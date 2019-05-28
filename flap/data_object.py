@@ -2155,7 +2155,7 @@ class DataObject:
                     for i in range(len(check_coord.dimension_list)):
                         check_coord.dimension_list[i] = dimension_mapping[check_coord.dimension_list[i]]
                         if (check_coord.dimension_list[i] is None):
-                            raise("Internal error in dimension mapping: None dimension")
+                            raise RuntimeError("Internal error in dimension mapping: None dimension")
 
         elif ((type(summing) is tuple) or (type(summing) is list)):
              raise NotImplemented("Summing along dimensions is not implemented.")

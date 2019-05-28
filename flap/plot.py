@@ -98,7 +98,7 @@ def axes_to_pdd_list(d,axes):
                                           data_object=d
                                           )
                 axx = d.data_unit
-        elif (type(ax) is DataObject):
+        elif (type(ax) is type(d)):
             if (ax.data is None):
                 raise ValueError("No data available for axis.")
             pdd = PlotDataDescription(data_type=PddType.Data,
@@ -534,12 +534,12 @@ def _plot(data_object,
     if ((_plot_type == 'xy') or (_plot_type == 'scatter')):
         # 1D plots: xy, scatter and complex versions
         # Checking whether oveplotting into the same plot type
-        if (d.data.dtype.kind != 'c'): 
-            subtype = 0
-        else:
+        if ((d.data is not None) and (d.data.dtype.kind == 'c')): 
             subtype = 1
+        else:
+            subtype = 0
         if (not _options['Clear']):
-            if ((_plot_id.plot_type is not None) and (_plot_id.plot_type != _plot_type) 
+            if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'xy') and (_plot_id.plot_type != 'scatter')) 
                 or (_plot_id.plot_subtype is not None) and (_plot_id.plot_subtype != subtype)):
                 raise ValueError("Overplotting into different plot type. Use option={'Clear':True} to erase first.")
         # Processing axes
@@ -595,7 +595,7 @@ def _plot(data_object,
         xdata = plotdata[0]
         xerror = ploterror[0]
 
-        if (d.data.dtype.kind != 'c'):     
+        if (subtype == 0):     
             yrange = _options['Y range']
             if (yrange is not None):
                 if ((type(yrange) is not list) or (len(yrange) != 2)):
@@ -612,19 +612,13 @@ def _plot(data_object,
                     ydata = np.full(1, ydata)
                 else:
                     ydata = np.full(xdata.size, ydata)
-                if (plot_error):
-                    yerror = d._plot_coord_ranges(c, ydata, ydata_low, ydata_high)
-                else:
-                    yerror = None
+                yerror = None
             if (np.isscalar(xdata)):
                 if (np.isscalar(ydata)):
                     xdata = np.full(1, xdata)
                 else:
                     xdata = np.full(ydata.size, xdata)
-                if (plot_error):
-                    xerror = d._plot_coord_ranges(c, xdata, xdata_low, xdata_high)
-                else:
-                    xerror = None
+                xerror = None
     
             if (all_points is True):
                 x = xdata
@@ -830,7 +824,7 @@ def _plot(data_object,
             ax.set_title(title)
 
             _plot_id.plot_subtype = 1
-            # End of comples xy and scatter plot
+            # End of complex xy and scatter plot
         
     elif (_plot_type == 'multi xy'):
         if (len(d.shape) > 2):

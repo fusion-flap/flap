@@ -15,62 +15,17 @@ from scipy import signal
 import copy
 
 import flap
-import flap.modules.apdcam
-import flap.modules.w7x_abes
+import flap_apdcam
+import flap_w7x_abes
 import flap.testdata
 import flap.config
-import flap.modules.w7x_webapi
+import flap_w7x_webapi
 
-flap.modules.w7x_abes.register()
+flap_apdcam.register()
+flap_w7x_abes.register()
 flap.testdata.register()
-flap.modules.apdcam.register()
-flap.modules.w7x_webapi.register()
+flap_w7x_webapi.register()
 
-
-
-def test_coordinate_data():
-    print("\n------- test coordinate data  --------")
-#    dp = 'c:/Data/W7-X_ABES/'
-    d=flap.get_data('W7X_ABES',exp_id='20181018.003',name=['ABES-1[5,6]'],\
-                    options={'Scaling':'Volt'},object_name='ABES',\
-                    coordinates=flap.Coordinate(name='Time',c_range=[1,1.00001]))
-    print("**** Storage contents")
-    flap.list_data_objects()
-    print("Getting Time for row 0")
-    c,cl,ch = d.coordinate('Time',[...,0])
-    print("  shape:"+str(c.shape)+" range: "+str(np.min(c))+" - "+str(np.max(c)))
-    if (max(c.shape) < 30):
-        print(" Coordinates: "+str(c))
-    if (cl is not None):
-        print("  L range shape:"+str(cl.shape)+" range: "+str(np.min(cl))+" - "+str(np.max(cl)))
-    if (ch is not None):
-        print("  H range shape:"+str(ch.shape)+" range: "+str(np.min(ch))+" - "+str(np.max(ch)))
-
-    print("Getting Signal name for column 0")
-    c,cl,ch = d.coordinate('Signal name',[0,...])
-    if (max(c.shape) < 30):
-        print(" Coordinates: "+str(c))
-
-    print("Getting Channel for all data")
-    c,cl,ch = d.coordinate('Channel',...)
-    print("  shape:"+str(c.shape)+" range: "+str(np.min(c))+" - "+str(np.max(c)))
-    if (max(c.shape) < 30):
-        print(" Coordinates: "+str(c))
-
-    print("Getting Time for all data")
-    c,cl,ch = d.coordinate('Time',...)
-    print("  shape:"+str(c.shape)+" range: "+str(np.min(c))+" - "+str(np.max(c)))
-    if (max(c.shape) < 30):
-        print(" Coordinates: "+str(c))
-
-    d=flap.get_data('W7X_ABES',exp_id='20181018.003',name=['ABES-12'],\
-                    options={'Scaling':'Volt'},object_name='ABES12',\
-                    coordinates=flap.Coordinate(name='Time',c_range=[5,6]))
-    print("Getting Time for all data of ABES12")
-    c,cl,ch = d.coordinate('Time',...)
-    print("  shape:"+str(c.shape)+" range: "+str(np.min(c))+" - "+str(np.max(c)))
-    if (max(c.shape) < 30):
-        print(" Coordinates: "+str(c))
 
 def test_plot_object():
     print("\n------- test plot data object --------")
@@ -779,15 +734,10 @@ def test_plot():
     plt.subplot(gs[:,1])
     plot_7 = flap.plot('TESTDATA',plot_type='multi xy',axes='Time')
 
-
-def problems():
-    d=flap.get_data('W7X_ABES',exp_id='20181018.003',name=['ABES-1[5,6]'],\
-                    options={'Scaling':'Volt'},object_name='ABES',\
-                    coordinates=flap.Coordinate(name='Time',c_range=[1,1.00001]))
     
     #test_config()
-#test_storage()
-#test_coordinates()
+test_storage()
+test_coordinates()
 #test_plot_xy()
 #test_plot_multi_xy()
 #test_coordinate_data()
@@ -810,4 +760,3 @@ def problems():
 #test_mult()
 #test_cpsd()
 #test_plot()
-problems()
