@@ -497,40 +497,40 @@ flap.config.read(file_name=fn)
 
 # Running tests
 plt.close('all')
-if (False):
+if (True):
     test_storage()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_saveload()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_coordinates()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot_xy()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot_multi_xy()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_simple_slice()
     input("Press Enter to continue...")
 if (True):
     test_select_multislice()
     input("Press Enter to continue...")
-if (False): 
+if (True): 
     test_detrend()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_apsd()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_filter()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_cpsd()
 
 
