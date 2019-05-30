@@ -7,7 +7,6 @@ Created on Fri Apr 12 19:23:25 2019
 import math
 import matplotlib.pyplot as plt
 import matplotlib
-
 import time
 
 from .coordinate import *
@@ -183,60 +182,6 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
         raise ValueError("Interval selection can be done only for coordinates changing along one dimension.")
 
     calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(coordinate, intervals=intervals)
-    """
-    # Determining processing intervals
-    if (slicing is not None):
-        # Creating an Intervals object from the slicing description
-        try:
-            intervals = d.slicing_to_intervals(slicing)
-        except Exception as e:
-            raise e
-        # Determining the start and end points of the intervals in the slicing coordinate value
-        slicing_coord_name = list(slicing.keys())[0]
-        slicing_coord_obj = d.get_coordinate_object(slicing_coord_name)
-        if (len(slicing_coord_obj.dimension_list) != 1):
-            raise ValueError("Slicing coordinate in select should change only along one dimension.")
-        coord_range, coord_range_err = slicing_coord_obj.data_range(data_shape=d.shape)
-        int_start, int_end = intervals.interval_limits(limits=coord_range,partial_intervals=True)
-        ind = [0]*len(d.shape)
-        ind[coord_obj.dimension_list[0]] = ...
-        coordinate_data, dl, dh = coord_obj.data(data_shape=d.shape,index=ind)
-        coordinate_data = coordinate_data.flatten()
-        # If the slicing coordinate is not the same as the selection coordinate we need to convert
-        # the intervals to the selection coordinates.
-        if (slicing_coord_name != coordinate):
-            # Getting the two coordinate data for the whole array
-            ind = [0]*len(d.shape)
-            ind[slicing_coord_obj.dimension_list[0]] = ...
-            slicing_coord_data, dl, dh = slicing_coord_obj.data(data_shape=d.shape,index=ind)
-            slicing_coord_data = slicing_coord_data.flatten()
-            # Sorting them as it is needed for the interpolation
-            sort_ind = np.argsort(slicing_coordinate_data)
-            slicing_coord_data_sorted = slicing_coord_data[sort_ind]
-            coordinate_data_sorted = coordinate_data[sort_ind]
-            int_start = np.interp(int_start, slicing_coord_data_sorted, coordinate_data_sorted)
-            int_end = np.interp(int_end, slicing_coord_data_sorted, coordinate_data_sorted)
-            # Arranging intervals in increasaing coordinate order
-            int_sort_index = np.argsort(int_start)
-            int_start = int_start[int_sort_index]
-            int_end = int_end[int_sort_index]
-        # Determining data indices for the intervals
-        c = np.concatenate((int_start, int_end))
-        n = len(int_start)
-        ci = d.index_from_coordinate(coordinate, c)
-        int_start_ind = ci[0:n]
-        int_end_ind = ci[n:]
-    else:
-        # If slicing is not set, just taking the whole interval
-        int_start_ind = [0]
-        int_end_ind = [d.shape[dimension_list[0]] - 1]
-        # Getting the coordinate of the first and last element in the array
-        ind = [0]*len(d.shape)
-        ind[coord_obj.dimension_list[0]] = [int_start_ind[0], int_end_ind[0]]
-        coords, cl, ch = coord_obj.data(data_shape=d.shape, index=ind)
-        int_start = [coords[0]]
-        int_end = [coords[1]]
-    """
     interval_n = len(sel_int[0])
 
     if ((_options['Select'] is None) and (ev_thr_type == 'Sigma')):

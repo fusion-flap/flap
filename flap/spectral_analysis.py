@@ -368,10 +368,12 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
 
     # Calculating the binning boxes from the resolution and range and related indices   
     ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, f_cent, \
-    fcent_index_range, res = _spectrum_binning_indices(n_apsd, 
+    fcent_index_range, res = _spectrum_binning_indices(wavenumber,
+                                                       n_apsd, 
                                                        _options, 
                                                        zero_ind, 
                                                        res_nat,
+                                                       range_nat,
                                                        log_scale, 
                                                        out_shape, 
                                                        proc_dim)
@@ -498,7 +500,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
 
     return d_out
 
-def _spectrum_binning_indices(n_apsd, _options, zero_ind, res_nat, log_scale, out_shape, proc_dim):
+def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, range_nat, log_scale, out_shape, proc_dim):
     """ Helper routine for apsd and cpsd for calculating numbers and indices
         for processing the spectra.
         Returns: ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, 
@@ -858,10 +860,11 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             ind_in1_apsd_ref[proc_dim_ref] = slice(0,n_apsd)
  
     ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, f_cent, \
-    fcent_index_range, res = _spectrum_binning_indices(n_apsd, 
+    fcent_index_range, res = _spectrum_binning_indices(wavenumber, n_apsd, 
                                             _options, 
                                             zero_ind, 
                                             res_nat,
+                                            range_nat,
                                             log_scale, 
                                             out_shape, 
                                             proc_dim_out)

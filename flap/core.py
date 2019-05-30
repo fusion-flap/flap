@@ -108,6 +108,8 @@ class FlapStorage:
     def list_data_objects(self,name, exp_id='*'):
         if (name is None):
             _name = '*'
+        else:
+            _name = name
         names, exps = find_data_objects(_name, exp_id=exp_id)
         if (len(names) == 0):
             return

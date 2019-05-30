@@ -274,7 +274,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                                              unit='Second',
                                              mode=c_mode,
                                              shape=ndata,
-                                             start=read_range[0]+4.5,
+                                             start=read_range[0],
                                              step=meas_sampletime,
                                              dimension_list=dimension_list)
                                             )

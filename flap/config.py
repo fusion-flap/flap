@@ -110,13 +110,13 @@ def merge_options(default_options, input_options, data_source=None, section=None
     """
     Merges options dictionaries. Uses default options of function, input options of function and
     options read from config file from <section> section. If exp_id is set will also look for options
-    in section Module exp_id for options starting with <section>_.
+    in section Module exp_id for options starting with {section}.
     The precedence of options is:
         default_options < section options < module options < input_options
       INPUT:
         default_options: Default options in a function. This should contain all the possible options.
         input_options: Contents of options argument of function. Option keys can also be abbreviated.
-        adta_source: The data source of the measurement. (May be None)
+        data_source: The data source of the measurement. (May be None)
         section: Name of the section in the config file related to the fnction. (May be None.)
       Return value:
           The merged options dictionary. Abbreviated keys are expanded to full name.

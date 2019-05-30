@@ -27,17 +27,6 @@ flap.testdata.register()
 flap_w7x_webapi.register()
 
 
-def test_plot_object():
-    print("\n------- test plot data object --------")
-    plt.close()
-#    dp = os.path.join('c:/Data/W7-X_ABES/','20181018.003')
-    d=flap.get_data('APDCAM',name='ADC10',coordinates={'Time':[5,6]})
-    plt.close()
-    d.plot()
-    plt.figure()
-    d.plot(axes=['Time'])
-
-
 def test_plot_xy():
     print("\n------- test plot x-y --------")
     plt.close('all')
@@ -88,14 +77,13 @@ def test_errorplot():
 def test_plot_multi_xy():
     print("\n------- test plot multi x-y --------")
     plt.close()
-    d=flap.get_data('W7X_ABES',name='ABES-[8-20]',
-                    exp_id='20181018.008',
+    d=flap.get_data('TESTDATA',name='TEST-1-*',
                     options={'Scaling':'Volt'},
-                    object_name='ABES')
+                    object_name='TEST')
     print("**** Storage contents")
     flap.list_data_objects()
     plt.close()
-    flap.plot('ABES',axes='Time',options={'All points':False,'Y sep':4})
+    flap.plot('TEST',axes='Time',options={'All points':False,'Y sep':4})
 
 def test_slice():
     print("\n------- test slice --------")
@@ -735,11 +723,10 @@ def test_plot():
     plot_7 = flap.plot('TESTDATA',plot_type='multi xy',axes='Time')
 
     
-    #test_config()
-test_storage()
-test_coordinates()
-#test_plot_xy()
-#test_plot_multi_xy()
+#test_config()
+#test_storage()
+#test_coordinates()
+test_plot_multi_xy()
 #test_coordinate_data()
 #test_slice()
 #test_plot_object()

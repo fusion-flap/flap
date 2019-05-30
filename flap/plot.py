@@ -1088,6 +1088,7 @@ def _plot(data_object,
             locator = ticker.LogLocator(subs='all')
         else:
             norm = None
+            locator = None
                 
         if (contour_levels is None):
             contour_levels = 255

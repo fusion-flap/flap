@@ -565,6 +565,7 @@ class DataObject:
             err = np.ndarray((2,self.error[0].size), dtype=self.error[0].dtype)
             err[0,:] = self.error[0][_index].flatten()
             err[1,:] = self.error[1][_index].flatten()
+            return err
         else:
             return self.error[_index].flatten()
 
@@ -2431,7 +2432,7 @@ class DataObject:
         trend = _options['Trend removal']
 
         try:    
-            calc_int, calc_int_ind, sel_int, sel_int_ind = self.proc_interval_limits(coordinate, intervals=intervals)
+            calc_int, calc_int_ind, sel_int, sel_int_ind = self.proc_interval_limits(_coordinate, intervals=intervals)
         except Exception as e:
             raise e
         int_start_ind = sel_int_ind[0]
@@ -2443,7 +2444,7 @@ class DataObject:
             sel_coordinate = list(intervals.keys())[0]
             sel_coord_obj = self.get_coordinate_object(_coordinate)
         else:
-            sel_coordinate = coordinate
+            sel_coordinate = _coordinate
             sel_coord_obj = coord_obj
 
 
