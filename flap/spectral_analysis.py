@@ -257,7 +257,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
                            interval. If the data name is not the same as coordinate a coordinate with the
                            same name will be searched for in the data object and the value_ranges
                            will be used fromm it to set the intervals.
-                       If not a dictionary and not None is is interpreted as the interval
+                       If not a dictionary and not None it is interpreted as the interval
                            description, the selection coordinate is taken the same as
                            coordinate.
                        If None, the whole data interval will be used as a single interval.
@@ -686,7 +686,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                            interval. If the data name is not the same as coordinate a coordinate with the
                            same name will be searched for in the data object and the value_ranges
                            will be used fromm it to set the intervals.
-                       If not a dictionary and not None is is interpreted as the interval
+                       If not a dictionary and not None it is interpreted as the interval
                            description, the selection coordinate is taken the same as
                            coordinate.
                        If None, the whole data interval will be used as a single interval.
@@ -762,7 +762,11 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         _ref = d
         ref_coord_obj = coord_obj
         try:
-            intervals, index_intervals = _spectral_calc_interval_selection(d,None, _coordinate,intervals,interval_n)
+            intervals, index_intervals = _spectral_calc_interval_selection(d,
+                                                                           None, 
+                                                                           _coordinate,
+                                                                           intervals,
+                                                                           interval_n)
         except Exception as e:
             raise e
     else:
@@ -778,8 +782,14 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         if (math.abs(ref_coord_obj.step[0] - coord_obj.step[0]) * d.shape[coord_obj.dimension_list[0]] \
             > math.abs(ref_coord_obj.step[0])):
                raise ValueError("Incompatible coordinate step sizes." )
+        if (math.abs(ref_coord_obj.start - coord_obj.start) > math.abs(coord_obj.step[0])):
+                   raise ValueError("Incompatible coordinate start values." )
         try:
-            intervals, index_intervals = _spectral_calc_interval_selection(d,_ref, _coordinate,intervals,interval_n)
+            intervals, index_intervals = _spectral_calc_interval_selection(d,
+                                                                           _ref, 
+                                                                           _coordinate,
+                                                                           intervals,
+                                                                           interval_n)
         except Exception as e:
             raise e
                         
@@ -1174,9 +1184,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                        interval. If the data name is not the same as coordinate a coordinate with the
                        same name will be searched for in the data object and the value_ranges
                        will be used fromm it to set the intervals.
-                   If not a dictionary and not None is is interpreted as the interval
+                   If not a dictionary and not None it is interpreted as the interval
                        description, the selection coordinate is taken the same as
-                       coordinate.
+                       (the first) coordinate.
                    If None, the whole data interval will be used as a single interval.
         options: Dictionary. (Keys can be abbreviated)
             'Resolution': Output resolution for each coordinate. (list of values or single value)
@@ -1193,7 +1203,135 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                            ['poly', n]: Fit an n order polynomial to the data and subtract.
                         Trend removal will be applied to each interval separately.
                         At present trend removal can be applied to 1D CCF only.
-            'Hanning': True/False Use a Hanning window.
             'Normalize': Normalize with autocorrelations, that is calculate correlation instead of covariance.
 """
+    if (d.data is None):
+        raise ValueError("Cannot do correlation calculation without data.")
 
+    default_options = {'Resolution': None,
+                       'Range': None,
+                       'Interval_n': 8,
+                       'Trend removal': ['poly', 2],
+                       'Error calculation': True,
+                       'Normalize': False
+                       }
+    _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='Correlation')
+    if (coordinate is None):
+        c_names = d.coordinate_names()
+        try:
+            c_names.index('Time')
+            _coordinate = ['Time']
+        except ValueError:
+            raise ValueError("No coordinate is given for correlation calculation and no Time coordinate found.")
+    else:
+        if (type(coordinate) is list):
+            _coordinate = coordinate
+        else:
+            _coordinnate = [coordinate]
+
+    trend = _options['Trend removal']
+    if (len(_coordinate) != 1 and (trend is not None)):
+        raise NotImplementedError("Trend removal for multi-dimensional correlation is not implemented.")
+    interval_n = _options['Interval_n']
+    norm = _options['Normalize']
+    error_calc = _options['Error calculation']
+    if (len(_coordinate) != 1 and (intervals is not None)):
+        raise NotImplementedError("Interval selection for multi-dimensional correlation is not implemented.")
+    if (len(_coordinate) != 1):
+        error_calc = False
+        interval_n = 1
+        
+    # Getting coordinate objects and checking properties    
+    coord_obj = []
+    correlation_dimensions = []
+    for c_name in _coordinate:
+        try:
+            c = d.get_coordinate_object(c_name)
+        except Exception as e:
+            raise e      
+        coord_obj.append(c)
+        if (len(c.dimension_list) != 1):
+            raise ValueError("Correlation calculation is possible only along coordinates changing in one dimension.")
+        if (not c.mode.equidistant):
+            raise ValueError("Correlation calculation is possible only along equidistant coordinates.")
+        try:
+            correlation_dimensions.index(c.dimension_list[0])
+            raise ValueError("Cannot calculate multi dimensional correlation with common dimensions.")
+        except ValueError:
+            pass
+        correlation_dimensions.append(c.dimension_list[0])
+        
+    if (ref is None):
+        _ref = d
+        ref_coord_obj = coord_obj
+        ref_correlation_dimensions = correlation_dimensions
+        try:
+            intervals, index_intervals = _spectral_calc_interval_selection(d,
+                                                                           None, 
+                                                                           _coordinate[0],
+                                                                           intervals,interval_n)
+        except Exception as e:
+            raise e
+    else:
+        _ref = ref
+        ref_coord_obj = []
+        ref_correlation_dimensions = []
+        for i,c_name in enumerate(_coordinate):
+            try:
+                c = _ref.get_coordinate_object(c_name)
+            except Exception as e:
+                raise e      
+            ref_coord_obj.append(c)
+            if (len(c.dimension_list) != 1):
+                raise ValueError("Correlation calculation is possible only along coordinates changing in one dimension.")
+            if (not c.mode.equidistant):
+                raise ValueError("Correlation calculation is possible only along equidistant coordinates.")
+            try:
+                correlation_dimensions.index(c.dimension_list[0])
+                raise ValueError("Cannot calculate multi dimensional correlation with common dimensions.")
+            except ValueError:
+                pass
+            correlation_dimensions.append(c.dimension_list[0])
+            if (math.abs(c.step[0] - coord_obj[i].step[0]) * d.shape[coord_obj[i].dimension_list[0]] \
+                > math.abs(c.step[0])):
+                   raise ValueError("Incompatible coordinate step sizes." )
+            if (math.abs(c.start - coord_obj[i].start) > math.abs(c.step[0])):
+                   raise ValueError("Incompatible coordinate start values." )
+        try:
+            intervals, index_intervals = _spectral_calc_interval_selection(d,
+                                                                           _ref, 
+                                                                           _coordinate[0],
+                                                                           intervals,
+                                                                           interval_n)
+        except Exception as e:
+            raise e
+                        
+    interval_n, start_ind = intervals.interval_number()
+    int_low, int_high = intervals.interval_limits()
+    
+    corr_res = _options['Resolution']
+    if (type(corr_res) is not list):
+        corr_res = [corr_res] * n_elements(_coordinates)
+    corr_range = _options['Range']
+    if (type(corr_range) is not list):
+        raise ValueError("Correlation range must be a list.")
+    if (type(corr_range[0]) is not list):
+        corr_range = [corr_range] * n_elements(_coordinates)
+    # Correlation final resolutions in sample numbers
+    corr_res_sample = []
+    # Correlation range in final resolution
+    range_sampout = []
+    # Number of correlation points
+    n_corr = []
+    for i,c in enumerate(coord_obj):
+        # Resolutions in sample number
+        corr_res_sample.append(int(round(corr_res[i] / c.step[0])))
+        # Correlation point ranges in output sample number
+        if ((type(corr_range[i]) is not list) or (len(corr_range[i]) != 2)):
+            raise ValueError("Invalid correlation range description. Must be 2-element list.")
+        range_sampout = (corr_range[i] / (c.step[0] * corr_res_sample[-1]))
+        range_sampout = [int(round(r_samp[0])), int(round(r_samp[1]))]
+        n_corr.append(range_sampout[1])
+        corr_range_sample
+        
+    res_nat
