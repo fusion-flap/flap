@@ -368,7 +368,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
 
     # Calculating the binning boxes from the resolution and range and related indices   
     ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, f_cent, \
-    fcent_index_range, res = _spectrum_binning_indices(wavenumber,
+z    fcent_index_range, res = _spectrum_binning_indices(wavenumber,
                                                        n_apsd, 
                                                        _options, 
                                                        zero_ind, 
@@ -1144,3 +1144,56 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                     )
     
     return d_out
+
+def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
+"""
+    N dimensional Cross Correlation Function or covariance calculation for the data object d taking d_ref 
+    as reference. If ref is not set d is used as reference, that is all CCFs are calculated 
+    within d. Calculates all CCF between all signals in ref and d, but not inside d and ref.
+    Correlation is calculated along the coordinate(s) listed in coordinate which should be
+    identical for the to input data objects.
+    Returns a data object with dimension number d.dim+ref.dim-len(coordinate). 
+    The coordinates are replaced by coordinate+' lag'.
+    The CCF is calculated in multiple intervals (described by intervals)
+    and the mean and variance will be returned.
+
+    INPUT:
+        d: A flap.DataObject.
+        ref: Another flap.DataObject
+        coordinate: The name of the coordinate (string) along which to calculate CCF or a list of names.
+                    Each coordinate should change only along one data dimension and should be equidistant.
+                    This and all other cordinates changing along the data dimension of
+                    these coordinates will be removed. New coordinates with name+' lag' will be added. 
+        intervals: Information of processing intervals.
+                   If dictionary with a single key: {selection coordinate: description})
+                       Key is a coordinate name which can be different from the calculation
+                       coordinate.
+                       Description can be flap.Intervals, flap.DataObject or
+                       a list of two numbers. If it is a data object with data name identical to
+                       the coordinate the error ranges of the data object will be used for
+                       interval. If the data name is not the same as coordinate a coordinate with the
+                       same name will be searched for in the data object and the value_ranges
+                       will be used fromm it to set the intervals.
+                   If not a dictionary and not None is is interpreted as the interval
+                       description, the selection coordinate is taken the same as
+                       coordinate.
+                   If None, the whole data interval will be used as a single interval.
+        options: Dictionary. (Keys can be abbreviated)
+            'Resolution': Output resolution for each coordinate. (list of values or single value)
+            'Range': Output ranges for each coordinate. (List or list of lists)
+            'Interval_n': Minimum number of intervals to use for the processing. These are identical
+                          length intervals inserted into the input interval list. Default is 8.
+            'Error calculation' : True/False. Calculate or not error. Omitting error calculation
+                                  increases speed. If Interval_n is 1 no error calculation is done.
+            'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
+                         None: Don't remove trend.
+                         Strings:
+                           'mean': subtract mean
+                         Lists:
+                           ['poly', n]: Fit an n order polynomial to the data and subtract.
+                        Trend removal will be applied to each interval separately.
+                        At present trend removal can be applied to 1D CCF only.
+            'Hanning': True/False Use a Hanning window.
+            'Normalize': Normalize with autocorrelations, that is calculate correlation instead of covariance.
+"""
+

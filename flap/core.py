@@ -488,17 +488,63 @@ def apsd(object_name,exp_id='*',output_name=None, coordinate=None, intervals=Non
             raise e
     return ds
 
-def cpsd(object_name, ref=None, exp_id='*', ref_exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
+def cpsd(object_name, ref=None, exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
     """
-    Cross Power Spetctrum between two objects in flap storage. This is a wrapper for DataObject.cpsd()
+    Cross Power Spetctrum between two objects in flap storage. (ref can also be a data object.) 
+    This is a wrapper for DataObject.cpsd()
     If output name is set the CPSD object will be written back to the flap storage under this name.
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
     except Exception as e:
         raise e
+    if (ref is not None):
+        if (type(ref) is str):
+            try:
+                d_ref = get_data_object(ref,exp_id=exp_id)
+            except Exception as e:
+                raise e
+        else:
+            d_ref = ref
+        if (type(d_ref) is not DataObject):
+            raise ValueError("Invalid reference data structure. Should be string or flap.DataObject.")
+    else:
+        d_ref = None
     try:
-        ds=d.cpsd(ref=ref, coordinate=coordinate, intervals=intervals, options=options)
+        ds=d.cpsd(ref=d_ref, coordinate=coordinate, intervals=intervals, options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(ds,output_name)
+        except Exception as e:
+            raise e
+    return ds
+
+def ccf(object_name, ref=None, exp_id='*', ref_exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
+    """
+    Cross Corrrelation Function or covariance calculation between two objects in flap storage. 
+    This is a wrapper for DataObject.ccf()
+    If output name is set the CPSD object will be written back to the flap storage under this name.
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    if (ref is not None):
+        if (type(ref) is str):
+            try:
+                d_ref = get_data_object(ref,exp_id=exp_id)
+            except Exception as e:
+                raise e
+        else:
+            d_ref = ref
+        if (type(d_ref) is not DataObject):
+            raise ValueError("Invalid reference data structure. Should be string or flap.DataObject.")
+    else:
+        d_ref = None
+    try:
+        ds=d.ccf(ref=d_ref, coordinate=coordinate, intervals=intervals, options=options)
     except Exception as e:
         raise e
     if (output_name is not None):
