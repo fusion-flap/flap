@@ -269,22 +269,27 @@ def flatten_multidim(mx, dim_list):
 
     return  mx[tuple(mx_list)], out_dim_mapping
 
-def multiply_along_axis(a1_orig, a2_orig, axes):
+def multiply_along_axes(a1_orig, a2_orig, axes):
     """ 
     Multiplies two arrays along given axes. 
     INPUT:
         a1_orig: Array 1.
         a2_orig: Array 2.
-        axes: List of two axes numbers.
+        axes: List of two axis numbers or list of tow lists of axis numbers
     Return values:
         a, axis_source, axis_number
             a: An array with dimension number a1.dim+a2.dim-1. First come the dimensions of a1, then 
-               a2 with the processing axis removed
+               a2 with the processing axes removed
             axis_source: List of integers telling the source array for each output axis ( 0 or 1)
             axis_number: Axis numbers in the arrays listed in axes_source
     """
-    if (a1_orig.shape[axes[0]] != a2_orig.shape[axes[1]]):
-        raise ValueError("Incompatible shapes.")
+    if (type(axes[0]) is not list):
+        axes[0] = [axes[0]]
+    if (type(axes[1]) is not list):
+        axes[1] = [axes[1]]
+    for i in range(len(axes[0])):       
+        if (a1_orig.shape[axes[0][i]] != a2_orig.shape[axes[1][i]]):
+            raise ValueError("Incompatible shapes.")
 
     a1 = a1_orig
     a2 = a2_orig
@@ -292,22 +297,36 @@ def multiply_along_axis(a1_orig, a2_orig, axes):
     a1_axes = list(range(a1.ndim))
     a2_shape = a2.shape
     a2_axes = list(range(a2.ndim))
-    # Move from a1 the processing axis to the end
-    a1 = np.moveaxis(a1,axes[0],-1)
-    # Move from a2 the processing axis to the front
-    a2 = np.moveaxis(a2,axes[1],0)
-    out_shape = list(a1.shape) + list(a2.shape)[1:]
-    a2_axes = [a2_axes[axes[1]]] + a2_axes
-    del a2_axes[axes[1] + 1]   
-    axis_source = [0]*a1_orig.ndim + [1]*(a2_orig.ndim - 1)
-    axis_number = a1_axes + a2_axes[1:]
+    for i in range(len(axes[0])):
+        # Finding the axis
+        ind = a1_axes.index(axes[0][i])
+        # Move from a1 the processing axis to the end
+        a1 = np.moveaxis(a1,ind,-1)
+        # Following this change in the axis list
+        del a1_axes[ind]
+        a1_axes.append(axes[0][i])
+        # Move from a2 the processing axis to the front
+        ind = a2_axes.index(axes[1][i])
+        a2 = np.moveaxis(a2,ind,i)
+        del a2_axes[ind]
+        a2_axes.insert(i,axes[1][i])
+    out_shape = list(a1.shape) + list(a2.shape)[len(axes[0]):]
     for i in range(len(out_shape)-len(a1_shape)):
         a1 = np.expand_dims(a1,-1)
     for i in range(len(out_shape)-len(a2_shape)):
         a2 = np.expand_dims(a2,0)    
     r = a1 * a2
-    # Moving the processing axis back where it was in the original array
-    r = np.moveaxis(r, len(a1_shape) - 1, axes[0]) 
+    # Moving the processing axes back where they were in the original array
+    # We have to move the axis in increasing destination order
+    sort_axes = axes[0]
+    sort_axes.sort()
+    for i in range(len(sort_axes)):
+        ind = a1_axes.index(sort_axes[i])
+        r = np.moveaxis(r, ind, sort_axes[i])
+        del a1_axes[ind]
+        a1_axes.insert(sort_axes[i],sort_axes[i])
+    axis_source = [0]*a1_orig.ndim + [1]*(a2_orig.ndim - len(axes[0]))
+    axis_number = a1_axes + a2_axes[len(axes[1]):]
     return r, axis_source, axis_number
 
 def find_str_match(value, options):

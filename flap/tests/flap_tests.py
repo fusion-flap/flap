@@ -465,30 +465,6 @@ def test_cpsd():
                     slicing={'Frequency':flap.Intervals(1e4,1e5)},
                     summing={'Frequency':'Mean'}).plot(axes='Row (Ref)',options={'Y sep': 1.5})
 
-def test_mult():
-    """ This is a test program to check flap.multiply_along_axis()
-    """
-    a1_orig = np.arange(12)
-    a1_orig = a1_orig.reshape((3,4))
-    a2_orig = np.arange(60)
-    a2_orig = a2_orig.reshape((3,4,5))
-    com_dim = [1,1]
-    r, axis_source, axis_number = flap.multiply_along_axis(a1_orig, a2_orig,com_dim)
-    print(axis_source)
-    print(axis_number)
-    for ii in range(100):
-        ind = np.random.random(4)
-        for i in range(r.ndim):
-            ind[i] = ind[i]*r.shape[i]
-        ind = ind.astype(np.int32)
-        ind_1 = ind[0:2]
-        ind_2 = np.concatenate((np.array([ind[2]]),np.array([ind[1]]),np.array([ind[3]])))
-        if (r[tuple(ind)] != a1_orig[tuple(ind_1)]*a2_orig[tuple(ind_2)]):
-            print(ind)
-            break
-    print("Test passed.")
-    pass
-       
 
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
