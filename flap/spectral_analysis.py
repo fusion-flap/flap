@@ -1243,6 +1243,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         
     # Getting coordinate objects and checking properties    
     coord_obj = []
+    # This will contain the dimension list in d.data and the output of the correlations
     correlation_dimensions = []
     for c_name in _coordinate:
         try:
@@ -1275,29 +1276,32 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             raise e
     else:
         _ref = ref
-        ref_coord_obj = []
-        ref_correlation_dimensions = []
+        coord_obj_ref = []
+        correlation_dimensions_ref = []
         for i,c_name in enumerate(_coordinate):
             try:
                 c = _ref.get_coordinate_object(c_name)
             except Exception as e:
                 raise e      
-            ref_coord_obj.append(c)
+            coord_obj_ref.append(c)
             if (len(c.dimension_list) != 1):
                 raise ValueError("Correlation calculation is possible only along coordinates changing in one dimension.")
             if (not c.mode.equidistant):
                 raise ValueError("Correlation calculation is possible only along equidistant coordinates.")
             try:
-                correlation_dimensions.index(c.dimension_list[0])
+                correlation_dimensions_ref.index(c.dimension_list[0])
                 raise ValueError("Cannot calculate multi dimensional correlation with common dimensions.")
             except ValueError:
                 pass
-            correlation_dimensions.append(c.dimension_list[0])
+            correlation_dimensions_ref.append(c.dimension_list[0])
             if (math.abs(c.step[0] - coord_obj[i].step[0]) * d.shape[coord_obj[i].dimension_list[0]] \
                 > math.abs(c.step[0])):
                    raise ValueError("Incompatible coordinate step sizes." )
             if (math.abs(c.start - coord_obj[i].start) > math.abs(c.step[0])):
                    raise ValueError("Incompatible coordinate start values." )
+            if (list(_ref.data.shape)[correlation_dimensions_ref[i]] 
+                           != list(d.data.shape)[correlation_dimensions[i]]):
+                   raise ValueError("Incompatible data dimensions." )
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
                                                                            _ref, 
@@ -1310,16 +1314,30 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     interval_n, start_ind = intervals.interval_number()
     int_low, int_high = intervals.interval_limits()
     index_int_low, index_int_high = index_intervals.interval_limits()
+    # Number of processing intervals
     n_proc_int = len(int_low)
-    # Creating an indexing list for each processing interval
-    interval_slice = [slice(0,dim) for dim in list(d.shape)]
+    # Numper of points in the selection coordinate
+    n_sample_sel = index_int_high[0] - index_int_low[0]
+    
+    # Creating indices to take out data for each processing interval and place it into the processing arrays
+    interval_slice = [slice(0,dim) for dim in list(d.data.shape)]
+    interval_out_slice = copy.deepcopy(interval_slice)
+    interval_out_slice[correlation_dimensions[0]] = slice(0,n_sample_sel)
     interval_slice = [interval_slice] * n_proc_int
     for i in range(n_proc_int):
         interval_slice[i][correlation_dimensions[0]] = slice(index_int_low[i],index_int_high[i])
-    # Number of correlation points after FFT    
-    corr_point_n_nat = list(d.shape)    
-    corr_point_n_nat[correlation_dimensions[0]] = (index_int_high[0] - index_int_low[0])
+    interval_slice_ref = [slice(0,dim) for dim in list(_ref.data.shape)]
+    interval_out_slice_ref = copy.deepcopy(interval_slice_ref)
+    interval_out_slice_ref[correlation_dimensions_ref[0]] = slice(0,n_sample_sel)
+    interval_slice_ref = [interval_slice_ref] * n_proc_int
+    for i in range(n_proc_int):
+        interval_slice_ref[i][correlation_dimensions_ref[0]] = slice(index_int_low[i],index_int_high[i])
+
+    # Number of correlation points in the correlation dimensions after FFT before binning 
+    corr_point_n_nat = [list(d.data.shape)[dim] for dim in correlation_dimensions]   
+    corr_point_n_nat[correlation_dimensions[0]] = n_sample_sel
     
+    # Setting resolution
     corr_res = _options['Resolution']
     if (corr_res is None):
         corr_res = [c.step[0] for c in coord_obj]
@@ -1329,8 +1347,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     #Setting default correlation range to 10-th of coordinate range 
     if (corr_range is None):
         corr_range = []
-        for c in coord_obj:
-            corr_range.append([-(c.step[0] * corr_point_n_nat) /10 , (c.step[0] * corr_point_n_nat) /10]
+        for i,coord in enumerate(coord_obj):
+            corr_range.append([-(coord.step[0] * corr_point_n_nat[i]) /10 , 
+                               (coord.step[0] * corr_point_n_nat[i]) /10
+                               ]
     if (type(corr_range) is not list):
         raise ValueError("Correlation range must be a list.")
     if (type(corr_range[0]) is not list):
@@ -1339,35 +1359,87 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     corr_res_sample = []
     # Correlation range in final resolution
     range_sampout = []
-    # Number of correlation points
+    # Number of correlation points at final resolution
     n_corr = []
     # The shift range in original sample numbers
     shift_range = []
-    for i,c in enumerate(coord_obj):
+    # Number of 0 samples to add in each correlation dimensions to prevent correlation from wrapping around
+    pad_length = []
+    for i,coord in enumerate(coord_obj):
         # Resolutions in sample number
-        corr_res_sample.append(int(round(corr_res[i] / c.step[0])))
+        corr_res_sample.append(int(round(corr_res[i] / coord.step[0])))
         # Correlation point ranges in output sample number
         if ((type(corr_range[i]) is not list) or (len(corr_range[i]) != 2)):
             raise ValueError("Invalid correlation range description. Must be 2-element list.")
-            
         r = [(corr_range[i][k] / (c.step[0] * corr_res_sample[-1]) for k in range(2)]
         r = [int(round(r_samp[0])), int(round(r_samp[1]))]
         range_sampout.append(r)
         n_corr.append(range_sampout[1] - range_sampout[0] + 1)
         shift_range.append([range_sampout[-1][0] * corr_res_sample[-1] - int(corr_res_sample[-1] / 2) + 1],
                             [range_sampout[-1][0] * corr_res_sample[-1] + int(corr_res_sample[-1] / 2) + 1])
-        
+        pad_length.append(max([abs(shift_range[cd][0]), abs(shift_range[cd][1])]))
+        corr_point_n_nat[i] += pad_length[i]
         
     # Determining the output shape. First the dimensions of d, then the reference with the calculation 
     # dimensions removed
-    out_shape = d.shape
+    out_shape = d.data.shape
     for i,cd in enumerate(correlation_dimensions):
         out_shape[cd] = n_corr[i]
-    for i in range(len(_ref.shape)):
+    for i in range(len(_ref.data.shape)):
         try:
             ref_correlation_dimensions.index(i)
         except ValueError:
             pass
-        out_shape.append(_ref.shape[i])
+        out_shape.append(_ref.data.shape[i])
+
+    # Array shapes for doing FFT
+    proc_shape = list(d.data.shape)
+    pad_slice = [slice(0,ds) for ds in d.data.shape]
+    for i,dim enumerate(correlation_dimensions):
+        proc_shape[dim] = corr_point_n_nat[i]
+        pad_slice[dim] = slice(-pad_length[i],corr_point_n_nat[i])
+    proc_shape_ref = list(_ref.data.shape)
+    pad_slice_ref = [slice(0,ds) for ds in _ref.data.shape]
+    for i,dim enumerate(correlation_dimensions_ref):
+        proc_shape_ref[dim] = corr_point_n_nat[i]
+        pad_slice_ref[dim] = slice(-pad_length[i],corr_point_n_nat[i])
     
-    
+    # Index arrays to rearrange after FFT and multiplying
+    ind_in1 = [slice(0,d) for d in out_shape]
+    ind_in2 = copy.deepcopy(ind_in1)
+    ind_out1 = copy.deepcopy(ind_in1)
+    ind_out2 = copy.deepcopy(ind_in1)
+    # zero_ind is the index where the 0 time lag will be after rearranging the CCF to final form
+    zero_ind = [0] * len(correlation_dimensions)
+    # A slicing list which will cut out the needed part of the CCF
+    ind_slice = [slice(0,d) for d in out_shape]
+    for i,cd in enumerate(correlation_dimensions):
+        nfft = corr_point_n_nat[cd] + pad_length[cd]
+        ind_in1[cd] = slice(0,int(nfft / 2))
+        ind_out1[cd] = slice(nfft-int(nfft / 2), nfft)
+        zero_ind[i] = nfft - int(nfft / 2)
+        ind_in2[cd] = slice(int(nfft / 2),nfft)
+        ind_out2[cd] = slice(0, nfft - int(nfft / 2))
+        ind_slice[cd] = slice(shift_range[i][0] + zero_ind[i], shift_range[i][1] + zero_ind[i])
+        proc_array_shape[cd] = nfft
+   
+    proc_array = np.zeros(tuple(proc_shape),dtype=d.data.dtype)
+    if (ref is not None)
+        proc_array_ref = np.zeros(tuple(proc_shape_ref),dtype=_ref.data.dtype)
+    for i_int in range(n_proc_int):
+        # Taking data for this processing interval
+        proc_array[tuple(interval_out_slice)] = d.data[tuple(interval_slice[i_int])]
+        proc_array[tuple(pad_slice)] = 0
+        fft = np.fftn(proc_array,axes=correlation_dimensions)
+        if (ref is not None):
+            proc_array_ref[tuple(interval_out_slice_ref)] = d.data[tuple(interval_slice_ref[i_int])]
+            proc_array[tuple(pad_slice)] = 0
+            fft_ref = np.fftn(proc_array_ref,axes=correlation_dimensions_ref)
+        else:
+            fft_ref = fft
+        res, axis_source, axis_number = flap.multiply_along_axes(fft, 
+                                                                 fft_ref,
+                                                                 [correlation_dimensions,correlation_dimensions_ref])
+            
+        
+        
