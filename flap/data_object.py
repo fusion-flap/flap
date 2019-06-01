@@ -19,7 +19,7 @@ from .tools import *
 from flap.coordinate import *
 from .core import get_addcoord_function
 import flap.config
-from .spectral_analysis import _apsd, _cpsd, _trend_removal
+from .spectral_analysis import _apsd, _cpsd, _trend_removal, _ccf
 from .plot import _plot
 
 class DataObject:

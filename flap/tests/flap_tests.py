@@ -24,6 +24,9 @@ import flap.testdata
 # Registering the TESTDATA data source
 flap.testdata.register()
 
+import flap_w7x_abes
+flap_w7x_abes.register()
+
 def test_config():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Testing configuration file <<<<<<<<<<<<<<<<<<<<<<<< ")
@@ -465,6 +468,15 @@ def test_cpsd():
                     slicing={'Frequency':flap.Intervals(1e4,1e5)},
                     summing={'Frequency':'Mean'}).plot(axes='Row (Ref)',options={'Y sep': 1.5})
 
+def test_ccf():
+    print()
+    print('>>>>>>>>>>>>>>>>>>> Test ccf (Cross Correlation Function) <<<<<<<<<<<<<<<<<<<<<<<<')
+    flap.delete_data_object('*')
+#    flap.get_data('W7X_ABES',exp_id='20181018.003',name='ABES-[8-12]',coordinates={'Time':[1,1.5]},object_name='TESTDATA')
+    flap.get_data('TESTDATA',name='TEST-1-*',options={'Length':1, 'Signal':'Random'},object_name='TESTDATA')
+#    flap.filter_data('TESTDATA',coordinate='Time',options={'Type':'Lowpass','f_high':1e5},output_name='TESTDATA_filt')
+    flap.ccf('TESTDATA',coordinate='Time',options={'Range':[-1e-4,1e-4]},output_name='CCF')
+    flap.plot('CCF',axes='Time lag')
 
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
@@ -473,41 +485,43 @@ flap.config.read(file_name=fn)
 
 # Running tests
 plt.close('all')
-if (True):
+if (False):
     test_storage()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_saveload()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_coordinates()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_plot()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_plot_xy()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_plot_multi_xy()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_simple_slice()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_select_multislice()
     input("Press Enter to continue...")
-if (True): 
+if (False): 
     test_detrend()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_apsd()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_filter()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_cpsd()
+if (True):
+    test_ccf()    
 
 
 

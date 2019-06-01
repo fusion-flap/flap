@@ -1227,7 +1227,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         if (type(coordinate) is list):
             _coordinate = coordinate
         else:
-            _coordinnate = [coordinate]
+            _coordinate = [coordinate]
 
     trend = _options['Trend removal']
     if (len(_coordinate) != 1 and (trend is not None)):
@@ -1264,8 +1264,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         
     if (ref is None):
         _ref = d
-        ref_coord_obj = coord_obj
-        ref_correlation_dimensions = correlation_dimensions
+        coord_obj_ref = coord_obj
+        correlation_dimensions_ref = correlation_dimensions
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
                                                                            None, 
@@ -1326,16 +1326,17 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     interval_slice = [interval_slice] * n_proc_int
     for i in range(n_proc_int):
         interval_slice[i][correlation_dimensions[0]] = slice(index_int_low[i],index_int_high[i])
-    interval_slice_ref = [slice(0,dim) for dim in list(_ref.data.shape)]
-    interval_out_slice_ref = copy.deepcopy(interval_slice_ref)
-    interval_out_slice_ref[correlation_dimensions_ref[0]] = slice(0,n_sample_sel)
-    interval_slice_ref = [interval_slice_ref] * n_proc_int
-    for i in range(n_proc_int):
-        interval_slice_ref[i][correlation_dimensions_ref[0]] = slice(index_int_low[i],index_int_high[i])
+    if (ref is not None):
+        interval_slice_ref = [slice(0,dim) for dim in list(_ref.data.shape)]
+        interval_out_slice_ref = copy.deepcopy(interval_slice_ref)
+        interval_out_slice_ref[correlation_dimensions_ref[0]] = slice(0,n_sample_sel)
+        interval_slice_ref = [interval_slice_ref] * n_proc_int
+        for i in range(n_proc_int):
+            interval_slice_ref[i][correlation_dimensions_ref[0]] = slice(index_int_low[i],index_int_high[i])
 
     # Number of correlation points in the correlation dimensions after FFT before binning 
     corr_point_n_nat = [list(d.data.shape)[dim] for dim in correlation_dimensions]   
-    corr_point_n_nat[correlation_dimensions[0]] = n_sample_sel
+    corr_point_n_nat[0] = n_sample_sel
     
     # Setting resolution
     corr_res = _options['Resolution']
@@ -1350,11 +1351,11 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         for i,coord in enumerate(coord_obj):
             corr_range.append([-(coord.step[0] * corr_point_n_nat[i]) /10 , 
                                (coord.step[0] * corr_point_n_nat[i]) /10
-                               ]
+                               ])
     if (type(corr_range) is not list):
         raise ValueError("Correlation range must be a list.")
     if (type(corr_range[0]) is not list):
-        corr_range = [corr_range] * n_elements(_coordinates)
+        corr_range = [corr_range] * len(_coordinate)
     # Correlation final resolutions in sample numbers
     corr_res_sample = []
     # Correlation range in final resolution
@@ -1366,44 +1367,45 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     # Number of 0 samples to add in each correlation dimensions to prevent correlation from wrapping around
     pad_length = []
     for i,coord in enumerate(coord_obj):
-        # Resolutions in sample number
-        corr_res_sample.append(int(round(corr_res[i] / coord.step[0])))
+        # Resolutions in sample number. Ensuring that it is odd sample
+        res = int(round(corr_res[i] / coord.step[0]))
+        if (res % 2 == 0):
+            res = res + 1
+        corr_res_sample.append(res)
         # Correlation point ranges in output sample number
         if ((type(corr_range[i]) is not list) or (len(corr_range[i]) != 2)):
             raise ValueError("Invalid correlation range description. Must be 2-element list.")
-        r = [(corr_range[i][k] / (c.step[0] * corr_res_sample[-1]) for k in range(2)]
-        r = [int(round(r_samp[0])), int(round(r_samp[1]))]
-        range_sampout.append(r)
-        n_corr.append(range_sampout[1] - range_sampout[0] + 1)
-        shift_range.append([range_sampout[-1][0] * corr_res_sample[-1] - int(corr_res_sample[-1] / 2) + 1],
-                            [range_sampout[-1][0] * corr_res_sample[-1] + int(corr_res_sample[-1] / 2) + 1])
-        pad_length.append(max([abs(shift_range[cd][0]), abs(shift_range[cd][1])]))
+        r_samp = [(corr_range[i][k] / (c.step[0] * corr_res_sample[-1])) for k in range(2)]
+        r_samp = [int(round(r_samp[0])), int(round(r_samp[1]))]
+        range_sampout.append(r_samp)
+        n_corr.append(r_samp[1] - r_samp[0] + 1)
+        shift_range.append([r_samp[0] * corr_res_sample[-1] - int(corr_res_sample[-1] / 2),
+                            r_samp[1] * corr_res_sample[-1] + int(corr_res_sample[-1] / 2)])
+        pad_length.append(max([abs(shift_range[-1][0]), abs(shift_range[-1][1])]))
         corr_point_n_nat[i] += pad_length[i]
         
     # Determining the output shape. First the dimensions of d, then the reference with the calculation 
     # dimensions removed
-    out_shape = d.data.shape
+    out_shape = list(d.data.shape)
     for i,cd in enumerate(correlation_dimensions):
         out_shape[cd] = n_corr[i]
     for i in range(len(_ref.data.shape)):
         try:
-            ref_correlation_dimensions.index(i)
+            correlation_dimensions_ref.index(i)
         except ValueError:
             pass
-        out_shape.append(_ref.data.shape[i])
+            out_shape.append(_ref.data.shape[i])
 
     # Array shapes for doing FFT
     proc_shape = list(d.data.shape)
     pad_slice = [slice(0,ds) for ds in d.data.shape]
-    for i,dim enumerate(correlation_dimensions):
-        proc_shape[dim] = corr_point_n_nat[i]
+    for i,dim in enumerate(correlation_dimensions):
         pad_slice[dim] = slice(-pad_length[i],corr_point_n_nat[i])
-    proc_shape_ref = list(_ref.data.shape)
-    pad_slice_ref = [slice(0,ds) for ds in _ref.data.shape]
-    for i,dim enumerate(correlation_dimensions_ref):
-        proc_shape_ref[dim] = corr_point_n_nat[i]
-        pad_slice_ref[dim] = slice(-pad_length[i],corr_point_n_nat[i])
-    
+    if (ref is not None):
+        proc_shape_ref = list(_ref.data.shape)
+        pad_slice_ref = [slice(0,ds) for ds in _ref.data.shape]
+        for i,dim in enumerate(correlation_dimensions_ref):
+            pad_slice_ref[dim] = slice(-pad_length[i],corr_point_n_nat[i])    
     # Index arrays to rearrange after FFT and multiplying
     ind_in1 = [slice(0,d) for d in out_shape]
     ind_in2 = copy.deepcopy(ind_in1)
@@ -1413,33 +1415,73 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     zero_ind = [0] * len(correlation_dimensions)
     # A slicing list which will cut out the needed part of the CCF
     ind_slice = [slice(0,d) for d in out_shape]
+    ind_bin = [slice(0,dim) for dim in out_shape]
     for i,cd in enumerate(correlation_dimensions):
-        nfft = corr_point_n_nat[cd] + pad_length[cd]
+        nfft = corr_point_n_nat[i] + pad_length[i]
         ind_in1[cd] = slice(0,int(nfft / 2))
         ind_out1[cd] = slice(nfft-int(nfft / 2), nfft)
         zero_ind[i] = nfft - int(nfft / 2)
         ind_in2[cd] = slice(int(nfft / 2),nfft)
         ind_out2[cd] = slice(0, nfft - int(nfft / 2))
         ind_slice[cd] = slice(shift_range[i][0] + zero_ind[i], shift_range[i][1] + zero_ind[i])
-        proc_array_shape[cd] = nfft
-   
+        proc_shape[cd] = nfft
+        if (ref is not None):
+            proc_shape_ref[correlation_dimensions_ref[i]] = nfft
+        ind_bin[cd] = np.arange(ind_slice[cd].stop - ind_slice[cd].start + 1,dtype=np.int32) / corr_res_sample[i]
     proc_array = np.zeros(tuple(proc_shape),dtype=d.data.dtype)
-    if (ref is not None)
+    if (ref is not None):
         proc_array_ref = np.zeros(tuple(proc_shape_ref),dtype=_ref.data.dtype)
+    if ((d.data.dtype.kind != 'c') and (_ref.data.dtype.kind != 'c')):
+        out_dtype = float
+    else:
+        out_dtype= complex
+    out_corr = np.zeros(tuple(out_shape), dtype=out_dtype)
     for i_int in range(n_proc_int):
         # Taking data for this processing interval
         proc_array[tuple(interval_out_slice)] = d.data[tuple(interval_slice[i_int])]
         proc_array[tuple(pad_slice)] = 0
-        fft = np.fftn(proc_array,axes=correlation_dimensions)
+        fft = np.fft.fftn(proc_array,axes=correlation_dimensions)
         if (ref is not None):
             proc_array_ref[tuple(interval_out_slice_ref)] = d.data[tuple(interval_slice_ref[i_int])]
             proc_array[tuple(pad_slice)] = 0
-            fft_ref = np.fftn(proc_array_ref,axes=correlation_dimensions_ref)
+            fft_ref = np.fft.fftn(proc_array_ref,axes=correlation_dimensions_ref)
         else:
             fft_ref = fft
         res, axis_source, axis_number = flap.multiply_along_axes(fft, 
-                                                                 fft_ref,
+                                                                 np.conj(fft_ref),
                                                                  [correlation_dimensions,correlation_dimensions_ref])
-            
+        if (out_dtype is float):
+            res = np.real(res)
+        corr = np.empty(res.shape,dtype=res.dtype)
+        corr[tuple(ind_out1)] = res[tuple(ind_in1)]
+        corr[tuple(ind_out2)] = res[tuple(ind_in2)]
+        corr_sliced = corr[tuple(ind_slice)]
+        corr_binned = np.zeros(tuple(out_shape),dtype=res.dtype)
+        np.add.at(corr_binned,tuple(ind_bin),corr_sliced)
+        out_corr += corr_binned
+        if (norm):
+            if (ref is None):
+                autocorr_index_shape = out_shape[:len(d.data.shape)-len(correlation_dimensions)]
+                ind_autocorr = [0]*len(out_shape)
+                for i in range(len(autocorr_index_shape)):
+                    ind = np.arange(out_shape[i],dtype=int)
+                    temp_shape = [1]*len(autocorr_index_shape)
+                    temp_shape[i] = autocorr_index_shape[i]
+                    ind = ind.reshape(tuple(temp_shape))
+                    tile_shape = autocorr_index_shape
+                    tile_shape[i] = 1
+                    ind_autocorr[i] = np.tile(ind,tile_shape)
+                ind_autocorr[len(autocorr_index_shape):len(autocorr_index_shape)+len(correlation_dimensions)] 
+                     = np.zeros(autocorr_index_shape,dtype=int)
+                ind_autocorr[len(autocorr_index_shape)+len(correlation_dimensions):] 
+                       = ind_autocorr[0:len(autocorr_index_shape)]     
+                autocorr_mx = out_corr[tuple(ind_autocorr)]
+                extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
+                out_corr /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
+                out_corr /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
+            else:
+                
+        
+        
         
         
