@@ -269,17 +269,20 @@ def flatten_multidim(mx, dim_list):
 
     return  mx[tuple(mx_list)], out_dim_mapping
 
-def multiply_along_axes(a1_orig, a2_orig, axes):
+def multiply_along_axes(a1_orig, a2_orig, axes,keep_a1_dims=True):
     """ 
     Multiplies two arrays along given axes. 
     INPUT:
         a1_orig: Array 1.
         a2_orig: Array 2.
         axes: List of two axis numbers or list of tow lists of axis numbers
+        keep_1_dims: (bool) 
+                     If True: The output array has dimensions of a1 followed by a2 with the common dims removed
+                     If False: The output array has the a1 dimensions without common dims then the common dims
+                               followed by a2 with the common dims removed
     Return values:
         a, axis_source, axis_number
-            a: An array with dimension number a1.dim+a2.dim-1. First come the dimensions of a1, then 
-               a2 with the processing axes removed
+            a: An array with dimension number a1.dim+a2.dim-1. 
             axis_source: List of integers telling the source array for each output axis ( 0 or 1)
             axis_number: Axis numbers in the arrays listed in axes_source
     """
@@ -316,15 +319,16 @@ def multiply_along_axes(a1_orig, a2_orig, axes):
     for i in range(len(out_shape)-len(a2_shape)):
         a2 = np.expand_dims(a2,0)    
     r = a1 * a2
-    # Moving the processing axes back where they were in the original array
-    # We have to move the axis in increasing destination order
-    sort_axes = axes[0]
-    sort_axes.sort()
-    for i in range(len(sort_axes)):
-        ind = a1_axes.index(sort_axes[i])
-        r = np.moveaxis(r, ind, sort_axes[i])
-        del a1_axes[ind]
-        a1_axes.insert(sort_axes[i],sort_axes[i])
+    if (keep_a1_dims):
+        # Moving the processing axes back where they were in the original array
+        # We have to move the axis in increasing destination order
+        sort_axes = axes[0]
+        sort_axes.sort()
+        for i in range(len(sort_axes)):
+            ind = a1_axes.index(sort_axes[i])
+            r = np.moveaxis(r, ind, sort_axes[i])
+            del a1_axes[ind]
+            a1_axes.insert(sort_axes[i],sort_axes[i])
     axis_source = [0]*a1_orig.ndim + [1]*(a2_orig.ndim - len(axes[0]))
     axis_number = a1_axes + a2_axes[len(axes[1]):]
     return r, axis_source, axis_number

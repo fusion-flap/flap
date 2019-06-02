@@ -1384,11 +1384,19 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         pad_length.append(max([abs(shift_range[-1][0]), abs(shift_range[-1][1])]))
         corr_point_n_nat[i] += pad_length[i]
         
-    # Determining the output shape. First the dimensions of d, then the reference with the calculation 
-    # dimensions removed
-    out_shape = list(d.data.shape)
-    for i,cd in enumerate(correlation_dimensions):
-        out_shape[cd] = n_corr[i]
+    # Determining the output shape. First the dimensions of d without the common dimensions, 
+    # then the common dimensions, then the reference with the calculation dimensions removed
+    out_shape = []
+    correlation_dimensions_out = []
+    for i in range(len(d.data.shape)):
+        try:
+            correlation_dimensions.index(i)
+        except ValueError:
+            pass
+            out_shape.append(d.data.shape[i])
+    for i in range(len(correlation_dimensions)):
+        out_shape.append(n_corr[i])
+        correlation_dimensions_out.append(len(out_shape)-1)
     for i in range(len(_ref.data.shape)):
         try:
             correlation_dimensions_ref.index(i)
@@ -1397,15 +1405,20 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             out_shape.append(_ref.data.shape[i])
 
     # Array shapes for doing FFT
-    proc_shape = list(d.data.shape)
+    proc_shape = list(d.data.shape)   
+    if (ref is not None):
+        proc_shape_ref = list(_ref.data.shape)
+
     pad_slice = [slice(0,ds) for ds in d.data.shape]
     for i,dim in enumerate(correlation_dimensions):
         pad_slice[dim] = slice(-pad_length[i],corr_point_n_nat[i])
+        proc_shape[dim] = corr_point_n_nat[i] + pad_length[i]
+
     if (ref is not None):
-        proc_shape_ref = list(_ref.data.shape)
         pad_slice_ref = [slice(0,ds) for ds in _ref.data.shape]
         for i,dim in enumerate(correlation_dimensions_ref):
-            pad_slice_ref[dim] = slice(-pad_length[i],corr_point_n_nat[i])    
+            pad_slice_ref[dim] = slice(-pad_length[i],corr_point_n_nat[i])  
+            proc_shape_ref[dim] = corr_point_n_nat[i] + pad_length[i]
     # Index arrays to rearrange after FFT and multiplying
     ind_in1 = [slice(0,d) for d in out_shape]
     ind_in2 = copy.deepcopy(ind_in1)
@@ -1416,7 +1429,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     # A slicing list which will cut out the needed part of the CCF
     ind_slice = [slice(0,d) for d in out_shape]
     ind_bin = [slice(0,dim) for dim in out_shape]
-    for i,cd in enumerate(correlation_dimensions):
+    for i,cd in enumerate(correlation_dimensions_out):
         nfft = corr_point_n_nat[i] + pad_length[i]
         ind_in1[cd] = slice(0,int(nfft / 2))
         ind_out1[cd] = slice(nfft-int(nfft / 2), nfft)
@@ -1424,10 +1437,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         ind_in2[cd] = slice(int(nfft / 2),nfft)
         ind_out2[cd] = slice(0, nfft - int(nfft / 2))
         ind_slice[cd] = slice(shift_range[i][0] + zero_ind[i], shift_range[i][1] + zero_ind[i])
-        proc_shape[cd] = nfft
-        if (ref is not None):
-            proc_shape_ref[correlation_dimensions_ref[i]] = nfft
-        ind_bin[cd] = np.arange(ind_slice[cd].stop - ind_slice[cd].start + 1,dtype=np.int32) / corr_res_sample[i]
+        ind_bin[cd] = np.arange(ind_slice[cd].stop - ind_slice[cd].start + 1,dtype=np.int32) // corr_res_sample[i]
     proc_array = np.zeros(tuple(proc_shape),dtype=d.data.dtype)
     if (ref is not None):
         proc_array_ref = np.zeros(tuple(proc_shape_ref),dtype=_ref.data.dtype)
@@ -1436,6 +1446,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     else:
         out_dtype= complex
     out_corr = np.zeros(tuple(out_shape), dtype=out_dtype)
+    if (error_calc):
+        out_corr_square = np.zeros(tuple(out_shape), dtype=out_dtype)    
     for i_int in range(n_proc_int):
         # Taking data for this processing interval
         proc_array[tuple(interval_out_slice)] = d.data[tuple(interval_slice[i_int])]
@@ -1443,13 +1455,15 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         fft = np.fft.fftn(proc_array,axes=correlation_dimensions)
         if (ref is not None):
             proc_array_ref[tuple(interval_out_slice_ref)] = d.data[tuple(interval_slice_ref[i_int])]
-            proc_array[tuple(pad_slice)] = 0
+            proc_array_ref[tuple(pad_slice_ref)] = 0
             fft_ref = np.fft.fftn(proc_array_ref,axes=correlation_dimensions_ref)
         else:
             fft_ref = fft
         res, axis_source, axis_number = flap.multiply_along_axes(fft, 
                                                                  np.conj(fft_ref),
-                                                                 [correlation_dimensions,correlation_dimensions_ref])
+                                                                 [correlation_dimensions,correlation_dimensions_ref],
+                                                                 keep_a1_dims = False
+                                                                 )
         if (out_dtype is float):
             res = np.real(res)
         corr = np.empty(res.shape,dtype=res.dtype)
@@ -1458,9 +1472,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         corr_sliced = corr[tuple(ind_slice)]
         corr_binned = np.zeros(tuple(out_shape),dtype=res.dtype)
         np.add.at(corr_binned,tuple(ind_bin),corr_sliced)
-        out_corr += corr_binned
         if (norm):
             if (ref is None):
+                # We already have the autocorrelations
                 autocorr_index_shape = out_shape[:len(d.data.shape)-len(correlation_dimensions)]
                 ind_autocorr = [0]*len(out_shape)
                 for i in range(len(autocorr_index_shape)):
@@ -1471,17 +1485,93 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     tile_shape = autocorr_index_shape
                     tile_shape[i] = 1
                     ind_autocorr[i] = np.tile(ind,tile_shape)
-                ind_autocorr[len(autocorr_index_shape):len(autocorr_index_shape)+len(correlation_dimensions)] 
+                ind_autocorr[len(autocorr_index_shape):len(autocorr_index_shape)+len(correlation_dimensions)] \
                      = np.zeros(autocorr_index_shape,dtype=int)
-                ind_autocorr[len(autocorr_index_shape)+len(correlation_dimensions):] 
+                ind_autocorr[len(autocorr_index_shape)+len(correlation_dimensions):] \
                        = ind_autocorr[0:len(autocorr_index_shape)]     
                 autocorr_mx = out_corr[tuple(ind_autocorr)]
                 extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
-                out_corr /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
-                out_corr /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
+                corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
+                corr_binned /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
             else:
-                
-        
-        
-        
-        
+                # We do not have the autocorrelations
+                autocorr_mx = np.sum(proc_array ** 2, tuple(correlation_dimensions))
+                autocorr_mx_ref = np.sum(proc_array_ref ** 2, tuple(correlation_dimensions_ref))
+                extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
+                corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
+                extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx_ref.shape))
+                corr_binned /= np.sqrt(np.reshape(autocorr_mx_ref,extend_shape + tuple(list(autocorr_mx_ref.shape))))
+        out_corr += corr_binned
+        if (error_calc):   
+            out_corr_square += corr_binned ** 2
+    out_corr /= n_proc_int
+    if (error_calc):
+        out_error = (out_corr_square / n_proc_int - out_corr ** 2)
+    else:
+        out_error = None
+    
+    #Assembling the coordinates
+    # Removing all coordinates which have common dimensions with the correlation coordinates
+    coord_list = []
+    for c in d.coordinates:
+        for dim in c.dimension_list:
+            try:
+                correlation_dimensions.index(dim)
+                break
+            except ValueError:
+                pass
+        else:
+            coord_list.append(copy_deepcopy(c))
+            for i_dim, dim in enumerate(coord_list[-1].dimension_list):
+                for i in range(len(axis_source)):
+                    if ((axis_source == 0) and (axis_number == dim)):
+                       coord_list[-1].dimension_list[i_dim] = i
+
+    for c in _ref.coordinates:
+        for dim in c.dimension_list:
+            try:
+                correlation_dimensions_ref.index(dim)
+                break
+            except ValueError:
+                pass
+        else:
+            coord_list.append(copy_deepcopy(c))
+            for i_dim, dim in enumerate(coord_list[-1].dimension_list):
+                for i in range(len(axis_source)):
+                    if ((axis_source == 1) and (axis_number == dim)):
+                       coord_list[-1].dimension_list[i_dim] = i
+            # Checking whether there is already an axis with this name
+            for c1 in coord_list:
+                if (c1.unit.name == c.unit.name):
+                    coord_list[-1].unit.name = coord_list[-1].unit.name + ' (Ref)'
+    
+    # Adding the correlation coordinates
+    for i,c in enumerate(coord_obj):           
+        c_new = Coordinate(name = c.unit.name + ' lag',
+                           unit = c.unit.unit,
+                           mode = CoordinateMode(equidistant=True),
+                           shape = [],
+                           start = range_sampout[i] * corr_res_sample[i] * c.step[0],
+                           step = [corr_res_sample[i] * c.step[0]],
+                           dimension_list=[len(d.data.shape) - len(correlation_dimensions) + i])
+    coord_list.append(c_new)
+
+    if (norm):
+        unit_name = 'Correlation'
+    else:
+        unit_name = 'Covariance'
+ 
+    if (d.exp_id == _ref.exp_id):
+        exp_id_out = d.exp_id
+    else:
+        exp_id_out = None
+
+    # We create the new data object with this trick as data_object.py cannot be imported
+    d_out = type(d)(data_array = out_corr,
+                    error = out_error,
+                    coordinates = coord_list,
+                    exp_id = exp_id_out,
+                    data_unit = Unit(unit_name)
+                    )
+    
+    return d_out
