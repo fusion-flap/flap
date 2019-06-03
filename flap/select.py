@@ -11,7 +11,6 @@ import time
 
 from .coordinate import *
 from .data_object import *
-from .core import *
 
 def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, options=None, plot_options=None, output_name=None):
     """

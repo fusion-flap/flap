@@ -956,6 +956,8 @@ def _plot(data_object,
         if (_plot_id.number_of_plots != 0):
             ax_min = min(ax.get_ylim()[0], ax_min)
             ax_max = max(ax.get_ylim()[1], ax_max)
+        if (ax_max <= ax_min):
+            ax_max += 1
         ax.set_ylim(ax_min, ax_max)
 
         legend = []

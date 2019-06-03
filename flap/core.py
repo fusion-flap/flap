@@ -22,7 +22,6 @@ from .coordinate import *
 from .data_object import *
 import flap.config
 
-
 class FlapStorage:
     """ This class is for data and data source information storage
     """

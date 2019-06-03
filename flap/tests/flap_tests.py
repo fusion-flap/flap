@@ -306,7 +306,7 @@ def test_detrend():
     plt.figure()
     flap.plot('TEST-1',axes='Time')
     flap.detrend('TEST-1',intervals={'Time':flap.Intervals(0.001,0.0015,step=0.003,number=2)},
-                                     options={'Trend':['poly',2]},output_name='TEST-1_detrend')
+                                     options={'Trend':['Poly',2]},output_name='TEST-1_detrend')
     flap.plot('TEST-1_detrend',axes='Time')
 
 def test_apsd():
@@ -472,10 +472,28 @@ def test_ccf():
     print()
     print('>>>>>>>>>>>>>>>>>>> Test ccf (Cross Correlation Function) <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
-    flap.get_data('TESTDATA',name='TEST-1-1',options={'Length':1, 'Signal':'Random'},object_name='TESTDATA')
-    flap.filter_data('TESTDATA',coordinate='Time',options={'Type':'Lowpass','f_high':1e5},output_name='TESTDATA_filt')
-    flap.ccf('TESTDATA',coordinate='Time',options={'Range':[-1e-4,1e-4]},output_name='CCF')
-    flap.plot('CCF',axes='Time lag')
+    print("**** Generating 10x15 random test signals, 5000 points each, 1 MHz sampling.")
+    flap.get_data('TESTDATA',
+                  name='TEST-*-*',
+                  options={'Length':0.005, 'Signal':'Random'},
+                  object_name='TESTDATA')
+    print("**** Filtering with 10 microsec integrating filter.")
+    flap.filter_data('TESTDATA',coordinate='Time',options={'Type':'Int','Tau':1e-5},output_name='TESTDATA_filt')
+    flap.list_data_objects()
+    print("**** Plotting an original and a filtered signal.")
+    flap.plot('TESTDATA',slicing={'Row':1,'Column':1},axes='Time')
+    flap.plot('TESTDATA_filt',slicing={'Row':1,'Column':1})
+    print('**** Calculating the 10x15x10x15 CCFs, each 5000 samples.')
+    print('**** CCF START')
+    start = time.time()    
+    flap.ccf('TESTDATA_filt',ref='TESTDATA_filt',coordinate='Time',options={'Trend':'Mean','Range':[-1e-4,1e-4],'Res':1e-5,'Norm':True},output_name='CCF')
+    stop = time.time()
+    print('**** CCF STOP')
+    print("**** Calculation time: {:6.3f} ms/signal".format(1000*(stop-start)/(10*15*10*15)))
+    flap.list_data_objects()
+    print("**** Plotting spatiotemporal correlation function at ref row, column 3,3, column 3")
+    plt.figure()
+    flap.plot('CCF',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag','Row'],plot_type='image')
 
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
@@ -519,7 +537,7 @@ if (False):
     input("Press Enter to continue...")
 if (False):
     test_cpsd()
-if (False):
+if (True):
     test_ccf()    
 
 

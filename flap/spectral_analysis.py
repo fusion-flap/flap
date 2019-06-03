@@ -82,8 +82,8 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
                 intervals_high.append(ref_intervals_high[i])
         ref_coord = ref.get_coordinate_object(coordinate)
         if ((ref_coord.start != coord.start) 
-            or (math.abs(ref_coord.step[0] - coord.step[0]) * d.shape[coord.dimension_list[0]] 
-                 > math.abs(coord.step))):
+            or (math.fabs(ref_coord.step[0] - coord.step[0]) * d.shape[coord.dimension_list[0]] 
+                 > math.fabs(coord.step[0]))):
             raise ValueError("The start and step of the calculating coordinates in the two data objects should be identical.")
     else:
         intervals_low = d_intervals_low 
@@ -177,9 +177,9 @@ def _trend_removal(d,ax,trend,x=None):
         trend: Trend removal description. A list, string or None.
                 None: Don't remove trend.
                 Strings:
-                    'mean': subtract mean
+                    'Mean': subtract mean
                 Lists:
-                    ['poly', n]: Fit an n order polynomial to the data and subtract.
+                    ['Poly', n]: Fit an n order polynomial to the data and subtract.
         x: X axis. If not used equidistant will be assumed.
     RETURN value:
         None. The input array is modified.
@@ -187,13 +187,13 @@ def _trend_removal(d,ax,trend,x=None):
     if (trend is None):
         return
     if (type(trend) is str):
-        if (trend == 'mean'):
-            d = scipy.signal.detrend(d, axis=ax, type='constant')
+        if (trend == 'Mean'):
+            d[:] = signal.detrend(d, axis=ax, type='constant')
             return
         else:
             raise ValueError("Unknown trend removal method: "+trend)
     elif (type(trend) is list):
-        if ((len(trend) == 2) and (trend[0] == 'poly')):
+        if ((len(trend) == 2) and (trend[0] == 'Poly')):
             try:
                 order = int(trend[1])
             except ValueError:
@@ -274,9 +274,9 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
                 'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
                              None: Don't remove trend.
                              Strings:
-                               'mean': subtract mean
+                               'Mean': subtract mean
                              Lists:
-                               ['poly', n]: Fit an n order polynomial to the data and subtract.
+                               ['Poly', n]: Fit an n order polynomial to the data and subtract.
                             Trend removal will be applied to each interval separately.
                  'Hanning': True/False Use a Hanning window.
 
@@ -289,7 +289,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
                        'Range': None,
                        'Logarithmic': False,
                        'Interval_n': 8,
-                       'Trend removal': ['poly', 2],
+                       'Trend removal': ['Poly', 2],
                        'Error calculation': True,
                        'Hanning' : True
                        }
@@ -449,7 +449,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
     out_data /= n_proc_int
     if (calc_error):
         out_err = np.sqrt(np.clip(out_data_square / n_proc_int - out_data ** 2,
-                                  0,None))
+                                  0,None)) / math.sqrt(n_proc_int)
     # If there are frequency bins without data setting them to np.NaN
     if (ind_nonzero is not None):
         out_data[tuple(ind_zero)] = np.NaN
@@ -705,7 +705,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                              Strings:
                                'mean': subtract mean
                              Lists:
-                               ['poly', n]: Fit an n order polynomial to the data and subtract.
+                               ['Poly', n]: Fit an n order polynomial to the data and subtract.
                             Trend removal will be applied to each interval separately.
                 'Hanning': True/False Use a Hanning window.
                 'Error calculation' : True/False. Calculate or not error. Omitting error calculation
@@ -726,7 +726,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                        'Range': None,
                        'Logarithmic': False,
                        'Interval_n': 8,
-                       'Trend removal': ['poly', 2],
+                       'Trend removal': ['Poly', 2],
                        'Hanning' : True,
                        'Error calculation': True,
                        'Normalize': False
@@ -779,10 +779,10 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             raise ValueError("Spectrum calculation is possible only along coordinates changing in one dimension (ref).")
         if (not ref_coord_obj.mode.equidistant):
             raise ValueError("Spectrum calculation is possible only along equidistant coordinates (ref).")    
-        if (math.abs(ref_coord_obj.step[0] - coord_obj.step[0]) * d.shape[coord_obj.dimension_list[0]] \
-            > math.abs(ref_coord_obj.step[0])):
+        if (math.fabs(ref_coord_obj.step[0] - coord_obj.step[0]) * d.shape[coord_obj.dimension_list[0]] \
+            > math.fabs(ref_coord_obj.step[0])):
                raise ValueError("Incompatible coordinate step sizes." )
-        if (math.abs(ref_coord_obj.start - coord_obj.start) > math.abs(coord_obj.step[0])):
+        if (math.fabs(ref_coord_obj.start - coord_obj.start) > math.fabs(coord_obj.step[0])):
                    raise ValueError("Incompatible coordinate start values." )
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
@@ -1200,7 +1200,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                              Strings:
                                'mean': subtract mean
                              Lists:
-                               ['poly', n]: Fit an n order polynomial to the data and subtract.
+                               ['Poly', n]: Fit an n order polynomial to the data and subtract.
                             Trend removal will be applied to each interval separately.
                             At present trend removal can be applied to 1D CCF only.
                 'Normalize': Normalize with autocorrelations, that is calculate correlation instead of covariance.
@@ -1211,7 +1211,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     default_options = {'Resolution': None,
                        'Range': None,
                        'Interval_n': 8,
-                       'Trend removal': ['poly', 2],
+                       'Trend removal': ['Poly', 2],
                        'Error calculation': True,
                        'Normalize': False
                        }
@@ -1294,10 +1294,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             except ValueError:
                 pass
             correlation_dimensions_ref.append(c.dimension_list[0])
-            if (math.abs(c.step[0] - coord_obj[i].step[0]) * d.shape[coord_obj[i].dimension_list[0]] \
-                > math.abs(c.step[0])):
+            if (math.fabs(c.step[0] - coord_obj[i].step[0]) * d.shape[coord_obj[i].dimension_list[0]] \
+                > math.fabs(c.step[0])):
                    raise ValueError("Incompatible coordinate step sizes." )
-            if (math.abs(c.start - coord_obj[i].start) > math.abs(c.step[0])):
+            if (math.fabs(c.start - coord_obj[i].start) > math.fabs(c.step[0])):
                    raise ValueError("Incompatible coordinate start values." )
             if (list(_ref.data.shape)[correlation_dimensions_ref[i]] 
                            != list(d.data.shape)[correlation_dimensions[i]]):
@@ -1320,17 +1320,21 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     n_sample_sel = index_int_high[0] - index_int_low[0]
     
     # Creating indices to take out data for each processing interval and place it into the processing arrays
-    interval_slice = [slice(0,dim) for dim in list(d.data.shape)]
-    interval_out_slice = copy.deepcopy(interval_slice)
+    interval_slice_1 = [slice(0,dim) for dim in list(d.data.shape)]
+    interval_out_slice = copy.deepcopy(interval_slice_1)
     interval_out_slice[correlation_dimensions[0]] = slice(0,n_sample_sel)
-    interval_slice = [interval_slice] * n_proc_int
+    interval_slice = [None] * n_proc_int
+    for i in range(n_proc_int):
+        interval_slice[i] = copy.deepcopy(interval_slice_1)
     for i in range(n_proc_int):
         interval_slice[i][correlation_dimensions[0]] = slice(index_int_low[i],index_int_high[i])
     if (ref is not None):
-        interval_slice_ref = [slice(0,dim) for dim in list(_ref.data.shape)]
-        interval_out_slice_ref = copy.deepcopy(interval_slice_ref)
+        interval_slice_ref_1 = [slice(0,dim) for dim in list(_ref.data.shape)]
+        interval_out_slice_ref = copy.deepcopy(interval_slice_ref_1)
         interval_out_slice_ref[correlation_dimensions_ref[0]] = slice(0,n_sample_sel)
-        interval_slice_ref = [interval_slice_ref] * n_proc_int
+        interval_slice_ref = [None] * n_proc_int
+        for i in range(n_proc_int):
+            interval_slice_ref[i] = copy.deepcopy(interval_slice_ref_1)
         for i in range(n_proc_int):
             interval_slice_ref[i][correlation_dimensions_ref[0]] = slice(index_int_low[i],index_int_high[i])
 
@@ -1343,7 +1347,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     if (corr_res is None):
         corr_res = [c.step[0] for c in coord_obj]
     if (type(corr_res) is not list):
-        corr_res = [corr_res] * n_elements(_coordinates)
+        corr_res = [corr_res] * len(_coordinate)
     corr_range = _options['Range']
     #Setting default correlation range to 10-th of coordinate range 
     if (corr_range is None):
@@ -1405,19 +1409,19 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             out_shape.append(_ref.data.shape[i])
 
     # Array shapes for doing FFT
-    proc_shape = list(d.data.shape)   
+    proc_shape = list(d.data.shape)
     if (ref is not None):
         proc_shape_ref = list(_ref.data.shape)
-
+        
     pad_slice = [slice(0,ds) for ds in d.data.shape]
     for i,dim in enumerate(correlation_dimensions):
-        pad_slice[dim] = slice(-pad_length[i],corr_point_n_nat[i])
+        pad_slice[dim] = slice(corr_point_n_nat[i]-pad_length[i],corr_point_n_nat[i])
         proc_shape[dim] = corr_point_n_nat[i] + pad_length[i]
 
     if (ref is not None):
         pad_slice_ref = [slice(0,ds) for ds in _ref.data.shape]
         for i,dim in enumerate(correlation_dimensions_ref):
-            pad_slice_ref[dim] = slice(-pad_length[i],corr_point_n_nat[i])  
+            pad_slice_ref[dim] = slice(corr_point_n_nat[i]-pad_length[i],corr_point_n_nat[i]) 
             proc_shape_ref[dim] = corr_point_n_nat[i] + pad_length[i]
     # Index arrays to rearrange after FFT and multiplying
     ind_in1 = [slice(0,d) for d in out_shape]
@@ -1436,8 +1440,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         zero_ind[i] = nfft - int(nfft / 2)
         ind_in2[cd] = slice(int(nfft / 2),nfft)
         ind_out2[cd] = slice(0, nfft - int(nfft / 2))
-        ind_slice[cd] = slice(shift_range[i][0] + zero_ind[i], shift_range[i][1] + zero_ind[i])
-        ind_bin[cd] = np.arange(ind_slice[cd].stop - ind_slice[cd].start + 1,dtype=np.int32) // corr_res_sample[i]
+        ind_slice[cd] = slice(shift_range[i][0] + zero_ind[i], shift_range[i][1] + zero_ind[i]+1)
+        ind_bin[cd] = np.arange(ind_slice[cd].stop - ind_slice[cd].start,dtype=np.int32) // corr_res_sample[i]
     proc_array = np.zeros(tuple(proc_shape),dtype=d.data.dtype)
     if (ref is not None):
         proc_array_ref = np.zeros(tuple(proc_shape_ref),dtype=_ref.data.dtype)
@@ -1447,14 +1451,33 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         out_dtype= complex
     out_corr = np.zeros(tuple(out_shape), dtype=out_dtype)
     if (error_calc):
-        out_corr_square = np.zeros(tuple(out_shape), dtype=out_dtype)    
+        out_corr_square = np.zeros(tuple(out_shape), dtype=out_dtype)  
+    all_points = 1
+    for i in range(len(correlation_dimensions)):
+        all_points *= n_corr[i]
     for i_int in range(n_proc_int):
         # Taking data for this processing interval
-        proc_array[tuple(interval_out_slice)] = d.data[tuple(interval_slice[i_int])]
+        if (trend is not None):
+            proc_array_trend = copy.deepcopy(d.data[tuple(interval_slice[i_int])])
+            try:
+                _trend_removal(proc_array_trend,correlation_dimensions[0],trend)
+            except Exception as e:
+                raise e
+            proc_array[tuple(interval_out_slice)] = proc_array_trend 
+        else:
+            proc_array[tuple(interval_out_slice)] = d.data[tuple(interval_slice[i_int])]
         proc_array[tuple(pad_slice)] = 0
         fft = np.fft.fftn(proc_array,axes=correlation_dimensions)
         if (ref is not None):
-            proc_array_ref[tuple(interval_out_slice_ref)] = d.data[tuple(interval_slice_ref[i_int])]
+            if (trend is not None):
+                proc_array_trend_ref = copy.deepcopy(_ref.data[tuple(interval_slice_ref[i_int])])
+                try:
+                    _trend_removal(proc_array_trend_ref,correlation_dimensions_ref[0],trend)
+                except Exception as e:
+                    raise e
+                proc_array_ref[tuple(interval_out_slice_ref)] = proc_array_trend_ref 
+            else:
+                proc_array_ref[tuple(interval_out_slice_ref)] = _ref.data[tuple(interval_slice_ref[i_int])]
             proc_array_ref[tuple(pad_slice_ref)] = 0
             fft_ref = np.fft.fftn(proc_array_ref,axes=correlation_dimensions_ref)
         else:
@@ -1464,6 +1487,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                                                  [correlation_dimensions,correlation_dimensions_ref],
                                                                  keep_a1_dims = False
                                                                  )
+        corr_dim_start = len(d.data.shape) - len(correlation_dimensions)
+        cps_corr_dims = np.arange(len(correlation_dimensions),dtype=int) + corr_dim_start 
+        res = np.fft.ifftn(res,axes=cps_corr_dims)
         if (out_dtype is float):
             res = np.real(res)
         corr = np.empty(res.shape,dtype=res.dtype)
@@ -1473,40 +1499,58 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         corr_binned = np.zeros(tuple(out_shape),dtype=res.dtype)
         np.add.at(corr_binned,tuple(ind_bin),corr_sliced)
         if (norm):
-            if (ref is None):
+            # Check if we have lag 0 data in  all dimensions
+            lag0_present = True
+            for i in range(len(correlation_dimensions)):
+                if ((range_sampout[i][0] > 0) or (range_sampout[i][1] < 0)):
+                    lag0_present = False
+            if ((ref is None) and lag0_present):
                 # We already have the autocorrelations
-                autocorr_index_shape = out_shape[:len(d.data.shape)-len(correlation_dimensions)]
-                ind_autocorr = [0]*len(out_shape)
-                for i in range(len(autocorr_index_shape)):
-                    ind = np.arange(out_shape[i],dtype=int)
-                    temp_shape = [1]*len(autocorr_index_shape)
-                    temp_shape[i] = autocorr_index_shape[i]
-                    ind = ind.reshape(tuple(temp_shape))
-                    tile_shape = autocorr_index_shape
-                    tile_shape[i] = 1
-                    ind_autocorr[i] = np.tile(ind,tile_shape)
-                ind_autocorr[len(autocorr_index_shape):len(autocorr_index_shape)+len(correlation_dimensions)] \
-                     = np.zeros(autocorr_index_shape,dtype=int)
-                ind_autocorr[len(autocorr_index_shape)+len(correlation_dimensions):] \
-                       = ind_autocorr[0:len(autocorr_index_shape)]     
-                autocorr_mx = out_corr[tuple(ind_autocorr)]
-                extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
-                corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
-                corr_binned /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
+                zero_ind_out = [0] * len(correlation_dimensions)
+                for i in range(len(correlation_dimensions)):
+                    zero_ind_out[i] = 0 - range_sampout[i][0]
+                if (len(d.data.shape) == len(correlation_dimensions)):
+                    # There is a single correlation function
+                    corr_binned /= corr_binned[zero_ind_out[0]]
+                else:
+                    autocorr_index_shape = copy.deepcopy(out_shape[:len(d.data.shape)-len(correlation_dimensions)])
+                    ind_autocorr = [0]*len(out_shape)
+                    for i in range(len(autocorr_index_shape)):
+                        ind = np.arange(out_shape[i],dtype=int)
+                        temp_shape = [1] * len(autocorr_index_shape)
+                        temp_shape[i] = autocorr_index_shape[i]
+                        ind = ind.reshape(tuple(temp_shape))
+                        tile_shape = copy.deepcopy(autocorr_index_shape)
+                        tile_shape[i] = 1
+                        ind_autocorr[i] = np.tile(ind,tile_shape)
+                    for i,dim in enumerate(correlation_dimensions):
+                        ind_autocorr[dim] = np.full(tuple(autocorr_index_shape),zero_ind_out[i])
+                    ind_autocorr[len(autocorr_index_shape)+len(correlation_dimensions):] \
+                           = copy.deepcopy(ind_autocorr[0:len(autocorr_index_shape)])     
+                    autocorr_mx = corr_binned[tuple(ind_autocorr)]
+                    extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
+                    corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
+                    corr_binned /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
             else:
                 # We do not have the autocorrelations
                 autocorr_mx = np.sum(proc_array ** 2, tuple(correlation_dimensions))
-                autocorr_mx_ref = np.sum(proc_array_ref ** 2, tuple(correlation_dimensions_ref))
+                if (ref is not None):
+                    autocorr_mx_ref = np.sum(proc_array_ref ** 2, tuple(correlation_dimensions_ref))
+                else:
+                    autocorr_ms_ref = autocorr_mx
                 extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
                 corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
                 extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx_ref.shape))
-                corr_binned /= np.sqrt(np.reshape(autocorr_mx_ref,extend_shape + tuple(list(autocorr_mx_ref.shape))))
+                corr_binned /= np.sqrt(np.reshape(autocorr_mx_ref,tuple(extend_shape + list(autocorr_mx_ref.shape))))
+        else:
+            corr_binned /= all_points
         out_corr += corr_binned
         if (error_calc):   
             out_corr_square += corr_binned ** 2
     out_corr /= n_proc_int
     if (error_calc):
-        out_error = (out_corr_square / n_proc_int - out_corr ** 2)
+        out_error = np.sqrt(np.clip((out_corr_square / n_proc_int - out_corr ** 2),
+                                  0,None)) / math.sqrt(n_proc_int) 
     else:
         out_error = None
     
@@ -1521,10 +1565,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             except ValueError:
                 pass
         else:
-            coord_list.append(copy_deepcopy(c))
+            coord_list.append(copy.deepcopy(c))
             for i_dim, dim in enumerate(coord_list[-1].dimension_list):
                 for i in range(len(axis_source)):
-                    if ((axis_source == 0) and (axis_number == dim)):
+                    if ((axis_source[i] == 0) and (axis_number[i] == dim)):
                        coord_list[-1].dimension_list[i_dim] = i
 
     for c in _ref.coordinates:
@@ -1535,10 +1579,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             except ValueError:
                 pass
         else:
-            coord_list.append(copy_deepcopy(c))
+            coord_list.append(copy.deepcopy(c))
             for i_dim, dim in enumerate(coord_list[-1].dimension_list):
                 for i in range(len(axis_source)):
-                    if ((axis_source == 1) and (axis_number == dim)):
+                    if ((axis_source[i] == 1) and (axis_number[i] == dim)):
                        coord_list[-1].dimension_list[i_dim] = i
             # Checking whether there is already an axis with this name
             for c1 in coord_list:
@@ -1551,7 +1595,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                            unit = c.unit.unit,
                            mode = CoordinateMode(equidistant=True),
                            shape = [],
-                           start = range_sampout[i] * corr_res_sample[i] * c.step[0],
+                           start = range_sampout[i][0] * corr_res_sample[i] * c.step[0],
                            step = [corr_res_sample[i] * c.step[0]],
                            dimension_list=[len(d.data.shape) - len(correlation_dimensions) + i])
     coord_list.append(c_new)
