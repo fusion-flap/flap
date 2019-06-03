@@ -494,7 +494,7 @@ if (False):
 if (False):
     test_coordinates()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot()
     input("Press Enter to continue...")
 if (False):
@@ -520,7 +520,7 @@ if (False):
     input("Press Enter to continue...")
 if (False):
     test_cpsd()
-if (True):
+if (False):
     test_ccf()    
 
 
