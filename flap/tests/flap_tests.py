@@ -472,7 +472,6 @@ def test_ccf():
     print()
     print('>>>>>>>>>>>>>>>>>>> Test ccf (Cross Correlation Function) <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
-#    flap.get_data('W7X_ABES',exp_id='20181018.003',name='ABES-[8-12]',coordinates={'Time':[1,1.5]},object_name='TESTDATA')
     flap.get_data('TESTDATA',name='TEST-1-1',options={'Length':1, 'Signal':'Random'},object_name='TESTDATA')
     flap.filter_data('TESTDATA',coordinate='Time',options={'Type':'Lowpass','f_high':1e5},output_name='TESTDATA_filt')
     flap.ccf('TESTDATA',coordinate='Time',options={'Range':[-1e-4,1e-4]},output_name='CCF')
@@ -494,7 +493,7 @@ if (False):
 if (False):
     test_coordinates()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_plot()
     input("Press Enter to continue...")
 if (False):
