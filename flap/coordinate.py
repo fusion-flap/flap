@@ -428,6 +428,8 @@ class Coordinate:
         Returns standard Python types: str, int, float, complex, boolean, object
         """
         if (self.mode.equidistant):
+            if ((self.start is None) or (self.step is None)):
+                raise ValueError("Bad equidistant coordinate description: step or start is missing.")
             # Reporting int type only if both start and step is integer
             kind = np.array([self.start]).dtype.kind
             for s in self.step:

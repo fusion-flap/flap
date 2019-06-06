@@ -763,7 +763,7 @@ def load(filename,options=None):
     else:
         raise ValueError("File "+filename+" is not a flap save file.")
         
-def abs(object_name,exp_id='*',output_name=None):
+def abs_value(object_name,exp_id='*',output_name=None):
     """
     Absolute value
     """

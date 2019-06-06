@@ -486,14 +486,15 @@ def test_ccf():
     print('**** Calculating the 10x15x10x15 CCFs, each 5000 samples.')
     print('**** CCF START')
     start = time.time()    
-    flap.ccf('TESTDATA_filt',ref='TESTDATA_filt',coordinate='Time',options={'Trend':'Mean','Range':[-1e-4,1e-4],'Res':1e-5,'Norm':True},output_name='CCF')
+    flap.ccf('TESTDATA_filt',coordinate='Time',
+             options={'Trend':'Mean','Range':[-1e-4,1e-4],'Res':1e-5,'Norm':True},output_name='CCF')
     stop = time.time()
     print('**** CCF STOP')
     print("**** Calculation time: {:6.3f} ms/signal".format(1000*(stop-start)/(10*15*10*15)))
     flap.list_data_objects()
     print("**** Plotting spatiotemporal correlation function at ref row, column 3,3, column 3")
     plt.figure()
-    flap.plot('CCF',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag','Row'],plot_type='image')
+    flap.plot('CCF',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
 
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))

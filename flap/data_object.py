@@ -104,7 +104,74 @@ class DataObject:
                 self.__coordinates = [copy.deepcopy(coordinates)]
             else:
                 raise TypeError("Bad type for coordinates.")
-
+                
+    def check(self):
+        """ Does a consistency check for the data object and raises errors if problems found.
+        """
+        if (self.data is not None):
+            if (type(self.data) is not np.ndarray):
+                raise TypeError("Wrong data array. DataObject.data should be numpy.ndarray.")
+            if (self.data.shape != self.shape):
+                raise ValueError("DataObject.data shape is not the same as DataObject.shape.")
+        if (self.error is not None):
+            if (type(self.error) is list):
+                if (len(self.error) is not 2):
+                    raise ValueError("Wrong number of elements in error. If DataObject.error is a list it should have two elements." )
+                error = self.error
+            else:
+                error = [self.error]
+            for err in error:
+                if (type(err) is not np.ndarray):
+                    raise TypeError("Wrong error array in DataObject. It should be numpy.ndarray.")
+                if (err.shape != self.shape):
+                    raise ValueError("Shape of error  array un DataObject is different from data.")
+        if (self.coordinates is not None):
+            for i,c in enumerate(self.coordinates):
+                if (type(c.dimension_list) is not list):
+                    raise TypeError("Wrong type for dimension list for coordinate '{:s}'.".format(c.unit.name))
+                if (len(c.dimension_list) > len(self.shape)):
+                    raise TypeError("Too long dimension list for coordinate '{:s}'.".format(c.unit.name)) 
+                for d in c.dimension_list:
+                    if (d >= len(self.shape)):
+                        raise TypeError("Wrong dimension number in coordinate '{:s}'.".format(c.unit.name))                         
+                if (type(c.unit) is not flap.Unit):
+                    raise TypeError("Wrong coordinate unit in coordinate #{:d}. Should be flap.Unit().".format(i))
+                if (type(c.mode) is not CoordinateMode):
+                    raise TypeError("Wrong coordinate mode type in '{:s}'. Should be flap.CoordinateMode().".format(c.unit.name))
+                if (c.mode.equidistant):
+                    if (c.start is None):
+                        raise TypeError("No start for equdistant coordinate '{:s}'.".format(c.unit.name))
+                    if (type(c.start ) is str):
+                        raise TypeError("Invalid start value type for equdistant coordinate '{:s}'.".format(c.unit.name))
+                    if (len(c.step) != len(c.dimension_list)):
+                        raise ValueError("Number of step values is different from length of dimension_list in '{:s}'.".format(c.unit.name))
+                    for cstep in c.step:
+                        if (cstep is None):
+                            raise TypeError("One step is None for equdistant coordinate '{:s}'.".format(c.unit.name))
+                        if (type(cstep ) is str):
+                            raise TypeError("Invalid step type for equdistant coordinate '{:s}'.".format(c.unit.name))
+                    if (c.value_ranges is not None):
+                        if (c.mode.range_symmetric):
+                            try:
+                                if (c.value_ranges * 0 != 0):
+                                    raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))
+                            except:
+                                    raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))                                
+                        else:
+                            if (type(c.value_ranges) is not list):
+                                raise TypeError("Invalid type for value_ranges in asymmetric coordinate '{:s}'.".format(c.unit.name))
+                            if (len(c.value_ranges) is not 2):
+                                raise TypeError("Invalid list length for value_ranges in asymmetric coordinate '{:s}'.".format(c.unit.name))
+                            for c_val_ranges in c.value_ranges:
+                                try:
+                                    if (c_value_ranges * 0 != 0):
+                                        raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))
+                                except:
+                                        raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))     
+                else:
+                    if (not c.non_interpol(self.shape)):
+                        raise ValueError("Coordinate value and data shape is inconsistent in coordinate '{:s}'.".format(c.unit.name))
+                                                                    
     def coordinate_names(self):
         """ Returns a list with the coordinate names.
         """
@@ -162,7 +229,7 @@ class DataObject:
             data_source: Optional data_source. Use this not the one in data_object
             exp_id: Optional exp_id. Use this not the one in data_object
             options: Dictionary of options.
-        Returns the modified data object. Note that the input data object is the same, and it is modified.
+        Returns the modified data object. Note that the input data object remanins the same.
         """
         if (data_source is not None):
             _data_source = data_source
@@ -1206,16 +1273,7 @@ class DataObject:
         Slice (select areas) from the data object along one or more dimensions.
         Return the sliced object.
           slicing:
-              1. Tuple or list with the same number of elements as the data dimension.
-                 IT HAS TO BE DECIDED WHETHER WE NEED THIS CASE AT ALL.
-                 In this case slicing is done in the data matrix. Elements can be:
-                 a  slice objects, range objects, scalars, lists, ellipses, numpy array,
-                    flap.Intervals with one interval In this case the indexed elements are selected
-                    and kept in the array.
-                 b  flap.Intervals objects with more than one interval. In this case ranges are
-                    selected and a new dimension is added to the data array (to the end)
-                    going through the intervals.
-              2. Dictionary with keys referring to coordinates in the data object.
+              Dictionary with keys referring to coordinates in the data object.
                  Values can be:
                      a: Cases when closest value is selected.
                          a1 slice objects, range objects, scalars, lists, numpy array.
@@ -1239,13 +1297,10 @@ class DataObject:
                         If range slicing is done with multiple coordinates which have common element in the
                         dimension list they will be done in one step. Otherwise the slicing is done sequentially.
           summing:
-              Summing is applied to the sliced data. It processes data along one dimension or coordinate
-              and the result is a scalar. This way summing reduces the numner of dimensions.
-              1. tuple of processing strings. The number of elements should be identical to the number of
-                 dimensions. Dimension summing cannot be applied after coordinate slicing as this might
-                 change the number of dimensions. (Tbd if dimension slicing is needed at all.)
-              2. Dictionary with keys referring to coordinates and values as processing strings. If
-                 the processed coordinate changes along multiple dimensions those dimensions will be flattened.
+              Summing is applied to the sliced data. It processes data along one coordinate
+              and the result is a scalar. This way summing reduces the number of dimensions.
+              Dictionary with keys referring to coordinates and values as processing strings. If
+              the processed coordinate changes along multiple dimensions those dimensions will be flattened.
 
               For mean and avereage data errors are calculated as error of independent variables, that is taking the square
               root of the squared sum of errors. For coordinates the mean of the ranges is taken.
@@ -1365,7 +1420,7 @@ class DataObject:
                     (range_slice[1] < range_coord[0])):
                     del regular_slice
                 else:
-                    # Checking whether the step of regular_slice is nearly the interger multiple of
+                    # Checking whether the step of regular_slice is nearly the integer multiple of
                     # the coordinate step size
                     n_step = int((min([range_slice[1], range_coord[1]])
                               - max([range_slice[0], range_coord[0]]))  \
@@ -1738,7 +1793,7 @@ class DataObject:
                             d_range, d_range_ext = slicing_coords[i_sc].data_range(data_shape=self.shape)
                             n_int, start_int = intervals[0].interval_number(limits=d_range,
                                                                             partial_intervals=partial_intervals)
-                            if (math.fabs(
+                            if (abs(
                                     round(intervals[0].step / slicing_coords[i_sc].step[0])
                                     - (intervals[0].step / slicing_coords[i_sc].step[0])
                                     ) > slicing_coords[i_sc].step[0]*1e-5) :
@@ -3138,7 +3193,14 @@ def get_data(data_source,
         d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates)
     except Exception as e:
         raise e
+    if (type(d) is not DataObject):
+        raise ValueError("No data receiveid.")
     d.data_source = data_source
+    try:
+        d.check()
+    except (ValueError, TypeError) as e:
+        raise e
+        
     if ((object_name is not None) and (d is not None)):
         add_data_object(d,object_name)
     return d
@@ -3534,7 +3596,7 @@ def load(filename,options=None):
     else:
         raise ValueError("File "+filename+" is not a flap save file.")
         
-def abs(object_name,exp_id='*',output_name=None):
+def abs_value(object_name,exp_id='*',output_name=None):
     """
     Absolute value
     """
