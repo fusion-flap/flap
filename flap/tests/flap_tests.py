@@ -176,7 +176,7 @@ def test_plot():
     plt.figure()
     gs = GridSpec(1, 2)
     plt.subplot(gs[0,0])
-    plot_4 = flap.abs('TESTDATA_comp').plot()
+    plot_4 = flap.abs_value('TESTDATA_comp').plot()
     plt.subplot(gs[0,1])
     plot_5 = flap.phase('TESTDATA_comp').plot(options={'Y sep':10})
 #    plot_4 = flap.plot('TESTDATA_comp')
@@ -452,7 +452,7 @@ def test_cpsd():
     flap.cpsd('TESTDATA',
               options={'Norm':True,'Interval':50, 'Log':True,'Res':10,'Range':[100,1e5]},
               output_name='TESTDATA_cpsd')
-    flap.abs('TESTDATA_cpsd',output_name='TESTDATA_cpsd_abs')
+    flap.abs_value('TESTDATA_cpsd',output_name='TESTDATA_cpsd_abs')
 
     print("**** Plotting coherency between channels 1-2 and its significance level.")    
     plt.figure()
@@ -536,9 +536,9 @@ if (False):
 if (False):
     test_filter()
     input("Press Enter to continue...")
-if (False):
-    test_cpsd()
 if (True):
+    test_cpsd()
+if (False):
     test_ccf()    
 
 

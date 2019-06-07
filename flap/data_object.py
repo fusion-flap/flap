@@ -2244,7 +2244,7 @@ class DataObject:
             d_out.data_unit.name = 'Imag('+self.data_unit.name+')'
         return d_out
 
-    def abs(self):
+    def abs_value(self):
         d_out = copy.deepcopy(self)
         if (d_out.data is not None):
             d_out.data = np.abs(self.data)
@@ -3603,7 +3603,7 @@ def abs_value(object_name,exp_id='*',output_name=None):
     except Exception as e:
         raise e
     try:
-        d_out = d.abs()
+        d_out = d.abs_value()
     except Exception as e:
         raise e
     if (output_name is not None):

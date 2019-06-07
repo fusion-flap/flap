@@ -772,7 +772,7 @@ def abs_value(object_name,exp_id='*',output_name=None):
     except Exception as e:
         raise e
     try:
-        d_out = d.abs()
+        d_out = d.abs_value()
     except Exception as e:
         raise e
     if (output_name is not None):
