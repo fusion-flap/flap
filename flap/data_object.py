@@ -1650,8 +1650,8 @@ class DataObject:
 
                     if (len(slicing_coords[i_sc].dimension_list) == 0):
                         # This coordinate is constant
-                        raise NotImplementedError("Slicing on constant coordinates is not immplemented.")
-
+                        #raise NotImplementedError("Slicing on constant coordinates is not immplemented.")
+                        return d_slice
                     try:
                         # Determine slicing index in the flattened coordinate dimensions
                         ind_slice_coord = simple_slice_index(slicing_description[i_sc],
