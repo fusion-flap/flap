@@ -1203,7 +1203,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                ['Poly', n]: Fit an n order polynomial to the data and subtract.
                             Trend removal will be applied to each interval separately.
                             At present trend removal can be applied to 1D CCF only.
-                'Normalize': Normalize with autocorrelations, that is calculate correlation instead of covariance.
+                'Normalize': Normalize with autocorrelations, that is calculate correlation instead of 
+                             covariance.
+                'Verbose': Print progress messages
     """
     if (d.data is None):
         raise ValueError("Cannot do correlation calculation without data.")
@@ -1213,7 +1215,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                        'Interval_n': 8,
                        'Trend removal': ['Poly', 2],
                        'Error calculation': True,
-                       'Normalize': False
+                       'Normalize': False,
+                       'Verbose':True
                        }
     _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='Correlation')
     if (coordinate is None):
@@ -1360,6 +1363,16 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         raise ValueError("Correlation range must be a list.")
     if (type(corr_range[0]) is not list):
         corr_range = [corr_range] * len(_coordinate)
+    # Sanity check for lag range
+    for i,coord in enumerate(coord_obj):
+        dr, dr1 = coord.data_range(data_shape=d.shape)
+        if ((abs(corr_range[i][0]) > (int_high[0] - int_low[0])) or (abs(corr_range[i][1]) > (int_high[0] - int_low[0]))):
+            raise ValueError("Correlation lag calculation range is too large for coordinate '{:s}'.".format(coord.unit.name))
+        if ((corr_range[i][1] - corr_range[i][0]) < coord.step[0]*3):
+            raise ValueError("Correlation lag calculation range is too small for coordinate '{:s}'.".format(coord.unit.name))
+        if (corr_range[i][0] >= corr_range[i][1]):
+            raise ValueError("Invalid correlation lag range for coordinate '{:s}'.".format(coord.unit.name))
+
     # Correlation final resolutions in sample numbers
     corr_res_sample = []
     # Correlation range in final resolution
@@ -1456,6 +1469,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     for i in range(len(correlation_dimensions)):
         all_points *= n_corr[i]
     for i_int in range(n_proc_int):
+        if (_options['Verbose']):
+            print("Interval {:d}/{:d}".format(i_int, n_proc_int))
         # Taking data for this processing interval
         if (trend is not None):
             proc_array_trend = copy.deepcopy(d.data[tuple(interval_slice[i_int])])
@@ -1513,7 +1528,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     # There is a single correlation function
                     corr_binned /= corr_binned[zero_ind_out[0]]
                 else:
-                    autocorr_index_shape = copy.deepcopy(out_shape[:len(d.data.shape)-len(correlation_dimensions)])
+                    corr_dimension_start = len(d.data.shape)-len(correlation_dimensions)
+                    autocorr_index_shape = copy.deepcopy(out_shape[:corr_dimension_start])
                     ind_autocorr = [0]*len(out_shape)
                     for i in range(len(autocorr_index_shape)):
                         ind = np.arange(out_shape[i],dtype=int)
@@ -1523,8 +1539,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                         tile_shape = copy.deepcopy(autocorr_index_shape)
                         tile_shape[i] = 1
                         ind_autocorr[i] = np.tile(ind,tile_shape)
-                    for i,dim in enumerate(correlation_dimensions):
-                        ind_autocorr[dim] = np.full(tuple(autocorr_index_shape),zero_ind_out[i])
+                    for i in range(len(correlation_dimensions)):
+                        ind_autocorr[corr_dimension_start + i] = np.full(tuple(autocorr_index_shape),zero_ind_out[i])
                     ind_autocorr[len(autocorr_index_shape)+len(correlation_dimensions):] \
                            = copy.deepcopy(ind_autocorr[0:len(autocorr_index_shape)])     
                     autocorr_mx = corr_binned[tuple(ind_autocorr)]
