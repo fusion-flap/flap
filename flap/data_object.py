@@ -132,6 +132,8 @@ class DataObject:
                 if (len(c.dimension_list) > len(self.shape)):
                     raise TypeError("Too long dimension list for coordinate '{:s}'.".format(c.unit.name)) 
                 for d in c.dimension_list:
+                    if (d is None):
+                        raise ValueError("Null in dimension list.")
                     if (d >= len(self.shape)):
                         raise TypeError("Wrong dimension number in coordinate '{:s}'.".format(c.unit.name))                         
                 if (type(c.unit) is not flap.Unit):
@@ -162,7 +164,7 @@ class DataObject:
                                 raise TypeError("Invalid type for value_ranges in asymmetric coordinate '{:s}'.".format(c.unit.name))
                             if (len(c.value_ranges) is not 2):
                                 raise TypeError("Invalid list length for value_ranges in asymmetric coordinate '{:s}'.".format(c.unit.name))
-                            for c_val_ranges in c.value_ranges:
+                            for c_value_ranges in c.value_ranges:
                                 try:
                                     if (c_value_ranges * 0 != 0):
                                         raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))
@@ -1967,14 +1969,10 @@ class DataObject:
                                          in_interval_dimension,
                                          n_int,
                                          n_in_int)
-
-        elif ((type(slicing) is tuple) or (type(slicing) is list)):
-            raise NotImplemented("Slicing along dimensions is not implemented.")
-
         elif (slicing is None):
             pass
         else:
-            raise ValueError("Wrong slicing description. Use tuple or dictionary.")
+            raise ValueError("Wrong slicing description. Use dictionary.")
 
 
         if (type(summing) is dict):
@@ -1995,6 +1993,7 @@ class DataObject:
                 if (len(summing_coords[i_sc].dimension_list) == 0):
                     # Do nothing if coordinate is constant
                     continue
+                
                 # Flattening the data array for the dimensions
                 d_flat, dimension_mapping = flatten_multidim(d_slice.data,
                                                              summing_coords[i_sc].dimension_list)
@@ -2056,6 +2055,8 @@ class DataObject:
                 d_slice.shape = d_slice.data.shape
 
                 # Doing changes to all coordinates
+                # Saving a copy of the original summing coord structure
+                summing_coords_orig = copy.deepcopy(summing_coords)
                 for check_coord in d_slice.coordinates:
                     # Do nothing for scalar dimension
                     if (len(check_coord.dimension_list) == 0):
@@ -2067,7 +2068,7 @@ class DataObject:
                     for i_d in range(len(check_coord.dimension_list)):
                         d = check_coord.dimension_list[i_d]
                         try:
-                            summing_coords[i_sc].dimension_list.index(d)
+                            summing_coords_orig[i_sc].dimension_list.index(d)
                             common_dims.append(d)
                             common_in_dimlist.append(i_d)
                         except ValueError:
@@ -2081,7 +2082,7 @@ class DataObject:
                             # In all these cases we must get the data for the selected elements
                             # Getting coordinate data in the unified dims
                             unified_dims = unify_list(check_coord.dimension_list,
-                                                          summing_coords[i_sc].dimension_list)
+                                                          summing_coords_orig[i_sc].dimension_list)
                             ind = [0]*len(original_shape)
                             for d in unified_dims:
                                 ind[d] = ...
@@ -2090,7 +2091,7 @@ class DataObject:
                             except Exception as e:
                                 raise e
                             # indices of summing dimensions in unified dimension list
-                            summing_in_unified = [unified_dims.index(d) for d in summing_coords[i_sc].dimension_list]
+                            summing_in_unified = [unified_dims.index(d) for d in summing_coords_orig[i_sc].dimension_list]
                             data = np.squeeze(data)
                             data, dims = flatten_multidim(data, summing_in_unified)
                             if ((summing_description[i_sc] == 'Sum') \
@@ -2137,7 +2138,7 @@ class DataObject:
                                 # dimension is None
                                 flattened_dimlist = []
                                 for i_d in range(len(dimension_mapping)):
-                                    if (i_d == summing_coords[i_sc].dimension_list[0]):
+                                    if (i_d == summing_coords_orig[i_sc].dimension_list[0]):
                                         flattened_dimlist.append(None)
                                     elif (dimension_mapping[i_d] is not None):
                                         flattened_dimlist.append(i_d)
@@ -2211,15 +2212,10 @@ class DataObject:
                         check_coord.dimension_list[i] = dimension_mapping[check_coord.dimension_list[i]]
                         if (check_coord.dimension_list[i] is None):
                             raise RuntimeError("Internal error in dimension mapping: None dimension")
-
-        elif ((type(summing) is tuple) or (type(summing) is list)):
-             raise NotImplemented("Summing along dimensions is not implemented.")
-
-
         elif (summing is None):
             pass
         else:
-            raise TypeError("Bad summing description. Use dictionary, tuple or list.")
+            raise TypeError("Bad summing description. Use dictionary.")
 
         return d_slice
     # End of slice_data
@@ -3007,6 +3003,8 @@ class FlapStorage:
                 if (c.mode.range_symmetric):
                     s += '<R. symm.>'
                 s += '] '
+                if (c.value_ranges is not None):
+                    s +='[Ranges set] '
                 if (c.mode.equidistant):
                     s += 'Start: {:10.3E}, Steps: '.format(c.start)
                     for i_step in range(len(c.step)):

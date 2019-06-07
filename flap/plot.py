@@ -666,7 +666,7 @@ def _plot(data_object,
             if (title[-3:] != '...'):
                 newtitle = ''
                 if (d.exp_id is not None):
-                    newtitle += str(d.exp_id)
+                    newtitle += str(d.exp_id) + ' '
                     if (d.data_title is not None):
                         newtitle += d.data_title
                 if (len(newtitle) != 0):
@@ -810,7 +810,7 @@ def _plot(data_object,
             if (title[-3:] != '...'):
                 newtitle = ''
                 if (d.exp_id is not None):
-                    newtitle += str(d.exp_id)
+                    newtitle += str(d.exp_id) + ' '
                     if (d.data_title is not None):
                         newtitle += d.data_title
                 if (len(newtitle) != 0):
@@ -1010,7 +1010,7 @@ def _plot(data_object,
         if (title[-3:] != '...'):
             newtitle = ''
             if (d.exp_id is not None):
-                newtitle += str(d.exp_id)
+                newtitle += str(d.exp_id) + ' '
                 if (d.data_title is not None):
                     newtitle += d.data_title
             if (len(newtitle) != 0):
