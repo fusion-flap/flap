@@ -1396,7 +1396,7 @@ class DataObject:
                 raise TypeError("Invalid slicing description.")
 
 
-        def simple_slice_index(slicing, slicing_coord, data_shape):
+        def simple_slice_index(slicing, slicing_coord, data_shape, _options):
             """ Returns index array which can be used for indexing the selected elements in the
                 data array flattened in the dimensions of the coordinate.
 
@@ -1727,7 +1727,8 @@ class DataObject:
                         # Determine slicing index in the flattened coordinate dimensions
                         ind_slice_coord = simple_slice_index(slicing_description[i_sc],
                                                              slicing_coords[i_sc],
-                                                             d_slice.shape)
+                                                             d_slice.shape,
+                                                             _options)
                     except ValueError as e:
                         raise e
                     # Flatten the data array along the coordinate dimensions
@@ -1735,10 +1736,53 @@ class DataObject:
                                                                  slicing_coords[i_sc].dimension_list)
                     # Create a list of slices for each dimension for the whole array
                     ind_slice = [slice(0,d_flat.shape[i]) for i in range(d_flat.ndim)]
-                    # Insert the slicing indices into the flattened dimension
-                    ind_slice[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord
-                    # Slice the data with this index list
-                    d_slice.data = copy.deepcopy(d_flat[tuple(ind_slice)])
+                    if (_options['Interpolation'] == 'Closest value'):
+                        # Insert the slicing indices into the flattened dimension
+                        ind_slice[slicing_coords[i_sc].dimension_list[0]] = np.round(ind_slice_coord).astype(np.int32)
+                        # Slice the data with this index list
+                        d_slice.data = copy.deepcopy(d_flat[tuple(ind_slice)])
+                    elif (_options['Interpolation'] == 'Linear'):
+                        if (type(ind_slice_coord) is slice):
+                            ind_slice_coord_1 = slice(int(ind_slice_coord.start), 
+                                                      ind_slice_coord.step, 
+                                                      int(ind_slice_coord.stop)
+                                                      )
+                            ind_slice_coord_2 = slice(ind_slice_coord_1.start + 1,
+                                                      ind_slice_coord.step,
+                                                      ind_slice_coord.stop + 1
+                                                      )
+                            if (ind_slice_coord_2.stop > d_flat.size):
+                                ind_slice_coord_1 = slice(ind_slice_coord_1.start, 
+                                                          ind_slice_coord_1.step, 
+                                                          ind_slice_coord_1.stop - 1
+                                                          )
+                                ind_slice_coord_2 = slice(ind_slice_coord_2.start, 
+                                                          ind_slice_coord_2.step, 
+                                                          ind_slice_coord_2.stop - 1
+                                                          )
+                                
+                        else:
+                            # ind_slice_coord is numpy array
+                            ind_slice_coord_1 = np.trunc(ind_slice_coord).astype(np.int32)
+                            ind_slice_coord_2 = ind_slice_coord_1 + 1
+                            ind = np.nonzero(ind_slice_coord_2 < d_flat.size)[0]
+                            if (ind.size < ind_slice_coord_2.size):
+                                ind_slice_coord_1 = ind_slice_coord_1[ind]
+                                ind_slice_coord_2 = ind_slice_coord_2[ind]
+                        # Insert the lower slicing indices into the flattened dimension and get the two base points
+                        # for interpolation
+                        ind_slice[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_1
+                        d1 = copy.deepcopy(d_flat[tuple(ind_slice)])
+                        ind_slice[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_2
+                        d2 = copy.deepcopy(d_flat[tuple(ind_slice)])
+                        # Reshaping ind_slice_coord_1 and ind_slice_coord to an array with 1 elements in all
+                        # dimensions except the coordinate dimendsion. This will broadcast with d2 and d2.
+                        interplol_weight_shape = [1] * len(d_flat.shape)
+                        interplol_weight_shape[slicing_coords[i_sc].dimension_list[0]] \
+                                                                 = d1.shape[slicing_coords[i_sc].dimension_list[0]]
+                        ind_slice_1 = ind_slice_1.reshape(tuple(interplol_weight_shape))  
+                        ind_slice = ind_slice.reshape(tuple(interplol_weight_shape))                                        
+                        d_slice.data = (d2 - d1) * (ind_slice - ind_slice_1) + d1
                     original_shape = d_slice.shape
                     # If the sliced data contains only 1 element removing this dimension
                     if (d_slice.data.shape[slicing_coords[i_sc].dimension_list[0]] == 1):

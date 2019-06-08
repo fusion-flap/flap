@@ -265,6 +265,10 @@ def test_simple_slice():
     flap.slice_data('TESTDATA',slicing={'Signal name': 'TEST-1-*'},output_name='TESTDATA_slice')
     print("**** Sliced object")
     flap.list_data_objects(name='TESTDATA_slice')
+    print
+    flap.slice_data('TESTDATA')
+    
+    
 
 def test_select_multislice():
     print()
