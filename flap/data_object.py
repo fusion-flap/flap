@@ -1277,14 +1277,14 @@ class DataObject:
           slicing:
               Dictionary with keys referring to coordinates in the data object.
                  Values can be:
-                     a: Cases when closest value is selected.
+                     a:SIMPLE SLICE: cases when closest value or interpolated value is selected.
                          a1 slice objects, range objects, scalars, lists, numpy array.
                          a2 flap.DataObjects without error and with data unit.name equal to
                             the coordinate
                          a3 flap.DataObject with the name of one coordinate equal to the dictionary
                             key without having value_ranges values.
                          a4 flap.Intervals objects with one interval
-                     b: Various range selection objects. In this case ranges are
+                     b: MULTI SLICE: Various range selection objects. In this case ranges are
                         selected and a new dimension is added to the data array
                         (only of more than 1 interval is selected) going through the
                         intervals. If intervals are of different length the longest will be used
@@ -1314,9 +1314,35 @@ class DataObject:
                       'Min'  : take the minimum of the values/coordinate
                       'Max'  : take the maximum of the values/coordinate
 
-          options: 'Partial intervals'  True or False
+          options: 'Partial intervals'  (bool). If true processes intervals which extend over the coordinate limits. 
+                                                If false only full intervals are processed.
+                   'Slice type': 'Simple': Case a above: closest or interplated values are selected, dimensions 
+                                           are reduced or unchanged.
+                                 'Multi': Case b above: multiple intervals are selected and their date is placed into
+                                          new dimension.
+                                 None: Automatically select. For slicing data in case b multi slice, otherwise simple
+                   'Interpolation: 'Closest value'
+                                   'Linear'
         """
 
+        default_options = {'Partial intervals': True,
+                           'Slice type': None,
+                           'Interpolation': 'Linear',
+                           }
+        _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='Slicing')
+
+        if (_options['Slice type'] is not None):
+            try:
+                _options['Slice type'] = find_str_match(_options['Slice type'], ['Simple','Multi'])
+            except ValueError as e:
+                raise e
+        if (_options['Interpolation'] is not None):
+            try:
+                _options['Interpolation'] = find_str_match(_options['Interpolation'], ['Closest value','Linear'])
+            except ValueError as e:
+                raise e
+        
+                
         def check_multi_slice(slicing, coord_dim):
             """ Determines whether this slicing operation is multi-slice
                 slicing: the slicing list or dictionary element
@@ -1376,12 +1402,11 @@ class DataObject:
 
                 Assumes simple (non-range) slicing.
             """
-
-
             if (slicing_coord.mode.equidistant):
                 # There is a chance to slice with slice object if the coordinate is equidistant
                 # Creating a slice object (regular_slice) if the slicing description can be described
-                # with it. Later it will be checked whether it is consistent with the equidistant coordinate
+                # with it. Later it will be checked whether it is consistent with the equidistant coordinate.
+                # regular_slice is in coordinate units.
                 if ((type(slicing) is slice) or (type(slicing) is range)) :
                     if (slicing.step == None):
                         regular_slice = slice(slicing.start, slicing.stop, 1)
@@ -1400,7 +1425,10 @@ class DataObject:
                                               coord_obj.start + coord_obj.step[0] *
                                                  (slicing.shape[coord_obj.dimension_list[0]] - 1),
                                               coord_obj.step[0])
-                if (type(slicing) is Intervals):
+                if ((type(slicing) is Intervals) 
+                    # Regular slice is possible only with a single interval
+                    and ((slicing.step is None) and (len(slicing.start) == 1) or
+                        (slicing.step is not None) and (slicing.number == 1))):
                     if (slicing_coord.step[0] > 0):
                         regular_slice = slice(slicing.start[0], slicing.stop[0], slicing_coord.step[0])
                     else:
@@ -1435,9 +1463,10 @@ class DataObject:
                 pass
 
             # At this point if we have a regular_slice object than it is possible to use slicing
-            # in the data array. Otherwise we will create a numpy array and look for close match
+            # in the data array. Otherwise we will create a numpy array for indexing
 
             try:
+                # Limiting regular slice within the data range
                 regular_slice
                 if (regular_slice.step > 0):
                     if (regular_slice.start < range_coord[0]):
@@ -1469,14 +1498,18 @@ class DataObject:
                                               + regular_slice.start,
                                               regular_slice.step)
 
-                start_index = int(round((regular_slice.start - range_coord[0]) / abs(slicing_coord.step[0])))
-                step_index = int(round(regular_slice.step / abs(slicing_coord.step[0])))
-                stop_index = int((regular_slice.stop - range_coord[0]) / abs(slicing_coord.step[0]))
-                return slice(start_index, stop_index, step_index)
-
+                if (_options['Interpolation'] == 'Closest value'):
+                    start_index = int(round((regular_slice.start - range_coord[0]) / abs(slicing_coord.step[0])))
+                    step_index = int(round(regular_slice.step / abs(slicing_coord.step[0])))
+                    stop_index = int((regular_slice.stop - range_coord[0]) / abs(slicing_coord.step[0]))
+                    return slice(start_index, stop_index, step_index)
+                else:
+                    start_index = (regular_slice.start - range_coord[0]) / abs(slicing_coord.step[0])
+                    step_index = int(round(regular_slice.step / abs(slicing_coord.step[0])))
+                    stop_index = (regular_slice.stop - range_coord[0]) / abs(slicing_coord.step[0])
+                    return slice(start_index, stop_index, step_index)       
             except NameError:
                 # slice object could not be created for data array
-
                 # Creating flattened coordinate data array
                 index = [0]*len(data_shape)
                 for d in slicing_coord.dimension_list:
@@ -1484,17 +1517,27 @@ class DataObject:
                 coord_data, coord_low, coord_high = slicing_coord.data(data_shape, index)
                 coord_data = coord_data.flatten()
                 if (type(slicing) is Intervals):
-                    if (type(coord_data[0]) is np.str_):
+                    if (not slicing_coord.isnumeric()):
                         raise TypeError("Cannot slice string coordinate with numeric intervals.")
-                    # This means one interval as this routine is for non-range slicing
-                    where_start = coord_data >= slicing.start[0]
-                    where_stop = coord_data <= slicing.stop[0]
-                    ind = np.where(np.logical_and(where_start,where_stop))[0]
-                    if (len(ind) == 0):
-                        raise ValueError("No elements found in slicing range.")
-                    return ind
+                    # Determining the interval limits which are within the coordinate data range 
+                    dr, dre = slicing_coord.data_range(data_shape=data_shape)
+                    try:
+                        int_l, int_h = slicing.interval_limits(limits=dr,partial_intervals=_options['Partial intervals'])
+                    except ValueError as e:
+                        raise e
+                    # Creating a numpy array with the indices within the intervals
+                    index = np.array([])
+                    for i in range(len(int_l)):
+                        where_start = coord_data >= int_l[i]
+                        where_stop = coord_data <= int_h[i]
+                        ind = np.where(np.logical_and(where_start,where_stop))[0]
+                        if (len(ind) != 0):
+                            index = np.concatenate((index,ind))    
+                    if (len(index) == 0):
+                        raise ValueError("No elements found in slicing interval(s).")
+                    return index
                 else:
-                    # Creating numpy array from all slicing descriptions
+                    # Creating numpy array from all slicing descriptions. The values are in coordinate units
                     if ((type(slicing) is list)
                         or (type(slicing) is range)):
                         slicing_arr = np.array(slicing)
@@ -1518,7 +1561,11 @@ class DataObject:
                             index[d] = ...
                         slicing_arr = coord_obj.data(data_shape,index).flatten()
 
+                    # Creating an ind_coord array with the indices into the data array
+                    # This might be a float value as interpolation might need a non-integer index
                     if (type(slicing_arr[0]) is np.str_):
+                        if (_options['Slice type'] == 'Interpolation'):
+                            raise ValueError("Cannot do interpolation with string values.")
                         # For strings requiring exact match but wildcards are allowed
                         ind_coord = np.ndarray(0, np.dtype('int64'))
                         if (coord_data.size != 1):
@@ -1531,10 +1578,28 @@ class DataObject:
                         if (len(ind_coord) == 0):
                             raise ValueError("No matching elements found in slicing.")
                     else:
-                        # For non-string find closest matches
-                        ind_coord = np.ndarray(len(slicing_arr), np.dtype('int64'))
-                        for i in range(len(slicing_arr)):
-                            ind_coord [i] = np.abs(coord_data - slicing_arr[i]).argmin()
+                        if (slicing_coord.mode.equidistant and len(slicing_coord.dimension_list) == 1):
+                            ind_coord = (slicing_arr - slicing_coord.start) / slicing_coord.step
+                            ind = np.nonzero(ind_coord < 0)[0]
+                            if (ind.size > 0):
+                                ind_coord[ind] = 0
+                            ind = np.nonzero(ind_coord >= data_shape[slicing_coord.dimension_list[0]])[0]
+                            if (ind.size > 0):
+                                ind_coord[ind] = data_shape[slicing_coord.dimension_list[0]] - 1
+                        else:
+                            # Checking for monotonicity of coordinate
+                            diff = (coord_data[1:] - coord_data[:-1])
+                            if (np.nonzero(diff[0] * diff < 0)[0].size == 0):
+                                # If monotonous interpolating the coordinate-index function
+                                data_index = np.arange(coord_data.shape,dtype=float)
+                                ind_coord = np.interp(slicing_arr,coord_data,data_index)
+                            else:
+                                # Otherwise looking for closest match for each element
+                                if (_options['Interpolation'] != 'Closest value'):
+                                    raise ValueError("Coordinate is non-monotonous, cannot interpolate.")
+                                ind_coord = np.ndarray(len(slicing_arr), np.dtype('int64'))
+                                for i in range(len(slicing_arr)):
+                                    ind_coord [i] = np.abs(coord_data - slicing_arr[i]).argmin()
                     return ind_coord
 
         def check_slicing_type(slicing_description, slicing_coord):
@@ -1588,7 +1653,7 @@ class DataObject:
             return
 
 
-        # slice starts here
+        # **************** slice starts here ***********************
 
         if (self.data is None):
             raise ValueError("Cannot slice data object without data.")
@@ -1610,7 +1675,13 @@ class DataObject:
                 try:
                     slicing_coord_names.append(sc)
                     slicing_coords.append(d_slice.get_coordinate_object(sc))
+                    # Multi-slice is called range_slice in this program
                     range_slice.append(check_multi_slice(slicing[sc], sc))
+                    if (_options['Slice type'] is not None):
+                        if ((range_slice[-1] is False) and (_options['Slice type'] == 'Multi')):
+                            raise ("Multi slice not possible with this description.")
+                        if (_options['Slice type'] == 'Simple'):
+                            range_slice[-1] = False
                     slicing_description.append(slicing[sc])
                 except ValueError:
                     raise ValueError("Slicing coordinate "+sc+" is not present in data object.")
