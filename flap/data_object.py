@@ -1329,7 +1329,7 @@ class DataObject:
                            'Slice type': None,
                            'Interpolation': 'Linear',
                            }
-        _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='Slicing')
+        _options = flap.config.merge_options(default_options, options, data_source=self.data_source, section='Slicing')
 
         if (_options['Slice type'] is not None):
             try:
@@ -1734,6 +1734,15 @@ class DataObject:
                     # Flatten the data array along the coordinate dimensions
                     d_flat, dimension_mapping = flatten_multidim(d_slice.data,
                                                                  slicing_coords[i_sc].dimension_list)
+                    if (d_slice.error is not None):
+                        if (type(d_slice.error) is list):
+                            d_err_flat_1, xx = flatten_multidim(d_slice.error[0],
+                                                                 slicing_coords[i_sc].dimension_list)
+                            d_err_flat_2, xx = flatten_multidim(d_slice.error[1],
+                                                                 slicing_coords[i_sc].dimension_list)
+                        else:
+                            d_err, xx = flatten_multidim(d_slice.error,
+                                                                 slicing_coords[i_sc].dimension_list)
                     # Create a list of slices for each dimension for the whole array
                     ind_slice = [slice(0,d_flat.shape[i]) for i in range(d_flat.ndim)]
                     if (_options['Interpolation'] == 'Closest value'):
@@ -1741,6 +1750,12 @@ class DataObject:
                         ind_slice[slicing_coords[i_sc].dimension_list[0]] = np.round(ind_slice_coord).astype(np.int32)
                         # Slice the data with this index list
                         d_slice.data = copy.deepcopy(d_flat[tuple(ind_slice)])
+                        if (d_slice.error is not None):
+                            if (type(d_slice.error) is list):
+                                d_err_flat_1 = copy.deepcopy(d_err_flat_1[tuple(ind_slice)])
+                                d_err_flat_2 = copy.deepcopy(d_err_flat_2[tuple(ind_slice)])
+                            else:
+                                d_err  = copy.deepcopy(d_err[tuple(ind_slice)])                        
                     elif (_options['Interpolation'] == 'Linear'):
                         if (type(ind_slice_coord) is slice):
                             ind_slice_coord_1 = slice(int(ind_slice_coord.start), 
@@ -1759,8 +1774,7 @@ class DataObject:
                                 ind_slice_coord_2 = slice(ind_slice_coord_2.start, 
                                                           ind_slice_coord_2.step, 
                                                           ind_slice_coord_2.stop - 1
-                                                          )
-                                
+                                                          )                                
                         else:
                             # ind_slice_coord is numpy array
                             ind_slice_coord_1 = np.trunc(ind_slice_coord).astype(np.int32)
@@ -1771,18 +1785,32 @@ class DataObject:
                                 ind_slice_coord_2 = ind_slice_coord_2[ind]
                         # Insert the lower slicing indices into the flattened dimension and get the two base points
                         # for interpolation
-                        ind_slice[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_1
-                        d1 = copy.deepcopy(d_flat[tuple(ind_slice)])
-                        ind_slice[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_2
-                        d2 = copy.deepcopy(d_flat[tuple(ind_slice)])
+                        ind_slice_1 = copy.deepcopy(ind_slice)
+                        ind_slice_2 = copy.deepcopy(ind_slice)
+                        ind_slice_1[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_1
+                        d1 = copy.deepcopy(d_flat[tuple(ind_slice_1)])
+                        ind_slice_2[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_2
+                        d2 = copy.deepcopy(d_flat[tuple(ind_slice_2)])
                         # Reshaping ind_slice_coord_1 and ind_slice_coord to an array with 1 elements in all
                         # dimensions except the coordinate dimendsion. This will broadcast with d2 and d2.
                         interplol_weight_shape = [1] * len(d_flat.shape)
                         interplol_weight_shape[slicing_coords[i_sc].dimension_list[0]] \
                                                                  = d1.shape[slicing_coords[i_sc].dimension_list[0]]
-                        ind_slice_1 = ind_slice_1.reshape(tuple(interplol_weight_shape))  
-                        ind_slice = ind_slice.reshape(tuple(interplol_weight_shape))                                        
-                        d_slice.data = (d2 - d1) * (ind_slice - ind_slice_1) + d1
+                        ind_slice_intepr_1 = ind_slice_1.reshape(tuple(interplol_weight_shape))  
+                        ind_slice_interp = ind_slice.reshape(tuple(interplol_weight_shape))                                        
+                        d_slice.data = (d2 - d1) * (ind_slice_interp - ind_slice_interp_1) + d1
+                        if (d_slice.error is not None):
+                            if (type(d_slice.error) is list):
+                                d_err_flat_1_1 = copy.deepcopy(d_err_flat_1[tuple(ind_slice_1)])
+                                d_err_flat_1_2 = copy.deepcopy(d_err_flat_1[tuple(ind_slice_2)])
+                                d_err_flat_1 = (d_err_flat_1_2 - d_err_flat_1_1) * (ind_slice_interp - ind_slice_interp_1) + d_err_flat_1_1
+                                d_err_flat_2_1 = copy.deepcopy(d_err_flat_2[tuple(ind_slice_1)])
+                                d_err_flat_2_2 = copy.deepcopy(d_err_flat_2[tuple(ind_slice_2)])
+                                d_err_flat_2 = (d_err_flat_2_2 - d_err_flat_2_1) * (ind_slice_interp - ind_slice_interp_1) + d_err_flat_2_1
+                            else:
+                                d_err_1 = copy.deepcopy(d_err[tuple(ind_slice_1)])
+                                d_err_2 = copy.deepcopy(d_err[tuple(ind_slice_2)])
+                                d_err = (d_err_2 - d_err_1) * (ind_slice_interp - ind_slice_interp_1) + d_err_1
                     original_shape = d_slice.shape
                     # If the sliced data contains only 1 element removing this dimension
                     if (d_slice.data.shape[slicing_coords[i_sc].dimension_list[0]] == 1):
@@ -1799,20 +1827,12 @@ class DataObject:
 
                     if (d_slice.error is not None):
                         if (type(d_slice.error) is list):
-                            d_err_flat_1, xx = flatten_multidim(d_slice.error[0],
-                                                                 slicing_coords[i_sc].dimension_list)
-                            d_err_flat_1 = copy.deepcopy(d_err_flat_1[tuple(ind_slice)])
-                            d_err_flat_2, xx = flatten_multidim(d_slice.error[1],
-                                                                 slicing_coords[i_sc].dimension_list)
-                            d_err_flat_2 = copy.deepcopy(d_err_flat_2[tuple(ind_slice)])
                             if (sliced_removed):
                                 d_err_flat_1 = np.squeeze(d_err_flat_1)
                                 d_err_flat_2 = np.squeeze(d_err_flat_2)
                             d_slice.error = [d_err_flat_1, d_error_flat_2]
                         else:
-                            d_err, xx = flatten_multidim(d_slice.error,
-                                                                 slicing_coords[i_sc].dimension_list)
-                            d_slice.error  = copy.deepcopy(np.squeeze(d_err[tuple(ind_slice)]))
+                            d_slice.error  = np.squeeze(d_err)
 
                     # Doing changes to all coordinates
                     d_slice.__check_coords_after_simple_slice(sliced_dimensions, 

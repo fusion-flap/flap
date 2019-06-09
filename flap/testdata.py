@@ -42,8 +42,8 @@ import copy
 # These are the measurement parameters
 ROW_NUMBER = 10
 COLUMN_NUMBER = 15
-meas_ADC_step = 0.001
-alpha = 18. # deg
+meas_ADC_step = 0.001  # ADC resolution in Volt
+alpha = 18. # degree angle of measurement matrix
 
 def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                       options=None, coordinates=None):

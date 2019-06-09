@@ -265,8 +265,27 @@ def test_simple_slice():
     flap.slice_data('TESTDATA',slicing={'Signal name': 'TEST-1-*'},output_name='TESTDATA_slice')
     print("**** Sliced object")
     flap.list_data_objects(name='TESTDATA_slice')
-    print
-    flap.slice_data('TESTDATA')
+    
+def test_resample()    :
+    print()
+    print(">>>>>>>>>>>>> Test signal resampling (interpolation) <<<<<<<<<<<")
+    flap.delete_data_object('*')
+    print("**** Generating two test signals with different sampling frequency.")
+    flap.get_data('TESTDATA',
+                 name='TEST-1-1',
+                 options={'Scaling':'Volt','Frequency':1e3, 'Samplerate':1e6},
+                 object_name='TEST-1MHz',
+                 coordinates={'Time':[0,0.001]}
+                 )
+    flap.get_data('TESTDATA',
+                 name='TEST-1-1',
+                 options={'Scaling':'Volt','Frequency':1.5e3, 'Samplerate':3e6},
+                 object_name='TEST-3MHz',
+                 coordinates={'Time':[0,0.001]}
+                 )
+    flap.plot('TEST-1MHz',axes='Time',plot_options={'marker':'o'})
+    flap.plot('TEST-3MHz',plot_options={'marker':'o'})
+
     
     
 
@@ -528,6 +547,9 @@ if (False):
 if (False):
     test_simple_slice()
     input("Press Enter to continue...")
+if (True):
+    test_resample()
+    input("Press Enter to continue...")    
 if (False):
     test_select_multislice()
     input("Press Enter to continue...")
@@ -540,7 +562,7 @@ if (False):
 if (False):
     test_filter()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_cpsd()
 if (False):
     test_ccf()    
