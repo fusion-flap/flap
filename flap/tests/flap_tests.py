@@ -283,13 +283,35 @@ def test_resample()    :
                  object_name='TEST-3MHz',
                  coordinates={'Time':[0,0.001]}
                  )
+    print("***** Resampling from lower to higher frequency.")
+    plt.figure()
     flap.plot('TEST-1MHz',axes='Time',plot_options={'marker':'o'})
     flap.plot('TEST-3MHz',plot_options={'marker':'o'})
-    flap.slice_data('TEST-1MHz',slicing={'Time':flap.get_data_object('TEST-3MHz')},output_name='TEST-1MHz_resample')
-    flap.list_data_objects()
+    flap.slice_data('TEST-1MHz',
+                    slicing={'Time':flap.get_data_object('TEST-3MHz')},
+                    options={'Interpol':'Linear'},
+                    output_name='TEST-1MHz_resample')
     flap.plot('TEST-1MHz_resample',plot_options={'marker':'x'})
     
-
+    print("***** Resampling from higher to lower frequency.")
+    plt.figure()
+    flap.plot('TEST-1MHz',axes='Time',plot_options={'marker':'o'})
+    flap.plot('TEST-3MHz',plot_options={'marker':'o'})
+    flap.slice_data('TEST-3MHz',
+                    slicing={'Time':flap.get_data_object('TEST-1MHz')},
+                    options={'Interpol':'Linear'},
+                    output_name='TEST-3MHz_resample')
+    flap.plot('TEST-3MHz_resample',plot_options={'marker':'x'})
+    
+    print("***** Cutting parts.")
+    plt.figure()
+    flap.slice_data('TEST-1MHz',
+                    slicing={'Time':flap.Intervals([1e-4,5e-4],[2e-4,7e-4])},
+                    options={'Slice':'Simple'},                     
+                    output_name='TEST-1MHz_parts')
+    flap.plot('TEST-1MHz_parts',axes='Time',plot_options={'marker':'o'})
+    flap.list_data_objects()
+    
 def test_select_multislice():
     print()
     print('>>>>>>>>>>>>>>>>>>> Test select on maxima and multi slice <<<<<<<<<<<<<<<<<<<<<<<<')
