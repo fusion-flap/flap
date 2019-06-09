@@ -285,8 +285,9 @@ def test_resample()    :
                  )
     flap.plot('TEST-1MHz',axes='Time',plot_options={'marker':'o'})
     flap.plot('TEST-3MHz',plot_options={'marker':'o'})
-
-    
+    flap.slice_data('TEST-1MHz',slicing={'Time':flap.get_data_object('TEST-3MHz')},output_name='TEST-1MHz_resample')
+    flap.list_data_objects()
+    flap.plot('TEST-1MHz_resample',plot_options={'marker':'x'})
     
 
 def test_select_multislice():

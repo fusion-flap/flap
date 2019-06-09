@@ -775,9 +775,11 @@ class DataObject:
                 elif (self.error.dtype.kind is 'O'):
                     self.error[ind] = None
 
-    def __check_coords_after_simple_slice(self,sliced_dimensions, sliced_removed, ind_slice_coord, original_shape, dimension_mapping):
+    def __check_coords_after_simple_slice(self,sliced_dimensions, sliced_removed, ind_slice_coord, original_shape, 
+                                          dimension_mapping, slicing_equidistant,slicing_coord,_options):
         """ This is an internal function to modify the coordinates after a simple (non-interval) slice operation
         """
+        
         for check_coord in self.coordinates:
             # Do nothing for scalar dimension
             if (len(check_coord.dimension_list) == 0):
@@ -792,25 +794,41 @@ class DataObject:
                 except ValueError:
                     pass
 
+            # If there are common dimensions then must change the description
             if (len(common_dims) != 0):
-                # If there are common dimensions then must change the description
-                if ((len(check_coord.dimension_list) == 1)
-                      and (type(ind_slice_coord) is slice)
-                      and (check_coord.mode.equidistant)):
-                    # if coordinate changes along one dimension and slicing
-                    # could be done with slice object and this coordinate is
-                    # equidistant then it can stay equidistant
-                    check_coord.start = check_coord.start    \
-                                        + ind_slice_coord.start   \
-                                           * check_coord.step[0]
-                    check_coord.step = check_coord.step[0] * ind_slice_coord.step
+                # Checking if this coordinate can be equidistant. Two cases qualify:
+                # 1. If this is the slicing coordinate and the slicing is equidistant
+                # 2. If this is not the slicing coordinate but both this and the slicing coordinates are equidistant
+                #    along a single dimension
+                if (slicing_equidistant and
+                    ((check_coord == slicing_coord) 
+                     or ((check_coord != slicing_coord)  
+                         and (len(check_coord.dimension_list) == 1)
+                         and (check_coord.mode.equidistant)
+                         and (len(slicing_coord.dimension_list) == 1)
+                         and slicing_coord.mode.equidistant
+                        )
+                     )
+                    ):
+                    # if this coordinate is equidistant and changes along one dimension 
+                    # and slicing is also equidistant
+                    if (type(check_coord) is slice):
+                        check_coord.start = check_coord.start    \
+                                            + ind_slice_coord.start   \
+                                               * check_coord.step[0]
+                        check_coord.step = check_coord.step[0] * ind_slice_coord.step
+                    else:
+                        check_coord.start = check_coord.start    \
+                                            + ind_slice_coord[0]   \
+                                               * check_coord.step[0]
+                        check_coord.step = check_coord.step[0] * (ind_slice_coord[-1]  - ind_slice_coord[0]) \
+                                                                 / (ind_slice_coord.size - 1)                      
                     if (sliced_removed):
                        check_coord.mode.equidistant = False
                        check_coord.values = check_coord.start
                     check_coord.shape = None
                 else:
                     # This coordinate will be non-equidistant
-
                     # Determining dimension list containing dimensions from this coordinate
                     # and the sliced ones
                     unified_dims = unify_list(check_coord.dimension_list, sliced_dimensions)
@@ -833,25 +851,87 @@ class DataObject:
                             pass
                     # Flattening these dimensions in the coordinate data matrix
                     new_coord_data, flat_dim_mapping = flatten_multidim(new_coord_data, flattened_in_unified)
-                    # Creating a list of slices for all dimension, so as all elments are copied
-                    ind = [slice(0,x) for x in new_coord_data.shape]
-                    # In the flattened dimensions inserting the slicing index array
-                    ind[flattened_in_unified[0]] = ind_slice_coord
-                    # Selecting the coordinate data for the remaining data elements
-                    check_coord.values = np.squeeze(new_coord_data[tuple(ind)])
                     # Doing the same with coordinate ranges
                     if (data_low is not None):
                         data_low = np.reshape(data_low,tuple(unified_shape))
                         data_low = flatten_multidim(data_low, flattened_in_unified)
-                        data_low = data_low[tuple(ind)]
                         if (not check_coord.mode.range_symmetric):
                            data_high = np.reshape(data_high,tuple(unified_shape))
                            data_high = flatten_multidim(data_high, flattened_in_unified)
-                           data_high = data_high[tuple(ind)]
-                           check_coord_value_ranges = [check_coord.values - data_low,
+                    # Creating a list of slices for all dimension, so as all elements are copied
+                    ind_slice = [slice(0,x) for x in new_coord_data.shape]
+                    if (_options['Interpolation'] == 'Closest value'):
+                        # In the flattened dimensions inserting the slicing index array
+                        ind_slice[flattened_in_unified[0]] = np.round(ind_slice_coord).astype(np.int32)
+                        # Selecting the coordinate data for the remaining data elements
+                        check_coord.values = copy.deepcopy(np.squeeze(new_coord_data[tuple(ind_slice)]))
+                        if (data_low is not None):
+                            data_low = data_low[tuple(ind_slice)]
+                            if (not check_coord.mode.range_symmetric):
+                                data_high = data_high[tuple(ind_slice)]                        
+                    elif (_options['Interpolation'] == 'Linear'):
+                        if (type(ind_slice_coord) is slice):
+                            ind_slice_coord_1 = slice(int(ind_slice_coord.start), 
+                                                      ind_slice_coord.step, 
+                                                      int(ind_slice_coord.stop)
+                                                      )
+                            ind_slice_coord_2 = slice(ind_slice_coord_1.start + 1,
+                                                      ind_slice_coord.step,
+                                                      ind_slice_coord.stop + 1
+                                                      )
+                            if (ind_slice_coord_2.stop > d_flat.size):
+                                ind_slice_coord_1 = slice(ind_slice_coord_1.start, 
+                                                          ind_slice_coord_1.step, 
+                                                          ind_slice_coord_1.stop - 1
+                                                          )
+                                ind_slice_coord_2 = slice(ind_slice_coord_2.start, 
+                                                          ind_slice_coord_2.step, 
+                                                          ind_slice_coord_2.stop - 1
+                                                          )                                
+                        else:
+                            # ind_slice_coord is numpy array
+                            ind_slice_coord_1 = np.trunc(ind_slice_coord).astype(np.int32)
+                            ind_slice_coord_2 = ind_slice_coord_1 + 1
+                            ind = np.nonzero(ind_slice_coord_2 >= new_coord_data.size)[0]
+                            if (ind.size != 0):
+                                ind_slice_coord_2[-1] = ind_slice_coord_2[-2] 
+                        # Insert the lower slicing indices into the flattened dimension and get the two base points
+                        # for interpolation
+                        ind_slice_1 = copy.deepcopy(ind_slice)
+                        ind_slice_2 = copy.deepcopy(ind_slice)
+                        ind_slice_1[flattened_in_unified[0]] = ind_slice_coord_1
+                        d1 = new_coord_data[tuple(ind_slice_1)]
+                        ind_slice_2[flattened_in_unified[0]] = ind_slice_coord_2
+                        d2 = new_coord_data[tuple(ind_slice_2)]
+                        if (d2.shape[flattened_in_unified[0]] < d1.shape[flattened_in_unified[0]]):
+                            # This can happen only if the last point is on the last index 
+                           d2_last_ind = ind_slice_2[flattened_in_unified[0]] = -1
+                           d2_beforelast_ind = ind_slice_2[flattened_in_unified[0]] = -2
+                           d2[d2_last_ind] = d2[d2_beforelast_ind] 
+
+                        # Reshaping ind_slice_coord_1 and ind_slice_coord to an array with 1 elements in all
+                        # dimensions except the coordinate dimension. This will broadcast with d2 and d2.
+                        interplol_weight_shape = [1] * len(new_coord_data.shape)
+                        interplol_weight_shape[flattened_in_unified[0]] = d1.shape[flattened_in_unified[0]]
+                        ind_slice_interp_1 = ind_slice_coord_1.reshape(tuple(interplol_weight_shape))  
+                        ind_slice_interp = ind_slice_coord.reshape(tuple(interplol_weight_shape))                                        
+                        check_coord.values = (d2 - d1) * (ind_slice_interp - ind_slice_interp_1) + d1
+                        if (data_low is not None):
+                            d1 = data_low[tuple(ind_slice_1)]
+                            d2 = data_low[tuple(ind_slice_2)]
+                            data_low = (d2 - d1) * (ind_slice_interp - ind_slice_interp_1) + d1
+                            if (not check_coord.mode.range_symmetric):
+                                d1 = data_high[tuple(ind_slice_1)]
+                                d2 = data_high[tuple(ind_slice_2)]
+                                data_high = (d2 - d1) * (ind_slice_interp - ind_slice_interp_1) + d1
+                    else:
+                        raise ValueError("Internal error: cannot handle interpolation method '{:s}'".format(_options['Interpolation']))
+                    if (data_low is not None):
+                        if (not check_coord.mode.range_symmetric):
+                           check_coord.value_ranges = [check_coord.values - data_low,
                                                        data_high - check_coord.values]
                         else:
-                           check_coord_value_ranges = check_coord.values - data_low
+                           check_coord.value_ranges = check_coord.values - data_low
                     check_coord.mode.equidistant = False
                     check_coord.shape = check_coord.values.shape
 
@@ -1259,20 +1339,10 @@ class DataObject:
                                      dimension_list = in_interval_dimension))
         self.coordinates.append(c)
 
-#        print(self.shape)
-#        for c in self.coordinates:
-#            print(c.unit.name)
-#            print(c.dimension_list)
-#            print(c.shape)
-##            if(np.isscalar(c.values) or (c.values is None)):
-#                print(c.values)
-#            else:
-#                print(c.values.shape)
-#        pass
 
     def slice_data(self,slicing=None,summing=None,options=None):
         """
-        Slice (select areas) from the data object along one or more dimensions.
+        Slice (select areas) from the data object along one or more coordinates.
         Return the sliced object.
           slicing:
               Dictionary with keys referring to coordinates in the data object.
@@ -1349,52 +1419,33 @@ class DataObject:
                 coord_dim: Coordinate name in case of coordinate slincing,
                            dimension index in case of dimension slicing.
             """
-
-            if (type(coord_dim) is str):
-                # Coordinate slicing
-                if ( (type(slicing) is slice) or
-                     (type(slicing) is range) or
-                     np.isscalar(slicing) or
-                     (type(slicing) is list) or
-                     (type(slicing) is np.ndarray)):
-                    return False
-                if (type(slicing) is DataObject):
-                    if (slicing.data_unit.name != coord_dim):
-                        try:
-                            coord_obj = slicing.get_coordinate_object(coord_dim)
-                        except ValueError:
-                            raise ValueError("To use a flap.DataObject for slicing either the data_unit.name or a coordinate name should be identical to the coordinate.")
-                        if (coord_obj.value_ranges is None):
-                            return False
-                        else:
-                            return True
-                    else:
-                        if (slicing.error is None):
-                            return False
-                        else:
-                            return True
-                if (type(slicing) is Intervals):
-                    if (slicing.number == 1):
+            if ( (type(slicing) is slice) or
+                 (type(slicing) is range) or
+                 np.isscalar(slicing) or
+                 (type(slicing) is list) or
+                 (type(slicing) is np.ndarray)):
+                return False
+            if (type(slicing) is DataObject):
+                if (slicing.data_unit.name != coord_dim):
+                    try:
+                        coord_obj = slicing.get_coordinate_object(coord_dim)
+                    except ValueError:
+                        raise ValueError("To use a flap.DataObject for slicing either the data_unit.name or a coordinate name should be identical to the coordinate.")
+                    if (coord_obj.value_ranges is None):
                         return False
                     else:
                         return True
-                raise TypeError("Invalid slicing description.")
-
-            else:
-                # Dimension slicing
-                if ( (type(slicing) is slice) or
-                     (type(slicing) is range) or
-                     np.isscalar(slicing) or
-                     (type(slicing) is list) or
-                     (type(slicing) is np.ndarray)):
-                    return False
-                if (type(slicing) is Intervals):
-                    if (slicing.number == 1):
+                else:
+                    if (slicing.error is None):
                         return False
                     else:
                         return True
-                raise TypeError("Invalid slicing description.")
-
+            if (type(slicing) is Intervals):
+                if (slicing.number == 1):
+                    return False
+                else:
+                    return True
+            raise TypeError("Invalid slicing description.")
 
         def simple_slice_index(slicing, slicing_coord, data_shape, _options):
             """ Returns index array which can be used for indexing the selected elements in the
@@ -1402,6 +1453,7 @@ class DataObject:
 
                 Assumes simple (non-range) slicing.
             """
+            
             if (slicing_coord.mode.equidistant):
                 # There is a chance to slice with slice object if the coordinate is equidistant
                 # Creating a slice object (regular_slice) if the slicing description can be described
@@ -1436,6 +1488,10 @@ class DataObject:
             try:
                 # If regular_slice exists
                 regular_slice
+                regular_slice_exists = True
+            except NameError:
+                regular_slice_exists = False
+            if (regular_slice_exists):
                 # Checking if regular_slice and coordinate have common range
                 slicing_coord_stop = slicing_coord.start \
                                      + slicing_coord.step[0] \
@@ -1448,26 +1504,24 @@ class DataObject:
                                max([slicing_coord.start, slicing_coord_stop])]
                 if ((range_slice[0] > range_coord[1]) or
                     (range_slice[1] < range_coord[0])):
+                    raise ValueError("No data in slicing range.")
+                # Checking whether the step of regular_slice is nearly the integer multiple of
+                # the coordinate step size
+                n_step = int((min([range_slice[1], range_coord[1]])
+                          - max([range_slice[0], range_coord[0]]))  \
+                         / abs(regular_slice.step))
+                step_diff = (abs(regular_slice.step) / abs(slicing_coord.step[0]))  \
+                            - round(abs(regular_slice.step) / abs(slicing_coord.step[0]))
+                if (abs(step_diff) * n_step > slicing_coord.step[0] / 2):
                     del regular_slice
-                else:
-                    # Checking whether the step of regular_slice is nearly the integer multiple of
-                    # the coordinate step size
-                    n_step = int((min([range_slice[1], range_coord[1]])
-                              - max([range_slice[0], range_coord[0]]))  \
-                             / abs(regular_slice.step))
-                    step_diff = (abs(regular_slice.step) / abs(slicing_coord.step[0]))  \
-                                - round(abs(regular_slice.step) / abs(slicing_coord.step[0]))
-                    if (abs(step_diff) * n_step > slicing_coord.step[0] / 2):
-                        del regular_slice
-            except NameError:
-                pass
+                    regular_slice_exists = False        
+                
 
             # At this point if we have a regular_slice object than it is possible to use slicing
             # in the data array. Otherwise we will create a numpy array for indexing
 
-            try:
+            if (regular_slice_exists):
                 # Limiting regular slice within the data range
-                regular_slice
                 if (regular_slice.step > 0):
                     if (regular_slice.start < range_coord[0]):
                         regular_slice = slice((int((range_coord[0] - regular_slice.start)  \
@@ -1508,7 +1562,7 @@ class DataObject:
                     step_index = int(round(regular_slice.step / abs(slicing_coord.step[0])))
                     stop_index = (regular_slice.stop - range_coord[0]) / abs(slicing_coord.step[0])
                     return slice(start_index, stop_index, step_index)       
-            except NameError:
+            else:
                 # slice object could not be created for data array
                 # Creating flattened coordinate data array
                 index = [0]*len(data_shape)
@@ -1556,14 +1610,14 @@ class DataObject:
                     elif ((type(slicing) is DataObject)
                           and (slicing.data_unit.name != slicing_coord.unit.name)):
                         coord_obj = slicing.get_coordinate_object(slicing_coord.unit.name)
-                        index = [0]*len(data_shape)
+                        index = [0]*len(slicing.shape)
                         for d in coord_obj.dimension_list:
-                            index[d] = ...
-                        slicing_arr = coord_obj.data(data_shape,index).flatten()
+                            index[d] = ...    
+                        slicing_arr = coord_obj.data(slicing.shape,index)[0].flatten()
 
                     # Creating an ind_coord array with the indices into the data array
                     # This might be a float value as interpolation might need a non-integer index
-                    if (type(slicing_arr[0]) is np.str_):
+                    if (type(slicing_arr) is np.str_):
                         if (_options['Slice type'] == 'Interpolation'):
                             raise ValueError("Cannot do interpolation with string values.")
                         # For strings requiring exact match but wildcards are allowed
@@ -1665,6 +1719,7 @@ class DataObject:
 
         d_slice = copy.deepcopy(self)
 
+
         if (type(slicing) is dict):
             # Checking whether these coordinates are present
             slicing_coords = []
@@ -1726,9 +1781,9 @@ class DataObject:
                     try:
                         # Determine slicing index in the flattened coordinate dimensions
                         ind_slice_coord = simple_slice_index(slicing_description[i_sc],
-                                                             slicing_coords[i_sc],
-                                                             d_slice.shape,
-                                                             _options)
+                                                                               slicing_coords[i_sc],
+                                                                               d_slice.shape,
+                                                                               _options)
                     except ValueError as e:
                         raise e
                     # Flatten the data array along the coordinate dimensions
@@ -1766,51 +1821,58 @@ class DataObject:
                                                       ind_slice_coord.step,
                                                       ind_slice_coord.stop + 1
                                                       )
-                            if (ind_slice_coord_2.stop > d_flat.size):
-                                ind_slice_coord_1 = slice(ind_slice_coord_1.start, 
-                                                          ind_slice_coord_1.step, 
-                                                          ind_slice_coord_1.stop - 1
-                                                          )
-                                ind_slice_coord_2 = slice(ind_slice_coord_2.start, 
-                                                          ind_slice_coord_2.step, 
-                                                          ind_slice_coord_2.stop - 1
-                                                          )                                
+#                            if (ind_slice_coord_2.stop > d_flat.size):
+#                                ind_slice_coord_1 = slice(ind_slice_coord_1.start, 
+#                                                          ind_slice_coord_1.step, 
+#                                                          ind_slice_coord_1.stop - 1
+#                                                          )
+#                                ind_slice_coord_2 = slice(ind_slice_coord_2.start, 
+#                                                          ind_slice_coord_2.step, 
+#                                                          ind_slice_coord_2.stop - 1
+#                                                          )        
                         else:
                             # ind_slice_coord is numpy array
                             ind_slice_coord_1 = np.trunc(ind_slice_coord).astype(np.int32)
                             ind_slice_coord_2 = ind_slice_coord_1 + 1
-                            ind = np.nonzero(ind_slice_coord_2 < d_flat.size)[0]
-                            if (ind.size < ind_slice_coord_2.size):
-                                ind_slice_coord_1 = ind_slice_coord_1[ind]
-                                ind_slice_coord_2 = ind_slice_coord_2[ind]
+                            # Checking if the index is above the limit. This can happen at the
+                            ind = np.nonzero(ind_slice_coord_2 >= d_flat.size)[0]
+                            if (ind.size != 0):
+                                ind_slice_coord_2[-1] = ind_slice_coord_2[-2] 
                         # Insert the lower slicing indices into the flattened dimension and get the two base points
                         # for interpolation
                         ind_slice_1 = copy.deepcopy(ind_slice)
                         ind_slice_2 = copy.deepcopy(ind_slice)
                         ind_slice_1[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_1
-                        d1 = copy.deepcopy(d_flat[tuple(ind_slice_1)])
+                        d1 = d_flat[tuple(ind_slice_1)]
                         ind_slice_2[slicing_coords[i_sc].dimension_list[0]] = ind_slice_coord_2
-                        d2 = copy.deepcopy(d_flat[tuple(ind_slice_2)])
+                        d2 = d_flat[tuple(ind_slice_2)]
+                        if (d2.shape[slicing_coords[i_sc].dimension_list[0]] < d1.shape[slicing_coords[i_sc].dimension_list[0]]):
+                            # This can happen only if the last point is on the last index 
+                           d2_last_ind = ind_slice_2[slicing_coords[i_sc].dimension_list[0]] = -1
+                           d2_beforelast_ind = ind_slice_2[slicing_coords[i_sc].dimension_list[0]] = -2
+                           d2[d2_last_ind] = d2[d2_beforelast_ind] 
                         # Reshaping ind_slice_coord_1 and ind_slice_coord to an array with 1 elements in all
                         # dimensions except the coordinate dimendsion. This will broadcast with d2 and d2.
-                        interplol_weight_shape = [1] * len(d_flat.shape)
-                        interplol_weight_shape[slicing_coords[i_sc].dimension_list[0]] \
+                        interpol_weight_shape = [1] * len(d_flat.shape)
+                        interpol_weight_shape[slicing_coords[i_sc].dimension_list[0]] \
                                                                  = d1.shape[slicing_coords[i_sc].dimension_list[0]]
-                        ind_slice_intepr_1 = ind_slice_1.reshape(tuple(interplol_weight_shape))  
-                        ind_slice_interp = ind_slice.reshape(tuple(interplol_weight_shape))                                        
+                        ind_slice_interp_1 = ind_slice_coord_1.reshape(tuple(interpol_weight_shape))  
+                        ind_slice_interp = ind_slice_coord.reshape(tuple(interpol_weight_shape))                                        
                         d_slice.data = (d2 - d1) * (ind_slice_interp - ind_slice_interp_1) + d1
                         if (d_slice.error is not None):
                             if (type(d_slice.error) is list):
-                                d_err_flat_1_1 = copy.deepcopy(d_err_flat_1[tuple(ind_slice_1)])
-                                d_err_flat_1_2 = copy.deepcopy(d_err_flat_1[tuple(ind_slice_2)])
+                                d_err_flat_1_1 = d_err_flat_1[tuple(ind_slice_1)]
+                                d_err_flat_1_2 = d_err_flat_1[tuple(ind_slice_2)]
                                 d_err_flat_1 = (d_err_flat_1_2 - d_err_flat_1_1) * (ind_slice_interp - ind_slice_interp_1) + d_err_flat_1_1
-                                d_err_flat_2_1 = copy.deepcopy(d_err_flat_2[tuple(ind_slice_1)])
-                                d_err_flat_2_2 = copy.deepcopy(d_err_flat_2[tuple(ind_slice_2)])
+                                d_err_flat_2_1 = d_err_flat_2[tuple(ind_slice_1)]
+                                d_err_flat_2_2 = d_err_flat_2[tuple(ind_slice_2)]
                                 d_err_flat_2 = (d_err_flat_2_2 - d_err_flat_2_1) * (ind_slice_interp - ind_slice_interp_1) + d_err_flat_2_1
                             else:
-                                d_err_1 = copy.deepcopy(d_err[tuple(ind_slice_1)])
-                                d_err_2 = copy.deepcopy(d_err[tuple(ind_slice_2)])
+                                d_err_1 = d_err[tuple(ind_slice_1)]
+                                d_err_2 = d_err[tuple(ind_slice_2)]
                                 d_err = (d_err_2 - d_err_1) * (ind_slice_interp - ind_slice_interp_1) + d_err_1
+                    else:
+                        raise ValueError("Internal error: cannot handle interpolation method '{:s}'".format(_options['Interpolation']))
                     original_shape = d_slice.shape
                     # If the sliced data contains only 1 element removing this dimension
                     if (d_slice.data.shape[slicing_coords[i_sc].dimension_list[0]] == 1):
@@ -1833,13 +1895,40 @@ class DataObject:
                             d_slice.error = [d_err_flat_1, d_error_flat_2]
                         else:
                             d_slice.error  = np.squeeze(d_err)
+                            
+                    # Determining whether the slicing description results in equidistant coordinate in the 
+                    # slicing coordinate. Slice_coord_step will contain the step size or None
+                    # if the slicing is non-equidistant
+                    if ((type(slicing_description[i_sc]) is slice) or 
+                        (type(slicing_description[i_sc]) is range)
+                        ):
+                       slicing_equidistant = True
+                    elif ((type(slicing_description[i_sc]) is DataObject) and \
+                          (slicing_description[i_sc].data_unit.name != slicing_coord_names[i_sc])
+                          ):
+                        coord = slicing_description[i_sc].get_coordinate_object(slicing_coord_names[i_sc])
+                        if ((len(coord.dimension_list) == 1) and coord.mode.equidistant):
+                            slicing_equidistant = True
+                        else:
+                            slicing_equidistant = False       
+                    elif ((type(slicing_description[i_sc]) is Intervals) and
+                          (slicing_description[i_sc].interval_number == 1) and
+                          (len(slicing_coords[i_sc].dimension_list) == 1) and
+                          slicing_coords[i_sc].mode.equidistant
+                          ):
+                        slicing_equidistant = True
+                    else:
+                        slicing_equidistant = False
 
                     # Doing changes to all coordinates
                     d_slice.__check_coords_after_simple_slice(sliced_dimensions, 
                                                               sliced_removed, 
                                                               ind_slice_coord,
                                                               original_shape, 
-                                                              dimension_mapping)
+                                                              dimension_mapping,
+                                                              slicing_equidistant,
+                                                              slicing_coords[i_sc],
+                                                              _options)
 
                     slice_processed[i_sc] = True
                 else:
@@ -2115,12 +2204,12 @@ class DataObject:
             summing_coord_names = []
             summing_description = []
             for sc in summing.keys():
+                summing_coord_names.append(sc)
                 try:
-                    summing_coord_names.append(sc)
                     summing_coords.append(d_slice.get_coordinate_object(sc))
-                    summing_description.append(summing[sc])
                 except ValueError:
                     raise ValueError("Summing coordinate "+sc+" is not present in data object.")
+                summing_description.append(summing[sc])
 
             for i_sc in range(len(summing_coord_names)):
                 original_shape = d_slice.shape
@@ -2702,7 +2791,7 @@ class DataObject:
                 try:
                     index = [0]*len(d.shape)
                     index[sel_coord_obj.dimension_list[0]] = slice(int_start_ind[i_int],int_end_ind[i_int])
-                    coord_data = coord_obj.data(data_shape=d.shape, index=index)
+                    coord_data = coord_obj.data(data_shape=d.shape, index=index)[0]
                 except Exception as e:
                     raise e
                 _trend_removal(d.data[tuple(ind)],
