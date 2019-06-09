@@ -3024,7 +3024,46 @@ class DataObject:
         except Exception:
             raise e
 
+    def __add__(self, d1):
+        """ Addition for DataObject
+        """
+        if (type(d1) is DataObject):
+            if (self.data_unit.unit != d1.data_unit.unit):
+                raise ValueError("Cannot add data objects with different units.")
+            if (self.shape != d1.shape):
+                raise ValueError("Cannot add data objects with different shapes.")
+            if (self.error is not None):
+                err = self.error
+            else:
+                err = None
+            if (d1.error is not None):
+                if (err is None):
+                    err = d1.error
+                else:
+                    err = np.sqrt(err ** 2 + d1.error ** 2)
+            d_out = DataObject(data_array=self.data+d1.data,
+                               error=err,
+                               data_unit=self.data_unit)
+            d_out.coordinates = []
+            for coord in self.coordinates:
+                try:
+                    c1 = d1.get_coordinate_object(coord.unit.name)
+                    if (coord != c1):
+                        continue
+                    d_out.coordinates.append(copy.deepcopy(coord))
+                except ValueError:
+                    pass
+            if (len(d_out.coordinates) == 0):
+                d_out.coordinates = None
+            if (self.exp_id == d1.exp_id):
+                d_out.exp_id = self.exp_id
+            if (self.data_source == d1.data_source):
+                d_out.data_source = self.data_source
+            return d1
 
+        
+########## END of class DataObject            
+            
 class FlapStorage:
     """ This class is for data and data source information storage
     """
@@ -3114,123 +3153,12 @@ class FlapStorage:
             _name = name
         names, exps = find_data_objects(_name, exp_id=exp_id)
         if (len(names) == 0):
-            return
+            return []
         
+        d_list = []
         for i_names in range(len(names)):
-            d = get_data_object(names[i_names], exp_id=exps[i_names])
-            print('-----------------------------')
-            if (d.data_title is None):
-                dtit = ""
-            else:
-                dtit = d.data_title
-            s = names[i_names] + "(exp_id:" + exps[i_names] + ') data_title:"' + dtit + '"'
-            s += " shape:["
-            if (d.shape is None):
-                data_shape = []
-            else:
-                data_shape = d.shape
-            for i in range(len(data_shape)):
-                s += str(data_shape[i])
-                if (i != len(data_shape) - 1):
-                    s += ","
-            s += "]"
-            if (d.data is None):
-                s += " [no data]"
-            if (d.error is None):
-                s += "[no error]"
-            elif (type(d.error) is list):
-                s += "[error asymm.]"
-            else:
-                s += "[error symm.]"
-            if (d.data_unit is not None):
-                if (d.data_unit.name is not None):
-                    data_name = d.data_unit.name
-                else:
-                    data_name = ""
-                if (d.data_unit.unit is not None):
-                    data_unit = d.data_unit.unit
-                else:
-                    data_unit = ""
-            s += '\n  Data name:"'+data_name+'", unit:"'+data_unit+'"'
-            s += "\n  Coords:\n"
-            c_names = d.coordinate_names()
-            for i in range(len(c_names)):
-                c = d.coordinates[i]
-                s += "    '" + c.unit.name + "'[" + c.unit.unit + ']'
-                s += "(Dims:"
-                if (len(c.dimension_list) is not 0):
-                    try:
-                        c.dimension_list.index(None)
-                        print("None in dim. list!")
-                    except:
-                        for i1 in range(len(c.dimension_list)):
-                            s += str(c.dimension_list[i1])
-                            if (i1 != len(c.dimension_list) - 1):
-                                s += ","
-                if (not c.mode.equidistant):
-                    s = s + ", Shape:["
-                    if (type(c.shape) is not list):
-                        shape = [c.shape]
-                    else:
-                        shape = c.shape
-                    if (len(shape) is not 0):
-                        for i1 in range(len(shape)):
-                            s += str(shape[i1])
-                            if (i1 != len(shape) - 1):
-                                s += ","
-                s += "]) ["
-                if (c.mode.equidistant):
-                    s += '<Equ.>'
-                if (c.mode.range_symmetric):
-                    s += '<R. symm.>'
-                s += '] '
-                if (c.value_ranges is not None):
-                    s +='[Ranges set] '
-                if (c.mode.equidistant):
-                    s += 'Start: {:10.3E}, Steps: '.format(c.start)
-                    for i_step in range(len(c.step)):
-                       s += '{:10.3E}'.format(c.step[i_step])
-                       if (i_step < len(c.step)-1):
-                           s +=", "
-                else:
-                    if (len(c.dimension_list)) is not 0:
-                        ind = [0] * len(data_shape)
-                        for dim in c.dimension_list:
-                            ind[dim] = ...
-                    else:
-                        ind = [0]*len(data_shape)
-                    c_data, c_range_l, c_range_h = c.data(data_shape=data_shape,index=ind)
-                    dt = c.dtype()
-                    try:
-                        no_max = False
-                        "{:10.3E}".format(np.min(c_data))
-                    except (TypeError, ValueError):
-                        no_max = True
-                    if ((c_data.size <= 10) or no_max):
-                        s += 'Val:'
-                        n = c_data.size
-                        if (n > 10):
-                            n = 10
-                        for j in range(n):
-                            if (dt is str):
-                                if (np.isscalar(c_data)):
-                                    s += c_data
-                                else:
-                                    s += c_data.flatten()[j]
-                            elif ((dt is Decimal) or (dt is float)):
-                                s += "{:10.3E}".format(c_data.flatten()[j])
-                            else:
-                                s += str(c_data.flatten()[j])
-                            if (j != c_data.size - 1):
-                                s += ", "
-                        if (c_data.size > 10):
-                            s += "..."
-                    else:
-                        s += 'Val. range: ' + "{:10.3E}".format(np.min(c_data)) + ' - '\
-                             + "{:10.3E}".format(np.max(c_data))
-                if (i != len(d.coordinates) - 1):
-                    s += "\n"
-            print(s)
+            d_list.append(get_data_object(names[i_names], exp_id=exps[i_names]))
+        return d_list, names, exps
 
 
 # This is the instance of the storage class
@@ -3336,11 +3264,154 @@ def get_data_object(object_name,exp_id='*'):
     return d
 
 
-def list_data_objects(name=None, exp_id='*'):
-    """ Return the list of data objects in flap storage.
-        The returned data is a key list.
+def list_data_objects(name=None, exp_id='*', screen=True):
+    """ Prepare a printout of data objects is flap storage or the listed data objects.
+        name: name (with wildcards) or list of data objects
+        exp_id: exp id for name
+        screen: (bool) If True print to screen
+        
+        Return value: The text
     """
-    return flap_storage.list_data_objects(name=name, exp_id=exp_id)
+    if ((type(name) is list) or (type(name) is DataObject)):
+        if (type(name) is not list):
+            d_list = [name]
+        else:    
+            d_list = name
+        names = []
+        for i,d in enumerate(d_list):
+            if (type(d) is not DataObject):
+                raise TypeError("List of flap.DataObjects is expected.")
+            names.append("<{:d}>".format(i+1))
+    else:
+        d_list, names, exps = flap_storage.list_data_objects(name=name, exp_id=exp_id)
+
+    s = ''
+    for i_names,d in enumerate(d_list):
+        s += '\n-----------------------------\n'
+        if (d.data_title is None):
+            dtit = ""
+        else:
+            dtit = d.data_title
+        if (d.exp_id is None):
+            expid = ""
+        else:
+            expid= d.exp_id
+        if (d.data_source is None):
+            ds = ""
+        else:
+            ds= d.data_source
+
+        s += names[i_names] + '(data_source:"'+ds+'" exp_id:"' + expid + '") data_title:"' + dtit + '"'
+        s += " shape:["
+        if (d.shape is None):
+            data_shape = []
+        else:
+            data_shape = d.shape
+        for i in range(len(data_shape)):
+            s += str(data_shape[i])
+            if (i != len(data_shape) - 1):
+                s += ","
+        s += "]"
+        if (d.data is None):
+            s += " [no data]"
+        if (d.error is None):
+            s += "[no error]"
+        elif (type(d.error) is list):
+            s += "[error asymm.]"
+        else:
+            s += "[error symm.]"
+        if (d.data_unit is not None):
+            if (d.data_unit.name is not None):
+                data_name = d.data_unit.name
+            else:
+                data_name = ""
+            if (d.data_unit.unit is not None):
+                data_unit = d.data_unit.unit
+            else:
+                data_unit = ""
+        s += '\n  Data name:"'+data_name+'", unit:"'+data_unit+'"'
+        s += "\n  Coords:\n"
+        c_names = d.coordinate_names()
+        for i in range(len(c_names)):
+            c = d.coordinates[i]
+            s += "    '" + c.unit.name + "'[" + c.unit.unit + ']'
+            s += "(Dims:"
+            if (len(c.dimension_list) is not 0):
+                try:
+                    c.dimension_list.index(None)
+                    print("None in dim. list!")
+                except:
+                    for i1 in range(len(c.dimension_list)):
+                        s += str(c.dimension_list[i1])
+                        if (i1 != len(c.dimension_list) - 1):
+                            s += ","
+            if (not c.mode.equidistant):
+                s = s + ", Shape:["
+                if (type(c.shape) is not list):
+                    shape = [c.shape]
+                else:
+                    shape = c.shape
+                if (len(shape) is not 0):
+                    for i1 in range(len(shape)):
+                        s += str(shape[i1])
+                        if (i1 != len(shape) - 1):
+                            s += ","
+            s += "]) ["
+            if (c.mode.equidistant):
+                s += '<Equ.>'
+            if (c.mode.range_symmetric):
+                s += '<R. symm.>'
+            s += '] '
+            if (c.value_ranges is not None):
+                s +='[Ranges set] '
+            if (c.mode.equidistant):
+                s += 'Start: {:10.3E}, Steps: '.format(c.start)
+                for i_step in range(len(c.step)):
+                   s += '{:10.3E}'.format(c.step[i_step])
+                   if (i_step < len(c.step)-1):
+                       s +=", "
+            else:
+                if (len(c.dimension_list)) is not 0:
+                    ind = [0] * len(data_shape)
+                    for dim in c.dimension_list:
+                        ind[dim] = ...
+                else:
+                    ind = [0]*len(data_shape)
+                c_data, c_range_l, c_range_h = c.data(data_shape=data_shape,index=ind)
+                dt = c.dtype()
+                try:
+                    no_max = False
+                    "{:10.3E}".format(np.min(c_data))
+                except (TypeError, ValueError):
+                    no_max = True
+                if ((c_data.size <= 10) or no_max):
+                    s += 'Val:'
+                    n = c_data.size
+                    if (n > 10):
+                        n = 10
+                    for j in range(n):
+                        if (dt is str):
+                            if (np.isscalar(c_data)):
+                                s += c_data
+                            else:
+                                s += c_data.flatten()[j]
+                        elif ((dt is Decimal) or (dt is float)):
+                            s += "{:10.3E}".format(c_data.flatten()[j])
+                        else:
+                            s += str(c_data.flatten()[j])
+                        if (j != c_data.size - 1):
+                            s += ", "
+                    if (c_data.size > 10):
+                        s += "..."
+                else:
+                    s += 'Val. range: ' + "{:10.3E}".format(np.min(c_data)) + ' - '\
+                         + "{:10.3E}".format(np.max(c_data))
+            if (i != len(d.coordinates) - 1):
+                s += "\n"
+    if (screen):
+        print(s)
+    return s
+
 
 
 def get_data(data_source,

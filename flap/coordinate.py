@@ -400,6 +400,50 @@ class Coordinate:
         else:
             self.__shape = shape
 
+    def __ne__(self, c1):
+        """ compares two coordinates assuming same data shape
+        """
+        return not (self == c1)
+            
+    def __eq__(self, c1):
+        """ compares two coordinates assuming same data shape
+        """
+        if (self.unit.name != c1.unit.name):
+            return False
+        if (self.unit.unit != c1.unit.unit):
+            return False
+        if (self.dimension_list != c1.dimension_list):
+            return False
+        if (self.mode.equidistant != c1.mode.equidistant):
+            return False
+        if (self.mode.equidistant and c1.mode.equidistant):
+            if ((self.start != c1.start) or (self.step != c1.step)):
+                return False
+            if (self.value_ranges != c1.value_ranges):
+                return False
+        else:
+            if (self.shape != c1.shape):
+                return False
+            if (self.values.shape != c1.values.shape):
+                return False
+            if (np.nonzero(self.values != c1.values)[0].size != 0):
+                return False
+            if ((self.value_ranges is not None) and (c1.value_ranges is None) or
+                (self.value_ranges is None) and (c1.value_ranges is not None)):
+                return False
+            if (self.value_ranges is not None):
+                if (self.mode.range_symmetric != c1.mode.range_symmetric):
+                    return False
+                if (self.mode.range_symmetric):
+                    if (np.nonzero(self.value_ranges.flatten() != c1.value_ranges.flatten())[0].size != 0):
+                        return False
+                else:
+                    if (np.nonzero(self.value_ranges[0].flatten() != c1.value_ranges[0].flatten())[0].size != 0):
+                        return False
+                    if (np.nonzero(self.value_ranges[1].flatten() != c1.value_ranges[1].flatten())[0].size != 0):
+                        return False
+        return True
+                    
     def non_interpol(self,data_shape):
         """ Return True if the shape of the coordinate description
             is the same as the sub-data-array for which it applies and self.value_index is None.

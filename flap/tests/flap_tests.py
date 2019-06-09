@@ -137,7 +137,17 @@ def test_coordinates():
     print("**** Adding Device x coordinate")
     flap.add_coordinate('TESTDATA',exp_id='*',coordinates=['Device x','Device z', 'Device y'])
     print("**** Storage contents")
-    flap.list_data_objects()    
+    flap.list_data_objects()  
+    
+def test_arithmetic():
+    d = flap.get_data('TESTDATA',name='*',
+                    options={'Scaling':'Volt'},
+                    object_name='TESTDATA',
+                    coordinates={'Time':[0,0.001]})
+    d1 = copy.deepcopy(d)
+    d1.coordinates[1].unit.name='ssd'
+    flap.list_data_objects([d,d1,d+d])
+    
 
 def test_plot():
     print()
@@ -558,6 +568,9 @@ if (False):
 if (False):
     test_coordinates()
     input("Press Enter to continue...")
+if (True):    
+    test_arithmetic()
+    input("Press Enter to continue...")
 if (False):
     test_plot()
     input("Press Enter to continue...")
@@ -570,7 +583,7 @@ if (False):
 if (False):
     test_simple_slice()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_resample()
     input("Press Enter to continue...")    
 if (False):
