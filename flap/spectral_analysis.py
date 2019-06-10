@@ -1553,7 +1553,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                 if (ref is not None):
                     autocorr_mx_ref = np.sum(proc_array_ref ** 2, tuple(correlation_dimensions_ref))
                 else:
-                    autocorr_ms_ref = autocorr_mx
+                    autocorr_mx_ref = autocorr_mx
                 extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
                 corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
                 extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx_ref.shape))
