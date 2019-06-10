@@ -619,7 +619,7 @@ if (False):
 if (False):
     test_coordinates()
     input("Press Enter to continue...")
-if (True):    
+if (False):    
     test_arithmetic()
     input("Press Enter to continue...")
 if (False):
@@ -651,7 +651,7 @@ if (False):
     input("Press Enter to continue...")
 if (False):
     test_cpsd()
-if (False):
+if (True):
     test_ccf()    
 
 

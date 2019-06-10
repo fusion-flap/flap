@@ -860,7 +860,8 @@ class DataObject:
                            data_high = flatten_multidim(data_high, flattened_in_unified)
                     # Creating a list of slices for all dimension, so as all elements are copied
                     ind_slice = [slice(0,x) for x in new_coord_data.shape]
-                    if ((_options['Interpolation'] == 'Closest value') or (type(ind_slice_coord) is slice)):
+                    if ((_options['Interpolation'] == 'Closest value') or (type(ind_slice_coord) is slice)
+                        or (check_coord.dtype() == object) or (check_coord.dtype() == str)):
                         # In the flattened dimensions inserting the slicing index array or slice
                         if (type(ind_slice_coord) is slice):
                             ind_slice[flattened_in_unified[0]] = ind_slice_coords
@@ -1623,7 +1624,7 @@ class DataObject:
                             diff = (coord_data[1:] - coord_data[:-1])
                             if (np.nonzero(diff[0] * diff < 0)[0].size == 0):
                                 # If monotonous interpolating the coordinate-index function
-                                data_index = np.arange(coord_data.shape,dtype=float)
+                                data_index = np.arange(coord_data.shape[0],dtype=float)
                                 ind_coord = np.interp(slicing_arr,coord_data,data_index)
                             else:
                                 # Otherwise looking for closest match for each element
@@ -1637,6 +1638,7 @@ class DataObject:
         def check_slicing_type(slicing_description, slicing_coord):
             """ Check if the slicing description is compatible with the coordinate
                 Raise TypeError is not.
+                Returns the slicing type 'Numeric' or 'String'
             """
 
             if ((type(slicing_description) is slice)
@@ -1682,7 +1684,7 @@ class DataObject:
             if (coord_type != slicing_type):
                     raise TypeError("Incompatible slicing and coordinate values.")
 
-            return
+            return slicing_type
 
 
         # **************** slice starts here ***********************
@@ -1741,13 +1743,21 @@ class DataObject:
             # therefore we need to keep track which one was processed.
             slice_processed = [False] * len(slicing_coord_names)
 
+            # Making a copy of options. Interpolation will be set to closest value if string slice is used
+            save_options = copy.deepcopy(_options)
+
             for i_sc in range(len(slicing_coord_names)):
+                _options = copy.deepcopy(save_options)
+                
                 if (slice_processed[i_sc]):
                     continue
                 try:
-                    check_slicing_type(slicing_description[i_sc],slicing_coords[i_sc])
+                    st = check_slicing_type(slicing_description[i_sc],slicing_coords[i_sc])
                 except TypeError as e:
                     raise e
+                if (st == 'String'):
+                    _options['Interpolation'] = 'Closest value'
+                    
 
                 if (not range_slice[i_sc]):
                     # This is a simple slice
@@ -1759,9 +1769,9 @@ class DataObject:
                     try:
                         # Determine slicing index in the flattened coordinate dimensions
                         ind_slice_coord = simple_slice_index(slicing_description[i_sc],
-                                                                               slicing_coords[i_sc],
-                                                                               d_slice.shape,
-                                                                               _options)
+                                                             slicing_coords[i_sc],
+                                                             d_slice.shape,
+                                                             _options)
                     except ValueError as e:
                         raise e
                     # Flatten the data array along the coordinate dimensions
@@ -3312,7 +3322,7 @@ class FlapStorage:
             _name = name
         names, exps = find_data_objects(_name, exp_id=exp_id)
         if (len(names) == 0):
-            return []
+            return [], [], []
         
         d_list = []
         for i_names in range(len(names)):
@@ -3423,7 +3433,7 @@ def get_data_object(object_name,exp_id='*'):
     return d
 
 
-def list_data_objects(name=None, exp_id='*', screen=True):
+def list_data_objects(name='*', exp_id='*', screen=True):
     """ Prepare a printout of data objects is flap storage or the listed data objects.
         name: name (with wildcards) or list of data objects
         exp_id: exp id for name
