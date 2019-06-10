@@ -450,6 +450,8 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
     if (calc_error):
         out_err = np.sqrt(np.clip(out_data_square / n_proc_int - out_data ** 2,
                                   0,None)) / math.sqrt(n_proc_int)
+    else:
+        out_err = None
     # If there are frequency bins without data setting them to np.NaN
     if (ind_nonzero is not None):
         out_data[tuple(ind_zero)] = np.NaN
