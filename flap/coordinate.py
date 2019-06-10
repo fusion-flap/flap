@@ -720,8 +720,8 @@ class Coordinate:
                         value_mx_low = value_mx - _value_ranges[value_index_arrays]
                         value_mx_high = value_mx + _value_ranges[value_index_arrays]
                     else:
-                        value_mx_low = value_mx - _value_ranges['low'][value_index_arrays]
-                        value_mx_high = value_mx - _value_ranges['high'][value_index_arrays]
+                        value_mx_low = value_mx - _value_ranges[0][value_index_arrays]
+                        value_mx_high = value_mx + _value_ranges[1][value_index_arrays]
                 else:
                     value_mx_low = None
                     value_mx_high = None

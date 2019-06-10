@@ -854,10 +854,10 @@ class DataObject:
                     # Doing the same with coordinate ranges
                     if (data_low is not None):
                         data_low = np.reshape(data_low,tuple(unified_shape))
-                        data_low = flatten_multidim(data_low, flattened_in_unified)
+                        data_low, xxx = flatten_multidim(data_low, flattened_in_unified)
                         if (not check_coord.mode.range_symmetric):
                            data_high = np.reshape(data_high,tuple(unified_shape))
-                           data_high = flatten_multidim(data_high, flattened_in_unified)
+                           data_high, xxx = flatten_multidim(data_high, flattened_in_unified)
                     # Creating a list of slices for all dimension, so as all elements are copied
                     ind_slice = [slice(0,x) for x in new_coord_data.shape]
                     if ((_options['Interpolation'] == 'Closest value') or (type(ind_slice_coord) is slice)
