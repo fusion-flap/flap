@@ -1401,18 +1401,32 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         pad_length.append(max([abs(shift_range[-1][0]), abs(shift_range[-1][1])]))
         corr_point_n_nat[i] += pad_length[i]
         
+    # Check if we have lag 0 data in  all dimensions
+    lag0_present = True
+    for i in range(len(correlation_dimensions)):
+        if ((range_sampout[i][0] > 0) or (range_sampout[i][1] < 0)):
+            lag0_present = False
+    
+    # This flag indicates whether we need to calculate ACFs separately
+    calc_acf = not lag0_present or (ref is not None) and _options['Normalize']
+                
     # Determining the output shape. First the dimensions of d without the common dimensions, 
     # then the common dimensions, then the reference with the calculation dimensions removed
     out_shape = []
     correlation_dimensions_out = []
+    out_shape_acf = []
+    out_shape_acf_ref = []
     for i in range(len(d.data.shape)):
         try:
             correlation_dimensions.index(i)
         except ValueError:
             pass
             out_shape.append(d.data.shape[i])
+            out_shape_acf.append(d.data.shape[i])
     for i in range(len(correlation_dimensions)):
         out_shape.append(n_corr[i])
+        out_shape_acf.append(n_corr[i])
+        out_shape_acf_ref.append(n_corr[i])
         correlation_dimensions_out.append(len(out_shape)-1)
     for i in range(len(_ref.data.shape)):
         try:
@@ -1420,6 +1434,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         except ValueError:
             pass
             out_shape.append(_ref.data.shape[i])
+            out_shape_acf_ref.append(_ref.data.shape[i])
 
     # Array shapes for doing FFT
     proc_shape = list(d.data.shape)
@@ -1441,11 +1456,31 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     ind_in2 = copy.deepcopy(ind_in1)
     ind_out1 = copy.deepcopy(ind_in1)
     ind_out2 = copy.deepcopy(ind_in1)
+    if (calc_acf):
+        # We need to calculate APSDs separately
+        ind_in1_acf = [slice(0,d) for d in out_shape_acf]
+        ind_in2_acf = copy.deepcopy(ind_in1_acf)
+        ind_out1_acf = copy.deepcopy(ind_in1_acf)
+        ind_out2_acf = copy.deepcopy(ind_in1_acf)
+        if (ref is not None):
+            ind_in1_acf_ref = [slice(0,d) for d in out_shape_acf_ref]
+            ind_in2_acf_ref = copy.deepcopy(ind_in1_acf_ref)
+            ind_out1_acf_ref = copy.deepcopy(ind_in1_acf_ref)
+            ind_out2_acf_ref = copy.deepcopy(ind_in1_acf_ref)
+            
     # zero_ind is the index where the 0 time lag will be after rearranging the CCF to final form
     zero_ind = [0] * len(correlation_dimensions)
     # A slicing list which will cut out the needed part of the CCF
+    # The CCF will have first the remaining dimensions of d, then the correlation dimensions, 
+    # then the remaining dimensions of ref
     ind_slice = [slice(0,d) for d in out_shape]
-    ind_bin = [slice(0,dim) for dim in out_shape]
+    ind_bin = copy.deepcopy(ind_slice)
+    if (calc_acf):
+        ind_slice_acf = [slice(0,dim) for dim in out_shape_acf]
+        ind_bin_acf = copy.deepcopy(ind_slice_acf)
+        if (ref is not None):
+            ind_slice_acf_ref = [slice(0,dim) for dim in out_shape_acf_ref]
+            ind_bin_acf_ref = copy.deepcopy(ind_slice_acf_ref)
     for i,cd in enumerate(correlation_dimensions_out):
         nfft = corr_point_n_nat[i] + pad_length[i]
         ind_in1[cd] = slice(0,int(nfft / 2))
@@ -1455,9 +1490,26 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         ind_out2[cd] = slice(0, nfft - int(nfft / 2))
         ind_slice[cd] = slice(shift_range[i][0] + zero_ind[i], shift_range[i][1] + zero_ind[i]+1)
         ind_bin[cd] = np.arange(ind_slice[cd].stop - ind_slice[cd].start,dtype=np.int32) // corr_res_sample[i]
+        if (calc_acf):
+            ind_in1_acf[cd] = ind_in1[cd]
+            ind_out1_acf[cd] = ind_out1[cd]
+            ind_in2_acf[cd] = ind_in2[cd]
+            ind_out2_acf[cd] = ind_out2[cd]
+            ind_slice_acf[cd] = ind_slice[cd]
+            ind_bin_acf[cd]  = ind_bin[cd]
+            if (ref is not None):
+                ind_in1_acf_ref[i] = ind_in1[cd]
+                ind_out1_acf_ref[i] = ind_out1[cd]
+                ind_in2_acf_ref[i] = ind_in2[cd]
+                ind_out2_acf_ref[i] = ind_out2[cd]
+                ind_slice_acf_ref[i] = ind_slice[cd]
+                ind_bin_acf_ref[i]  = ind_bin[cd]
+                
+    # The processing array for each interval, data will be read here                
     proc_array = np.zeros(tuple(proc_shape),dtype=d.data.dtype)
     if (ref is not None):
         proc_array_ref = np.zeros(tuple(proc_shape_ref),dtype=_ref.data.dtype)
+    # The output array    
     if ((d.data.dtype.kind != 'c') and (_ref.data.dtype.kind != 'c')):
         out_dtype = float
     else:
@@ -1506,7 +1558,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         cps_corr_dims = np.arange(len(correlation_dimensions),dtype=int) + corr_dim_start 
         res = np.fft.ifftn(res,axes=cps_corr_dims)
         if (out_dtype is float):
-            res = np.real(res)
+            res = np.real(res)        
         corr = np.empty(res.shape,dtype=res.dtype)
         corr[tuple(ind_out1)] = res[tuple(ind_in1)]
         corr[tuple(ind_out2)] = res[tuple(ind_in2)]
@@ -1514,16 +1566,11 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         corr_binned = np.zeros(tuple(out_shape),dtype=res.dtype)
         np.add.at(corr_binned,tuple(ind_bin),corr_sliced)
         if (norm):
-            # Check if we have lag 0 data in  all dimensions
-            lag0_present = True
+            zero_ind_out = [0] * len(correlation_dimensions)
             for i in range(len(correlation_dimensions)):
-                if ((range_sampout[i][0] > 0) or (range_sampout[i][1] < 0)):
-                    lag0_present = False
-            if ((ref is None) and lag0_present):
+                zero_ind_out[i] = 0 - range_sampout[i][0]
+            if (not calc_acf):
                 # We already have the autocorrelations
-                zero_ind_out = [0] * len(correlation_dimensions)
-                for i in range(len(correlation_dimensions)):
-                    zero_ind_out[i] = 0 - range_sampout[i][0]
                 if (len(d.data.shape) == len(correlation_dimensions)):
                     # There is a single correlation function
                     corr_binned /= corr_binned[zero_ind_out[0]]
@@ -1548,16 +1595,41 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
                     corr_binned /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
             else:
-                # We do not have the autocorrelations
-                autocorr_mx = np.sum(proc_array ** 2, tuple(correlation_dimensions))
+                # We do not have the autocorrelations, calculating
+                res_acf = np.real(np.fft.ifftn(fft * np.conj(fft),axes=correlation_dimensions))
+                # we need to move the correlation axes to the end to be consistent with the CCF
+                res_acf, ax_map = move_axes_to_end(res_acf,correlation_dimensions)
+                corr_acf = np.empty(res_acf.shape,dtype=res.dtype)
+                corr_acf[tuple(ind_out1_acf)] = res_acf[tuple(ind_in1_acf)]
+                corr_acf[tuple(ind_out2_acf)] = res_acf[tuple(ind_in2_acf)]
+                corr_sliced_acf = corr_acf[tuple(ind_slice_acf)]
+                corr_binned_acf = np.zeros(tuple(out_shape_acf),dtype=res_acf.dtype)
+                np.add.at(corr_binned_acf,tuple(ind_bin_acf),corr_sliced_acf)
+                # We need to take the zero lag elements from each correlation dimension
+                corr_dimension_start = len(out_shape_acf)-len(correlation_dimensions)
+                for i in range(len(correlation_dimensions)):
+                    # Always the cor_dimension_start axis is taken as it is removed by take
+                    corr_binned_acf = np.take(corr_binned_acf,zero_ind_out[i],axis=corr_dimension_start)
                 if (ref is not None):
-                    autocorr_mx_ref = np.sum(proc_array_ref ** 2, tuple(correlation_dimensions_ref))
+                    res_acf_ref = np.real(np.fft.ifftn(fft_ref * np.conj(fft_ref),axes=correlation_dimensions_ref))
+                    # we need to move the correlation axes to the start to be consistent with the CCF
+                    res_acf_ref,ax_map_ref = move_axes_to_start(res_acf_ref,correlation_dimensions_ref)
+                    corr_acf_ref = np.empty(res_acf_ref.shape,dtype=res_acf.dtype)
+                    corr_acf_ref[tuple(ind_out1_acf_ref)] = res_acf_ref[tuple(ind_in1_acf_ref)]
+                    corr_acf_ref[tuple(ind_out2_acf_ref)] = res_acf_ref[tuple(ind_in2_acf_ref)]
+                    corr_sliced_acf_ref = corr_acf_ref[tuple(ind_slice_acf_ref)]
+                    corr_binned_acf_ref = np.zeros(tuple(out_shape_acf_ref),dtype=res_acf_ref.dtype)
+                    np.add.at(corr_binned_acf_ref,tuple(ind_bin_acf_ref),corr_sliced_acf_ref)
+                    # We need to take the zero lag elements from each correlation dimension
+                    for i in range(len(correlation_dimensions)):
+                        # Always the cor_dimension_start axis is taken as it is removed by take
+                        corr_binned_acf_ref = np.take(corr_binned_acf_ref,zero_ind_out[i],axis=0)
                 else:
-                    autocorr_mx_ref = autocorr_mx
-                extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
-                corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
-                extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx_ref.shape))
-                corr_binned /= np.sqrt(np.reshape(autocorr_mx_ref,tuple(extend_shape + list(autocorr_mx_ref.shape))))
+                    corr_binned_acf_ref = corr_binned_acf
+                extend_shape = [1] * (len(out_corr.shape) - len(corr_binned_acf.shape))
+                corr_binned /= np.sqrt(np.reshape(corr_binned_acf,tuple(list(corr_binned_acf.shape) + extend_shape)))
+                extend_shape = [1] * (len(out_corr.shape) - len(corr_binned_acf_ref.shape))
+                corr_binned /= np.sqrt(np.reshape(corr_binned_acf_ref,tuple(extend_shape + list(corr_binned_acf_ref.shape))))
         else:
             corr_binned /= all_points
         out_corr += corr_binned

@@ -602,14 +602,13 @@ def test_ccf():
     plt.figure()
     flap.plot('CCF',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
 
-    print('**** Calculating the 10x15x10x15 CCFs, each 5000 samples with ref')
+    print("**** Slicing TESTDATA_filt for row: 1-3, column:1-4")
+    flap.slice_data('TESTDATA_filt',slicing={'Row':[1,2,3],'Column':[1,2,3,4]},output_name='TESTDATA_filt_3x4')
+    print('**** Calculating CCFs, between original and sliced TESTDATAfilt')
     print('**** CCF START')
-    start = time.time()    
-    flap.ccf('TESTDATA_filt',ref='TESTDATA_filt',coordinate='Time',
+    flap.ccf('TESTDATA_filt',ref='TESTDATA_filt_3x4',coordinate='Time',
              options={'Trend':'Mean','Range':[-1e-4,1e-4],'Res':1e-5,'Norm':True},output_name='CCF_ref')
-    stop = time.time()
     print('**** CCF STOP')
-    print("**** Calculation time: {:6.3f} ms/signal".format(1000*(stop-start)/(10*15*10*15)))
     flap.list_data_objects()
     print("**** Plotting spatiotemporal correlation function at ref row, column 3,3, column 3")
     plt.figure()
@@ -622,46 +621,46 @@ flap.config.read(file_name=fn)
 
 # Running tests
 plt.close('all')
-if (False):
+if (True):
     test_storage()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_saveload()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_coordinates()
     input("Press Enter to continue...")
-if (False):    
+if (True):    
     test_arithmetic()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot_xy()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot_multi_xy()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_simple_slice()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_resample()
     input("Press Enter to continue...")    
-if (False):
+if (True):
     test_select_multislice()
     input("Press Enter to continue...")
-if (False): 
+if (True): 
     test_detrend()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_apsd()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_filter()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_cpsd()
 if (True):
     test_ccf()    

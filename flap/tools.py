@@ -207,7 +207,7 @@ def expand_matrix(mx,new_shape,dim_list):
             act_list += 1
         act_dim += 1
     return mx
-
+    
 def flatten_multidim(mx, dim_list):
     """ Flatten the dimensions in dim_list to dim_list[0]
         Returns the modified matrix and a mapping from the original to the new dimension list.
@@ -333,6 +333,36 @@ def multiply_along_axes(a1_orig, a2_orig, axes,keep_a1_dims=True):
     axis_number = a1_axes + a2_axes[len(axes[1]):]
     return r, axis_source, axis_number
 
+def move_axes_to_end(mx_orig,axes):
+    """ Moves the listed axes to the end.
+    """
+    mx = mx_orig
+    mx_axes = list(range(mx.ndim))
+    for i in range(len(axes)):
+        # Finding the axis
+        ind = mx_axes.index(axes[i])
+        # Move from to the end
+        mx = np.moveaxis(mx,ind,-1)
+        # Following this change in the axis list
+        del mx_axes[ind]
+        mx_axes.append(axes[i])
+    return mx, mx_axes
+    
+def move_axes_to_start(mx_orig,axes):
+    """ Moves the listed axes to the start axes.
+    """
+    mx = mx_orig
+    mx_axes = list(range(mx.ndim))
+    for i in range(len(axes)):
+        # Finding the axis
+        ind = mx_axes.index(axes[i])
+        # Move from to the end
+        mx = np.moveaxis(mx,ind,0)
+        # Following this change in the axis list
+        del mx_axes[ind]
+        mx_axes.insert(i,axes[i])
+    return mx, mx_axes
+    
 def find_str_match(value, options):
     """
     Given value string and a list of possibilities in the list of strings option
