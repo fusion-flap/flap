@@ -140,13 +140,64 @@ def test_coordinates():
     flap.list_data_objects()  
     
 def test_arithmetic():
+    print()
+    print("\n>>>>>>>>>>>>>>>>>>> Testing DataObject arithmetic <<<<<<<<<<<<<<<<<<<<<<<<")
     d = flap.get_data('TESTDATA',name='*',
                     options={'Scaling':'Volt'},
                     object_name='TESTDATA',
                     coordinates={'Time':[0,0.001]})
+    
+    print("\n***** Adding two DataObjects. One coordinate name is different.")
     d1 = copy.deepcopy(d)
     d1.coordinates[1].unit.name='ssd'
-    flap.list_data_objects([d,d1,d+d])
+    d2 = d + d1
+    flap.list_data_objects([d,d1,d2])
+    print(d.data[0,0,0],d1.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d1.data[1,1,1],d2.data[1,1,1])   
+
+    print("\n***** Adding scalar to a DataObject.")
+    d2 = d + 3
+    flap.list_data_objects([d,d2])
+    print(d.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d2.data[1,1,1])   
+    d2 = 3 + d
+    print(d.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d2.data[1,1,1])   
+
+    print("\n***** Subtracting two DataObjects.")
+    d1 = d+3
+    d2 = d - d1
+    flap.list_data_objects([d,d1,d2])
+    print(d.data[0,0,0],d1.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d1.data[1,1,1],d2.data[1,1,1])   
+    d2 = d1 - d
+    flap.list_data_objects([d,d1,d2])
+    print(d.data[0,0,0],d1.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d1.data[1,1,1],d2.data[1,1,1])   
+
+    print("\n***** Subtracting scalar from a DataObject.")
+    d2 = d - 3
+    flap.list_data_objects([d,d2])
+    print(d.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d2.data[1,1,1])   
+    d2 = 3 - d
+    print(d.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d2.data[1,1,1])   
+
+    
+    print("\n***** Multiplying two DataObjects.")
+    d1 = copy.deepcopy(d)
+    d1 = d1 + 3
+    d2 = d * d1
+    flap.list_data_objects([d,d1,d2])
+    print(d.data[0,0,0],d1.data[0,0,0],d2.data[0,0,0])
+    print(d.data[1,1,1],d1.data[1,1,1],d2.data[1,1,1])   
+    
+    print("\n***** Multiplying DataObject with constant.")
+    d1 = d * 3
+    flap.list_data_objects([d,d1,d2])
+    print(d.data[0,0,0],d1.data[0,0,0])
+    print(d.data[1,1,1],d1.data[1,1,1])   
     
 
 def test_plot():
@@ -293,7 +344,7 @@ def test_resample()    :
                  object_name='TEST-3MHz',
                  coordinates={'Time':[0,0.001]}
                  )
-    print("***** Resampling from lower to higher frequency.")
+    print("\n***** Resampling from lower to higher frequency.")
     plt.figure()
     flap.plot('TEST-1MHz',axes='Time',plot_options={'marker':'o'})
     flap.plot('TEST-3MHz',plot_options={'marker':'o'})
@@ -303,7 +354,7 @@ def test_resample()    :
                     output_name='TEST-1MHz_resample')
     flap.plot('TEST-1MHz_resample',plot_options={'marker':'x'})
     
-    print("***** Resampling from higher to lower frequency.")
+    print("\n***** Resampling from higher to lower frequency.")
     plt.figure()
     flap.plot('TEST-1MHz',axes='Time',plot_options={'marker':'o'})
     flap.plot('TEST-3MHz',plot_options={'marker':'o'})
@@ -313,7 +364,7 @@ def test_resample()    :
                     output_name='TEST-3MHz_resample')
     flap.plot('TEST-3MHz_resample',plot_options={'marker':'x'})
     
-    print("***** Cutting parts.")
+    print("\n***** Cutting parts.")
     plt.figure()
     flap.slice_data('TEST-1MHz',
                     slicing={'Time':flap.Intervals([1e-4,5e-4],[2e-4,7e-4])},

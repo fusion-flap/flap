@@ -3028,19 +3028,31 @@ class DataObject:
         """ Addition for DataObject
         """
         if (type(d1) is DataObject):
+            if ((self.data is None) or (d1.data is None)):
+                raise ValueError("Cannot add data objects without data.")
             if (self.data_unit.unit != d1.data_unit.unit):
                 raise ValueError("Cannot add data objects with different units.")
+            if (self.data_unit.name != d1.data_unit.name):
+                raise ValueError("Cannot add data objects with different data names.")
             if (self.shape != d1.shape):
                 raise ValueError("Cannot add data objects with different shapes.")
-            if (self.error is not None):
+            if (self.error is None):
+                err = d1.error
+            elif (d1.error is None):
                 err = self.error
             else:
-                err = None
-            if (d1.error is not None):
-                if (err is None):
-                    err = d1.error
+                if ((type(self.error) is not list) and (type(d1.error) is not list)):
+                    err = np.sqrt(self.error ** 2 + d1.error ** 2)
+                elif ((type(self.error) is list) and (type(d1.error) is list)):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error[1] ** 2)]                    
+                elif (type(self.error) is list):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error ** 2)]
                 else:
-                    err = np.sqrt(err ** 2 + d1.error ** 2)
+                    err = [np.sqrt(self.error ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error ** 2 + d1.error[1] ** 2)]
+                                                   
             d_out = DataObject(data_array=self.data+d1.data,
                                error=err,
                                data_unit=self.data_unit)
@@ -3059,9 +3071,156 @@ class DataObject:
                 d_out.exp_id = self.exp_id
             if (self.data_source == d1.data_source):
                 d_out.data_source = self.data_source
-            return d1
+        elif (np.isscalar(d1)):
+            if (self.data is None):
+                raise ValueError("Cannot add data objects without data.")
+            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
+                raise ValueError("Cannot add strings.")
+            d_out = copy.deepcopy(self)
+            d_out.data += d1
+        return d_out
 
-        
+    def __radd__(self, d1):
+         try:
+             return self.__add__(d1)
+         except Exception as e:
+             raise e
+
+    def __sub__(self, d1):
+        """ Subtraction for DataObject
+        """
+        if (type(d1) is DataObject):
+            if ((self.data is None) or (d1.data is None)):
+                raise ValueError("Cannot subtract data objects without data.")
+            if (self.data_unit.unit != d1.data_unit.unit):
+                raise ValueError("Cannot subtract data objects with different units.")
+            if (self.data_unit.name != d1.data_unit.name):
+                raise ValueError("Cannot subtract data objects with different data names.")
+            if (self.shape != d1.shape):
+                raise ValueError("Cannot subtract data objects with different shapes.")
+            if (self.error is None):
+                err = d1.error
+            elif (d1.error is None):
+                err = self.error
+            else:
+                if ((type(self.error) is not list) and (type(d1.error) is not list)):
+                    err = np.sqrt(self.error ** 2 + d1.error ** 2)
+                elif ((type(self.error) is list) and (type(d1.error) is list)):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error[1] ** 2)]                    
+                elif (type(self.error) is list):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error ** 2)]
+                else:
+                    err = [np.sqrt(self.error ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error ** 2 + d1.error[1] ** 2)]
+                                                   
+            d_out = DataObject(data_array=self.data-d1.data,
+                               error=err,
+                               data_unit=self.data_unit)
+            d_out.coordinates = []
+            for coord in self.coordinates:
+                try:
+                    c1 = d1.get_coordinate_object(coord.unit.name)
+                    if (coord != c1):
+                        continue
+                    d_out.coordinates.append(copy.deepcopy(coord))
+                except ValueError:
+                    pass
+            if (len(d_out.coordinates) == 0):
+                d_out.coordinates = None
+            if (self.exp_id == d1.exp_id):
+                d_out.exp_id = self.exp_id
+            if (self.data_source == d1.data_source):
+                d_out.data_source = self.data_source
+        elif (np.isscalar(d1)):
+            if (self.data is None):
+                raise ValueError("Cannot add data objects without data.")
+            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
+                raise ValueError("Cannot add strings.")
+            d_out = copy.deepcopy(self)
+            d_out.data -= d1
+        return d_out
+
+    def __rsub__(self, d1):
+         try:
+             d = self.__sub__(d1)
+             d.data = -d.data
+             return d
+         except Exception as e:
+             raise e
+
+    def __mul__(self, d1):
+        """ Multiplication for DataObject
+        """
+        if (type(d1) is DataObject):
+            if ((self.data is None) or (d1.data is None)):
+                raise ValueError("Cannot multiply data objects without data.")
+            if (self.shape != d1.shape):
+                raise ValueError("Cannot multiply data objects with different shapes.")
+            if ((self.error is None) or (d1.error is None)):
+                err = None
+            else:
+                if (type(self.error) is list):
+                    err1 = sqrt(self.error[0] ** 2 + self.error[1] ** 2)
+                else:
+                    err1 = self.error
+                if (type(d1.error) is list):
+                    err2 = sqrt(d1.error[0] ** 2 + d1.error[1] ** 2)
+                else:
+                    err2 = d1.error
+                err = np.sqrt(err1 ** 2 * err2 ** 2 
+                              + self.data ** 2 * err2 ** 2
+                              + d1.data **2 * err1 ** 2)
+            new_unit = Unit()
+            if (d1.data_unit.name == self.data_unit.name):
+                new_unit.name = self.data_unit.name+'^2'
+            else:
+                new_unit.name = self.data_unit.name+'*'+d1.unit.name
+            if (d1.data_unit.unit == self.data_unit.unit):
+                new_unit.unit = self.data_unit.unit+'^2'
+            else:
+                new_unit.unit = self.data_unit.unit+'*'+d1.unit.name
+                
+            d_out = DataObject(data_array=self.data * d1.data,
+                               error=err,
+                               data_unit=new_unit
+                               )
+            d_out.coordinates = []
+            for coord in self.coordinates:
+                try:
+                    c1 = d1.get_coordinate_object(coord.unit.name)
+                    if (coord != c1):
+                        continue
+                    d_out.coordinates.append(copy.deepcopy(coord))
+                except ValueError:
+                    pass
+            if (len(d_out.coordinates) == 0):
+                d_out.coordinates = None
+            if (self.exp_id == d1.exp_id):
+                d_out.exp_id = self.exp_id
+            if (self.data_source == d1.data_source):
+                d_out.data_source = self.data_source
+        elif (np.isscalar(d1)):
+            if (self.data is None):
+                raise ValueError("Cannot multiply data objects without data.")
+            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
+                raise ValueError("Cannot multiply strings.")
+            d_out = copy.deepcopy(self)
+            d_out.data *= d1
+            if (d_out.error is not None):
+                if (type(d_out.error) is list):
+                    d_out.error = [d_out.error[0] * d1, d_out.error[1] * d1]
+                else:
+                    d_out.error *= d1
+        return d_out
+             
+    def __rmul__(self, d1):
+         try:
+             return self.__mul__(d1)
+         except Exception as e:
+             raise e
+             
 ########## END of class DataObject            
             
 class FlapStorage:
