@@ -861,10 +861,10 @@ class DataObject:
                     # Creating a list of slices for all dimension, so as all elements are copied
                     ind_slice = [slice(0,x) for x in new_coord_data.shape]
                     if ((_options['Interpolation'] == 'Closest value') or (type(ind_slice_coord) is slice)
-                        or (check_coord.dtype() == object) or (check_coord.dtype() == str)):
+                        or not check_coord.isnumeric()):
                         # In the flattened dimensions inserting the slicing index array or slice
                         if (type(ind_slice_coord) is slice):
-                            ind_slice[flattened_in_unified[0]] = ind_slice_coords
+                            ind_slice[flattened_in_unified[0]] = ind_slice_coord
                         else:
                             ind_slice[flattened_in_unified[0]] = np.round(ind_slice_coord).astype(np.int32)
                         # Selecting the coordinate data for the remaining data elements
@@ -877,9 +877,9 @@ class DataObject:
                         # ind_slice_coord is numpy array
                         ind_slice_coord_1 = np.trunc(ind_slice_coord).astype(np.int32)
                         ind_slice_coord_2 = ind_slice_coord_1 + 1
-                        ind = np.nonzero(ind_slice_coord_2 >= new_coord_data.size)[0]
+                        ind = np.nonzero(ind_slice_coord_2 >= new_coord_data.shape[flattened_in_unified[0]])[0]
                         if (ind.size != 0):
-                            ind_slice_coord_2[-1] = ind_slice_coord_2[-2] 
+                            ind_slice_coord_2[ind] = ind_slice_coord_1[ind] 
                         # Insert the lower slicing indices into the flattened dimension and get the two base points
                         # for interpolation
                         ind_slice_1 = copy.deepcopy(ind_slice)
@@ -1596,8 +1596,8 @@ class DataObject:
 
                     # Creating an ind_coord array with the indices into the data array
                     # This might be a float value as interpolation might need a non-integer index
-                    if (type(slicing_arr) is np.str_):
-                        if (_options['Slice type'] == 'Interpolation'):
+                    if (slicing_arr.dtype.kind is 'U'):
+                        if (_options['Interpolation'] != 'Closest value'):
                             raise ValueError("Cannot do interpolation with string values.")
                         # For strings requiring exact match but wildcards are allowed
                         ind_coord = np.ndarray(0, np.dtype('int64'))
@@ -1807,9 +1807,9 @@ class DataObject:
                         ind_slice_coord_1 = np.trunc(ind_slice_coord).astype(np.int32)
                         ind_slice_coord_2 = ind_slice_coord_1 + 1
                         # Checking if the index is above the limit. This can happen at the end
-                        ind = np.nonzero(ind_slice_coord_2 >= d_flat.size)[0]
+                        ind = np.nonzero(ind_slice_coord_2 >= d_flat.shape[slicing_coords[i_sc].dimension_list[0]])[0]
                         if (ind.size != 0):
-                            ind_slice_coord_2[-1] = ind_slice_coord_2[-2] 
+                            ind_slice_coord_2[ind] = ind_slice_coord_1[ind] 
                         # Insert the lower slicing indices into the flattened dimension and get the two base points
                         # for interpolation
                         ind_slice_1 = copy.deepcopy(ind_slice)
@@ -2408,6 +2408,10 @@ class DataObject:
         else:
             raise TypeError("Bad summing description. Use dictionary.")
 
+        try:
+            d_slice.check()
+        except Exception as e:
+            raise RuntimeError("Internal error. Bad data object after slicing.")
         return d_slice
     # End of slice_data
 

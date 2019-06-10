@@ -353,6 +353,7 @@ def _plot(data_object,
           axes=None,
           slicing=None,
           summing=None,
+          slicing_options=None,
           options=None,
           plot_type=None,
           plot_options={},
@@ -366,6 +367,7 @@ def _plot(data_object,
           If no axes are given default will be used depending on the plot type. E.g. for
           x-y plot the default first axis is the firs coordinate, the second axis is '__Data__'
     slicing, summing: arguments for slice_data. Slicing will be applied before plotting.
+    slicing_options: options for slicing. See slice_data()
     plot_type: The plot type (string). Can be abbreviated.
           'xy': Simple 1D plot. Default axes are: first coordinate, Data. For complex signals this
                 produces two plots, see option "Complex mode'.
@@ -424,7 +426,7 @@ def _plot(data_object,
         raise TypeError("Invalid type for option 'Force axes'. Should be boolean.")    
 
     if ((slicing is not None) or (summing is not None)):
-        d = data_object.slice_data(slicing=slicing, summing=summing, options=options)
+        d = data_object.slice_data(slicing=slicing, summing=summing, options=slicing_options)
     else:
         d = data_object        
     

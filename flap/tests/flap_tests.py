@@ -376,9 +376,7 @@ def test_resample()    :
 def test_select_multislice():
     print()
     print('>>>>>>>>>>>>>>>>>>> Test select on maxima and multi slice <<<<<<<<<<<<<<<<<<<<<<<<')
-    # plt.close('all')
     flap.delete_data_object('*')
-    plt.figure()
     d = flap.get_data('TESTDATA',name='TEST-1-1',object_name='TEST-1-1',options={'Length':0.050})
     print("**** Selecting 100 microsec long intervals around the maxima of the signal.")
     d_int = flap.select_intervals('TEST-1-1',
@@ -587,6 +585,7 @@ def test_ccf():
     print("**** Filtering with 10 microsec integrating filter.")
     flap.filter_data('TESTDATA',coordinate='Time',options={'Type':'Int','Tau':1e-5},output_name='TESTDATA_filt')
     flap.list_data_objects()
+    plt.figure()
     print("**** Plotting an original and a filtered signal.")
     flap.plot('TESTDATA',slicing={'Row':1,'Column':1},axes='Time')
     flap.plot('TESTDATA_filt',slicing={'Row':1,'Column':1})
@@ -602,6 +601,19 @@ def test_ccf():
     print("**** Plotting spatiotemporal correlation function at ref row, column 3,3, column 3")
     plt.figure()
     flap.plot('CCF',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
+
+    print('**** Calculating the 10x15x10x15 CCFs, each 5000 samples with ref')
+    print('**** CCF START')
+    start = time.time()    
+    flap.ccf('TESTDATA_filt',ref='TESTDATA_filt',coordinate='Time',
+             options={'Trend':'Mean','Range':[-1e-4,1e-4],'Res':1e-5,'Norm':True},output_name='CCF_ref')
+    stop = time.time()
+    print('**** CCF STOP')
+    print("**** Calculation time: {:6.3f} ms/signal".format(1000*(stop-start)/(10*15*10*15)))
+    flap.list_data_objects()
+    print("**** Plotting spatiotemporal correlation function at ref row, column 3,3, column 3")
+    plt.figure()
+    flap.plot('CCF_ref',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
 
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
