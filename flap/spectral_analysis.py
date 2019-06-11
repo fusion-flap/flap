@@ -81,9 +81,9 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
                 intervals_low.append(ref_intervals_low[i])
                 intervals_high.append(ref_intervals_high[i])
         ref_coord = ref.get_coordinate_object(coordinate)
-        if ((ref_coord.start != coord.start) 
-            or (math.fabs(ref_coord.step[0] - coord.step[0]) * d.shape[coord.dimension_list[0]] 
-                 > math.fabs(coord.step[0]))):
+        if ((math.fabs(ref_coord.start - coord.start) > math.fabs(ref_coord.step[0] ) / 10)
+            or (math.fabs(ref_coord.step[0] - coord.step[0]) / math.fabs(ref_coord.step[0]) > 1e-4) 
+            ):
             raise ValueError("The start and step of the calculating coordinates in the two data objects should be identical.")
     else:
         intervals_low = d_intervals_low 
@@ -1299,10 +1299,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             except ValueError:
                 pass
             correlation_dimensions_ref.append(c.dimension_list[0])
-            if (math.fabs(c.step[0] - coord_obj[i].step[0]) * d.shape[coord_obj[i].dimension_list[0]] \
-                > math.fabs(c.step[0])):
+            if (math.fabs(c.step[0] - coord_obj[i].step[0]) / math.fabs(c.step[0]) > 1e-4):
                    raise ValueError("Incompatible coordinate step sizes." )
-            if (math.fabs(c.start - coord_obj[i].start) > math.fabs(c.step[0])):
+            if (math.fabs(c.start - coord_obj[i].start) > math.fabs(c.step[0]) / 10):
                    raise ValueError("Incompatible coordinate start values." )
             if (list(_ref.data.shape)[correlation_dimensions_ref[i]] 
                            != list(d.data.shape)[correlation_dimensions[i]]):
