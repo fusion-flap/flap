@@ -123,7 +123,7 @@ class Intervals:
                 range_stops[ind] = limits[1]
 
         if ((np.amin(range_starts) < limits[0]) or (np.amax(range_starts) > limits[1])):
-            raise RuntimeEror("Internal error: selected intervals outside of limits.")
+            raise RuntimeError("Internal error: selected intervals outside of limits.")
         return range_starts, range_stops
 
     def interval_number(self,limits=None,partial_intervals=False):
@@ -157,14 +157,14 @@ class Intervals:
                         start_interval = 0
                     interval_n = int((limits[1] - self.start) / self.step) - start_interval + 1
                 else:
-                    if (self.start <= limits[0]):
+                    if (self.start >= limits[0]):
                         start_interval = 0
                     else:
                         start_interval = int((limits[0] - self.start) / self.step) + 1
                     interval_n = int((limits[1] - self.stop) / self.step) - start_interval + 1
             else:
                 if (partial_intervals):
-                    if (self.start <= limits[1]):
+                    if (self.start >= limits[1]):
                         start_interval = int((self.start - limits[1]) / self.step) + 1
                     else:
                         start_interval = 0
