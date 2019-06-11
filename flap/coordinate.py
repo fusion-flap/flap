@@ -597,12 +597,12 @@ class Coordinate:
                 out_index[i] = np.arange(_data_shape[i],dtype=int)
             elif (type(_index[i]) is slice):
                 if (_index[i].step is None):
-                    out_shape[i] = (_index[i].stop - _index[i].start)
+                    out_shape[i] = round(_index[i].stop - _index[i].start)
                 else:
-                    out_shape[i] = int((_index[i].stop - _index[i].start) / _index[i].step)
+                    out_shape[i] = int(round((_index[i].stop - _index[i].start) / _index[i].step))
                 out_index[i] = np.array(list(range(*_index[i].indices(_data_shape[i]))))
             elif (type(_index[i]) is range):
-                out_shape[i] = (_index[i].stop - _index[i].start) / _index[i].step
+                out_shape[i] = int(round((_index[i].stop - _index[i].start) / _index[i].step))
                 out_index[i] = np.array(list(_index[i]))
             elif (type(_index[i]) is list):
                 out_shape[i] = len(_index[i])
