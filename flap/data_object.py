@@ -523,6 +523,8 @@ class DataObject:
             data_low: low ranges, same shape as data. None if no range data is present
             data_high: high ranges, same shape as data. None if no range data is present
         """
+        if (type(name) is not str):
+            raise TypeError("Invalid coordinate name.")
         for c in self.coordinates:
             if c.unit.name == name:
                 break
@@ -1864,8 +1866,7 @@ class DataObject:
                             d_slice.error  = np.squeeze(d_err)
                             
                     # Determining whether the slicing description results in equidistant coordinate in the 
-                    # slicing coordinate. Slice_coord_step will contain the step size or None
-                    # if the slicing is non-equidistant
+                    # slicing coordinate. 
                     if ((type(slicing_description[i_sc]) is slice) or 
                         (type(slicing_description[i_sc]) is range)
                         ):
@@ -1879,7 +1880,7 @@ class DataObject:
                         else:
                             slicing_equidistant = False       
                     elif ((type(slicing_description[i_sc]) is Intervals) and
-                          (slicing_description[i_sc].interval_number == 1) and
+                          (slicing_description[i_sc].interval_number()[0] == 1) and
                           (len(slicing_coords[i_sc].dimension_list) == 1) and
                           slicing_coords[i_sc].mode.equidistant
                           ):
