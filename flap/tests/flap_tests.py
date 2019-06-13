@@ -2,7 +2,7 @@
 """
 Created on Thu Dec  6 22:11:28 2018
 
-@author: Zoletnik
+@author: Sandor Zoletnik  (zoletnik.sandor@wigner.mta.hu)
 
 Example/test programs for FLAP.
 
@@ -663,7 +663,9 @@ if (True):
 if (True):
     test_cpsd()
 if (True):
-    test_ccf()    
+    test_ccf()   
+
+print(">>>>>>>>>>>>>>>> All tests finished <<<<<<<<<<<<<<<<<<<<")
 
 
 

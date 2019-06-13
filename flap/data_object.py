@@ -152,8 +152,10 @@ class DataObject:
                             raise TypeError("One step is None for equdistant coordinate '{:s}'.".format(c.unit.name))
                         if (type(cstep ) is str):
                             raise TypeError("Invalid step type for equdistant coordinate '{:s}'.".format(c.unit.name))
-                        if (type(cstep) is not type(c.start)):
-                            raise TypeError("Equidistant coordinate {:s} start and step should have same type.".format(c.unit.name))
+                        try:
+                            cstep + c.start
+                        except:
+                            raise TypeError("Equidistant coordinate '{:s}' start and step should have same type.".format(c.unit.name))
                     if (c.value_ranges is not None):
                         if (c.mode.range_symmetric):
                             try:
