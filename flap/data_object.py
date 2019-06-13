@@ -152,13 +152,26 @@ class DataObject:
                             raise TypeError("One step is None for equdistant coordinate '{:s}'.".format(c.unit.name))
                         if (type(cstep ) is str):
                             raise TypeError("Invalid step type for equdistant coordinate '{:s}'.".format(c.unit.name))
+                        if (type(cstep) is not type(c.start)):
+                            raise TypeError("Equidistant coordinate {:s} start and step should have same type.".format(c.unit.name))
                     if (c.value_ranges is not None):
                         if (c.mode.range_symmetric):
                             try:
                                 if (c.value_ranges * 0 != 0):
                                     raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))
                             except:
-                                    raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))                                
+                                    raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))  
+                            if (c.mode.equidistant):
+                                try:
+                                    c.value_ranges + c.start
+                                except:
+                                    raise TypeError("Incompatible value_range and start in coordinate {:s}.".format(c.unit.name))
+                            else:
+                                try:
+                                    c.value_ranges[0] + c.values[0]
+                                except:
+                                    raise TypeError("Incompatible value_range and start in coordinate {:s}.".format(c.unit.name))
+                                
                         else:
                             if (type(c.value_ranges) is not list):
                                 raise TypeError("Invalid type for value_ranges in asymmetric coordinate '{:s}'.".format(c.unit.name))
@@ -656,6 +669,7 @@ class DataObject:
     def plot(self,
              axes=None,
              slicing=None,
+             slicing_options=None,
              summing=None,
              options=None,
              plot_type=None,
@@ -697,6 +711,7 @@ class DataObject:
             return _plot(self,
                          axes=axes,
                          slicing=slicing,
+                         slicing_options=slicing_options,
                          summing=summing,
                          options=options,
                          plot_type=plot_type,
@@ -1378,7 +1393,7 @@ class DataObject:
 
         default_options = {'Partial intervals': True,
                            'Slice type': None,
-                           'Interpolation': 'Linear',
+                           'Interpolation': 'Closest value',
                            }
         _options = flap.config.merge_options(default_options, options, data_source=self.data_source, section='Slicing')
 
@@ -3683,7 +3698,7 @@ def add_coordinate(object_name,
 
 
 def plot(object_name,exp_id='*',axes=None, slicing=None, summing=None, options=None,
-         plot_type=None, plot_options=None,plot_id=None):
+         plot_type=None, plot_options=None,plot_id=None,slicing_options=None):
     """
     plot function for an object in flap storage. This is a wrapper for DataObject.plot()
     """
@@ -3694,6 +3709,7 @@ def plot(object_name,exp_id='*',axes=None, slicing=None, summing=None, options=N
     try:
         return d.plot(axes=axes,
                       slicing=slicing, 
+                      slicing_options=slicing_options,
                       summing=summing, 
                       options=options,
                       plot_type=plot_type,

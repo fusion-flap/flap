@@ -678,7 +678,7 @@ class Coordinate:
                 ind = [0] * len(self.dimension_list)
                 ind[i] = np.arange(value_mx.shape[i])
                 # Creating value_ms_tmp as described above
-                value_mx_tmp = np.zeros(tuple(shape),self.dtype())
+                value_mx_tmp = np.zeros(tuple(shape),dtype=value_mx.dtype)
                 # Creating the coordinate dependency and putting it into value_mx_tmp
                 x = value_index[i]
 #                if (x.dtype is not np.dtype(np.float64)):
