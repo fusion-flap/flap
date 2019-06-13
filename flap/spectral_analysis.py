@@ -61,33 +61,38 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
         calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(coordinate, intervals=intervals)
     except Exception as e:
         raise e
-    d_intervals_low = sel_int[0]
-    d_intervals_high = sel_int[1]
+    intervals_low = sel_int[0]
+    intervals_high = sel_int[1]    
+# This part is commented out as we assume identiacl coordinate for d and ref
 
-    if (ref is not None):
-        try:    
-            calc_int, calc_int_ind, sel_int, sel_int_ind = ref.proc_interval_limits(coordinate, intervals=intervals)
-        except Exception as e:
-            raise e
-        ref_intervals_low = sel_int[0]
-        ref_intervals_high = sel_int[1]
-        intervals_low = []
-        intervals_high = []
-        d_int_low_min = np.amin(d_intervals_low)
-        d_int_low_max = np.amax(d_intervals_low)
-        for i in range(len(ref_intervals_low)):
-            if ((ref_intervals_low[i] >= d_int_low_min) and
-                  (ref_intervals_low <= d_int_low_max)):
-                intervals_low.append(ref_intervals_low[i])
-                intervals_high.append(ref_intervals_high[i])
-        ref_coord = ref.get_coordinate_object(coordinate)
-        if ((math.fabs(ref_coord.start - coord.start) > math.fabs(ref_coord.step[0] ) / 10)
-            or (math.fabs(ref_coord.step[0] - coord.step[0]) / math.fabs(ref_coord.step[0]) > 1e-4) 
-            ):
-            raise ValueError("The start and step of the calculating coordinates in the two data objects should be identical.")
-    else:
-        intervals_low = d_intervals_low 
-        intervals_high = d_intervals_high
+#    d_intervals_low = sel_int[0]
+#    d_intervals_high = sel_int[1]
+
+#
+#    if (ref is not None):
+#        try:    
+#            calc_int, calc_int_ind, sel_int, sel_int_ind = ref.proc_interval_limits(coordinate, intervals=intervals)
+#        except Exception as e:
+#            raise e
+#        ref_intervals_low = sel_int[0]
+#        ref_intervals_high = sel_int[1]
+#        intervals_low = []
+#        intervals_high = []
+#        d_int_low_min = np.amin(d_intervals_low)
+#        d_int_low_max = np.amax(d_intervals_low)
+#        for i in range(len(ref_intervals_low)):
+#            if ((ref_intervals_low[i] >= d_int_low_min) and
+#                  (ref_intervals_low <= d_int_low_max)):
+#                intervals_low.append(ref_intervals_low[i])
+#                intervals_high.append(ref_intervals_high[i])
+#        ref_coord = ref.get_coordinate_object(coordinate)
+#        if ((math.fabs(ref_coord.start - coord.start) > math.fabs(ref_coord.step[0] ) / 10)
+#            or (math.fabs(ref_coord.step[0] - coord.step[0]) / math.fabs(ref_coord.step[0]) > 1e-4) 
+#            ):
+#            raise ValueError("The start and step of the calculating coordinates in the two data objects should be identical.")
+#    else:
+#        intervals_low = d_intervals_low 
+#        intervals_high = d_intervals_high
 
     if (len(intervals_low) > 1):
         # Ensuring that the intervals are in asceding order

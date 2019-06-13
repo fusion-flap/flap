@@ -494,7 +494,7 @@ def _plot(data_object,
             errorbars = int(plot_error)
             plot_error = True
         except:
-            raise ValueError("Invalid 'Plot error' option.")
+            raise ValueError("Invalid 'Error' option.")
     else:
         errorbars = -1
     # The maximum number of points expected in the horizontal dimension of a plot
@@ -787,12 +787,12 @@ def _plot(data_object,
                     if (plot_error):
                         ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,**_plot_opt)
                     else:
-                        ax.plot(x,y,**_plot_options)
+                        ax.plot(x,y,**_plot_opt)
                 else:
                     if (plot_error):
                         ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,fmt='o',**_plot_opt)
                     else:
-                        ax.scatter(x,y,**_plot_options)
+                        ax.scatter(x,y,**_plot_opt)
 
                 # Setting axis labels
                 ax.set_xlabel(ax_list[0].title(language=language))

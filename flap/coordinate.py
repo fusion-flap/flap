@@ -325,7 +325,7 @@ class Coordinate:
         #     if mode.symmetric is True: value_ranges should be scalar
         # if mode.equidistant is False:
         #     if mode.range_symmetric is False:
-        #           value_ranges should be a disctionary with keys 'low', 'high'. Each value has
+        #           value_ranges should be a dictionary with keys 'low', 'high'. Each value has
         #           the same dimensions as values,
         #     if mode.symmetric is True: value_ranges should have same shape as values
         self.value_ranges = value_ranges
