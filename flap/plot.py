@@ -142,6 +142,19 @@ class PlotID:
         # These are a list of the options to plot
         self.options = []
 
+    def clear(self):
+        """ Clears the parameters of the plot, but does not clear the
+        base_subplot and figure
+        """
+        self.plot_type = None
+        self.plot_subtype = None
+        self.number_of_plots = 0
+        self.axes = None
+        self.plot_data = []
+        self.plt_axis_list = None
+        self.options = []
+        
+
 #    def __del__(self):
 #        if (self.plt_axis_list is not None):
 #            for ax in self.plt_axis_list:
@@ -181,7 +194,7 @@ class PlotID:
             if (not clear and (self.axes is not None)):
                 # Using the axis in the plot
                 plot_axes = [''] * (len(default_axes) - len(_axes))
-                for i,ax in enumerate(self.axes[len(_axes):]):
+                for i,ax in enumerate(self.axes[len(_axes):len(default_axes)]):
                     # If axis in plot has no name then using default axis else the plot axis
                     if (ax.name == ''):
                         plot_axes[i] = default_axes[i]
@@ -448,21 +461,24 @@ def _plot(data_object,
                 # If the actual subplot is not the one in the plot ID then either the subplot was
                 # changed to a new one or the plot_ID changed with set_plot. 
                 if (not __get_gca_invalid()):
-                    # This means the plot ID was not changed, therefore we need to use
-                    # the gca                
+                    # This means the plot ID was not changed, the actual plot or axis was changed.
+                    # Therefore we need to use the actual values         
                     _plot_id = PlotID()
                     _plot_id.figure = plt.gcf().number
-                    _plot_id.base_subplot = plt.gca() 
-                    plt.subplot(_plot_id.base_subplot)
+                    _plot_id.base_subplot = plt.gca()  
                     plt.cla()
     if (_options['Clear'] ):
-        plt.subplot(_plot_id.base_subplot)
-        plt.cla()
-        # Creating a new emplty plot ID
-        del _plot_id
         _plot_id = PlotID()
-        _plot_id.figure = plt.gcf().number
-        _plot_id.base_subplot = plt.gca()
+#        _plot_id.clear()
+        if (_plot_id.figure is not None):
+            plt.figure(_plot_id.figure)
+        else:
+            _plot_id.figure = plt.gcf().number
+        if (_plot_id.base_subplot is not None):
+            plt.subplot(_plot_id.base_subplot)
+        else:
+            _plot_id.base_subplot = plt.gca()          
+        plt.cla()
             
     # Setting plot type
     known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image']
@@ -1059,15 +1075,16 @@ def _plot(data_object,
             raise e
 
         # No overplotting is possible for this type of plot, erasing and restarting a Plot_ID
-        plt.subplot(_plot_id.base_subplot)
-        plt.cla()
+        if (not _options['Clear']):
+            plt.subplot(_plot_id.base_subplot)
+            plt.cla()
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
         ax = _plot_id.plt_axis_list[0]
         
-        if (not ((pdd_list[2].data_type == PddType.Data) and (pdd_list[2].data_object == d))):
-            raise ValueError("For image plot only data can be plotted on the z axis.")
+        pdd_list[2].data_type = PddType.Data
+        pdd_list[2].data_object = d
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
             raise ValueError("X and y coordinates of image plot type should be coordinates.")
 
@@ -1307,37 +1324,21 @@ def _plot(data_object,
                 ax.set_xscale('log')
             if (_options['Log y']):
                 ax.set_yscale('log')
-            title = ax.get_title()
-            if (title is None):
-                title = ''
-            if (title[-3:] != '...'):
-                newtitle = ''
-                if (d.exp_id is not None):
-                    newtitle += str(d.exp_id)
-                    if (d.data_title is not None):
-                        newtitle += d.data_title
-                if (len(newtitle) != 0):
-                    if (len(title + newtitle) < 40):
-                        if (title != ''):
-                            title += ','+newtitle
-                        else:
-                            title = newtitle
-                    else:
-                        title += ',...'
-                    ax.set_title(title)
+            title = coord_t.unit.name+'='+"{:10f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
+            ax.set_title(title)
             plt.show()
             time.sleep(_options['Waittime'])
-            plt.pause(0.05)
+            plt.pause(0.001)
 
                 
 
     plt.show()       
  
-    if (_options['Clear']):
-        _plot_id.number_of_plots = 0
-        _plot_id.plot_data = []
-        _plot_id.plt_axis_list = None            
-    _plot_id.number_of_plots += 1
+#    if (_options['Clear']):
+#        _plot_id.number_of_plots = 0
+#        _plot_id.plot_data = []
+#        _plot_id.plt_axis_list = None            
+#    _plot_id.number_of_plots += 1
     _plot_id.axes = ax_list
     _plot_id.plot_data.append(pdd_list)
     #Setting this one the default plot ID

@@ -51,7 +51,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                       options=None, coordinates=None):
     """ Data read function for flap test data source
         Channel names: TEST-col-row: Signals on a 15x5 spatial matrix
-                       TEST_IMAGE: A test image with timescale as for the signals.
+                       VIDEO: A test image with timescale as for the signals.
                        
         options:
             'Scaling': 'Volt', 'Digit'
@@ -70,7 +70,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
     for row in range(ROW_NUMBER):
         for column in range(COLUMN_NUMBER):
             signal_list.append('TEST-'+str(column+1)+'-'+str(row+1))
-    signal_list.append('TEST_IMAGE')
+    signal_list.append('VIDEO')
 
     # Selecting the desired channels
     try:
@@ -80,12 +80,12 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
         raise e
 
     try:
-        signal_select.index('TEST_IMAGE')
+        signal_select.index('VIDEO')
         test_image = True
-        if (len(signal_select) != 1):
-            raise ValueError("TEST_IMAGE cannot be read together with test signals.")
     except:
         test_image = False
+    if (test_image and (len(signal_select) != 1)):
+            raise ValueError("VIDEO data cannot be read together with test signals.")
 
     if (test_image):
         default_options = {'Signal': 'Sin',
@@ -177,6 +177,8 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
         columns_act = np.array([0]*COLUMN_NUMBER)
         for i in range(len(signal_select)):
             s_split = signal_select[i].split('-')
+            if (len(s_split) != 3):
+                continue
             c = int(s_split[1])
             r = int(s_split[2])
             row_list.append(r)
@@ -218,7 +220,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             data_shape = [ndata]
         # Reading the signals
     
-        for i in range(len(signal_select)):
+        for i in range(len(row_list)):
             # Determining row and column numbers from
             r = row_list[i]
             c = column_list[i]
@@ -381,18 +383,18 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                             data_title=data_title, data_shape=data_shape)
     
     else:
-        # TEST_IMAGE
+        # VIDEO
         if (no_data is False):
             f = float(_options['Frequency'])
             t = np.arange(ndata,dtype=float) * meas_sampletime
-            amp = np.sin(t * 4.5 * math.pi * f) ** 2 * 3000 
+            amp = np.sin(t * 4.5 * math.pi * f) ** 2 * 3000 + 1000
             center_x = IMAGE_XSIZE/2 + (np.sin(t*2*math.pi*f) * IMAGE_XSIZE / 4) * (t / t[-1] + 0.2)
             center_y = IMAGE_YSIZE/2 + (np.cos(t*2*math.pi*f) * IMAGE_YSIZE / 4) * (t / t[-1] + 0.2)
             x,y = np.meshgrid(range(0,IMAGE_XSIZE), range(0,IMAGE_YSIZE))
             data_arr = np.empty((x.shape[0], x.shape[1], t.size),dtype=np.int16)
             for it in range(len(t)):
-                data_arr[:,:,it] = np.exp(-((x - center_x[it]) ** 2 + (y - center_y[it]) ** 2)
-                                   /2/((IMAGE_XSIZE/10) ** 2 + (IMAGE_YSIZE/10) ** 2)) * amp[it].astype(np.int16)
+                data_arr[:,:,it] = (np.exp(-((x - center_x[it]) ** 2 + (y - center_y[it]) ** 2)
+                                   /2/((IMAGE_XSIZE/10) ** 2 + (IMAGE_YSIZE/10) ** 2)) * amp[it]).astype(np.int16)
         coord = [None]*4
         coord[0] = copy.deepcopy(flap.Coordinate(name='Time',
                                                  unit='Second',

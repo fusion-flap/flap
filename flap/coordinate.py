@@ -455,6 +455,8 @@ class Coordinate:
             return False
         if (len(self.dimension_list) is 0):
             return True
+        if (data_shape is None):
+            return True
         # The shape for which the coordinate description applies
         ds_coord = [data_shape[x] for x in self.dimension_list]
         # Removing dimensions with one element

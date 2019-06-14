@@ -49,7 +49,7 @@ def test_config():
                                          data_source='TESTDATA')
     print("Merged options: %",_options)
     
-def test_storage(signals='*',timerange=[0,0.001]):
+def test_storage(signals='TEST-*',timerange=[0,0.001]):
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test storage operations on test data <<<<<<<<<<<<<<<<<<<<<<<<")
     flap.delete_data_object('*',exp_id='*')
@@ -81,7 +81,7 @@ def test_saveload():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test save/load <<<<<<<<<<<<<<<<<<<<<<<<")
     flap.delete_data_object('*')
-    d=flap.get_data('TESTDATA',name='*',
+    d=flap.get_data('TESTDATA',name='TEST-*',
                     options={'Scaling':'Volt'},
                     object_name='TESTDATA',
                     coordinates={'Time':[0,0.001]})
@@ -127,7 +127,7 @@ def test_coordinates():
 
     print()
     print("**** Reading all test signals for time range [0,0.001]")
-    d=flap.get_data('TESTDATA',name='*',
+    d=flap.get_data('TESTDATA',name='TEST-*',
                     options={'Scaling':'Volt'},
                     object_name='TESTDATA',
                     coordinates={'Time':[0,0.001]})
@@ -142,7 +142,7 @@ def test_coordinates():
 def test_arithmetic():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Testing DataObject arithmetic <<<<<<<<<<<<<<<<<<<<<<<<")
-    d = flap.get_data('TESTDATA',name='*',
+    d = flap.get_data('TESTDATA',name='TEST-*',
                     options={'Scaling':'Volt'},
                     object_name='TESTDATA',
                     coordinates={'Time':[0,0.001]})
@@ -204,6 +204,7 @@ def test_plot():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Testing various plot modes <<<<<<<<<<<<<<<<<<<<<<<<")
     flap.delete_data_object('*')
+    plt.close('all')
 
     print("**** Generating some test data.")
     length = 0.01
@@ -268,7 +269,7 @@ def test_plot():
 def test_plot_xy():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test plot x-y <<<<<<<<<<<<<<<<<<<<<<<<")
-    # plt.close('all')
+    plt.close('all')
     flap.delete_data_object('*')
     print("**** Reading signal TEST-2-5 for time range [0,0.1]")
     d=flap.get_data('TESTDATA',name='TEST-2-5',
@@ -282,7 +283,7 @@ def test_plot_xy():
     plt.figure()
     d.plot(axes=['__Data__','Time'])
     print("**** Reading all test signals for time range [0,0.001]")
-    d=flap.get_data('TESTDATA',name='*',
+    d=flap.get_data('TESTDATA',name='TEST-*',
                     options={'Scaling':'Volt'},
                     object_name='TESTDATA',
                     coordinates={'Time':[0,0.001]})
@@ -299,7 +300,7 @@ def test_plot_xy():
 def test_plot_multi_xy():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test plot multi x-y --------")
-    #plt.close('all')
+    plt.close('all')
     plt.figure()
     flap.delete_data_object('*')
     d=flap.get_data('TESTDATA',name='TEST-1-*',
@@ -314,7 +315,7 @@ def test_simple_slice():
     print("\n>>>>>>>>>>>>>>>>>>> Test simple slice <<<<<<<<<<<<<<<<<<<<<<<<")
     flap.delete_data_object('*')
     print("**** Reading all test signals for time range [0,0.001]")
-    d=flap.get_data('TESTDATA',name='*',
+    d=flap.get_data('TESTDATA',name='TEST-*',
                     options={'Scaling':'Volt'},
                     object_name='TESTDATA',
                     coordinates={'Time':[0,0.001]})
@@ -327,7 +328,8 @@ def test_simple_slice():
     print("**** Sliced object")
     flap.list_data_objects(name='TESTDATA_slice')
     
-def test_resample()    :
+def test_resample():
+    plt.close('all')
     print()
     print(">>>>>>>>>>>>> Test signal resampling (interpolation) <<<<<<<<<<<")
     flap.delete_data_object('*')
@@ -374,6 +376,7 @@ def test_resample()    :
     flap.list_data_objects()
     
 def test_select_multislice():
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test select on maxima and multi slice <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -402,6 +405,7 @@ def test_select_multislice():
                       axes='Rel. Time in int(Time)')
 
 def test_detrend():
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test detrend <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -415,6 +419,7 @@ def test_detrend():
     flap.plot('TEST-1_detrend',axes='Time')
 
 def test_apsd():
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test apds (Auto Power Spectral Density) <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -453,6 +458,7 @@ def test_apsd():
     flap.plot('TEST-1-1_APSD',options={'X range':[0,5e3]})
 
 def test_filter():
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test filter <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -546,6 +552,7 @@ def test_filter():
     plotid.plt_axis_list[-1].set_title("'Type':'Bandpass','f_low':5e4,'f_high':2e5, 'Power':True, 'Inttime':20e-6}") 
     
 def test_cpsd():
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test cpsd (Cross Spectral Power Density) <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -574,6 +581,7 @@ def test_cpsd():
                     summing={'Frequency':'Mean'}).plot(axes='Row (Ref)',options={'Y sep': 1.5})
 
 def test_ccf():
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test ccf (Cross Correlation Function) <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -615,18 +623,50 @@ def test_ccf():
     flap.plot('CCF_ref',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
 
 def test_image():
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
+    plt.figure()
     print("**** Generating a sequence of test images")
-    flap.get_data('TESTDATA',name='TEST_IMAGE',object_name='TEST_IMAGE')
+    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO')
     flap.list_data_objects()
     print("***** Showing one image")
-    flap.plot('TEST_IMAGE',slicing={'Time':30e-3/4},plot_type='image',axes=['Image x','Image y'])
-#    print("**** Showing a sequence of images.")
-#    flap.plot('TEST_IMAGE',plot_type='anim-image',axes=['Image x','Image y','Time'],options={'Wait':0.1})
+    flap.plot('TEST_VIDEO',slicing={'Time':30e-3/4},plot_type='image',axes=['Image x','Image y'],options={'Clear':True})
+    plt.figure()
+    print("**** Showing a sequence of images.")
+    flap.plot('TEST_VIDEO',plot_type='anim-image',axes=['Image x','Image y','Time'],options={'Z range':[0,4095],'Wait':0.01,'Clear':True})
+    flap.plot('TEST_VIDEO',slicing={'Time':30e-3/3},plot_type='image',axes=['Image x','Image y'])
+
+ 
+def show_plot():
+    plt.pause(0.05)
+    plt.show(block=False)
+    plt.pause(0.05)
+  
+def keypress_event(event):
+    global keypressed
+    print("dssfsf")
+    keypressed = event.key
     
+def keypress_start():
+    global keypressed
+    keypressed = None
     
+def key_pressed():
+    global keypressed
+    if (keypressed is not None):
+        return True
+
+def wait_for_key():
+    print("Press any key ON A PLOT to continue...")
+    fig = plt.gcf()
+    kbd_press = fig.canvas.mpl_connect('key_press_event', keypress_event)
+    keypress_start()
+    while not key_pressed():
+        time.sleep(0.01)
+        plt.pause(0.01)
+    fig.canvas.mpl_disconnect(kbd_press)
     
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
@@ -634,52 +674,68 @@ fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
 # Running tests
-#plt.close('all')
-if (False):
+plt.close('all')
+
+if (True):
     test_storage()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_saveload()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_coordinates()
     input("Press Enter to continue...")
-if (False):    
+if (True):    
     test_arithmetic()
     input("Press Enter to continue...")
-if (False):
+if (True):
     test_plot()
-    input("Press Enter to continue...")
-if (False):
+    wait_for_key()
+#    input("Press Enter to continue...")
+if (True):
     test_plot_xy()
-    input("Press Enter to continue...")
-if (False):
+    show_plot()
+    wait_for_key()
+#    input("Press Enter to continue...")
+if (True):
     test_plot_multi_xy()
-    input("Press Enter to continue...")
-if (False):
+    show_plot()
+    wait_for_key()
+#    input("Press Enter to continue...")
+if (True):
     test_simple_slice()
-    input("Press Enter to continue...")
-if (False):
+    show_plot()
+    wait_for_key()
+if (True):
     test_resample()
-    input("Press Enter to continue...")    
-if (False):
+    plt.pause(0.05)
+    wait_for_key()   
+if (True):
     test_select_multislice()
-    input("Press Enter to continue...")
-if (False): 
+    show_plot()
+    wait_for_key()
+if (True): 
     test_detrend()
-    input("Press Enter to continue...")
-if (False):
+    plt.pause(0.05)
+    wait_for_key()
+if (True):
     test_apsd()
-    input("Press Enter to continue...")
-if (False):
+    show_plot()
+    wait_for_key()
+if (True):
     test_filter()
-    input("Press Enter to continue...")
-if (False):
+    plt.pause(0.05)
+    wait_for_key()
+if (True):
     test_cpsd()
-if (False):
+    show_plot()
+    wait_for_key()
+if (True):
     test_ccf()
 if (True):
     test_image()
+    show_plot()
+    wait_for_key()
 
 print(">>>>>>>>>>>>>>>> All tests finished <<<<<<<<<<<<<<<<<<<<")
 
