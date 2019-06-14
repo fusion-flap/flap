@@ -614,56 +614,72 @@ def test_ccf():
     plt.figure()
     flap.plot('CCF_ref',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
 
+def test_image():
+    print()
+    print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
+    flap.delete_data_object('*')
+    print("**** Generating a sequence of test images")
+    flap.get_data('TESTDATA',name='TEST_IMAGE',object_name='TEST_IMAGE')
+    flap.list_data_objects()
+    print("***** Showing one image")
+    flap.plot('TEST_IMAGE',slicing={'Time':30e-3/4},plot_type='image',axes=['Image x','Image y'])
+#    print("**** Showing a sequence of images.")
+#    flap.plot('TEST_IMAGE',plot_type='anim-image',axes=['Image x','Image y','Time'],options={'Wait':0.1})
+    
+    
+    
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
 # Running tests
-plt.close('all')
-if (True):
+#plt.close('all')
+if (False):
     test_storage()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_saveload()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_coordinates()
     input("Press Enter to continue...")
-if (True):    
+if (False):    
     test_arithmetic()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_plot()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_plot_xy()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_plot_multi_xy()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_simple_slice()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_resample()
     input("Press Enter to continue...")    
-if (True):
+if (False):
     test_select_multislice()
     input("Press Enter to continue...")
-if (True): 
+if (False): 
     test_detrend()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_apsd()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_filter()
     input("Press Enter to continue...")
-if (True):
+if (False):
     test_cpsd()
+if (False):
+    test_ccf()
 if (True):
-    test_ccf()   
+    test_image()
 
 print(">>>>>>>>>>>>>>>> All tests finished <<<<<<<<<<<<<<<<<<<<")
 

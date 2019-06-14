@@ -35,6 +35,7 @@ import numpy as np
 import copy
 from enum import Enum
 import math
+import time
 
 import flap.config
 from .coordinate import *
@@ -400,6 +401,7 @@ def _plot(data_object,
         'Z range': Range of the vertical axis. (List of two numbers.)
         'Colormap': Cmap name for image and contour plots.
         'Levels': Number of contour levels or array of levels.
+        'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
@@ -409,7 +411,7 @@ def _plot(data_object,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
                        'X range':None, 'Y range': None, 'Z range': None,
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
-                       'Levels': None, 'Colormap':None}
+                       'Levels': None, 'Colormap':None, 'Waittime':1}
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
 
     if (plot_options is None):
@@ -463,12 +465,14 @@ def _plot(data_object,
         _plot_id.base_subplot = plt.gca()
             
     # Setting plot type
-    known_plot_types = ['xy','scatter','multi xy', 'image']
+    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image']
     if (plot_type is None):
         if (len(d.shape) == 1):
             _plot_type = 'xy'
         elif (len(d.shape) == 2):
             _plot_type = 'multi xy'
+        elif (len(d.shape) == 3):
+            _plot_type = 'anim-image'
         else:
             raise ValueError("No default plot type for this kind of data, set plot_type.")
     else:
@@ -477,7 +481,7 @@ def _plot(data_object,
         except TypeError:
             raise TypeError("Invalid type for plot_type. String is expected.")
         except ValueError:
-            raise ("Unknown plot type or too short abbreviation")    
+            raise ValueError("Unknown plot type or too short abbreviation")    
 
     # Processing some options
     if ((_plot_type == 'xy') or (_plot_type == 'multi xy')):
@@ -1027,7 +1031,7 @@ def _plot(data_object,
         _plot_id.plot_subtype = 0 # real multi xy plot 
 
     elif (_plot_type == 'image'):
-        if (len(d.shape) > 2):
+        if (len(d.shape) != 2):
             raise TypeError("Image plot is applicable to 2D data only. Use slicing.")
         if (d.data.dtype.kind == 'c'):
             raise TypeError("Image plot is applicable only to real data.")
@@ -1055,6 +1059,8 @@ def _plot(data_object,
             raise e
 
         # No overplotting is possible for this type of plot, erasing and restarting a Plot_ID
+        plt.subplot(_plot_id.base_subplot)
+        plt.cla()
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
@@ -1066,13 +1072,21 @@ def _plot(data_object,
             raise ValueError("X and y coordinates of image plot type should be coordinates.")
 
         coord_x = pdd_list[0].value
-        if (not coord_x.isnumeric()):
-            raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
-        xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
         coord_y = pdd_list[1].value
-        if (not coord_y.isnumeric()):
-            raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
-        ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape)
+        if ((coord_x.mode.equidistant) and (len(coord_x.dimension_list) == 1) and
+            (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
+            # This data is image-like with data points on a rectangular array
+            image_like = True
+            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
+            ydata_range = coord_x.data_range(data_shape=d.shape)[0]
+        else:
+            image_like = False
+            if (not coord_x.isnumeric()):
+                raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
+            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
+            if (not coord_y.isnumeric()):
+                raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
+            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape)
         
 
         if (zrange is None):
@@ -1087,7 +1101,7 @@ def _plot(data_object,
             
         if (_options['Log z']):
             if (vmin <= 0):
-                raise ValueError("z range[0] cannot be negative of zero for logarithmic scale.")
+                raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
             norm = colors.LogNorm(vmin=vmin, vmax=vmax)
             locator = ticker.LogLocator(subs='all')
         else:
@@ -1099,12 +1113,24 @@ def _plot(data_object,
             
         _plot_opt = _plot_options[0]
 
-        try:
-            img = ax.contourf(xdata,ydata,d.data,contour_levels,norm=norm,cmap=cmap,vmin=vmin,
-                              vmax=vmax,locator=locator,**_plot_opt)
-            plt.colorbar(img)
-        except Exception as e:
-            raise e
+        if (image_like):
+            try: 
+                if (coord_x.dimension_list[0] == 0):
+                    img = ax.imshow(d.data,extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
+                                  vmax=vmax,**_plot_opt)
+                else:
+                    img = ax.imshow(np.transpose(d.data),extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
+                                  vmax=vmax,**_plot_opt)
+                    
+            except Exception as e:
+                raise e
+        else:
+            try:
+                img = ax.contourf(xdata,ydata,d.data,contour_levels,norm=norm,cmap=cmap,vmin=vmin,
+                                  vmax=vmax,locator=locator,**_plot_opt)
+            except Exception as e:
+                raise e
+        plt.colorbar(img,ax=ax)
         
         if (xrange is not None):
             ax.set_xlim(xrange[0],xrange[1])
@@ -1133,10 +1159,178 @@ def _plot(data_object,
                         title = newtitle
                 else:
                     title += ',...'
-                ax.set_title(title)    
+                ax.set_title(title)   
                 
+    elif (_plot_type == 'anim-image'):
+        if (len(d.shape) != 3):
+            raise TypeError("Animated image plot is applicable to 3D data only. Use slicing.")
+        if (d.data.dtype.kind == 'c'):
+            raise TypeError("Animated image plot is applicable only to real data.")
+        # Checking for numeric type
+        try:
+            d.data[0,0] += 1
+        except TypeError:
+            raise TypeError("Animated image plot is applicable only to numeric data.")
         
- 
+        yrange = _options['Y range']
+        if (yrange is not None):
+            if ((type(yrange) is not list) or (len(yrange) != 2)):
+                raise ValueError("Invalid Y range setting.")
+
+        # Processing axes
+        # Although the plot will be cleared the existing plot axes will be considered
+        default_axes = [d.coordinates[0].unit.name, d.coordinates[1].unit.name,d.coordinates[2].unit.name,'__Data__']
+        try:
+            pdd_list, ax_list = _plot_id.check_axes(d, 
+                                                    axes, 
+                                                    clear=_options['Clear'], 
+                                                    default_axes=default_axes, 
+                                                    force=_options['Force axes'])
+        except ValueError as e:
+            raise e
+        
+        if (not ((pdd_list[3].data_type == PddType.Data) and (pdd_list[3].data_object == d))):
+            raise ValueError("For anim-image plot only data can be plotted on the z axis.")
+        if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
+            raise ValueError("X and y coordinates of anim-image plot type should be coordinates.")
+        if (pdd_list[2].data_type != PddType.Coordinate) :
+            raise ValueError("Time coordinate of anim-image plot should be coordinate.")
+
+        coord_x = pdd_list[0].value
+        coord_y = pdd_list[1].value
+        coord_t = pdd_list[2].value
+        
+        if (len(coord_t.dimension_list) != 1):
+            raise ValueError("Time coordinate for anim-image plot should be changing only along one dimension.")
+        try:
+            coord_x.dimension_list.index(coord_t.dimension_list[0])
+            badx = True
+        except:
+            badx = False
+        try:
+            coord_y.dimension_list.index(coord_t.dimension_list[0])
+            bady = True
+        except:
+            bady = False
+        if (badx or bady):
+            raise ValueError("X and y coordinate for anim-image plot should not change in time dimension.")
+            
+        index = [0] * 3
+        index[coord_t.dimension_list[0]] = ...
+        tdata = coord_t.data(data_shape=d.shape,index=index)[0].flatten()
+        if (not coord_y.isnumeric()):
+            raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
+
+        if ((coord_x.mode.equidistant) and (len(coord_x.dimension_list) == 1) and
+            (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
+            # This data is image-like with data points on a rectangular array
+            image_like = True
+            try:
+                xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
+                ydata_range = coord_x.data_range(data_shape=d.shape)[0]
+            except Exception as e:
+                raise e
+        else:
+            ind = [...] * 3
+            ind[coord_t.dimension_list[0]] = 0
+            image_like = False
+            if (not coord_x.isnumeric()):
+                raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
+            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape,index=ind)
+            xdata = np.squeeze(xdata)        
+            if (not coord_y.isnumeric()):
+                raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
+            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=ind)
+            ydata = np.squeeze(ydata)
+        
+        for it in range(len(tdata)):
+            plt.subplot(_plot_id.base_subplot)
+            plt.cla()
+            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+            _plot_id.plt_axis_list = []
+            _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+            ax = _plot_id.plt_axis_list[0]
+            time_index = [slice(0,dim) for dim in d.data.shape]
+            time_index[coord_t.dimension_list[0]] = it
+            time_index = tuple(time_index)
+    
+            if (zrange is None):
+                vmin = np.nanmin(d.data[time_index])
+                vmax = np.nanmax(d.data[time_index])
+            else:
+                vmin = zrange[0]
+                vmax = zrange[1]
+    
+            if (vmax <= vmin):
+                raise ValueError("Invalid z range.")
+                
+            if (_options['Log z']):
+                if (vmin <= 0):
+                    raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
+                norm = colors.LogNorm(vmin=vmin, vmax=vmax)
+                locator = ticker.LogLocator(subs='all')
+            else:
+                norm = None
+                locator = None
+                    
+            if (contour_levels is None):
+                contour_levels = 255
+                
+            _plot_opt = _plot_options[0]
+    
+            if (image_like):
+                try: 
+                    if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
+                        img = ax.imshow(np.squeeze(d.data[time_index]),extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
+                                      vmax=vmax,**_plot_opt)
+                    else:
+                        img = ax.imshow(np.transpose(np.squeeze(d.data[time_index])),extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
+                                      vmax=vmax,**_plot_opt)
+                        
+                except Exception as e:
+                    raise e
+            else:
+                try:
+                    img = ax.contourf(xdata,ydata,np.squeeze(d.data[time_index]),contour_levels,norm=norm,cmap=cmap,vmin=vmin,
+                                      vmax=vmax,locator=locator,**_plot_opt)
+                except Exception as e:
+                    raise e
+            plt.colorbar(img,ax=ax)
+            
+            if (xrange is not None):
+                ax.set_xlim(xrange[0],xrange[1])
+            if (yrange is not None):
+                ax.set_ylim(yrange[0],yrange[1])        
+            ax.set_xlabel(ax_list[0].title(language=language))
+            ax.set_ylabel(ax_list[1].title(language=language))
+            if (_options['Log x']):
+                ax.set_xscale('log')
+            if (_options['Log y']):
+                ax.set_yscale('log')
+            title = ax.get_title()
+            if (title is None):
+                title = ''
+            if (title[-3:] != '...'):
+                newtitle = ''
+                if (d.exp_id is not None):
+                    newtitle += str(d.exp_id)
+                    if (d.data_title is not None):
+                        newtitle += d.data_title
+                if (len(newtitle) != 0):
+                    if (len(title + newtitle) < 40):
+                        if (title != ''):
+                            title += ','+newtitle
+                        else:
+                            title = newtitle
+                    else:
+                        title += ',...'
+                    ax.set_title(title)
+            plt.show()
+            time.sleep(_options['Waittime'])
+            plt.pause(0.05)
+
+                
+
     plt.show()       
  
     if (_options['Clear']):
