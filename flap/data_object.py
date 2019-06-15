@@ -113,6 +113,9 @@ class DataObject:
                 raise TypeError("Wrong data array. DataObject.data should be numpy.ndarray.")
             if (self.data.shape != self.shape):
                 raise ValueError("DataObject.data shape is not the same as DataObject.shape.")
+        else:
+            if (self.shape is None):
+                raise ValueError("DataObject.shape is none. Even if no data is present shape should be set otherwise coordinates cannot be determined.")                
         if (self.error is not None):
             if (type(self.error) is list):
                 if (len(self.error) is not 2):

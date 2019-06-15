@@ -1047,6 +1047,8 @@ def _plot(data_object,
         _plot_id.plot_subtype = 0 # real multi xy plot 
 
     elif (_plot_type == 'image'):
+        if (d.data is None):
+            raise ValueError("Cannot plot DataObject without data.")
         if (len(d.shape) != 2):
             raise TypeError("Image plot is applicable to 2D data only. Use slicing.")
         if (d.data.dtype.kind == 'c'):
@@ -1179,6 +1181,8 @@ def _plot(data_object,
                 ax.set_title(title)   
                 
     elif (_plot_type == 'anim-image'):
+        if (d.data is None):
+            raise ValueError("Cannot plot DataObject without data.")
         if (len(d.shape) != 3):
             raise TypeError("Animated image plot is applicable to 3D data only. Use slicing.")
         if (d.data.dtype.kind == 'c'):
@@ -1244,7 +1248,7 @@ def _plot(data_object,
             image_like = True
             try:
                 xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
-                ydata_range = coord_x.data_range(data_shape=d.shape)[0]
+                ydata_range = coord_y.data_range(data_shape=d.shape)[0]
             except Exception as e:
                 raise e
         else:
