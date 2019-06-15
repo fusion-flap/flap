@@ -414,6 +414,7 @@ def _plot(data_object,
         'Z range': Range of the vertical axis. (List of two numbers.)
         'Colormap': Cmap name for image and contour plots.
         'Levels': Number of contour levels or array of levels.
+        'Aspect ratio': 'equal', 'auto' or float. (See imshow)
         'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
@@ -422,7 +423,7 @@ def _plot(data_object,
     
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
-                       'X range':None, 'Y range': None, 'Z range': None,
+                       'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'equal',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
                        'Levels': None, 'Colormap':None, 'Waittime':1}
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
@@ -1097,7 +1098,7 @@ def _plot(data_object,
             # This data is image-like with data points on a rectangular array
             image_like = True
             xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
-            ydata_range = coord_x.data_range(data_shape=d.shape)[0]
+            ydata_range = coord_y.data_range(data_shape=d.shape)[0]
         else:
             image_like = False
             if (not coord_x.isnumeric()):
@@ -1135,17 +1136,19 @@ def _plot(data_object,
         if (image_like):
             try: 
                 if (coord_x.dimension_list[0] == 0):
-                    img = ax.imshow(d.data,extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
-                                  vmax=vmax,**_plot_opt)
+                    img = ax.imshow(np.clip(d.data,vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                                    cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
+                                    vmax=vmax,**_plot_opt)
                 else:
-                    img = ax.imshow(np.transpose(d.data),extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
-                                  vmax=vmax,**_plot_opt)
+                    img = ax.imshow(np.clip(np.transpose(d.data),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                                    cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
+                                    vmax=vmax,**_plot_opt)
                     
             except Exception as e:
                 raise e
         else:
             try:
-                img = ax.contourf(xdata,ydata,d.data,contour_levels,norm=norm,cmap=cmap,vmin=vmin,
+                img = ax.contourf(xdata,ydata,np.clip(d.data,vmin,vmax),contour_levels,norm=norm,cmap=cmap,vmin=vmin,
                                   vmax=vmax,locator=locator,**_plot_opt)
             except Exception as e:
                 raise e
@@ -1302,17 +1305,19 @@ def _plot(data_object,
             if (image_like):
                 try: 
                     if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
-                        img = ax.imshow(np.squeeze(d.data[time_index]),extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
-                                      vmax=vmax,**_plot_opt)
+                        img = ax.imshow(np.clip(np.squeeze(d.data[time_index]),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                                        cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
+                                        vmax=vmax,**_plot_opt)
                     else:
-                        img = ax.imshow(np.transpose(np.squeeze(d.data[time_index])),extent=xdata_range + ydata_range,norm=norm,cmap=cmap,vmin=vmin,
-                                      vmax=vmax,**_plot_opt)
+                        img = ax.imshow(np.clip(np.transpose(np.squeeze(d.data[time_index])),vmin,vmax),extent=xdata_range + ydata_range,
+                                        norm=norm,cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
+                                        vmax=vmax,**_plot_opt)
                         
                 except Exception as e:
                     raise e
             else:
                 try:
-                    img = ax.contourf(xdata,ydata,np.squeeze(d.data[time_index]),contour_levels,norm=norm,cmap=cmap,vmin=vmin,
+                    img = ax.contourf(xdata,ydata,np.clip(np.squeeze(d.data[time_index]),vmin,vmax),contour_levels,norm=norm,cmap=cmap,vmin=vmin,
                                       vmax=vmax,locator=locator,**_plot_opt)
                 except Exception as e:
                     raise e
