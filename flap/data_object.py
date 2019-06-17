@@ -130,13 +130,20 @@ class DataObject:
                     raise ValueError("Shape of error  array un DataObject is different from data.")
         if (self.coordinates is not None):
             for i,c in enumerate(self.coordinates):
+                for j in range(i):
+                    if (id(self.coordinates[i]) == id(self.coordinates[j])):
+                        raise ValueError("ID of coordinates '{:s}' and '{:s}' are identical.".\
+                                         format(self.coordinates[i].unit.name, self.coordinates[j].unit.name))
+                    if (id(self.coordinates[i].mode) == id(self.coordinates[j].mode)):
+                        raise ValueError("ID of coordinate.mode for '{:s}' and '{:s}' are identical.".\
+                                         format(self.coordinates[i].unit.name, self.coordinates[j].unit.name))
                 if (type(c.dimension_list) is not list):
                     raise TypeError("Wrong type for dimension list for coordinate '{:s}'.".format(c.unit.name))
                 if (len(c.dimension_list) > len(self.shape)):
                     raise TypeError("Too long dimension list for coordinate '{:s}'.".format(c.unit.name)) 
                 for d in c.dimension_list:
                     if (d is None):
-                        raise ValueError("Null in dimension list.")
+                        raise ValueError("Null in dimension list in coordinate '{:s}'.".format(c.unit.name))    
                     if (d >= len(self.shape)):
                         raise TypeError("Wrong dimension number in coordinate '{:s}'.".format(c.unit.name))                         
                 if (type(c.unit) is not flap.Unit):
@@ -189,6 +196,8 @@ class DataObject:
                                 except:
                                         raise TypeError("Invalid type for value_ranges in coordinate '{:s}'.".format(c.unit.name))     
                 else:
+                    if (c.values is None):
+                        raise ValueError("No values in non-equidistant coordinate '{:s}'.".format(c.unit.name))
                     if (not c.non_interpol(self.shape)):
                         raise ValueError("Coordinate value and data shape is inconsistent in coordinate '{:s}'.".format(c.unit.name))
                                                                     
@@ -891,10 +900,16 @@ class DataObject:
                             ind_slice[flattened_in_unified[0]] = np.round(ind_slice_coord).astype(np.int32)
                         # Selecting the coordinate data for the remaining data elements
                         check_coord.values = copy.deepcopy(np.squeeze(new_coord_data[tuple(ind_slice)]))
+                        if (check_coord.values.ndim == 0):
+                            check_coord.values = check_coord.values.reshape([1])
                         if (data_low is not None):
                             data_low = data_low[tuple(ind_slice)]
+                            if (data_low.ndim == 0):
+                                data_low = data_low.reshape([1])
                             if (not check_coord.mode.range_symmetric):
                                 data_high = data_high[tuple(ind_slice)]                        
+                                if (data_high.ndim == 0):
+                                    data_high = data_high.reshape([1])
                     elif (_options['Interpolation'] == 'Linear'):
                         # ind_slice_coord is numpy array
                         ind_slice_coord_1 = np.trunc(ind_slice_coord).astype(np.int32)
@@ -2432,7 +2447,8 @@ class DataObject:
         try:
             d_slice.check()
         except Exception as e:
-            raise RuntimeError("Internal error. Bad data object after slicing.")
+            raise RuntimeError("Internal error. Bad data object after slicing:{:s}".format(str(e)))
+
         return d_slice
     # End of slice_data
 
@@ -3113,6 +3129,9 @@ class DataObject:
                 raise ValueError("Cannot add strings.")
             d_out = copy.deepcopy(self)
             d_out.data += d1
+        else:
+            raise TypeError("Invalid data type for addition with flap.DataObject")
+
         return d_out
 
     def __radd__(self, d1):
@@ -3175,6 +3194,9 @@ class DataObject:
                 raise ValueError("Cannot add strings.")
             d_out = copy.deepcopy(self)
             d_out.data -= d1
+        else:
+            raise TypeError("Invalid data type for subtaction from flap.DataObject")
+
         return d_out
 
     def __rsub__(self, d1):
@@ -3248,6 +3270,8 @@ class DataObject:
                     d_out.error = [d_out.error[0] * d1, d_out.error[1] * d1]
                 else:
                     d_out.error *= d1
+        else:
+            raise TypeError("Invalid data type for multiplication with flap.DataObject")
         return d_out
              
     def __rmul__(self, d1):
@@ -3528,7 +3552,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
         c_names = d.coordinate_names()
         for i in range(len(c_names)):
             c = d.coordinates[i]
-            s += "    '" + c.unit.name + "'[" + c.unit.unit + ']'
+            s += "    '" + c.unit.title()
             s += "(Dims:"
             if (len(c.dimension_list) is not 0):
                 try:

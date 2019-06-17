@@ -203,7 +203,7 @@ class Unit:
         self.name = name
         self.unit = unit
     
-    def title(self,language='English',complex_txt=None):
+    def title(self,language='EN',complex_txt=None):
         """ Returns a title string which will be used in plotting.
             complex_txt: List of 2 numbers:
                          [0,0]: Amplitude
@@ -291,7 +291,7 @@ class Coordinate:
         # flap.Coordinate.EQUIDISTANT: coordinate changes proportionally to samples number
         # flap.Coordinate.RANGE_ASYMMETRIC: The range around the coordiantes is asymmetric described
         #                                   by lower and uper range
-        self.mode = mode
+        self.mode = copy.deepcopy(mode)
         # The shape of the sample space matrix in this coordinate description (tuple)
         # If len(shape) == 0 then the coordinate is the same for all samples and it is described by values and value_ranges
         # shape should not have a 1 element.
