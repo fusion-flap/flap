@@ -212,7 +212,7 @@ class Unit:
                          [1,1]: Imaginary
         """
         if (language == 'EN'):
-            if (self.unit == ''):
+            if ((self.unit is None) or (self.unit == '')):
                 unit_txt = ' [a.u.]'
             else:
                 unit_txt = ' [' + self.unit + ']'
@@ -228,7 +228,7 @@ class Unit:
             else:
                 txt = self.name + unit_txt
         elif (language == 'HU'):
-            if (self.unit == ''):
+            if ((self.unit is None) or (self.unit == '')):
                 unit_txt = ' [tetsz. e.]'
             else:
                 unit_txt = ' [' + self.unit + ']'
