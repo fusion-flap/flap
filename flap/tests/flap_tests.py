@@ -673,66 +673,68 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
+test_all = True
+
 # Running tests
 plt.close('all')
 
-if (True):
+if (True or test_all):
     test_storage()
     input("Press Enter to continue...")
-if (True):
+if (True or test_all):
     test_saveload()
     input("Press Enter to continue...")
-if (True):
+if (True or test_all):
     test_coordinates()
     input("Press Enter to continue...")
-if (True):    
+if (True or test_all):    
     test_arithmetic()
     input("Press Enter to continue...")
-if (True):
+if (True or test_all):
     test_plot()
     wait_for_key()
 #    input("Press Enter to continue...")
-if (True):
+if (True or test_all):
     test_plot_xy()
     show_plot()
     wait_for_key()
 #    input("Press Enter to continue...")
-if (True):
+if (True or test_all):
     test_plot_multi_xy()
     show_plot()
     wait_for_key()
 #    input("Press Enter to continue...")
-if (True):
+if (True or test_all):
     test_simple_slice()
     show_plot()
     wait_for_key()
-if (True):
+if (True or test_all):
     test_resample()
     plt.pause(0.05)
     wait_for_key()   
-if (True):
+if (True or test_all):
     test_select_multislice()
     show_plot()
     wait_for_key()
-if (True): 
+if (True or test_all): 
     test_detrend()
     plt.pause(0.05)
     wait_for_key()
-if (True):
+if (True or test_all):
     test_apsd()
     show_plot()
     wait_for_key()
-if (True):
+if (True or test_all):
     test_filter()
     plt.pause(0.05)
     wait_for_key()
-if (True):
+if (True or test_all):
     test_cpsd()
     show_plot()
     wait_for_key()
-if (True):
+if (True or test_all):
     test_ccf()
-if (True):
+if (True or test_all):
     test_image()
     show_plot()
     wait_for_key()
