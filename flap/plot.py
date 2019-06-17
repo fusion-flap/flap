@@ -524,16 +524,18 @@ def _plot(data_object,
     except ValueError:
         raise ValueError("Invalid maxpoints setting.")
 
-    if (_options['Complex mode'] == 'Amp-phase'):
-        comptype = 0
-    elif (_options['Complex mode'] == 'Amp-phase'):    
-        comptype = 1
-    else:
+    try:
+        compt = find_str_match(_options['Complex mode'], ['Amp-phase','Real-imag'])
+    except:
         raise ValueError("Invalid 'Complex mode' option:" +_options['Complex mode'])
+    if (compt == 'Amp-phase'):
+        comptype = 0
+    elif (compt == 'Real-imag'):    
+        comptype = 1
     if (_plot_id.number_of_plots > 0):
         if (_plot_id.options[-1]['Complex mode'] != _options['Complex mode']):
             raise ValueError("Different complex plot mode in overplot.")
-    
+
     language = _options['Language']
        
     # X range and Z range is processed here, but Y range not as it might have multiple entries for some plots

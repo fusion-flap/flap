@@ -218,13 +218,25 @@ class Unit:
                 unit_txt = ' [' + self.unit + ']'
             if (complex_txt is not None):
                 if (complex_txt == [0,0]):
-                    txt = 'Amplitude of ' + self.name + unit_txt
+                    if (self.name is None or (self.name == '')):
+                        txt = 'Amplitude ' + unit_txt
+                    else:    
+                        txt = 'Amplitude of ' + self.name + unit_txt
                 elif (complex_txt == [0,1]):
-                    txt = 'Phase of ' + self.name + ' [rad]'
-                elif (complex_txt == [0,1]):
-                    txt = 'Real part of ' + self.name + unit_txt
-                elif (complex_txt == [0,1]):
-                    txt = 'Imaginary part of ' + self.name + unit_txt
+                    if (self.name is None or (self.name == '')):
+                        txt = 'Phase [rad]'
+                    else:    
+                        txt = 'Phase of ' + self.name + ' [rad]'
+                elif (complex_txt == [1,0]):
+                    if (self.name is None or (self.name == '')):
+                        txt = 'Real part ' + unit_txt
+                    else:
+                        txt = 'Real part of ' + self.name + unit_txt
+                elif (complex_txt == [1,1]):
+                    if (self.name is None or (self.name == '')):
+                        txt = 'Imaginary part ' + unit_txt
+                    else:
+                        txt = 'Imaginary part of ' + self.name + unit_txt
             else:
                 txt = self.name + unit_txt
         elif (language == 'HU'):
@@ -237,9 +249,9 @@ class Unit:
                     txt = self.name +' amplitudo' + unit_txt
                 elif (complex_txt == [0,1]):
                     txt = self.name + ' fazis [rad]'
-                elif (complex_txt == [0,1]):
+                elif (complex_txt == [1,0]):
                     txt = self.name + ' valos resz' + unit_txt
-                elif (complex_txt == [0,1]):
+                elif (complex_txt == [1,1]):
                     txt = self.name + ' kepzetes resz'+ unit_txt
             else:
                 txt = self.name + unit_txt
