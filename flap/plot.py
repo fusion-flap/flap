@@ -1138,11 +1138,11 @@ def _plot(data_object,
         if (image_like):
             try: 
                 if (coord_x.dimension_list[0] == 0):
-                    img = ax.imshow(np.clip(d.data,vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                    img = ax.imshow(np.clip(np.transpose(d.data),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
                                     cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
                                     vmax=vmax,**_plot_opt)
                 else:
-                    img = ax.imshow(np.clip(np.transpose(d.data),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                    img = ax.imshow(np.clip(d.data,vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
                                     cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
                                     vmax=vmax,**_plot_opt)
                     

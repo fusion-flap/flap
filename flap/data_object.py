@@ -1682,7 +1682,7 @@ class DataObject:
                 or (type(slicing_description) is range)):
                 slicing_type = 'Numeric'
             elif (np.isscalar(slicing_description)):
-                if (type(slicing_description) is str):
+                if ((type(slicing_description) is str) or (type(slicing_description) is np.str_)):
                     slicing_type = 'String'
                 else:
                     slicing_type = 'Numeric'
@@ -1690,7 +1690,7 @@ class DataObject:
                 for i in range(1,len(slicing_description)):
                     if (type(slicing_description[i]) != type(slicing_description[0])):
                         raise TypeError("Changing types in slicing list.")
-                if (type(slicing_description[0]) is str):
+                if ((type(slicing_description[0]) is str) or (type(slicing_description[0]) is np.str_)):
                     slicing_type = 'String'
                 else:
                     slicing_type = 'Numeric'
