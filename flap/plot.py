@@ -418,6 +418,7 @@ def _plot(data_object,
         'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
+        'Colorbar': Boolelan
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
     """
     
@@ -425,7 +426,7 @@ def _plot(data_object,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'equal',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
-                       'Levels': None, 'Colormap':None, 'Waittime':1}
+                       'Levels': None, 'Colormap':None, 'Waittime':1,'Colorbar':True}
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
 
     if (plot_options is None):
@@ -1154,7 +1155,9 @@ def _plot(data_object,
                                   vmax=vmax,locator=locator,**_plot_opt)
             except Exception as e:
                 raise e
-        plt.colorbar(img,ax=ax)
+        if (_options['Colorbar']):
+            cbar = plt.colorbar(img,ax=ax)
+            cbar.set_label(d.data_unit.name)
         
         if (xrange is not None):
             ax.set_xlim(xrange[0],xrange[1])
@@ -1323,8 +1326,11 @@ def _plot(data_object,
                                       vmax=vmax,locator=locator,**_plot_opt)
                 except Exception as e:
                     raise e
-            plt.colorbar(img,ax=ax)
-            
+                
+            if (_options['Colorbar']):
+                cbar = plt.colorbar(img,ax=ax)
+                cbar.set_label(d.data_unit.name)
+
             if (xrange is not None):
                 ax.set_xlim(xrange[0],xrange[1])
             if (yrange is not None):

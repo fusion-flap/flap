@@ -976,7 +976,7 @@ class DataObject:
                     if (d is None):
                         raise("Internal error in dimension mapping. None dimension.")
 
-            if (not check_coord.mode.equidistant and (check_coord.values.size == 1)):
+            if (not check_coord.mode.equidistant and (np.isscalar(check_coord.values) or (check_coord.values.size == 1))):
                 check_coord.dimension_list = []
             else:
                 check_coord.dimension_list = new_dimension_list

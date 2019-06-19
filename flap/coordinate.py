@@ -655,11 +655,11 @@ class Coordinate:
                 try:
                     vl = self.value_ranges[0,0]
                     vh = self.value_ranges[0,1]
-                except IndexError:
+                except (TypeError,IndexError):
                     vl = self.value_ranges[0]
                     vh = self.value_ranges[1]
                 out_coord_low = np.zeros(tuple(out_shape),dtype=self.dtype()) + vl
-                out_coord_low = np.zeros(tuple(out_shape),dtype=self.dtype()) + vh
+                out_coord_high = np.zeros(tuple(out_shape),dtype=self.dtype()) + vh
             else:
                 out_coord_low = None
                 out_coord_high = None
