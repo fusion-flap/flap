@@ -418,7 +418,8 @@ def _plot(data_object,
         'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
-        'Colorbar': Boolelan
+        'Colorbar': Boolelan. Switch on/off colorbar
+        'Nan color': The colro to use in image data plotting for np.nan (not-a-number) values
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
     """
     
@@ -426,7 +427,7 @@ def _plot(data_object,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'equal',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
-                       'Levels': None, 'Colormap':None, 'Waittime':1,'Colorbar':True}
+                       'Levels': None, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None}
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
 
     if (plot_options is None):
@@ -1137,22 +1138,29 @@ def _plot(data_object,
         _plot_opt = _plot_options[0]
 
         if (image_like):
+            try:
+                cmap_obj = plt.cm.get_cmap(cmap)
+                if (_options['Nan color'] is not None):
+                    cmap_obj.set_bad(_options['Nan color'])
+            except ValueError:
+                raise ValueError("Invalid color map.")
             try: 
                 if (coord_x.dimension_list[0] == 0):
                     img = ax.imshow(np.clip(np.transpose(d.data),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
+                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],
                                     vmax=vmax,**_plot_opt)
                 else:
                     img = ax.imshow(np.clip(d.data,vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
+                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],
                                     vmax=vmax,**_plot_opt)
                     
             except Exception as e:
                 raise e
         else:
+            xgrid, ygrid = grid_to_box(xdata,ydata)
             try:
-                img = ax.contourf(xdata,ydata,np.clip(d.data,vmin,vmax),contour_levels,norm=norm,cmap=cmap,vmin=vmin,
-                                  vmax=vmax,locator=locator,**_plot_opt)
+                img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
+                                  vmax=vmax,**_plot_opt)
             except Exception as e:
                 raise e
         if (_options['Colorbar']):
@@ -1321,9 +1329,10 @@ def _plot(data_object,
                 except Exception as e:
                     raise e
             else:
-                try:
-                    img = ax.contourf(xdata,ydata,np.clip(np.squeeze(d.data[time_index]),vmin,vmax),contour_levels,norm=norm,cmap=cmap,vmin=vmin,
-                                      vmax=vmax,locator=locator,**_plot_opt)
+                xgrid, ygrid = grid_to_box(xdata,ydata)
+                try: 
+                    img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(np.squeeze(d.data[time_index])),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
+                                      vmax=vmax,**_plot_opt)
                 except Exception as e:
                     raise e
                 

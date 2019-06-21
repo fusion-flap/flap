@@ -382,5 +382,59 @@ def find_str_match(value, options):
         raise ValueError("No match for "+value)
     return matches[0]
 
-            
+def grid_to_box(xdata,ydata):
+    """
+    Given 2D x and y coordinate matrices create box coordinates around the points as
+    needed by matplotlib.pcolomesh.
+    xdata: X coordinates. 
+    ydata: Y coordinates. 
+    In both arrays x direction is along first dimension, y direction along second dimension.
+    Returns xbox, ybox.
+    """
+    xdata = np.transpose(xdata.astype(float))
+    xbox_shape = list(xdata.shape)
+    xbox_shape[0] += 1
+    xbox_shape[1] += 1
+    xbox = np.empty(tuple(xbox_shape),dtype=xdata.dtype)
+    xbox[1:,1:-1] = (xdata[:,:-1] + xdata[:,1:]) / 2 
+    xbox[1:-1,1:-1] = (xbox[2:,1:-1] + xbox[1:-1,1:-1]) / 2
+    xbox[1:-1,0] = ((xdata[1:,0] + xdata[:-1,0]) / 2 - xbox[1:-1,1]) * 2 + xbox[1:-1,1]
+    xbox[1:-1,-1] = ((xdata[1:,-1] + xdata[:-1,-1]) / 2 - xbox[1:-1,-2]) * 2 + xbox[1:-1,-2]
+    xbox[0,1:-1] = ((xdata[0,:-1] + xdata[0,1:]) / 2 - xbox[1,1:-1]) * 2 + xbox[1,1:-1]
+    xbox[-1,1:-1] = ((xdata[-1,:-1] + xdata[-1,1:]) / 2 - xbox[-2,1:-1]) * 2 + xbox[-2,1:-1]
+    xbox[0,0] = xbox[1,1] + (xbox[0,1] - xbox[1,1]) + (xbox[1,0] - xbox[1,1])
+    xbox[-1,-1] = xbox[-2,-2] + (xbox[-1,-2] - xbox[-2,-2]) + (xbox[-2,-1] - xbox[-2,-2])
+    xbox[0,-1] = xbox[1,-2] + (xbox[0,-2] - xbox[1,-2]) + (xbox[1,-1] - xbox[1,-2]) 
+    xbox[-1,0] = xbox[-2,1] + (xbox[-1,1] - xbox[-2,1]) + (xbox[-2,0] - xbox[-2,1])
+      
+    ydata = np.transpose(ydata.astype(float))
+    ybox_shape = list(ydata.shape)
+    ybox_shape[0] += 1
+    ybox_shape[1] += 1
+    ybox = np.empty(tuple(ybox_shape),dtype=ydata.dtype)
+    ybox[1:,1:-1] = (ydata[:,:-1] + ydata[:,1:]) / 2 
+    ybox[1:-1,1:-1] = (ybox[2:,1:-1] + ybox[1:-1,1:-1]) / 2
+    ybox[1:-1,0] = ((ydata[1:,0] + ydata[:-1,0]) / 2 - ybox[1:-1,1]) * 2 + ybox[1:-1,1]
+    ybox[1:-1,-1] = ((ydata[1:,-1] + ydata[:-1,-1]) / 2 - ybox[1:-1,-2]) * 2 + ybox[1:-1,-2]
+    ybox[0,1:-1] = ((ydata[0,:-1] + ydata[0,1:]) / 2 - ybox[1,1:-1]) * 2 + ybox[1,1:-1]
+    ybox[-1,1:-1] = ((ydata[-1,:-1] + ydata[-1,1:]) / 2 - ybox[-2,1:-1]) * 2 + ybox[-2,1:-1]
+    ybox[0,0] = ybox[1,1] + (ybox[0,1] - ybox[1,1]) + (ybox[1,0] - ybox[1,1])
+    ybox[-1,-1] = ybox[-2,-2] + (ybox[-1,-2] - ybox[-2,-2]) + (ybox[-2,-1] - ybox[-2,-2])
+    ybox[0,-1] = ybox[1,-2] + (ybox[0,-2] - ybox[1,-2]) + (ybox[1,-1] - ybox[1,-2]) 
+    ybox[-1,0] = ybox[-2,1] + (ybox[-1,1] - ybox[-2,1]) + (ybox[-2,0] - ybox[-2,1])
     
+    return xbox,ybox
+
+#import matplotlib.pyplot as plt
+
+#plt.clf()
+#ydata, xdata = np.meshgrid(np.arange(10),np.arange(20))
+#xdata = xdata.astype(float)
+#ydata = ydata.astype(float)
+#xdata += ydata*0.1
+#ydata += xdata*0.2
+#xbox, ybox = grid_to_box(xdata,ydata)
+#data =  (xdata + ydata)
+#plt.pcolormesh(xbox,ybox,np.transpose(data),cmap='Greys')
+#plt.scatter(xdata.flatten(), ydata.flatten())
+
