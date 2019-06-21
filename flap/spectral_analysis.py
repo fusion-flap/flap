@@ -1602,7 +1602,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     corr_binned /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
             else:
                 # We do not have the autocorrelations, calculating
-                res_acf = np.real(np.fft.ifftn(fft * np.conj(fft),axes=correlation_dimensions))
+                res_acf = np.fft.ifftn(fft * np.conj(fft),axes=correlation_dimensions)
+                if (out_dtype is float):
+                    res_acf = np.real(res_acf)
                 # we need to move the correlation axes to the end to be consistent with the CCF
                 res_acf, ax_map = move_axes_to_end(res_acf,correlation_dimensions)
                 corr_acf = np.empty(res_acf.shape,dtype=res.dtype)
@@ -1617,7 +1619,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     # Always the cor_dimension_start axis is taken as it is removed by take
                     corr_binned_acf = np.take(corr_binned_acf,zero_ind_out[i],axis=corr_dimension_start)
                 if (ref is not None):
-                    res_acf_ref = np.real(np.fft.ifftn(fft_ref * np.conj(fft_ref),axes=correlation_dimensions_ref))
+                    res_acf_ref = np.fft.ifftn(fft_ref * np.conj(fft_ref),axes=correlation_dimensions_ref)
+                    if (out_dtype is float):
+                        res_acf_ref = np.real(res_acf_ref)
                     # we need to move the correlation axes to the start to be consistent with the CCF
                     res_acf_ref,ax_map_ref = move_axes_to_start(res_acf_ref,correlation_dimensions_ref)
                     corr_acf_ref = np.empty(res_acf_ref.shape,dtype=res_acf.dtype)

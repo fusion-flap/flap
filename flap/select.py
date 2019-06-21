@@ -18,7 +18,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
     INPUT:
         object_descr: If a data object: Plot this data object to select.
            String: Will be interpreted as a data object name in flap storage.
-        exp_id: The exp_id is dobject_descr is a string
+        exp_id: The exp_id if dobject_descr is a string
                 intervals: Information of processing intervals.
                            If dictionary with a single key: {selection coordinate: description})
                                Key is a coordinate name which can be different from the calculation
@@ -29,7 +29,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                                interval. If the data name is not the same as coordinate a coordinate with the
                                same name will be searched for in the data object and the value_ranges
                                will be used fromm it to set the intervals.
-                           If not a dictionary and not None is is interpreted as the interval
+                           If not a dictionary and not None it is interpreted as the interval
                                description, the selection coordinate is taken the same as
                                coordinate.
                            If None, the whole data interval will be used as a single interval.
