@@ -419,15 +419,16 @@ def _plot(data_object,
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
         'Colorbar': Boolelan. Switch on/off colorbar
-        'Nan color': The colro to use in image data plotting for np.nan (not-a-number) values
+        'Nan color': The color to use in image data plotting for np.nan (not-a-number) values
+        'Interpolation': Interpolation method for image plot.
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
     """
     
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
-                       'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'equal',
+                       'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
-                       'Levels': None, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None}
+                       'Levels': None, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,'Interpolation':'bilinear'}
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
 
     if (plot_options is None):
@@ -1101,18 +1102,34 @@ def _plot(data_object,
             (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
             # This data is image-like with data points on a rectangular array
             image_like = True
-            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
-            ydata_range = coord_y.data_range(data_shape=d.shape)[0]
-        else:
-            image_like = False
+        elif ((len(coord_x.dimension_list) == 1) and (len(coord_y.dimension_list) == 1)):
             if (not coord_x.isnumeric()):
                 raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
-            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
             if (not coord_y.isnumeric()):
                 raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
+            index = [0] * len(d.shape)
+            index[coord_x.dimension_list[0]] = ...
+            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape,index=index)
+            xdata = xdata.flatten()
+            dx = xdata[1:] - xdata[:-1]
+            index = [0] * len(d.shape)
+            index[coord_y.dimension_list[0]] = ...
+            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=index)
+            ydata = ydata.flatten()
+            dy = ydata[1:] - ydata[:-1]
+            if ((np.nonzero(np.abs(dx - dx[0]) / math.fabs(dx[0]) > 0.001)[0].size == 0) and
+                (np.nonzero(np.abs(dy - dy[0]) / math.fabs(dy[0]) > 0.001)[0].size == 0)):
+                # Actually the non-equidistant coordinates are equidistant
+                image_like = True
+            else:
+                image_like = False
+        if (image_like):        
+            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
+            ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
+        else:
             ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape)
-        
-
+            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
+            
         if (zrange is None):
             vmin = np.nanmin(d.data)
             vmax = np.nanmax(d.data)
@@ -1137,22 +1154,23 @@ def _plot(data_object,
             
         _plot_opt = _plot_options[0]
 
+        try:
+            cmap_obj = plt.cm.get_cmap(cmap)
+            if (_options['Nan color'] is not None):
+                cmap_obj.set_bad(_options['Nan color'])
+        except ValueError:
+            raise ValueError("Invalid color map.")
+
         if (image_like):
-            try:
-                cmap_obj = plt.cm.get_cmap(cmap)
-                if (_options['Nan color'] is not None):
-                    cmap_obj.set_bad(_options['Nan color'])
-            except ValueError:
-                raise ValueError("Invalid color map.")
             try: 
                 if (coord_x.dimension_list[0] == 0):
                     img = ax.imshow(np.clip(np.transpose(d.data),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],
-                                    vmax=vmax,**_plot_opt)
+                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
+                                    vmax=vmax,origin='lower',**_plot_opt)
                 else:
                     img = ax.imshow(np.clip(d.data,vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],
-                                    vmax=vmax,**_plot_opt)
+                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
+                                    vmax=vmax,origin='lower',**_plot_opt)
                     
             except Exception as e:
                 raise e
@@ -1279,7 +1297,14 @@ def _plot(data_object,
                 raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
             ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=ind)
             ydata = np.squeeze(ydata)
-        
+            
+        try:
+            cmap_obj = plt.cm.get_cmap(cmap)
+            if (_options['Nan color'] is not None):
+                cmap_obj.set_bad(_options['Nan color'])
+        except ValueError:
+            raise ValueError("Invalid color map.")
+
         for it in range(len(tdata)):
             plt.subplot(_plot_id.base_subplot)
             plt.cla()
