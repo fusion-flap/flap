@@ -428,7 +428,8 @@ def _plot(data_object,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
-                       'Levels': None, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,'Interpolation':'bilinear'}
+                       'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
+                       'Interpolation':'bilinear'}
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
 
     if (plot_options is None):
@@ -485,7 +486,7 @@ def _plot(data_object,
         plt.cla()
             
     # Setting plot type
-    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image']
+    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contourf']
     if (plot_type is None):
         if (len(d.shape) == 1):
             _plot_type = 'xy'
@@ -1052,13 +1053,13 @@ def _plot(data_object,
                 ax.set_title(title)        
         _plot_id.plot_subtype = 0 # real multi xy plot 
 
-    elif (_plot_type == 'image'):
+    elif ((_plot_type == 'image') or (plot_type == 'contourf')):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
         if (len(d.shape) != 2):
-            raise TypeError("Image plot is applicable to 2D data only. Use slicing.")
+            raise TypeError("Image/contour plot is applicable to 2D data only. Use slicing.")
         if (d.data.dtype.kind == 'c'):
-            raise TypeError("Image plot is applicable only to real data.")
+            raise TypeError("Image/contour plot is applicable only to real data.")
         # Checking for numeric type
         try:
             d.data[0,0] += 1
@@ -1098,31 +1099,34 @@ def _plot(data_object,
 
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
-        if ((coord_x.mode.equidistant) and (len(coord_x.dimension_list) == 1) and
-            (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
-            # This data is image-like with data points on a rectangular array
-            image_like = True
-        elif ((len(coord_x.dimension_list) == 1) and (len(coord_y.dimension_list) == 1)):
-            if (not coord_x.isnumeric()):
-                raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
-            if (not coord_y.isnumeric()):
-                raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
-            index = [0] * len(d.shape)
-            index[coord_x.dimension_list[0]] = ...
-            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape,index=index)
-            xdata = xdata.flatten()
-            dx = xdata[1:] - xdata[:-1]
-            index = [0] * len(d.shape)
-            index[coord_y.dimension_list[0]] = ...
-            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=index)
-            ydata = ydata.flatten()
-            dy = ydata[1:] - ydata[:-1]
-            if ((np.nonzero(np.abs(dx - dx[0]) / math.fabs(dx[0]) > 0.001)[0].size == 0) and
-                (np.nonzero(np.abs(dy - dy[0]) / math.fabs(dy[0]) > 0.001)[0].size == 0)):
-                # Actually the non-equidistant coordinates are equidistant
+        if (plot_type == 'image'):
+            if ((coord_x.mode.equidistant) and (len(coord_x.dimension_list) == 1) and
+                (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
+                # This data is image-like with data points on a rectangular array
                 image_like = True
-            else:
-                image_like = False
+            elif ((len(coord_x.dimension_list) == 1) and (len(coord_y.dimension_list) == 1)):
+                if (not coord_x.isnumeric()):
+                    raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
+                if (not coord_y.isnumeric()):
+                    raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
+                index = [0] * len(d.shape)
+                index[coord_x.dimension_list[0]] = ...
+                xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape,index=index)
+                xdata = xdata.flatten()
+                dx = xdata[1:] - xdata[:-1]
+                index = [0] * len(d.shape)
+                index[coord_y.dimension_list[0]] = ...
+                ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=index)
+                ydata = ydata.flatten()
+                dy = ydata[1:] - ydata[:-1]
+                if ((np.nonzero(np.abs(dx - dx[0]) / math.fabs(dx[0]) > 0.01)[0].size == 0) and
+                    (np.nonzero(np.abs(dy - dy[0]) / math.fabs(dy[0]) > 0.01)[0].size == 0)):
+                    # Actually the non-equidistant coordinates are equidistant
+                    image_like = True
+                else:
+                    image_like = False
+        else:
+            image_like = False
         if (image_like):        
             xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
             ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
@@ -1175,12 +1179,20 @@ def _plot(data_object,
             except Exception as e:
                 raise e
         else:
-            xgrid, ygrid = grid_to_box(xdata,ydata)
-            try:
-                img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
-                                  vmax=vmax,**_plot_opt)
-            except Exception as e:
-                raise e
+            if (plot_type == 'image'):
+                xgrid, ygrid = grid_to_box(xdata,ydata)
+                try:
+                    img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
+                                      origin='lower',vmax=vmax,**_plot_opt)
+                except Exception as e:
+                    raise e
+            else:
+                try:
+                    img = ax.contourf(xdata,ydata,np.clip(d.data,vmin,vmax),contour_levels,norm=norm,
+                                      origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
+                except Exception as e:
+                    raise e
+                
         if (_options['Colorbar']):
             cbar = plt.colorbar(img,ax=ax)
             cbar.set_label(d.data_unit.name)
@@ -1203,7 +1215,7 @@ def _plot(data_object,
             if (d.exp_id is not None):
                 newtitle += str(d.exp_id)
                 if (d.data_title is not None):
-                    newtitle += d.data_title
+                    newtitle += ' ' + d.data_title
             if (len(newtitle) != 0):
                 if (len(title + newtitle) < 40):
                     if (title != ''):
