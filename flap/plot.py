@@ -389,7 +389,8 @@ def _plot(data_object,
                       Default x axis is first coordinate, y axis is Data
                       The signals are named in the label with the 'Signal name' coordinate or the one
                       named in options['Signal name']
-          'image': Plots a 2D data matrix as an image. Options: Colormap, Data range, 
+          'image': Plots a 2D data matrix as an image. Options: Colormap, Data range, ...
+          'contour': Contour plot
     plot_options: Dictionary or list of dictionories. Will be passed over to the plot call. For plots with multiple subplots this can be
                   a list of dictionaries, each for one subplot.
     plot_id: A PlotID object is the plot should go into an existing plot.
@@ -486,7 +487,7 @@ def _plot(data_object,
         plt.cla()
             
     # Setting plot type
-    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contourf']
+    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contour','anim-contour']
     if (plot_type is None):
         if (len(d.shape) == 1):
             _plot_type = 'xy'
@@ -1053,7 +1054,7 @@ def _plot(data_object,
                 ax.set_title(title)        
         _plot_id.plot_subtype = 0 # real multi xy plot 
 
-    elif ((_plot_type == 'image') or (plot_type == 'contourf')):
+    elif ((_plot_type == 'image') or (_plot_type == 'contour')):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
         if (len(d.shape) != 2):
@@ -1099,7 +1100,7 @@ def _plot(data_object,
 
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
-        if (plot_type == 'image'):
+        if (_plot_type == 'image'):
             if ((coord_x.mode.equidistant) and (len(coord_x.dimension_list) == 1) and
                 (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
                 # This data is image-like with data points on a rectangular array
@@ -1179,7 +1180,7 @@ def _plot(data_object,
             except Exception as e:
                 raise e
         else:
-            if (plot_type == 'image'):
+            if (_plot_type == 'image'):
                 xgrid, ygrid = grid_to_box(xdata,ydata)
                 try:
                     img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
@@ -1226,7 +1227,7 @@ def _plot(data_object,
                     title += ',...'
                 ax.set_title(title)   
                 
-    elif (_plot_type == 'anim-image'):
+    elif ((_plot_type == 'anim-image') or (_plot_type == 'anim-contour')):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
         if (len(d.shape) != 3):
@@ -1257,18 +1258,18 @@ def _plot(data_object,
             raise e
         
         if (not ((pdd_list[3].data_type == PddType.Data) and (pdd_list[3].data_object == d))):
-            raise ValueError("For anim-image plot only data can be plotted on the z axis.")
+            raise ValueError("For anim-image/anim-contour plot only data can be plotted on the z axis.")
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
-            raise ValueError("X and y coordinates of anim-image plot type should be coordinates.")
+            raise ValueError("X and y coordinates of anim-image/anim-contour plot type should be coordinates.")
         if (pdd_list[2].data_type != PddType.Coordinate) :
-            raise ValueError("Time coordinate of anim-image plot should be coordinate.")
+            raise ValueError("Time coordinate of anim-image/anim-contour plot should be coordinate.")
 
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
         coord_t = pdd_list[2].value
         
         if (len(coord_t.dimension_list) != 1):
-            raise ValueError("Time coordinate for anim-image plot should be changing only along one dimension.")
+            raise ValueError("Time coordinate for anim-image/anim-contour plot should be changing only along one dimension.")
         try:
             coord_x.dimension_list.index(coord_t.dimension_list[0])
             badx = True
@@ -1292,23 +1293,35 @@ def _plot(data_object,
             (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
             # This data is image-like with data points on a rectangular array
             image_like = True
-            try:
-                xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
-                ydata_range = coord_y.data_range(data_shape=d.shape)[0]
-            except Exception as e:
-                raise e
-        else:
-            ind = [...] * 3
-            ind[coord_t.dimension_list[0]] = 0
-            image_like = False
+        elif ((len(coord_x.dimension_list) == 1) and (len(coord_y.dimension_list) == 1)):
             if (not coord_x.isnumeric()):
                 raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
-            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape,index=ind)
-            xdata = np.squeeze(xdata)        
             if (not coord_y.isnumeric()):
                 raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
-            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=ind)
-            ydata = np.squeeze(ydata)
+            index = [0] * len(d.shape)
+            index[coord_x.dimension_list[0]] = ...
+            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape,index=index)
+            xdata = xdata.flatten()
+            dx = xdata[1:] - xdata[:-1]
+            index = [0] * len(d.shape)
+            index[coord_y.dimension_list[0]] = ...
+            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=index)
+            ydata = ydata.flatten()
+            dy = ydata[1:] - ydata[:-1]
+            if ((np.nonzero(np.abs(dx - dx[0]) / math.fabs(dx[0]) > 0.01)[0].size == 0) and
+                (np.nonzero(np.abs(dy - dy[0]) / math.fabs(dy[0]) > 0.01)[0].size == 0)):
+                # Actually the non-equidistant coordinates are equidistant
+                image_like = True
+            else:
+                image_like = False
+        else:
+            image_like = False
+        if (image_like):        
+            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
+            ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
+        else:
+            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape)
+            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
             
         try:
             cmap_obj = plt.cm.get_cmap(cmap)
@@ -1354,24 +1367,32 @@ def _plot(data_object,
     
             if (image_like):
                 try: 
-                    if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
-                        img = ax.imshow(np.clip(np.squeeze(d.data[time_index]),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
-                                        cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
-                                        vmax=vmax,**_plot_opt)
+                    if (coord_x.dimension_list[0] == 0):
+                        img = ax.imshow(np.clip(np.transpose(d.data[time_index]),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                                        cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
+                                        vmax=vmax,origin='lower',**_plot_opt)
                     else:
-                        img = ax.imshow(np.clip(np.transpose(np.squeeze(d.data[time_index])),vmin,vmax),extent=xdata_range + ydata_range,
-                                        norm=norm,cmap=cmap,vmin=vmin,aspect=_options['Aspect ratio'],
-                                        vmax=vmax,**_plot_opt)
-                        
+                        img = ax.imshow(np.clip(d.data[time_index],vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                                        cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
+                                        vmax=vmax,origin='lower',**_plot_opt)            
                 except Exception as e:
                     raise e
             else:
-                xgrid, ygrid = grid_to_box(xdata,ydata)
-                try: 
-                    img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(np.squeeze(d.data[time_index])),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
-                                      vmax=vmax,**_plot_opt)
-                except Exception as e:
-                    raise e
+                if (_plot_type == 'anim-image'):
+                    xgrid, ygrid = grid_to_box(xdata,ydata)
+                    try:
+                        img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data[time_index]),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
+                                          origin='lower',vmax=vmax,**_plot_opt)
+                    except Exception as e:
+                        raise e
+                else:
+                    try:
+                        img = ax.contourf(xdata,ydata,np.clip(d.data[time_index],vmin,vmax),contour_levels,norm=norm,
+                                          origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
+                    except Exception as e:
+                        raise e
+    
+
                 
             if (_options['Colorbar']):
                 cbar = plt.colorbar(img,ax=ax)
