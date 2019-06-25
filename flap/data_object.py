@@ -2734,9 +2734,9 @@ class DataObject:
                   'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
                     None: Don't remove trend.
                     Strings:
-                      'mean': subtract mean
+                      'Mean': subtract mean
                     Lists:
-                      ['poly', n]: Fit an n order polynomial to the data and subtract.
+                      ['Poly', n]: Fit an n order polynomial to the data and subtract.
                             Trend removal will be applied to each interval defined by slicing
                             separately.
             Return value: The data object with the trend removed data.

@@ -1184,7 +1184,7 @@ def _plot(data_object,
                 xgrid, ygrid = grid_to_box(xdata,ydata)
                 try:
                     img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
-                                      origin='lower',vmax=vmax,**_plot_opt)
+                                        vmax=vmax,**_plot_opt)
                 except Exception as e:
                     raise e
             else:
