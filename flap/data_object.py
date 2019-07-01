@@ -2031,8 +2031,8 @@ class DataObject:
                             # In slice type processing we create a slice object
                             if (n_int == 0):
                                 raise ValueError("No data in intervals")
-                            n_in_int = int(round(intervals[0].stop - intervals[0].start)  \
-                                                    / slicing_coords[i_sc].step[0]) + 1
+                            n_in_int = int(round((intervals[0].stop - intervals[0].start)  \
+                                                    / slicing_coords[i_sc].step[0])) + 1
                             # If the number of intervals is less than the elements in the interval it does not worth
                             # doing slice processing
                             if (n_in_int < 2):
