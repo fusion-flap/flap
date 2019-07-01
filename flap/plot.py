@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
 from matplotlib import ticker
+import matplotlib.animation as animation
 import numpy as np
 import copy
 from enum import Enum
@@ -417,12 +418,16 @@ def _plot(data_object,
         'Levels': Number of contour levels or array of levels.
         'Aspect ratio': 'equal', 'auto' or float. (See imshow)
         'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
+        'Video file': Name of output video file for anim-... plots
+        'Video framerate':  Frame rate for output video.
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
         'Colorbar': Boolelan. Switch on/off colorbar
         'Nan color': The color to use in image data plotting for np.nan (not-a-number) values
         'Interpolation': Interpolation method for image plot.
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
+        'animation.ffmpeg_path': Path for the ffmpeg program (with program name) for video encoding.
+                                 This can also be set in plt.rcParams['animation.ffmpeg_path']
     """
     
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
@@ -430,7 +435,8 @@ def _plot(data_object,
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
                        'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
-                       'Interpolation':'bilinear'}
+                       'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,
+                       'animation.ffmpeg_path':None}
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
 
     if (plot_options is None):
@@ -859,6 +865,8 @@ def _plot(data_object,
     elif (_plot_type == 'multi xy'):
         if (len(d.shape) > 2):
             raise TypeError("multi x-y plot is applicable to 2D data only. Use slicing.")
+        if (len(d.shape) != 2):
+            raise TypeError("multi x-y plot is applicable to 2D data only.")
         if (d.data.dtype.kind == 'c'):
             raise TypeError("multi x-y plot is applicable only to real data.")
         if ((axes is not None) and (type(axes) is list) and (len(axes) > 1)):
@@ -1225,7 +1233,7 @@ def _plot(data_object,
                         title = newtitle
                 else:
                     title += ',...'
-                ax.set_title(title)   
+        ax.set_title(title)   
                 
     elif ((_plot_type == 'anim-image') or (_plot_type == 'anim-contour')):
         if (d.data is None):
@@ -1330,13 +1338,19 @@ def _plot(data_object,
         except ValueError:
             raise ValueError("Invalid color map.")
 
+        if (_options['Video file'] is not None):
+            anim_ims = []
+        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+        ax=plt.plot()
+        _plot_id.plt_axis_list = []
+        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        plt.subplot(_plot_id.base_subplot)
+        plt.plot()
+        plt.cla()
+        ax=plt.gca()
         for it in range(len(tdata)):
-            plt.subplot(_plot_id.base_subplot)
-            plt.cla()
-            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
-            _plot_id.plt_axis_list = []
-            _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
-            ax = _plot_id.plt_axis_list[0]
+#            plt.subplot(_plot_id.base_subplot)
+#            plt.cla()
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
             time_index = tuple(time_index)
@@ -1368,11 +1382,13 @@ def _plot(data_object,
             if (image_like):
                 try: 
                     if (coord_x.dimension_list[0] == 0):
-                        img = ax.imshow(np.clip(np.transpose(d.data[time_index]),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                        im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
+                        img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
                                         cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
                                         vmax=vmax,origin='lower',**_plot_opt)
                     else:
-                        img = ax.imshow(np.clip(d.data[time_index],vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
+                        im = np.clip(d.data[time_index],vmin,vmax)
+                        img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
                                         cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
                                         vmax=vmax,origin='lower',**_plot_opt)            
                 except Exception as e:
@@ -1380,22 +1396,22 @@ def _plot(data_object,
             else:
                 if (_plot_type == 'anim-image'):
                     xgrid, ygrid = grid_to_box(xdata,ydata)
+                    im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     try:
-                        img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data[time_index]),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
+                        img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
                                           origin='lower',vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
                 else:
                     try:
-                        img = ax.contourf(xdata,ydata,np.clip(d.data[time_index],vmin,vmax),contour_levels,norm=norm,
+                        im = plt.clip(d.data[time_index],vmin,vmax)
+                        img = ax.contourf(xdata,ydata,im,contour_levels,norm=norm,
                                           origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
     
-
-                
             if (_options['Colorbar']):
-                cbar = plt.colorbar(img,ax=ax)
+                cbar = plt.colorbar(img,cax=_plot_id.base_subplot)
                 cbar.set_label(d.data_unit.name)
 
             if (xrange is not None):
@@ -1408,13 +1424,25 @@ def _plot(data_object,
                 ax.set_xscale('log')
             if (_options['Log y']):
                 ax.set_yscale('log')
-            title = coord_t.unit.name+'='+"{:10f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
-            ax.set_title(title)
+            title = coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
+            plt.title(title)
             plt.show()
             time.sleep(_options['Waittime'])
             plt.pause(0.001)
-
-                
+            if (_options['Video file'] is not None):
+                anim_ims.append([img])
+        if (_options['Video file'] is not None):
+            if (_options['animation.ffmpeg_path'] is not None):
+                plt.rcParams['animation.ffmpeg_path'] = _options['animation.ffmpeg_path']
+            im_ani = animation.ArtistAnimation(plt.gcf(), anim_ims, interval=1000./_options['Video framerate'],
+                                               blit=False)
+            im_ani.save(_options['Video file'])    
+#            plt.rcParams['animation.ffmpeg_path'] = 'C:\Program Files\ffmpeg\bin\ffmpeg.exe'
+#            im_ani = animation.ArtistAnimation(plt.gcf(), anim_ims, interval=50, repeat_delay=3000,
+#                                               blit=False)
+#            im_ani.save(_options['Video file'])
+#            im_ani.save(_options['Video file'], writer='ffmpeg')
+    
 
     plt.show()       
  

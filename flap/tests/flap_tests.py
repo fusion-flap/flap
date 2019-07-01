@@ -629,14 +629,15 @@ def test_image():
     flap.delete_data_object('*')
     plt.figure()
     print("**** Generating a sequence of test images")
-    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO')
+    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.01})
     flap.list_data_objects()
     print("***** Showing one image")
     flap.plot('TEST_VIDEO',slicing={'Time':30e-3/4},plot_type='image',axes=['Image x','Image y'],options={'Clear':True})
     plt.figure()
-    print("**** Showing a sequence of images.")
-    flap.plot('TEST_VIDEO',plot_type='anim-image',axes=['Image x','Image y','Time'],options={'Z range':[0,4095],'Wait':0.01,'Clear':True})
-    flap.plot('TEST_VIDEO',slicing={'Time':30e-3/3},plot_type='image',axes=['Image x','Image y'])
+    print("**** Showing a sequence of images and saving to test_video.mp4")
+    flap.plot('TEST_VIDEO',plot_type='anim-image',axes=['Image x','Image y','Time'],
+              options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video.mp4','Colorbar':False})
+#    flap.plot('TEST_VIDEO',slicing={'Time':30e-3/3},plot_type='image',axes=['Image x','Image y'],options={'Clear':True})
 
  
 def show_plot():
@@ -646,7 +647,6 @@ def show_plot():
   
 def keypress_event(event):
     global keypressed
-    print("dssfsf")
     keypressed = event.key
     
 def keypress_start():
@@ -673,66 +673,66 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = True
+test_all = False
 
 # Running tests
 plt.close('all')
 
-if (True or test_all):
+if (False or test_all):
     test_storage()
     input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_saveload()
     input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_coordinates()
     input("Press Enter to continue...")
-if (True or test_all):    
+if (False or test_all):    
     test_arithmetic()
     input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_plot()
     wait_for_key()
 #    input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_plot_xy()
     show_plot()
     wait_for_key()
 #    input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_plot_multi_xy()
     show_plot()
     wait_for_key()
 #    input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_simple_slice()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_resample()
     plt.pause(0.05)
     wait_for_key()   
-if (True or test_all):
+if (False or test_all):
     test_select_multislice()
     show_plot()
     wait_for_key()
-if (True or test_all): 
+if (False or test_all): 
     test_detrend()
     plt.pause(0.05)
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_apsd()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_filter()
     plt.pause(0.05)
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_cpsd()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_ccf()
 if (True or test_all):
     test_image()

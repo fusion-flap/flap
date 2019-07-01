@@ -3723,8 +3723,7 @@ def add_coordinate(object_name,
         add_data_object(d,_output_name)
     except Exception as e:
         raise e
-
-
+    return d
 
 def plot(object_name,exp_id='*',axes=None, slicing=None, summing=None, options=None,
          plot_type=None, plot_options=None,plot_id=None,slicing_options=None):
