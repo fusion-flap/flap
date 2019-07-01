@@ -458,7 +458,7 @@ class Coordinate:
                             return False
                         if (np.nonzero(self.value_ranges[1].flatten() != c1.value_ranges[1].flatten())[0].size != 0):
                             return False
-            return True
+        return True
                     
     def non_interpol(self,data_shape):
         """ Return True if the shape of the coordinate description
