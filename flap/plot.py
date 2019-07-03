@@ -569,6 +569,8 @@ def _plot(data_object,
 
     if ((_plot_type == 'xy') or (_plot_type == 'scatter')):
         # 1D plots: xy, scatter and complex versions
+        if (len(d.shape) > 1):
+            raise ValueError("xy plot is applicable only to 1D data. Use slicing.")
         # Checking whether oveplotting into the same plot type
         if ((d.data is not None) and (d.data.dtype.kind == 'c')): 
             subtype = 1
@@ -1349,8 +1351,10 @@ def _plot(data_object,
         plt.cla()
         ax=plt.gca()
         for it in range(len(tdata)):
-#            plt.subplot(_plot_id.base_subplot)
-#            plt.cla()
+            if (_options['Video file'] is None):
+                #Erasing plot if not making video
+#                plt.subplot(_plot_id.base_subplot)
+                plt.cla()
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
             time_index = tuple(time_index)
@@ -1391,6 +1395,8 @@ def _plot(data_object,
                         img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
                                         cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
                                         vmax=vmax,origin='lower',**_plot_opt)            
+                        if (_options['Video file'] is None):
+                            del im
                 except Exception as e:
                     raise e
             else:
@@ -1402,11 +1408,15 @@ def _plot(data_object,
                                           origin='lower',vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
+                    if (_options['Video file'] is None):
+                        del im
                 else:
                     try:
                         im = plt.clip(d.data[time_index],vmin,vmax)
                         img = ax.contourf(xdata,ydata,im,contour_levels,norm=norm,
                                           origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
+                        if (_options['Video file'] is None):
+                            del im
                     except Exception as e:
                         raise e
     

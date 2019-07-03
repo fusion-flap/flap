@@ -1802,7 +1802,7 @@ class DataObject:
                     if (len(slicing_coords[i_sc].dimension_list) == 0):
                         # This coordinate is constant
                         #raise NotImplementedError("Slicing on constant coordinates is not immplemented.")
-                        return d_slice
+                        continue
                     try:
                         # Determine slicing index in the flattened coordinate dimensions
                         ind_slice_coord = simple_slice_index(slicing_description[i_sc],
@@ -2744,7 +2744,7 @@ class DataObject:
 
         if (self.data is None):
             raise ValueError("Cannot detrend without data.")
-        default_options = {'Trend removal': ['poly', 2]}
+        default_options = {'Trend removal': ['Poly', 2]}
 
         try:
             _options = flap.config.merge_options(default_options, options,
