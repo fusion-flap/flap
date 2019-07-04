@@ -7,6 +7,7 @@ Created on Wed Jan 23 09:44:50 2019
 This is the coordinate description for FLAP
 """
 
+import math
 import numpy as np
 from .tools import *
 
@@ -429,7 +430,21 @@ class Coordinate:
         if (self.mode.equidistant != c1.mode.equidistant):
             return False
         if (self.mode.equidistant and c1.mode.equidistant):
-            if ((self.start != c1.start) or (self.step != c1.step)):
+            if (type(self.step) is not list):
+                self_step = [self.step]
+            else:
+                self_step = self.step
+            if (type(c1.step) is not list):
+                c1_step = [c1.step]
+            else:
+                c1_step = c1.step
+            minstep = math.fabs(self_step[0])    
+            for i in range(len(self_step)):
+                if (math.fabs(self_step[i] - c1_step[i]) / math.fabs(self_step[i]) > 0.00001):
+                    return False
+                if (math.fabs(self_step[i]) < minstep):
+                    minstep = math.fabs(self_step[i])
+            if (math.fabs(self.start - c1.start) / minstep > 0.00001):
                 return False
             if (self.value_ranges != c1.value_ranges):
                 return False

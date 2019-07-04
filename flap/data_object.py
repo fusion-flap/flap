@@ -1648,19 +1648,20 @@ class DataObject:
                         if (len(ind_coord) == 0):
                             raise ValueError("No matching elements found in slicing.")
                     else:
-                        if (slicing_coord.mode.equidistant and len(slicing_coord.dimension_list) == 1):
+                        if ((_options['Interpolation'] == 'Closest value')
+                             and slicing_coord.mode.equidistant and (len(slicing_coord.dimension_list) == 1)):
                             ind_coord = (slicing_arr - slicing_coord.start) / slicing_coord.step
                             ind = np.nonzero(ind_coord < 0)[0]
                             if (ind.size > 0):
                                 ind = np.nonzero(ind_coord >= 0)[0]
                                 if (len(ind) == 0):
-                                    raise ValueError("SLicing is out of coordinnate range.")
+                                    raise ValueError("Slicing is out of coordinate range.")
                                 ind_coord = ind_coord[ind]
                             ind = np.nonzero(ind_coord >= data_shape[slicing_coord.dimension_list[0]])[0]
                             if (ind.size > 0):
                                 ind = np.nonzero(ind_coord < data_shape[slicing_coord.dimension_list[0]])[0]
                                 if (len(ind) == 0):
-                                    raise ValueError("Slicing is out of coordinnate range.")
+                                    raise ValueError("Slicing is out of coordinate range.")
                                 ind_coord = ind_coord[ind]
                         else:
                             # Checking for monotonicity of coordinate
@@ -2876,7 +2877,7 @@ class DataObject:
                 c_names.index('Time')
                 _coordinate = 'Time'
             except ValueError:
-                raise ValueError("No coordinate is given for detrend and no Time coordinate found.")
+                raise ValueError("No coordinate is given for filter and no Time coordinate found.")
         else:
             _coordinate = coordinate
         try:
