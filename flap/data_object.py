@@ -342,10 +342,10 @@ class DataObject:
                                           number = number
                                           )
             else:
-                index = [0] * len(intervals.shape)
+                index = [0] * len(self.shape)
                 index[coord_obj.dimension_list[0]] = ...
                 try:
-                    d, d_low, d_high = coord_obj.data(data_shape=self.data_shape,index=index)
+                    d, d_low, d_high = coord_obj.data(data_shape=self.shape,index=index)
                 except Exception as e:
                     raise e
                 intervals = Intervals(d_low, d_high)
@@ -1795,6 +1795,8 @@ class DataObject:
                 
                 if (slice_processed[i_sc]):
                     continue
+                slicing_coords[i_sc] = d_slice.get_coordinate_object(slicing_coord_names[i_sc])
+
                 try:
                     st = check_slicing_type(slicing_description[i_sc],slicing_coords[i_sc])
                 except TypeError as e:

@@ -123,7 +123,7 @@ def select_signals(signal_list, signal_spec):
                         ch_match = True
                         break
         if (not ch_match):
-            raise ValueError("Signal name: " + ch + " is not measured.")
+            raise ValueError("Signal name: " + ch + " is not present.")
 
     return select_list, select_index
 

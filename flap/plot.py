@@ -1013,7 +1013,8 @@ def _plot(data_object,
             yerror = d._plot_error_ranges(index=tuple(index))
             if (_options['Log y']):
                 ydata = d.data[tuple(index)].flatten() * (ysep ** i)
-                yerror *= (ysep ** i)
+                if (yerror is not None):
+                    yerror *= (ysep ** i)
             else:
                 ydata = d.data[tuple(index)].flatten() + ysep * i
             if (all_points is True):

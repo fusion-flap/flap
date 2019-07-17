@@ -1306,7 +1306,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             correlation_dimensions_ref.append(c.dimension_list[0])
             if (math.fabs(c.step[0] - coord_obj[i].step[0]) / math.fabs(c.step[0]) > 1e-4):
                    raise ValueError("Incompatible coordinate step sizes." )
-            if (math.fabs(c.start - coord_obj[i].start) > math.fabs(c.step[0]) / 10):
+            if (math.fabs(c.start - coord_obj[i].start) > math.fabs(c.step[0])):
                    raise ValueError("Incompatible coordinate start values." )
             if (list(_ref.data.shape)[correlation_dimensions_ref[i]] 
                            != list(d.data.shape)[correlation_dimensions[i]]):
