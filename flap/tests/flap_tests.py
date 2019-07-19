@@ -627,18 +627,42 @@ def test_image():
     print()
     print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
-    plt.figure()
     print("**** Generating a sequence of test images")
-    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.01})
+    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1})
     flap.list_data_objects()
     print("***** Showing one image")
+    plt.figure()
     flap.plot('TEST_VIDEO',slicing={'Time':30e-3/4},plot_type='image',axes=['Image x','Image y'],options={'Clear':True})
     plt.figure()
-    print("**** Showing a sequence of images and saving to test_video.mp4")
+    print("**** Showing a sequence of images and saving to test_video.avi")
     flap.plot('TEST_VIDEO',plot_type='anim-image',axes=['Image x','Image y','Time'],
-              options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video.mp4','Colorbar':False})
-#    flap.plot('TEST_VIDEO',slicing={'Time':30e-3/3},plot_type='image',axes=['Image x','Image y'],options={'Clear':True})
-
+              options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video.avi','Colorbar':True,'Aspect ratio':'equal'})
+    plt.figure()
+    print("*** Showing the same images as contour plots and saving to test_video_contour.avi")
+    flap.plot('TEST_VIDEO',plot_type='anim-contour',axes=['Image x','Image y','Time'],
+              options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_contour.avi','Colorbar':False})
+    print("*** Converting data object x, y coordinates to non-equidistant.")
+    d=flap.get_data_object('TEST_VIDEO')
+    coord_x = d.get_coordinate_object('Image x')
+    index = [0]*3
+    index[coord_x.dimension_list[0]] = ...
+    x = np.squeeze(d.coordinate('Image x',index=index)[0])
+    coord_x.mode.equidistant = False
+    coord_x.values = x
+    coord_x.shape = x.shape
+    coord_y = d.get_coordinate_object('Image y')
+    index = [0]*3
+    index[coord_y.dimension_list[0]] = ...
+    y = np.squeeze(d.coordinate('Image y',index=index)[0])
+    coord_y.mode.equidistant = False
+    coord_y.values = y
+    coord_y.shape = y.shape
+    flap.add_data_object(d,"TEST_VIDEO_noneq")
+    flap.list_data_objects()
+    plt.figure()
+    print("**** Showing this video and test_video_noneq.avi")
+    flap.plot('TEST_VIDEO_noneq',plot_type='anim-image',axes=['Image x','Image y','Time'],
+              options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_noneq.avi','Colorbar':True,'Aspect ratio':'equal'})
  
 def show_plot():
     plt.pause(0.05)

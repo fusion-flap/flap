@@ -222,7 +222,7 @@ class DataObject:
             self.coordinates = None
 
     def get_coordinate_object(self, name):
-        """ Returns the Coordinate class having the given name.
+        """ Returns the Coordinate class having the given name. The returned object is a link not a copy.
         """
         if (self.coordinates is not None):
             for c in self.coordinates:

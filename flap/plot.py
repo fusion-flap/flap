@@ -31,12 +31,13 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
 from matplotlib import ticker
-import matplotlib.animation as animation
+#import matplotlib.animation as animation
 import numpy as np
 import copy
 from enum import Enum
 import math
 import time
+import cv2
 
 import flap.config
 from .coordinate import *
@@ -420,14 +421,13 @@ def _plot(data_object,
         'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
         'Video file': Name of output video file for anim-... plots
         'Video framerate':  Frame rate for output video.
+        'Video format': Format of the video. Valid: 'avi'
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
         'Colorbar': Boolelan. Switch on/off colorbar
         'Nan color': The color to use in image data plotting for np.nan (not-a-number) values
         'Interpolation': Interpolation method for image plot.
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
-        'animation.ffmpeg_path': Path for the ffmpeg program (with program name) for video encoding.
-                                 This can also be set in plt.rcParams['animation.ffmpeg_path']
     """
     
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
@@ -435,8 +435,8 @@ def _plot(data_object,
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
                        'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
-                       'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,
-                       'animation.ffmpeg_path':None}
+                       'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi'
+                       }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
 
     if (plot_options is None):
@@ -548,6 +548,13 @@ def _plot(data_object,
             raise ValueError("Different complex plot mode in overplot.")
 
     language = _options['Language']
+    
+    if (_options['Video file'] is not None):
+        if (_options['Video format'] == 'avi'):
+            video_codec_code = 'XVID'
+        else:
+            raise ValueError("Cannot write video in format '"+_options['Video format']+"'.")
+        
        
     # X range and Z range is processed here, but Y range not as it might have multiple entries for some plots
     xrange = _options['X range']
@@ -1327,12 +1334,14 @@ def _plot(data_object,
                 image_like = False
         else:
             image_like = False
-        if (image_like):        
+        if (image_like and (_plot_type == 'anim-image')):        
             xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
             ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
         else:
-            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape)
-            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
+            index = [...]*3
+            index[coord_t.dimension_list[0]] = 0
+            ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
+            xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
             
         try:
             cmap_obj = plt.cm.get_cmap(cmap)
@@ -1341,21 +1350,17 @@ def _plot(data_object,
         except ValueError:
             raise ValueError("Invalid color map.")
 
-        if (_options['Video file'] is not None):
-            anim_ims = []
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
-        ax=plt.plot()
+#        ax=plt.plot()
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
-        plt.subplot(_plot_id.base_subplot)
-        plt.plot()
-        plt.cla()
-        ax=plt.gca()
+#        plt.subplot(_plot_id.base_subplot)
+#        plt.plot()
+#        plt.cla()
+#        ax=plt.gca()
         for it in range(len(tdata)):
-            if (_options['Video file'] is None):
-                #Erasing plot if not making video
-#                plt.subplot(_plot_id.base_subplot)
-                plt.cla()
+            plt.subplot(_plot_id.base_subplot)
+            ax_act = plt.subplot(gs[0,0])
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
             time_index = tuple(time_index)
@@ -1384,7 +1389,7 @@ def _plot(data_object,
                 
             _plot_opt = _plot_options[0]
     
-            if (image_like):
+            if (image_like and (_plot_type == 'anim-image')):
                 try: 
                     if (coord_x.dimension_list[0] == 0):
                         im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
@@ -1396,8 +1401,7 @@ def _plot(data_object,
                         img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
                                         cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
                                         vmax=vmax,origin='lower',**_plot_opt)            
-                        if (_options['Video file'] is None):
-                            del im
+                    del im
                 except Exception as e:
                     raise e
             else:
@@ -1409,51 +1413,58 @@ def _plot(data_object,
                                           origin='lower',vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
-                    if (_options['Video file'] is None):
-                        del im
+                    del im
                 else:
                     try:
-                        im = plt.clip(d.data[time_index],vmin,vmax)
-                        img = ax.contourf(xdata,ydata,im,contour_levels,norm=norm,
+                        im = np.clip(d.data[time_index],vmin,vmax)
+                        img = plt.contourf(xdata,ydata,im,contour_levels,norm=norm,
                                           origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
-                        if (_options['Video file'] is None):
-                            del im
+                        del im
                     except Exception as e:
                         raise e
     
             if (_options['Colorbar']):
-                cbar = plt.colorbar(img,cax=_plot_id.base_subplot)
+                cbar = plt.colorbar(img,ax=ax_act)
                 cbar.set_label(d.data_unit.name)
 
             if (xrange is not None):
-                ax.set_xlim(xrange[0],xrange[1])
+                plt.xlim(xrange[0],xrange[1])
             if (yrange is not None):
-                ax.set_ylim(yrange[0],yrange[1])        
-            ax.set_xlabel(ax_list[0].title(language=language))
-            ax.set_ylabel(ax_list[1].title(language=language))
+                plt.ylim(yrange[0],yrange[1])        
+            plt.xlabel(ax_list[0].title(language=language))
+            plt.ylabel(ax_list[1].title(language=language))
             if (_options['Log x']):
-                ax.set_xscale('log')
+                plt.xscale('log')
             if (_options['Log y']):
-                ax.set_yscale('log')
+                plt.yscale('log')
             title = coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
             plt.title(title)
             plt.show()
             time.sleep(_options['Waittime'])
             plt.pause(0.001)
             if (_options['Video file'] is not None):
-                anim_ims.append([img])
+                fig = plt.gcf()
+                fig.canvas.draw ( )
+                # Get the RGBA buffer from the figure
+                w,h = fig.canvas.get_width_height()
+                buf = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
+                buf.shape = ( h, w, 3 )
+                try:
+                    video
+                except NameError:
+                    height = buf.shape[0]
+                    width = buf.shape[1]
+                    video = cv2.VideoWriter('test.avi',  cv2.VideoWriter_fourcc(*'XVID'), 10.0, (width,height),isColor=True)
+#                   video = cv2.VideoWriter(_options['Video file'],  
+ #                                           cv2.VideoWriter_fourcc(*video_codec_code), 
+ #                                           float(_options['Video framerate']), 
+ #                                           (width,height),
+ #                                           isColor=True)
+                video.write(buf)
         if (_options['Video file'] is not None):
-            if (_options['animation.ffmpeg_path'] is not None):
-                plt.rcParams['animation.ffmpeg_path'] = _options['animation.ffmpeg_path']
-            im_ani = animation.ArtistAnimation(plt.gcf(), anim_ims, interval=1000./_options['Video framerate'],
-                                               blit=False)
-            im_ani.save(_options['Video file'])    
-#            plt.rcParams['animation.ffmpeg_path'] = 'C:\Program Files\ffmpeg\bin\ffmpeg.exe'
-#            im_ani = animation.ArtistAnimation(plt.gcf(), anim_ims, interval=50, repeat_delay=3000,
-#                                               blit=False)
-#            im_ani.save(_options['Video file'])
-#            im_ani.save(_options['Video file'], writer='ffmpeg')
-    
+            cv2.destroyAllWindows()
+            video.release()  
+            del video
 
     plt.show()       
  
