@@ -576,8 +576,6 @@ def _plot(data_object,
 
     if ((_plot_type == 'xy') or (_plot_type == 'scatter')):
         # 1D plots: xy, scatter and complex versions
-        if (len(d.shape) > 1):
-            raise ValueError("xy plot is applicable only to 1D data. Use slicing.")
         # Checking whether oveplotting into the same plot type
         if ((d.data is not None) and (d.data.dtype.kind == 'c')): 
             subtype = 1
@@ -604,6 +602,8 @@ def _plot(data_object,
         ploterror = [0]*2
         for ax_ind in range(2):
             if (pdd_list[ax_ind].data_type == PddType.Data):
+                if (len(pdd_list[ax_ind].data_object.shape) > 1):
+                    raise ValueError("xy plot is applicable only to 1D data. Use slicing.")
                 plotdata[ax_ind] = pdd_list[ax_ind].data_object.data.flatten()
                 if (plot_error):
                     ploterror[ax_ind] = pdd_list[ax_ind].data_object._plot_error_ranges()
@@ -1454,12 +1454,11 @@ def _plot(data_object,
                 except NameError:
                     height = buf.shape[0]
                     width = buf.shape[1]
-                    video = cv2.VideoWriter('test.avi',  cv2.VideoWriter_fourcc(*'XVID'), 10.0, (width,height),isColor=True)
-#                   video = cv2.VideoWriter(_options['Video file'],  
- #                                           cv2.VideoWriter_fourcc(*video_codec_code), 
- #                                           float(_options['Video framerate']), 
- #                                           (width,height),
- #                                           isColor=True)
+                    video = cv2.VideoWriter(_options['Video file'],  
+                                            cv2.VideoWriter_fourcc(*video_codec_code), 
+                                            float(_options['Video framerate']), 
+                                            (width,height),
+                                            isColor=True)
                 video.write(buf)
         if (_options['Video file'] is not None):
             cv2.destroyAllWindows()
