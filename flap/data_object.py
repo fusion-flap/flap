@@ -1061,14 +1061,14 @@ class DataObject:
                                                              " in int("+
                                                              slicing_coord_names + ")",
                                                              unit=check_coord.unit.unit,
-                                                             mode=mode))
+                                                             mode=copy.deepcopy(mode)))
                     add_in_int_coord = True
                     cc_new_int = copy.deepcopy(Coordinate(name="Start " +
                                                           check_coord.unit.name +
                                                           " in int(" +
                                                           slicing_coord_names + ")",
                                                           unit=check_coord.unit.unit,
-                                                          mode=mode))
+                                                          mode=copy.deepcopy(mode)))
                     add_int_coord = True
                     del_coords.append(i_check_coord)
                     change_check_coord = False
@@ -1176,7 +1176,7 @@ class DataObject:
                             if (d is None):
                                 raise("Internal error in dimension mapping. None dimension.")
                         cc_new_int.dimension_list.append(interval_dimension)
-                        mode = check_coord.mode
+                        mode = copy.deepcopy(check_coord.mode)
                         mode.equidistant = False
                         cc_new_int.mode = mode
                     else:
@@ -1301,7 +1301,7 @@ class DataObject:
                                     raise("Internal error in dimension mapping. None dimension.")
                             cc_new_in_int.dimension_list.append(in_interval_dimension)
                             cc_new_in_int.dimension_list.append(interval_dimension)
-                            mode = check_coord.mode
+                            mode = copy.deepcopy(check_coord.mode)
                             mode.equidistant = False
                             cc_new_in_int.mode = mode
                         if (change_check_coord):
@@ -1342,14 +1342,14 @@ class DataObject:
         self.coordinates = copy.deepcopy(new_coord_list)
         c = copy.deepcopy(Coordinate(name="Interval(" + slicing_coord_names + ")",
                                      unit="[n.a.]",
-                                     mode=CoordinateMode(equidistant=True),
+                                     mode=copy.deepcopy(CoordinateMode(equidistant=True)),
                                      start = 0,
                                      step = 1,
                                      dimension_list = interval_dimension))
         self.coordinates.append(c)
         c = copy.deepcopy(Coordinate(name="Interval(" + slicing_coord_names + ") sample index",
                                      unit="[n.a.]",
-                                     mode=CoordinateMode(equidistant=True),
+                                     mode=copy.deepcopy(CoordinateMode(equidistant=True)),
                                      start = 0,
                                      step = 1,
                                      dimension_list = in_interval_dimension))
