@@ -1464,7 +1464,7 @@ def _plot(data_object,
             cv2.destroyAllWindows()
             video.release()  
             del video
-
+    print("------ plot finished, show() ----")
     plt.show()       
  
 #    if (_options['Clear']):
