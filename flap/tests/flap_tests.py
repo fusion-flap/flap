@@ -24,9 +24,6 @@ import flap.testdata
 # Registering the TESTDATA data source
 flap.testdata.register()
 
-import flap_w7x_abes
-flap_w7x_abes.register()
-
 def test_config():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Testing configuration file <<<<<<<<<<<<<<<<<<<<<<<< ")
@@ -221,7 +218,7 @@ def test_plot():
     gs = GridSpec(2, 2)
     plt.subplot(gs[0,0])
     plot_1 = flap.plot('TEST-1-1')
-    print("**** Creating a multi xy on the righ side.")
+    print("**** Creating a multi xy on the right side.")
     plt.subplot(gs[:,1])
     plot_2 = flap.plot('TESTDATA')
     plot_2 = flap.plot('TESTDATA',slicing={'Signal name':['TEST-1-2','TEST-1-3']})
