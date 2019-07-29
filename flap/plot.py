@@ -1439,7 +1439,7 @@ def _plot(data_object,
                 plt.yscale('log')
             title = coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
             plt.title(title)
-            plt.show()
+            plt.show(block=False)
             time.sleep(_options['Waittime'])
             plt.pause(0.001)
             if (_options['Video file'] is not None):
@@ -1465,7 +1465,7 @@ def _plot(data_object,
             video.release()  
             del video
 #    print("------ plot finished, show() ----")
-    plt.show()       
+    plt.show(block=False)       
  
 #    if (_options['Clear']):
 #        _plot_id.number_of_plots = 0
