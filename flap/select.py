@@ -212,7 +212,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                        options=plot_options)
             except Exception as e:
                 raise e
-            plt.show()
+            plt.show(block=False)
             plt.draw()
             if (interval_n != 1):
                 print("Processing selection interval #"+str(i_int+1)+".")
@@ -309,7 +309,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
         for i in range(selected_n):
             plt.plot(np.array([start_coord[i],end_coord[i]]),[y_coord[i],y_coord[i]])
         plt.draw()
-        plt.show()
+        plt.show(block=False)
 
         start_coord = np.array(start_coord)
         end_coord = np.array(end_coord)
