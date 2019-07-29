@@ -15,3 +15,7 @@ dependencies:
   - python = 3.7.0
   - scipy = 1.1.0
   - tornado = 5.0.2
+  - opencv=3.4.2=py37h40b0b35_0
+  - pickleshare=0.7.5=py37_0
+
+
