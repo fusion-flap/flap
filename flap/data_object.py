@@ -3667,7 +3667,14 @@ def get_data(data_source,
         _coordinates = coordinates
 
     try:
-        d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates)
+        d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates, data_source=None)
+    except TypeError:
+        # Trying without data_source as this was not part of earlier version
+        try:
+            d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates)
+            print("Warning: The get_data function of data_source '"+data_source+"' does not support the data_source keyword. Please upgrade.")
+        except Exception as e:
+            raise e
     except Exception as e:
         raise e
     if (type(d) is not DataObject):
