@@ -65,6 +65,9 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             'Length': Length in second. The sample rate is 1 MHz
             'Samplerate': Sample rate [Hz]
     """
+    if (data_source is None):
+        data_source = 'TESTDATA'
+    
     # creating a list of signal names
     signal_list = []
     for row in range(ROW_NUMBER):
@@ -104,7 +107,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                            'Image':'Gauss'
                            }
         
-    _options = flap.config.merge_options(default_options,options,data_source='TESTDATA')
+    _options = flap.config.merge_options(default_options,options,data_source=data_source)
 
     meas_timerange = [0, _options['Length']]
     meas_sampletime = 1./_options['Samplerate']
