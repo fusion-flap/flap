@@ -48,7 +48,7 @@ meas_ADC_step = 0.001  # ADC resolution in Volt
 alpha = 18. # degree angle of measurement matrix
 
 def testdata_get_data(exp_id=None, data_name='*', no_data=False,
-                      options=None, coordinates=None):
+                      options=None, coordinates=None, data_source=None):
     """ Data read function for flap test data source
         Channel names: TEST-col-row: Signals on a 15x5 spatial matrix
                        VIDEO: A test image with timescale as for the signals.
@@ -531,7 +531,9 @@ def add_coordinate(data_object,
             data_object.add_coordinate_object(copy.deepcopy(cc))
 
 
-def register():
+def register(data_source=None):
+    if (data_source is None):
+        data_source = 'TESTDATA'
     flap.register_data_source('TESTDATA',
                           get_data_func=testdata_get_data,
                           add_coord_func=add_coordinate)
