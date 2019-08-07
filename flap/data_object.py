@@ -3561,7 +3561,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
         c_names = d.coordinate_names()
         for i in range(len(c_names)):
             c = d.coordinates[i]
-            s += "    '" + c.unit.title()+"'"
+            s += c.unit.title()
             s += "(Dims:"
             if (len(c.dimension_list) is not 0):
                 try:
