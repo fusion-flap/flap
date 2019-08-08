@@ -3458,13 +3458,24 @@ def add_data_object(d,object_name):
 
 
 def delete_data_object(object_name,exp_id='*'):
-    """ Delete a data objejct from the flap storage
+    """ Delete data object(s) from the flap storage
     """
     global flap_storage
-    try:
-        flap_storage.delete_data_object(object_name, exp_id=exp_id)
-    except KeyError as e:
-        raise e
+    if (type(object_name) is list):
+        _object_name = object_name
+    else:
+        _object_name = [object_name]
+    if (type(exp_id) is list):
+        _exp_id = exp_id
+    else:
+        _exp_id = [exp_id]*len(_object_name)
+    if (len(_object_name) != len(_exp_id)):
+        raise ValueError("Lenght of object_name and exp_id list should be identical in delete_data_object()")
+    for o,e in zip(_object_name,_exp_id):    
+        try:
+            flap_storage.delete_data_object(o, exp_id=e)
+        except KeyError as e:
+            raise e
 
 def find_data_objects(name,exp_id='*'):
     """
