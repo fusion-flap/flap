@@ -53,6 +53,11 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                                    'Max-weight' or 'Min-weight':
                                      Same as Maximum and Minimum but selects senter of gravity
                                      for signal piece.
+                                   In each of the above cases the interval will be 'Length' long around the event.
+                                   'Above', 'Below':
+                                      The intervals will be where the signal is above or below the threshold. 
+                           'Start delay', 'End delay': For the Above and Below events the start and end delay of the interval
+                                                       in the coordinate units.
                            'Threshold': The threshold for the event.
                            'Thr-type' Threshold type:
                                          'Absolute': Absolute signal value
@@ -142,7 +147,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
         try:
             ev_type = event['Type']
         except KeyError:
-            raise ValueError("Event type is not set. Use Maximum, Minimum, Max-weight or Min-weight.")
+            raise ValueError("Event type is not set. Use Maximum, Minimum, Max-weight, Min-weight, Above or Below")
         try:
             ev_thr = event['Threshold']
         except KeyError:
@@ -151,6 +156,14 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
             ev_thr_type = event['Thr-type']
         except KeyError:
             raise ValueError("Event threshold type (Thr-type) is not set. Use Absolute or Sigma.")
+        try:
+            start_delay = event['Start delay']
+        except KeyError:
+            start_delay = 0
+        try:
+            end_delay = event['End delay']
+        except KeyError:
+            end_delay = 0
     else:
         if (((_options['Select'] == 'Start') or (_options['Select'] == 'End')
              or (_options['Select'] == 'Center'))
@@ -248,12 +261,12 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                 data_act = np.flip(data_act)
                 coord_act = np.flip(coord_act)
             # Finding indices where the condition switches on and off
-            if ((ev_type == 'Maximum') or (ev_type == 'Max-weight')):
+            if ((ev_type == 'Maximum') or (ev_type == 'Max-weight') or (ev_type == 'Above')):
                 cond_on = np.logical_and(data_act[1:] > ev_thr,
                                          data_act[0:-1] <= ev_thr)
                 cond_off = np.logical_and(data_act[0:-1] > ev_thr,
                                          data_act[1:] <= ev_thr)
-            elif ((ev_type == 'Minimum') or (ev_type == 'Min-weight')):
+            elif ((ev_type == 'Minimum') or (ev_type == 'Min-weight') or (ev_type == 'Below')):
                 cond_on = np.logical_and(data_act[1:] < ev_thr,
                                          data_act[0:-1] >= ev_thr)
                 cond_off = np.logical_and(data_act[0:-1] < ev_thr,
@@ -274,29 +287,35 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                     ind_off = np.array([])
                 else:
                     ind_off = ind_on[1:]
-            for i_event in range(len(ind_on)):
-                if (ev_type == 'Maximum'):
-                    act_ev_coord = coord_act[np.argmax(data_act[ind_on[i_event]
-                                                                : ind_off[i_event] + 1
-                                                                ]
-                                                       ) + ind_on[i_event]
-                                             ]
-                elif (ev_type == 'Minimum'):
-                    act_ev_coord = coord_act[np.argmin(data_act[ind_on[i_event]
-                                                                : ind_off[i_event] + 1
-                                                                ]
-                                                       ) + ind_on[i_event]
-                                             ]
-                elif ((ev_type == 'Max-weight') or (ev_type == 'Min-weight')):
-                    act_ev_coord = np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1]
-                                          * coord_act[ind_on[i_event] : ind_off[i_event] + 1]
-                                          ) / np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1])
-                if ((act_ev_coord - length / 2 > coord_act[0])
-                     and (act_ev_coord + length / 2 < coord_act[-1])):
-                    start_coord.append(act_ev_coord - length / 2)
-                    end_coord.append(start_coord[-1] + length)
-                    y_coord.append(ev_thr)
-                    selected_n += 1
+            if ((ev_type == 'Above') or (ev_type == 'Below')):
+                start_coord += list(coord_act[ind_on] + start_delay)
+                end_coord += list(coord_act[ind_off] + end_delay)
+                selected_n += len(ind_on)
+                y_coord += [ev_thr]*len(ind_on)
+            else:    
+                for i_event in range(len(ind_on)):
+                    if (ev_type == 'Maximum'):
+                        act_ev_coord = coord_act[np.argmax(data_act[ind_on[i_event]
+                                                                    : ind_off[i_event] + 1
+                                                                    ]
+                                                           ) + ind_on[i_event]
+                                                 ]
+                    elif (ev_type == 'Minimum'):
+                        act_ev_coord = coord_act[np.argmin(data_act[ind_on[i_event]
+                                                                    : ind_off[i_event] + 1
+                                                                    ]
+                                                           ) + ind_on[i_event]
+                                                 ]
+                    elif ((ev_type == 'Max-weight') or (ev_type == 'Min-weight')):
+                        act_ev_coord = np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1]
+                                              * coord_act[ind_on[i_event] : ind_off[i_event] + 1]
+                                              ) / np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1])
+                    if ((act_ev_coord - length / 2 > coord_act[0])
+                         and (act_ev_coord + length / 2 < coord_act[-1])):
+                        start_coord.append(act_ev_coord - length / 2)
+                        end_coord.append(start_coord[-1] + length)
+                        y_coord.append(ev_thr)
+                        selected_n += 1
 
     print("Selected "+str(selected_n)+" intervals.")
 

@@ -275,7 +275,7 @@ def multiply_along_axes(a1_orig, a2_orig, axes,keep_a1_dims=True):
     INPUT:
         a1_orig: Array 1.
         a2_orig: Array 2.
-        axes: List of two axis numbers or list of tow lists of axis numbers
+        axes: List of two axis numbers or list of two lists of axis numbers
         keep_1_dims: (bool) 
                      If True: The output array has dimensions of a1 followed by a2 with the common dims removed
                      If False: The output array has the a1 dimensions without common dims then the common dims

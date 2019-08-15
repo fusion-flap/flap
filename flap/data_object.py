@@ -732,6 +732,7 @@ class DataObject:
                          plot_options=plot_options,
                          plot_id=plot_id)
         except Exception as e:
+
             raise e
             
             
