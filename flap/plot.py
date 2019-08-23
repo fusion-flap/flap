@@ -129,112 +129,256 @@ def axes_to_pdd_list(d,axes):
         ax_list.append(axx)
     return pdd_list,ax_list
 
-def animate_plot(it, ax, ax_list, d, xdata, ydata, tdata, 
-                  xdata_range, ydata_range, contour_levels, cmap_obj,
-                  coord_t, coord_x, coord_y, cmap, options, 
-                  xrange, yrange, vmin, vmax, norm, locator, image_like, 
-                  plot_options, language, time_slider):
+class PlotAnimation:
     
-    global anim_opts
-    
-    time_index = [slice(0,dim) for dim in d.data.shape]
-    time_index[coord_t.dimension_list[0]] = it
-    time_index = tuple(time_index)
-    
-    time_slider.eventson = False
-    time_slider.set_val(tdata[it])
-    time_slider.eventson = True       
-    
-    anim_opts['Current frame'] = it
-    
-    if (contour_levels is None):
-        contour_levels = 255
+    def __init__(self, ax_list, d, xdata, ydata, tdata, cmap_obj, contour_levels, 
+                 coord_t, coord_x, coord_y, cmap, options, xrange, yrange, 
+                 zrange, image_like, plot_options, language, plot_id, gs):
         
-    plot_opt = copy.deepcopy(plot_options[0])
-    ax.clear()
-    if (image_like):
-        try: 
-            if (coord_x.dimension_list[0] == 0):
-                im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
-                img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                cmap=cmap_obj,vmin=vmin,aspect=options['Aspect ratio'],interpolation=options['Interpolation'],
-                                vmax=vmax,origin='lower',**plot_opt)
-            else:
-                im = np.clip(d.data[time_index],vmin,vmax)
-                img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                cmap=cmap_obj,vmin=vmin,aspect=options['Aspect ratio'],interpolation=options['Interpolation'],
-                                vmax=vmax,origin='lower',**plot_opt)            
-            del im
-        except Exception as e:
-            raise e
-    else:
-            xgrid, ygrid = grid_to_box(xdata,ydata)
-            im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
+        self.pause = False
+        self.speed = 40.
+        self.current_frame = 0.
+        self.fig = plt.figure(plot_id.figure)      
+        self.tdata = tdata
+        self.xdata = xdata
+        self.ydata = ydata
+        self.xrange = xrange
+        self.yrange = yrange
+        self.zrange = zrange
+        self.contour_levels = contour_levels
+        self.cmap = cmap
+        self.cmap_obj = cmap_obj
+        self.plot_options = plot_options
+        self.coord_t = coord_t  
+        self.coord_x = coord_x
+        self.coord_y = coord_y
+        self.d = d
+        self.ax_list = ax_list
+        self.plot_id = plot_id
+        self.image_like = image_like
+        self.language = language
+        self.options = options
+        self.gs = gs
+        
+        if (self.contour_levels is None):
+            self.contour_levels = 255
+            
+    def animate(self):
+        
+        pause_ax = plt.figure(self.plot_id.figure).add_axes((0.78, 0.94, 0.1, 0.04))
+        self.pause_button = Button(pause_ax, 'Pause', hovercolor='0.975')
+        self.pause_button.on_clicked(self._pause_animation)
+        pause_ax._button=self.pause_button
+        
+        reset_ax = plt.figure(self.plot_id.figure).add_axes((0.78, 0.89, 0.1, 0.04))
+        reset_button = Button(reset_ax, 'Reset', hovercolor='0.975')
+        reset_button.on_clicked(self._reset_animation)
+        reset_ax._button=reset_button
+        
+        slow_ax = plt.figure(self.plot_id.figure).add_axes((0.88, 0.94, 0.1, 0.04))
+        self.slow_button = Button(slow_ax, str(int(1000./(self.speed/0.8)))+'fps', hovercolor='0.975')
+        self.slow_button.on_clicked(self._slow_animation)
+        slow_ax._button=self.slow_button
+        
+        speed_ax = plt.figure(self.plot_id.figure).add_axes((0.88, 0.89, 0.1, 0.04))
+        self.speed_button = Button(speed_ax, str(int(1000./(self.speed*0.8)))+'fps', hovercolor='0.975')
+        self.speed_button.on_clicked(self._speed_animation)
+        speed_ax._button=self.speed_button
+        
+        
+        slider_ax = plt.figure(self.plot_id.figure).add_axes((0.1, 0.94, 0.5, 0.04))
+        self.time_slider = Slider(slider_ax, label='Time',
+                             valmin=self.tdata[0], valmax=self.tdata[-1],
+                             valinit=self.tdata[0])
+        self.time_slider.on_changed(self._set_animation)
+
+        plt.subplot(self.plot_id.base_subplot)
+        
+        self.ax_act = plt.subplot(self.gs[0,0])
+        self.ax_act.axis('equal')
+        
+        time_index = [slice(0,dim) for dim in self.d.data.shape]
+        time_index[self.coord_t.dimension_list[0]] = 0
+        time_index = tuple(time_index)
+        act_ax_pos=self.ax_act.get_position()
+        slider_ax.set_position([act_ax_pos.x0,0.94,0.5,0.04])
+
+        if (self.zrange is None):
+            self.vmin = np.nanmin(self.d.data[time_index])
+            self.vmax = np.nanmax(self.d.data[time_index])
+        else:
+            self.vmin = self.zrange[0]
+            self.vmax = self.zrange[1]
+
+        if (self.vmax <= self.vmin):
+            raise ValueError("Invalid z range.")
+            
+        if (self.options['Log z']):
+            if (self.vmin <= 0):
+                raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
+            self.norm = colors.LogNorm(vmin=self.vmin, vmax=self.vmax)
+            self.locator = ticker.LogLocator(subs='all')
+        else:
+            self.norm = None
+            self.locator = None
+                
+            
+        _plot_opt = self.plot_options[0]
+
+        if (self.image_like):
+            try: 
+                if (self.coord_x.dimension_list[0] == 0):
+                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                    cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
+                                    vmax=self.vmax,origin='lower',**_plot_opt)
+                else:
+                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                    cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
+                                    vmax=self.vmax,origin='lower',**_plot_opt)            
+                del im
+            except Exception as e:
+                raise e
+        else:
+            xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
+            im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
-                img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
-                                  vmax=vmax,**plot_opt)
+                img = plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
+                                  vmax=self.vmax,**_plot_opt)
             except Exception as e:
                 raise e
             del im
+            
+            self.xdata_range=None
+            self.ydata_range=None
 
-    if (xrange is not None):
-        ax.set_xlim(xrange[0],xrange[1])
-    if (yrange is not None):
-        ax.set_ylim(yrange[0],yrange[1])        
-    ax.set_xlabel(ax_list[0].title(language=language))
-    ax.set_ylabel(ax_list[1].title(language=language))
-    title = coord_t.unit.name+'='+"{:10f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
-    ax.set_title(title)
+        if (self.options['Colorbar']):
+            cbar = plt.colorbar(img,ax=self.ax_act)
+            cbar.set_label(self.d.data_unit.name)
 
-def reset_animation(event):
-    global anim, fargs, _plot_id, anim_opts
-    anim.event_source.stop()
-    anim_opts['Speed'] = 40.
-    anim = animation.FuncAnimation(plt.figure(_plot_id.figure), animate_plot, 
-                                   len(fargs[5]),interval=anim_opts['Speed'],blit=False, 
-                                   fargs=fargs)
-    anim.event_source.start()
-    anim_opts['Pause'] = False
-    
-def pause_animation(event):
-    global anim, anim_opts
-    if anim_opts['Pause']:
-        anim.event_source.start()
-        anim_opts['Pause'] = False
-    else:
-        anim.event_source.stop()
-        anim_opts['Pause'] = True
-    
-def set_animation(time):
-    global anim, fargs, _plot_id, anim_opts
-    anim.event_source.stop()
-    frame=(np.abs(fargs[5]-time)).argmin()
-    anim = animation.FuncAnimation(plt.figure(_plot_id.figure), animate_plot, 
-                                   frames=np.arange(frame,len(fargs[5])-1),interval=anim_opts['Speed'],blit=False, 
-                                   fargs=fargs)
-    anim.event_source.start()
-    anim_opts['Pause'] = False
-    
-def slow_down_animation(event):
-    global anim, fargs, _plot_id, anim_opts
-    anim.event_source.stop()
-    anim_opts['Speed']=anim_opts['Speed']/0.8
-    anim = animation.FuncAnimation(plt.figure(_plot_id.figure), animate_plot, 
-                                   frames=np.arange(anim_opts['Current frame'],len(fargs[5])-1),interval=anim_opts['Speed'],blit=False, 
-                                   fargs=fargs)
-    anim.event_source.start()
-    anim_opts['Pause'] = False
-    
-def speed_up_animation(event):  
-    global anim, fargs, _plot_id, anim_opts
-    anim.event_source.stop()
-    anim_opts['Speed']=anim_opts['Speed']*0.8
-    anim = animation.FuncAnimation(plt.figure(_plot_id.figure), animate_plot, 
-                                   frames=np.arange(anim_opts['Current frame'],len(fargs[5])-1),interval=anim_opts['Speed'],blit=False, 
-                                   fargs=fargs)
-    anim.event_source.start()
-    anim_opts['Pause'] = False
+        if (self.xrange is not None):
+            plt.xlim(self.xrange[0],self.xrange[1])
+        if (self.yrange is not None):
+            plt.ylim(self.yrange[0],self.yrange[1])        
+        plt.xlabel(self.ax_list[0].title(language=self.language))
+        plt.ylabel(self.ax_list[1].title(language=self.language))
         
+        if (self.options['Log x']):
+            plt.xscale('log')
+        if (self.options['Log y']):
+            plt.yscale('log')
+        title = self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[0])+' ['+self.coord_t.unit.unit+']'
+        plt.title(title)
+
+        plt.show(block=False)        
+
+        self.anim = animation.FuncAnimation(self.fig, self.animate_plot, 
+                                       len(self.tdata),
+                                       interval=self.speed,blit=False)
+        
+    def animate_plot(self, it):
+        
+        time_index = [slice(0,dim) for dim in self.d.data.shape]
+        time_index[self.coord_t.dimension_list[0]] = it
+        time_index = tuple(time_index)
+        
+        self.time_slider.eventson = False
+        self.time_slider.set_val(self.tdata[it])
+        self.time_slider.eventson = True       
+        
+        self.current_frame = it
+            
+        plot_opt = copy.deepcopy(self.plot_options[0])
+        self.ax_act.clear()
+        
+        if (self.image_like):
+            try: 
+                if (self.coord_x.dimension_list[0] == 0):
+                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                    cmap=self.cmap_obj,vmin=self.vmin,
+                                    aspect=self.options['Aspect ratio'],
+                                    interpolation=self.options['Interpolation'],
+                                    vmax=self.vmax,origin='lower',**plot_opt)
+                else:
+                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                    cmap=self.cmap_obj,vmin=self.vmin,
+                                    aspect=self.options['Aspect ratio'],
+                                    interpolation=self.options['Interpolation'],
+                                    vmax=self.vmax,origin='lower',**plot_opt)            
+                del im
+            except Exception as e:
+                raise e
+        else:
+                xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
+                im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                try:
+                    plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
+                                   vmax=self.vmax,**plot_opt)
+                except Exception as e:
+                    raise e
+                del im
+    
+        if (self.xrange is not None):
+            self.ax_act.set_xlim(self.xrange[0],self.xrange[1])
+        if (self.yrange is not None):
+            self.ax_act.set_ylim(self.yrange[0],self.yrange[1])        
+        self.ax_act.set_xlabel(self.ax_list[0].title(language=self.language))
+        self.ax_act.set_ylabel(self.ax_list[1].title(language=self.language))
+        title = self.coord_t.unit.name+' ='+"{:10f}".format(self.tdata[it])+' ['+self.coord_t.unit.unit+']'
+        self.ax_act.set_title(title)
+    
+    def _reset_animation(self, event):
+        self.anim.event_source.stop()
+        self.speed = 40.
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                       len(self.tdata),interval=self.speed,blit=False)
+        self.anim.event_source.start()
+        self.pause = False
+        
+    def _pause_animation(self, event):
+        if self.pause:
+            self.anim.event_source.start()
+            self.pause = False
+            self.pause_button.label.set_text("Pause")
+        else:
+            self.anim.event_source.stop()
+            self.pause = True
+            self.pause_button.label.set_text("Start")
+        
+    def _set_animation(self, time):
+        self.anim.event_source.stop()
+        frame=(np.abs(self.tdata-time)).argmin()
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                            frames=np.arange(frame,len(self.tdata)-1),
+                                            interval=self.speed,blit=False)
+        self.anim.event_source.start()
+        self.pause = False
+        
+    def _slow_animation(self, event):
+        self.anim.event_source.stop()
+        self.speed=self.speed/0.8
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                            frames=np.arange(self.current_frame,len(self.tdata)-1),
+                                            interval=self.speed,blit=False)
+        self.speed_button.label.set_text(str(int(1000./(self.speed*0.8)))+'fps')
+        self.slow_button.label.set_text(str(int(1000./(self.speed/0.8)))+'fps')
+        self.anim.event_source.start()
+        self.pause = False
+        
+    def _speed_animation(self, event):  
+        self.anim.event_source.stop()
+        self.speed=self.speed*0.8
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                            frames=np.arange(self.current_frame,len(self.tdata)-1),
+                                            interval=self.speed,blit=False)
+        self.speed_button.label.set_text(str(int(1000./(self.speed*0.8)))+'fps')
+        self.slow_button.label.set_text(str(int(1000./(self.speed/0.8)))+'fps')
+        self.anim.event_source.start()
+        self.pause = False
+            
 class PlotID:
     def __init__(self):
         # The figure number where the plto resides
@@ -552,7 +696,6 @@ def _plot(data_object,
                        'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi'
                        }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
-    global _plot_id
     
     if (plot_options is None):
         _plot_options = {}
@@ -1694,135 +1837,14 @@ def _plot(data_object,
 #        plt.cla()
 #        ax=plt.gca()
 
-        #for it in range(len(tdata)):
-        global anim_opts
-        anim_opts={}
-        anim_opts['Pause'] = False
-        anim_opts['Speed'] = 40.
-        anim_opts['Current frame'] = 0.
-        
-        pause_ax = plt.figure(_plot_id.figure).add_axes((0.78, 0.94, 0.1, 0.04))
-        pause_button = Button(pause_ax, 'Toggle', hovercolor='0.975')
-        pause_button.on_clicked(pause_animation)
-        pause_ax._button=pause_button
-        
-        reset_ax = plt.figure(_plot_id.figure).add_axes((0.78, 0.89, 0.1, 0.04))
-        reset_button = Button(reset_ax, 'Reset', hovercolor='0.975')
-        reset_button.on_clicked(reset_animation)
-        reset_ax._button=reset_button
-        
-        slow_ax = plt.figure(_plot_id.figure).add_axes((0.88, 0.94, 0.1, 0.04))
-        slow_button = Button(slow_ax, 'Slower', hovercolor='0.975')
-        slow_button.on_clicked(slow_down_animation)
-        slow_ax._button=slow_button
-        
-        speed_ax = plt.figure(_plot_id.figure).add_axes((0.88, 0.89, 0.1, 0.04))
-        speed_button = Button(speed_ax, 'Faster', hovercolor='0.975')
-        speed_button.on_clicked(speed_up_animation)
-        speed_ax._button=speed_button
-        
-        
-        slider_ax = plt.figure(_plot_id.figure).add_axes((0.1, 0.94, 0.5, 0.04))
-        time_slider = Slider(slider_ax, label='Time',
-                             valmin=tdata[0], valmax=tdata[-1],
-                             valinit=tdata[0])
-        time_slider.on_changed(set_animation)
-
-        plt.subplot(_plot_id.base_subplot)
-        
-        ax_act = plt.subplot(gs[0,0])
-        ax_act.axis('equal')
-        time_index = [slice(0,dim) for dim in d.data.shape]
-        time_index[coord_t.dimension_list[0]] = 0
-        time_index = tuple(time_index)
-        act_ax_pos=ax_act.get_position()
-        slider_ax.set_position([act_ax_pos.x0,0.94,0.5,0.04])
-
-        if (zrange is None):
-            vmin = np.nanmin(d.data[time_index])
-            vmax = np.nanmax(d.data[time_index])
-        else:
-            vmin = zrange[0]
-            vmax = zrange[1]
-
-        if (vmax <= vmin):
-            raise ValueError("Invalid z range.")
-            
-        if (_options['Log z']):
-            if (vmin <= 0):
-                raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
-            norm = colors.LogNorm(vmin=vmin, vmax=vmax)
-            locator = ticker.LogLocator(subs='all')
-        else:
-            norm = None
-            locator = None
-                
-        if (contour_levels is None):
-            contour_levels = 255
-            
-        _plot_opt = _plot_options[0]
-
-        if (image_like):
-            try: 
-                if (coord_x.dimension_list[0] == 0):
-                    im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
-                    img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
-                                    vmax=vmax,origin='lower',**_plot_opt)
-                else:
-                    im = np.clip(d.data[time_index],vmin,vmax)
-                    img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
-                                    vmax=vmax,origin='lower',**_plot_opt)            
-                del im
-            except Exception as e:
-                raise e
-        else:
-            xgrid, ygrid = grid_to_box(xdata,ydata)
-            im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
-            try:
-                img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
-                                  vmax=vmax,**_plot_opt)
-            except Exception as e:
-                raise e
-            del im
-            
-            xdata_range=None
-            ydata_range=None
-
-        if (_options['Colorbar']):
-            cbar = plt.colorbar(img,ax=ax_act)
-            cbar.set_label(d.data_unit.name)
-
-        if (xrange is not None):
-            plt.xlim(xrange[0],xrange[1])
-        if (yrange is not None):
-            plt.ylim(yrange[0],yrange[1])        
-        plt.xlabel(ax_list[0].title(language=language))
-        plt.ylabel(ax_list[1].title(language=language))
-        
-        if (_options['Log x']):
-            plt.xscale('log')
-        if (_options['Log y']):
-            plt.yscale('log')
-        title = coord_t.unit.name+'='+"{:10.5f}".format(tdata[0])+' ['+coord_t.unit.unit+']'
-        plt.title(title)
-
-        
-
-        plt.show(block=False)        
-
-        global anim, fargs
-        fargs=(ax_act, ax_list, d, xdata, ydata, tdata, 
-               xdata_range, ydata_range, 
+        fargs=(ax_list, d, xdata, ydata, tdata, 
                cmap_obj, contour_levels, 
                coord_t, coord_x, coord_y, cmap, _options, 
-               xrange, yrange, vmin, vmax, norm, locator, image_like, 
-               _plot_options, language, time_slider)
+               xrange, yrange, zrange, image_like, 
+               _plot_options, language, _plot_id, gs)
         
-        anim = animation.FuncAnimation(plt.figure(_plot_id.figure), animate_plot, 
-                                       len(tdata),interval=anim_opts['Speed'],blit=False, 
-                                       fargs=fargs)
+        anim = PlotAnimation(*fargs)
+        anim.animate()
         
 
 #    print("------ plot finished, show() ----")
