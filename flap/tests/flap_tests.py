@@ -660,6 +660,17 @@ def test_image():
     print("**** Showing this video and test_video_noneq.avi")
     flap.plot('TEST_VIDEO_noneq',plot_type='anim-image',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_noneq.avi','Colorbar':True,'Aspect ratio':'equal'})
+
+def test_animation():
+    print('>>>>>>>>>>>>>>>>>>> Test animation <<<<<<<<<<<<<<<<<<<<<<<<')
+    flap.delete_data_object('*')
+    print("**** Generating a sequence of test images")
+    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1})
+    print("**** Showing a sequence of images using animation plot type")
+    flap.plot('TEST_VIDEO',plot_type='animation',axes=['Image x','Image y','Time'],
+              options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Colorbar':True,'Aspect ratio':'equal'})
+    plt.figure()
+    
  
 def show_plot():
     plt.pause(0.05)
@@ -694,7 +705,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = True
+test_all = False
 
 # Running tests
 plt.close('all')
@@ -755,9 +766,12 @@ if (False or test_all):
     wait_for_key()
 if (False or test_all):
     test_ccf()
-if (True or test_all):
+if (False or test_all):
     test_image()
     show_plot()
+    wait_for_key()
+if (True or test_all):
+    test_animation()
     wait_for_key()
 
 print(">>>>>>>>>>>>>>>> All tests finished <<<<<<<<<<<<<<<<<<<<")
