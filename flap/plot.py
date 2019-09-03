@@ -131,8 +131,9 @@ def axes_to_pdd_list(d,axes):
 
 class PlotAnimation:
     
-    def __init__(self, ax_list, d, xdata, ydata, tdata, cmap_obj, contour_levels, 
-                 coord_t, coord_x, coord_y, cmap, options, xrange, yrange, 
+    def __init__(self, ax_list, d, xdata, ydata, tdata, xdata_range, ydata_range,
+                 cmap_obj, contour_levels, coord_t, coord_x,
+                 coord_y, cmap, options, xrange, yrange, 
                  zrange, image_like, plot_options, language, plot_id, gs):
         
         self.pause = False
@@ -142,6 +143,8 @@ class PlotAnimation:
         self.tdata = tdata
         self.xdata = xdata
         self.ydata = ydata
+        self.xdata_range = xdata_range
+        self.ydata_range = ydata_range
         self.xrange = xrange
         self.yrange = yrange
         self.zrange = zrange
@@ -1815,9 +1818,13 @@ def _plot(data_object,
         if (image_like):        
             xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
             ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
+            ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
+            xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
         else:
             index = [...]*3
             index[coord_t.dimension_list[0]] = 0
+            xdata_range = None
+            ydata_range = None
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
             
@@ -1837,7 +1844,7 @@ def _plot(data_object,
 #        plt.cla()
 #        ax=plt.gca()
 
-        fargs=(ax_list, d, xdata, ydata, tdata, 
+        fargs=(ax_list, d, xdata, ydata, tdata, xdata_range, ydata_range,
                cmap_obj, contour_levels, 
                coord_t, coord_x, coord_y, cmap, _options, 
                xrange, yrange, zrange, image_like, 
@@ -1863,4 +1870,3 @@ def _plot(data_object,
     set_plot_id(_plot_id)
 
     return _plot_id
-
