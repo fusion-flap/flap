@@ -2911,8 +2911,10 @@ class DataObject:
             f_low = _options['f_low']
             if (f_low is None):
                 raise ValueError("Missing f_low parameter for highpass filter.")
+        elif (filter_type == None):
+            pass
         else:
-            raise ValueError("Invalid filter type.")
+            ValueError("Invalid filter type.")
             
         if (_options['Design'] == 'Elliptic'):
             design = 'ellip'
@@ -3952,13 +3954,29 @@ def filter_data(object_name, exp_id='*', output_name=None, coordinate=None, inte
                        description, the selection coordinate is taken the same as
                        coordinate.
                    If None, the whole data interval will be used as a single interval.
-        options:
-            'Type' :
-                None: Do nothing.
-                'Int': Single term IIF filter, like RC integrator.
-                'Diff': Single term IIF filter, like RC differentiator.
-            'Tau': time constant for integrator/differentiator (in units of the coordinate)
-    Return value: The data object with the filtered data.
+                options:
+                    'Type' :
+                        None: Do nothing.
+                        'Int': Single term IIF filter, like RC integrator. 
+                        'Diff': Single term IIF filter, like RC differentiator.
+                        'Bandpass', 'Lowpass', 'Highpass': Filters designed by scipy.signal.iirdesign.
+                                                           The filter type is in 'Design'
+                                   Bandpass: f_low - f_high
+                                   Lowpass: - f_high
+                                   Highpass: - f_low
+                    'Design': The design type of the bandpass, lowpass or highpass filter. 
+                              ('Elliptic', 'Butterworth, 'Chebyshev I', 'Chebyshev II', 'Bessel') 
+                              The numpy.iirdesign function is used for generating the filter.  
+                              Setting inconsistent parameters can cause strange results. E.g. too high attenuation
+                              at too low frequency relative to the smapling frequency can be a problem.
+                    'f_low', 'f_high': Cut on/off frequencies. (Middle between passband and stopband edge.)
+                    'Steepness': Difference between passband and stopband edge frequencies as a fraction 
+                                 of the middle frequency.
+                     'Loss': The maximum loss in the passband in dB
+                     'Attenuation': The minimum attenuation in the stopband dB
+                    'Tau': time constant for integrator/differentiator (in units of the coordinate)
+                    'Power': Calculate square of the signal after filtering. (boolean)
+                    'Inttime': Integration time after power calculation. (in units of oordinate)    Return value: The data object with the filtered data.
     """
     
     try:

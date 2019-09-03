@@ -1144,6 +1144,8 @@ def _plot(data_object,
                     image_like = True
                 else:
                     image_like = False
+            else:
+                image_like = False
         else:
             image_like = False
         if (image_like):        
