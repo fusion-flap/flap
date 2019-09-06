@@ -425,6 +425,30 @@ def grid_to_box(xdata,ydata):
     
     return xbox,ybox
 
+def time_unit_translation(time_unit=None):
+    _time_unit=time_unit.lower()
+    translation={'seconds':1,
+                 'second':1,
+                 's':1,
+                 'milliseconds':1e-3,
+                 'millisecond':1e-3,
+                 'ms':1e-3,
+                 'microseconds':1e-6,
+                 'microsecond':1e-6,
+                 'us':1e-6,
+                 'nanoseconds':1e-9,
+                 'nanosecond':1e-9,
+                 'ns':1e-9,
+                 'picoseconds':1e-12,
+                 'picosecond':1e-12,
+                 'ps':1e-12,
+                 }
+    if (_time_unit in translation.keys()):
+        return translation[_time_unit]
+    else:
+        print(_time_unit+' was not found in the translation. Returning 1.')
+        return 1
+
 #import matplotlib.pyplot as plt
 
 #plt.clf()
