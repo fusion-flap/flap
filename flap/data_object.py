@@ -1403,9 +1403,9 @@ class DataObject:
 
           options: 'Partial intervals'  (bool). If true processes intervals which extend over the coordinate limits. 
                                                 If false only full intervals are processed.
-                   'Slice type': 'Simple': Case a above: closest or interplated values are selected, dimensions 
+                   'Slice type': 'Simple': Case a above: closest or interpolated values are selected, dimensions 
                                            are reduced or unchanged.
-                                 'Multi': Case b above: multiple intervals are selected and their date is placed into
+                                 'Multi': Case b above: multiple intervals are selected and their data is placed into
                                           new dimension.
                                  None: Automatically select. For slicing data in case b multi slice, otherwise simple
                    'Interpolation: 'Closest value'
@@ -1488,7 +1488,8 @@ class DataObject:
                     if (len(coord_obj.dimension_list) == 0):
                         # This coordinate is constant then simple slice will select this element anyway
                         return 0
-                    if ((coord_obj.mode.equidistant) and (len(coord_obj.dimension_list) == 1)):
+                    if ((coord_obj.mode.equidistant) and (len(coord_obj.dimension_list) == 1)
+                        and (coord_obj.value_ranges is None)):
                         # This coordinate changes in one dimension equidistantly
                         regular_slice = slice(coord_obj.start,
                                               coord_obj.start + coord_obj.step[0] *
@@ -1587,13 +1588,39 @@ class DataObject:
                     index[d] = ...
                 coord_data, coord_low, coord_high = slicing_coord.data(data_shape, index)
                 coord_data = coord_data.flatten()
+                interval_slice = False
+                if (type(slicing) is DataObject):
+                    if (slicing.data_unit.name == slicing_coord.unit.name):
+                        if (slicing.error is not None):
+                            # Data error ranges are considered as intervals
+                            d = slicing.data.flatten()
+                            if (type(slicing.error) is list):
+                                e = slicing.error.flatten()
+                                int_l = d - e
+                                int_h = d + e
+                            else:
+                                el = slicing.error[0].flatten()
+                                eh = slicing.error[1].flatten()
+                                int_l = d - el
+                                int_h = d + eh
+                    else:
+                        if (coord_obj.value_ranges is not None):
+                            if (len(coord_obj.dimension_list) != 1):
+                                raise ValueError("Cannot slice with coordinate changing along multiple dimensions.")
+                            d, int_l, int_h = coord_obj.data(index=...,data_shape=slicing.shape)
+                    slicing_intervals = Intervals(int_l,int_h)
+                    interval_slice = True
                 if (type(slicing) is Intervals):
+                    slicing_intervals = slicing
+                    interval_slice = True
+                     
+                if (interval_slice):
                     if (not slicing_coord.isnumeric()):
                         raise TypeError("Cannot slice string coordinate with numeric intervals.")
                     # Determining the interval limits which are within the coordinate data range 
                     dr, dre = slicing_coord.data_range(data_shape=data_shape)
                     try:
-                        int_l, int_h = slicing.interval_limits(limits=dr,partial_intervals=_options['Partial intervals'])
+                        int_l, int_h = slicing_intervals.interval_limits(limits=dr,partial_intervals=_options['Partial intervals'])
                     except ValueError as e:
                         raise e
                     # Creating a numpy array with the indices within the intervals
@@ -1920,10 +1947,31 @@ class DataObject:
                           (slicing_description[i_sc].data_unit.name != slicing_coord_names[i_sc])
                           ):
                         coord = slicing_description[i_sc].get_coordinate_object(slicing_coord_names[i_sc])
-                        if ((len(coord.dimension_list) == 1) and coord.mode.equidistant):
-                            slicing_equidistant = True
+                        if (coord.value_ranges is None):
+                            if ((len(coord.dimension_list) == 1) and coord.mode.equidistant):
+                                slicing_equidistant = True
+                            else:
+                                slicing_equidistant = False  
                         else:
-                            slicing_equidistant = False       
+                            # This is an interval slice case
+                            d,dl,dh = coord.data(index=...,data_shape=slicing_description[i_sc].shape)
+                            # if one interval is cut from an equidistant interval than the result is equidistant
+                            if (slicing_coords[i_sc].mode.equidistant 
+                                and (len(slicing_coords[i_sc].dimension_list) == 1) 
+                                and (len(d) == 1)):
+                                slicing_equidistant = True
+                            else:
+                                slicing_equidistant = False     
+                    elif ((type(slicing_description[i_sc]) is DataObject) and \
+                          (slicing_description[i_sc].data_unit.name == slicing_coord_names[i_sc])
+                          ):
+                        if (slicing_description[i_sc].error is None):
+                            slicing_equidistant = False
+                        else:
+                            if (slicing_description[i_sc].shape == [1]):
+                                slicing_equidistant = True
+                            else:
+                                slicing_equidistant = False            
                     elif ((type(slicing_description[i_sc]) is Intervals) and
                           (slicing_description[i_sc].interval_number()[0] == 1) and
                           (len(slicing_coords[i_sc].dimension_list) == 1) and
