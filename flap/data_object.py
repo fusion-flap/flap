@@ -3729,7 +3729,7 @@ def get_data(data_source,
         _coordinates = coordinates
 
     try:
-        d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates, data_source=None)
+        d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates, data_source=data_source)
     except TypeError:
         # Trying without data_source as this was not part of earlier version
         try:
