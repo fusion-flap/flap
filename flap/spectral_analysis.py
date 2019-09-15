@@ -1528,7 +1528,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         all_points *= n_corr[i]
     for i_int in range(n_proc_int):
         if (_options['Verbose']):
-            print("Interval {:d}/{:d}".format(i_int, n_proc_int))
+            print("Interval {:d}/{:d}".format(i_int+1, n_proc_int))
         # Taking data for this processing interval
         if (trend is not None):
             proc_array_trend = copy.deepcopy(d.data[tuple(interval_slice[i_int])])

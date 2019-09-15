@@ -1608,8 +1608,12 @@ class DataObject:
                             if (len(coord_obj.dimension_list) != 1):
                                 raise ValueError("Cannot slice with coordinate changing along multiple dimensions.")
                             d, int_l, int_h = coord_obj.data(index=...,data_shape=slicing.shape)
-                    slicing_intervals = Intervals(int_l,int_h)
-                    interval_slice = True
+                    try:
+                        int_l
+                        slicing_intervals = Intervals(int_l,int_h)
+                        interval_slice = True
+                    except NameError:
+                        pass
                 if (type(slicing) is Intervals):
                     slicing_intervals = slicing
                     interval_slice = True
@@ -3590,7 +3594,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
         else:
             ds= d.data_source
 
-        s += names[i_names] + '(data_source:"'+ds+'" exp_id:"' + expid + '") data_title:"' + dtit + '"'
+        s += names[i_names] + '(data_source:"'+ds+'" exp_id:"' + str(expid) + '") data_title:"' + dtit + '"'
         s += " shape:["
         if (d.shape is None):
             data_shape = []
@@ -3729,11 +3733,11 @@ def get_data(data_source,
         _coordinates = coordinates
 
     try:
-        d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates, data_source=None)
+        d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates, data_source=None)
     except TypeError:
         # Trying without data_source as this was not part of earlier version
         try:
-            d = f(exp_id, name, no_data=no_data, options=options, coordinates=_coordinates)
+            d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates)
             print("Warning: The get_data function of data_source '"+data_source+"' does not support the data_source keyword. Please upgrade.")
         except Exception as e:
             raise e

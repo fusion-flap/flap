@@ -1216,7 +1216,11 @@ def _plot(data_object,
                 
         if (_options['Colorbar']):
             cbar = plt.colorbar(img,ax=ax)
-            cbar.set_label(d.data_unit.name)
+            if (d.data_unit.unit is not None) and (d.data_unit.unit != ''):
+                unit_name = '['+d.data_unit.unit+']'
+            else:
+                unit_name = ''
+                cbar.set_label(d.data_unit.name+' '+unit_name)
         
         if (xrange is not None):
             ax.set_xlim(xrange[0],xrange[1])
