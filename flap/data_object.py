@@ -104,7 +104,14 @@ class DataObject:
                 self.__coordinates = [copy.deepcopy(coordinates)]
             else:
                 raise TypeError("Bad type for coordinates.")
-                
+    
+    @property
+    def time(self):
+        try:
+            return self.coordinate('Time')[0]
+        except:
+            raise ValueError("Time is not present in the coordinates.")
+            
     def check(self):
         """ Does a consistency check for the data object and raises errors if problems found.
         """
@@ -3733,7 +3740,7 @@ def get_data(data_source,
         _coordinates = coordinates
 
     try:
-        d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates, data_source=None)
+        d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates, data_source=data_source)
     except TypeError:
         # Trying without data_source as this was not part of earlier version
         try:
