@@ -30,14 +30,22 @@ Created on Sat May 18 18:37:06 2019
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
+import matplotlib.animation as animation
+from matplotlib.widgets import Button, Slider
 from matplotlib import ticker
-#import matplotlib.animation as animation
+
 import numpy as np
 import copy
 from enum import Enum
 import math
 import time
-import cv2
+
+try:
+    import cv2
+    cv2_presence = True
+except:
+    print('OpenCV is not present on the computer. Video saving is not available.')
+    cv2_presence = False
 
 import flap.config
 from .coordinate import *
@@ -121,6 +129,459 @@ def axes_to_pdd_list(d,axes):
         ax_list.append(axx)
     return pdd_list,ax_list
 
+class PlotAnimation:
+    
+    def __init__(self, ax_list, axes, d, xdata, ydata, tdata, xdata_range, ydata_range,
+                 cmap_obj, contour_levels, coord_t, coord_x,
+                 coord_y, cmap, options, xrange, yrange,
+                 zrange, image_like, plot_options, language, plot_id, gs):
+        
+        self.pause = False
+        self.speed = 40.
+        self.current_frame = 0.
+        self.fig = plt.figure(plot_id.figure)      
+        self.tdata = tdata
+        self.xdata = xdata
+        self.ydata = ydata
+        self.xdata_range = xdata_range
+        self.ydata_range = ydata_range
+        self.xrange = xrange
+        self.yrange = yrange
+        self.zrange = zrange
+        self.contour_levels = contour_levels
+        self.cmap = cmap
+        self.cmap_obj = cmap_obj
+        self.plot_options = plot_options
+        self.coord_t = coord_t  
+        self.coord_x = coord_x
+        self.coord_y = coord_y
+        self.d = d
+        self.ax_list = ax_list
+        self.axes = axes
+        self.plot_id = plot_id
+        self.image_like = image_like
+        self.language = language
+        self.options = options
+        self.gs = gs
+        
+        if (self.contour_levels is None):
+            self.contour_levels = 255
+            
+    def animate(self):
+        
+        pause_ax = plt.figure(self.plot_id.figure).add_axes((0.78, 0.94, 0.1, 0.04))
+        self.pause_button = Button(pause_ax, 'Pause', hovercolor='0.975')
+        self.pause_button.on_clicked(self._pause_animation)
+        pause_ax._button=self.pause_button
+        
+        reset_ax = plt.figure(self.plot_id.figure).add_axes((0.78, 0.89, 0.1, 0.04))
+        reset_button = Button(reset_ax, 'Reset', hovercolor='0.975')
+        reset_button.on_clicked(self._reset_animation)
+        reset_ax._button=reset_button
+        
+        slow_ax = plt.figure(self.plot_id.figure).add_axes((0.88, 0.94, 0.1, 0.04))
+        self.slow_button = Button(slow_ax, str(int(1000./(self.speed/0.8)))+'fps', hovercolor='0.975')
+        self.slow_button.on_clicked(self._slow_animation)
+        slow_ax._button=self.slow_button
+        
+        speed_ax = plt.figure(self.plot_id.figure).add_axes((0.88, 0.89, 0.1, 0.04))
+        self.speed_button = Button(speed_ax, str(int(1000./(self.speed*0.8)))+'fps', hovercolor='0.975')
+        self.speed_button.on_clicked(self._speed_animation)
+        speed_ax._button=self.speed_button
+        
+        
+        slider_ax = plt.figure(self.plot_id.figure).add_axes((0.1, 0.94, 0.5, 0.04))
+        self.time_slider = Slider(slider_ax, label='Time',
+                             valmin=self.tdata[0], valmax=self.tdata[-1],
+                             valinit=self.tdata[0])
+        self.time_slider.on_changed(self._set_animation)
+
+        plt.subplot(self.plot_id.base_subplot)
+        
+        self.ax_act = plt.subplot(self.gs[0,0])
+        self.ax_act.axis('equal')
+        
+        time_index = [slice(0,dim) for dim in self.d.data.shape]
+        time_index[self.coord_t.dimension_list[0]] = 0
+        time_index = tuple(time_index)
+        act_ax_pos=self.ax_act.get_position()
+        slider_ax.set_position([act_ax_pos.x0,0.94,0.5,0.04])
+
+        if (self.zrange is None):
+            self.vmin = np.nanmin(self.d.data[time_index])
+            self.vmax = np.nanmax(self.d.data[time_index])
+        else:
+            self.vmin = self.zrange[0]
+            self.vmax = self.zrange[1]
+
+        if (self.vmax <= self.vmin):
+            raise ValueError("Invalid z range.")
+            
+        if (self.options['Log z']):
+            if (self.vmin <= 0):
+                raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
+            self.norm = colors.LogNorm(vmin=self.vmin, vmax=self.vmax)
+            self.locator = ticker.LogLocator(subs='all')
+        else:
+            self.norm = None
+            self.locator = None
+                
+            
+        _plot_opt = self.plot_options[0]
+
+        if (self.image_like):
+            try: 
+                if (self.coord_x.dimension_list[0] == 0):
+                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                    cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
+                                    vmax=self.vmax,origin='lower',**_plot_opt)
+                else:
+                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                    cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
+                                    vmax=self.vmax,origin='lower',**_plot_opt)            
+                del im
+            except Exception as e:
+                raise e
+        else:
+            xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
+            im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+            try:
+                img = plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
+                                  vmax=self.vmax,**_plot_opt)
+            except Exception as e:
+                raise e
+            del im
+            
+            self.xdata_range=None
+            self.ydata_range=None
+
+        if (self.options['Colorbar']):
+            cbar = plt.colorbar(img,ax=self.ax_act)
+            cbar.set_label(self.d.data_unit.name)
+#EFIT overplot feature implementation:
+            #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
+            #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.
+        if ('EFIT options' in self.options and self.options['EFIT options'] != None):
+            
+            default_efit_options={'Plot limiter': None,
+                                  'Limiter X': None,
+                                  'Limiter Y': None,
+                                  'Limiter 2D': None,
+                                  'Limiter color': 'white',
+                                  'Plot separatrix': None,
+                                  'Separatrix X': None,
+                                  'Separatrix Y': None,
+                                  'Separatrix 2D': None,
+                                  'Separatrix color': 'red',
+                                  'Plot flux': None,
+                                  'Flux XY': None,
+                                  'Flux nlevel': 51}
+            
+            self.efit_options=flap.config.merge_options(default_efit_options,self.options['EFIT options'],data_source=self.d.data_source)
+            self.efit_data={'limiter':   {'Time':[],'Data':[]},
+                            'separatrix':{'Time':[],'Data':[]},
+                            'flux':      {'Time':[],'Data':[]}}
+            
+            for setting in ['limiter','separatrix']:
+                if (self.efit_options['Plot '+setting]):
+                    if (((self.efit_options[setting.capitalize()+' X']) and
+                         (self.efit_options[setting.capitalize()+' Y' ])) or
+                         (self.efit_options[setting.capitalize()+' 2D'])):
+                    
+                        if ((self.efit_options[setting.capitalize()+' X']) and
+                            (self.efit_options[setting.capitalize()+' Y'])):
+                            try:
+                                R_object=flap.get_data_object(self.efit_options[setting.capitalize()+' X'],exp_id=self.d.exp_id)
+                            except:
+                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' X']+" cannot be read.")
+                            try:
+                                Z_object=flap.get_data_object(self.efit_options[setting.capitalize()+' Y'],exp_id=self.d.exp_id)
+                            except:
+                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' Y']+" cannot be read.")
+                            if (len(R_object.data.shape) != 2 or len(Z_object.data.shape) != 2):
+                                raise ValueError("The "+setting.capitalize()+' Y'+" data is not 1D. Use 2D or modify data reading.")
+                            self.efit_data[setting]['Data']=np.asarray([R_object.data,Z_object.data])
+                            self.efit_data[setting]['Time']=R_object.coordinate('Time')[0][:,0] #TIME IS NOT ALWAYS THE FIRST COORDINATE, ELLIPSIS CHANGE SHOULD BE IMPLEMENTED
+                        elif (self.efit_options[setting.capitalize()+' XY']):
+                            try:
+                                R_object=flap.get_data_object(self.efit_options[setting.capitalize()+' 2D'],exp_id=self.d.exp_id)
+                            except:
+                                raise ValueError(setting.capitalize()+'  2D data is not available. FLAP data object needs to be read first.')  
+                            if R_object.data.shape[2] == 2:
+                                self.efit_data[setting]['Data']=np.asarray([R_object.data[:,:,0],R_object.data[:,:,1]])
+                            else:
+                                raise ValueError(setting.capitalize()+' XY data needs to be in the format [n_time,n_points,2 (xy)')
+                            self.efit_data[setting]['Time']=R_object.coordinate('Time')[0][:,0,0] #TIME IS NOT ALWAYS THE FIRST COORDINATE, ELLIPSIS CHANGE SHOULD BE IMPLEMENTED
+                        else:
+                            raise ValueError('Both '+setting.capitalize()+' X and'+
+                                             setting.capitalize()+' Y or '+
+                                             setting.capitalize()+' 2D need to be set.')
+                        
+                        for index_coordinate in range(len(self.d.coordinates)):
+                            if ((self.d.coordinates[index_coordinate].unit.name in self.axes) and
+                                (self.d.coordinates[index_coordinate].unit.name != 'Time')):
+                                coordinate_index=index_coordinate
+                        #Spatial unit translation (mm vs m usually)
+                        if (R_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
+                            try:
+                                coeff_efit_spatial=spatial_unit_translation(R_object.data_unit.unit)
+                            except:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            try:
+                                coeff_data_spatial=spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
+                            except:
+                                raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
+                            #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
+                            self.efit_data[setting]['Data'] *= coeff_efit_spatial/coeff_data_spatial
+                        #Time translation (usually ms vs s)
+                        for index_time in range(len(self.d.coordinates)):
+                            if (self.d.coordinates[index_time].unit.name == 'Time'):
+                                time_index_data=index_time
+                                
+                        for index_time in range(len(R_object.coordinates)):
+                            if (self.d.coordinates[index_time].unit.name == 'Time'):
+                                time_index_efit=index_time      
+                        
+                        if (R_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
+                            try:
+                                coeff_efit_time=time_unit_translation(R_object.coordinates[time_index_efit].unit.unit)
+                            except:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            try:
+                                coeff_data_time=time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
+                            except:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            self.efit_data[setting]['Time'] *= coeff_efit_time/coeff_data_time         
+                    else:
+                        raise ValueError(setting.capitalize()+' keywords are not set for the data objects.')
+                        
+                    #Interpolating EFIT data for the time vector of the data    
+                    if ((self.efit_data[setting]['Data'] != []) and (self.efit_data[setting]['Time'] != [])):
+                        self.efit_data[setting]['Data resampled']=np.zeros([2,self.tdata.shape[0],self.efit_data[setting]['Data'].shape[2]])
+                        for index_xy in range(0,2):
+                            for index_coordinate in range(0,self.efit_data[setting]['Data'].shape[2]):
+                                self.efit_data[setting]['Data resampled'][index_xy,:,index_coordinate]=np.interp(self.tdata,self.efit_data[setting]['Time'],
+                                                                                                                 self.efit_data[setting]['Data'][index_xy,:,index_coordinate])
+                                
+            if (self.efit_options['Plot flux']):
+                try:
+                    flux_object=flap.get_data_object(self.efit_options['Flux XY'],exp_id=self.d.exp_id)
+                except:
+                    raise ValueError('Flux  XY data is not available. FLAP data object needs to be read first.')  
+                if len(flux_object.data.shape) != 3:
+                    raise ValueError('Flux XY data needs to be a 3D matrix (r,z,t), not necessarily in this order.')
+                if (flux_object.coordinates[0].unit.name != 'Time'):
+                    raise ValueError('Time should be the first coordinate in the flux data object.')
+                self.efit_data['flux']['Data']=flux_object.data
+                self.efit_data['flux']['Time']=flux_object.time[:,0,0] #TIME IS NOT ALWAYS THE FIRST COORDINATE, ELLIPSIS CHANGE SHOULD BE IMPLEMENTED
+                self.efit_data['flux']['X coord']=flux_object.coordinate(flux_object.coordinates[1].unit.name)[0]
+                self.efit_data['flux']['Y coord']=flux_object.coordinate(flux_object.coordinates[2].unit.name)[0]
+                
+                for index_coordinate in range(len(self.d.coordinates)):
+                    if ((self.d.coordinates[index_coordinate].unit.name in self.axes) and
+                        (self.d.coordinates[index_coordinate].unit.name != 'Time')):
+                        coordinate_index=index_coordinate
+                #Spatial unit translation (mm vs m usually)
+                if (flux_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
+                    try:
+                        coeff_efit_spatial=spatial_unit_translation(flux_object.data_unit.unit)
+                    except:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    try:
+                        coeff_data_spatial=spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
+                    except:
+                        raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
+                    #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
+                    self.efit_data['flux']['X coord'] *= coeff_efit_spatial/coeff_data_spatial
+                    self.efit_data['flux']['Y coord'] *= coeff_efit_spatial/coeff_data_spatial
+                
+                #Time translation (usually ms vs s)
+                for index_time in range(len(self.d.coordinates)):
+                    if (self.d.coordinates[index_time].unit.name == 'Time'):
+                        time_index_data=index_time
+                        
+                for index_time in range(len(flux_object.coordinates)):
+                    if (flux_object.coordinates[index_time].unit.name == 'Time'):
+                        time_index_efit=index_time      
+                
+                if (flux_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
+                    try:
+                        coeff_efit_time=time_unit_translation(flux_object.coordinates[time_index_efit].unit.unit)
+                    except:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    try:
+                        coeff_data_time=time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
+                    except:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    self.efit_data['flux']['Time'] *= coeff_efit_time/coeff_data_time         
+                
+                #Interpolating EFIT data for the time vector of the data    
+                if ((self.efit_data['flux']['Data'] != []) and (self.efit_data['flux']['Time'] != [])):
+                    self.efit_data['flux']['Data resampled']=np.zeros([self.tdata.shape[0],
+                                                                       self.efit_data['flux']['Data'].shape[1],
+                                                                       self.efit_data['flux']['Data'].shape[2]])
+                    self.efit_data['flux']['X coord resampled']=np.zeros([self.tdata.shape[0],
+                                                                          self.efit_data['flux']['X coord'].shape[1],
+                                                                          self.efit_data['flux']['X coord'].shape[2]])
+                    self.efit_data['flux']['Y coord resampled']=np.zeros([self.tdata.shape[0],
+                                                                          self.efit_data['flux']['Y coord'].shape[1],
+                                                                          self.efit_data['flux']['Y coord'].shape[2]])
+                    for index_x in range(0,self.efit_data['flux']['Data'].shape[1]):
+                        for index_y in range(0,self.efit_data['flux']['Data'].shape[2]):
+                            self.efit_data['flux']['Data resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
+                                                                                                  self.efit_data['flux']['Data'][:,index_x,index_y])
+                            self.efit_data['flux']['X coord resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
+                                                                                                     self.efit_data['flux']['X coord'][:,index_x,index_y])
+                            self.efit_data['flux']['Y coord resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
+                                                                                                     self.efit_data['flux']['Y coord'][:,index_x,index_y])
+                            
+            
+        if (self.xrange is not None):
+            plt.xlim(self.xrange[0],self.xrange[1])
+            
+        if (self.yrange is not None):
+            plt.ylim(self.yrange[0],self.yrange[1])        
+            
+        plt.xlabel(self.ax_list[0].title(language=self.language))
+        plt.ylabel(self.ax_list[1].title(language=self.language))
+        
+        if (self.options['Log x']):
+            plt.xscale('log')
+        if (self.options['Log y']):
+            plt.yscale('log')
+        title = self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[0])+\
+                ' ['+self.coord_t.unit.unit+']'
+        plt.title(title)
+
+        plt.show(block=False)        
+
+        self.anim = animation.FuncAnimation(self.fig, self.animate_plot, 
+                                            len(self.tdata),
+                                            interval=self.speed,blit=False)
+        
+    def animate_plot(self, it):
+        
+        time_index = [slice(0,dim) for dim in self.d.data.shape]
+        time_index[self.coord_t.dimension_list[0]] = it
+        time_index = tuple(time_index)
+        
+        self.time_slider.eventson = False
+        self.time_slider.set_val(self.tdata[it])
+        self.time_slider.eventson = True       
+        
+        self.current_frame = it
+            
+        plot_opt = copy.deepcopy(self.plot_options[0])
+        self.ax_act.clear()
+        
+        if (self.image_like):
+            try: 
+                if (self.coord_x.dimension_list[0] == 0):
+                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                     cmap=self.cmap_obj,vmin=self.vmin,
+                                     aspect=self.options['Aspect ratio'],
+                                     interpolation=self.options['Interpolation'],
+                                     vmax=self.vmax,origin='lower',**plot_opt)
+                else:
+                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
+                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                     cmap=self.cmap_obj,vmin=self.vmin,
+                                     aspect=self.options['Aspect ratio'],
+                                     interpolation=self.options['Interpolation'],
+                                     vmax=self.vmax,origin='lower',**plot_opt)            
+                del im
+            except Exception as e:
+                raise e
+        else:
+                xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
+                im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                try:
+                    plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
+                                   vmax=self.vmax,**plot_opt)
+                except Exception as e:
+                    raise e
+                del im
+        if ('EFIT options' in self.options and self.options['EFIT options'] != None):        
+            for setting in ['limiter','separatrix']:
+                if (self.efit_options['Plot '+setting]):
+                    self.ax_act.set_autoscale_on(False)
+                    im = plt.plot(self.efit_data[setting]['Data resampled'][0,it,:],
+                                  self.efit_data[setting]['Data resampled'][1,it,:],
+                                  color=self.efit_options[setting.capitalize()+' color'])
+
+            if (self.efit_options['Plot flux']):
+                self.ax_act.set_autoscale_on(False)
+                #im = plt.contour(self.efit_data['flux']['X coord'][it,:,:],
+                #                 self.efit_data['flux']['Y coord'][it,:,:],
+                #                 self.efit_data['flux']['Data resampled'][it,:,:],
+                #                 levels=self.efit_options['Flux nlevel'])
+
+                im = plt.contour(self.efit_data['flux']['X coord resampled'][it,:,:].transpose(),
+                                 self.efit_data['flux']['Y coord resampled'][it,:,:].transpose(),
+                                 self.efit_data['flux']['Data resampled'][it,:,:],
+                                 levels=self.efit_options['Flux nlevel'])
+                
+        if (self.xrange is not None):
+            self.ax_act.set_xlim(self.xrange[0],self.xrange[1])
+        if (self.yrange is not None):
+            self.ax_act.set_ylim(self.yrange[0],self.yrange[1])        
+        self.ax_act.set_xlabel(self.ax_list[0].title(language=self.language))
+        self.ax_act.set_ylabel(self.ax_list[1].title(language=self.language))
+        title = self.coord_t.unit.name+' ='+"{:10f}".format(self.tdata[it])+' ['+self.coord_t.unit.unit+']'
+        self.ax_act.set_title(title)
+    
+    def _reset_animation(self, event):
+        self.anim.event_source.stop()
+        self.speed = 40.
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                       len(self.tdata),interval=self.speed,blit=False)
+        self.anim.event_source.start()
+        self.pause = False
+        
+    def _pause_animation(self, event):
+        if self.pause:
+            self.anim.event_source.start()
+            self.pause = False
+            self.pause_button.label.set_text("Pause")
+        else:
+            self.anim.event_source.stop()
+            self.pause = True
+            self.pause_button.label.set_text("Start")
+        
+    def _set_animation(self, time):
+        self.anim.event_source.stop()
+        frame=(np.abs(self.tdata-time)).argmin()
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                            frames=np.arange(frame,len(self.tdata)-1),
+                                            interval=self.speed,blit=False)
+        self.anim.event_source.start()
+        self.pause = False
+        
+    def _slow_animation(self, event):
+        self.anim.event_source.stop()
+        self.speed=self.speed/0.8
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                            frames=np.arange(self.current_frame,len(self.tdata)-1),
+                                            interval=self.speed,blit=False)
+        self.speed_button.label.set_text(str(int(1000./(self.speed*0.8)))+'fps')
+        self.slow_button.label.set_text(str(int(1000./(self.speed/0.8)))+'fps')
+        self.anim.event_source.start()
+        self.pause = False
+        
+    def _speed_animation(self, event):  
+        self.anim.event_source.stop()
+        self.speed=self.speed*0.8
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+                                            frames=np.arange(self.current_frame,len(self.tdata)-1),
+                                            interval=self.speed,blit=False)
+        self.speed_button.label.set_text(str(int(1000./(self.speed*0.8)))+'fps')
+        self.slow_button.label.set_text(str(int(1000./(self.speed/0.8)))+'fps')
+        self.anim.event_source.start()
+        self.pause = False
+            
 class PlotID:
     def __init__(self):
         # The figure number where the plto resides
@@ -428,6 +889,21 @@ def _plot(data_object,
         'Nan color': The color to use in image data plotting for np.nan (not-a-number) values
         'Interpolation': Interpolation method for image plot.
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
+        'EFIT options': Dictionary of EFIT plotting options:
+            'Plot separatrix': Set to plot the separatrix onto the video
+                'Separatrix X': Name of the flap.DataObject for the separatrix X data (usually R)
+                'Separatrix Y': Name of the flap.DataObject for the separatrix Y data (usually z)
+                'Separatrix XY': Name of the 2D flap.DataObject for the separatrix XY data (usually Rz)
+                'Separatrix color': Color of the separatrix for the plot
+            'Plot limiter': Set to plot the limiter onto the video
+                'Limiter X': Name of the flap.DataObject for the limiter X data (usually R)
+                'Limiter Y': Name of the flap.DataObject for the limiter Y data (usually z)
+                'Limiter XY': Name of the 2D flap.DataObject for the limiter XY data (usually Rz)
+                'Limiter color': Color of the limiter for the plot
+            'Plot flux surfaces': Name of the 2D flap.DataObject for the flux surfaces
+                (should have the same coordinate names as the plot)
+                'nlevels': Number of contour lines for the flux surface plotting
+            
     """
     
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
@@ -435,10 +911,11 @@ def _plot(data_object,
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
                        'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
-                       'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi'
+                       'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi',
+                       'EFIT options':None
                        }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
-
+    
     if (plot_options is None):
         _plot_options = {}
     else:
@@ -493,7 +970,7 @@ def _plot(data_object,
         plt.cla()
             
     # Setting plot type
-    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contour','anim-contour']
+    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contour','anim-contour','animation']
     if (plot_type is None):
         if (len(d.shape) == 1):
             _plot_type = 'xy'
@@ -1448,7 +1925,7 @@ def _plot(data_object,
             plt.show(block=False)
             time.sleep(_options['Waittime'])
             plt.pause(0.001)
-            if (_options['Video file'] is not None):
+            if ((_options['Video file'] is not None) and (cv2_presence is not False)):
                 fig = plt.gcf()
                 fig.canvas.draw ( )
                 # Get the RGBA buffer from the figure
@@ -1470,6 +1947,135 @@ def _plot(data_object,
             cv2.destroyAllWindows()
             video.release()  
             del video
+            
+    elif (_plot_type == 'animation'):
+        if (d.data is None):
+            raise ValueError("Cannot plot DataObject without data.")
+        if (len(d.shape) != 3):
+            raise TypeError("Animated image plot is applicable to 3D data only. Use slicing.")
+        if (d.data.dtype.kind == 'c'):
+            raise TypeError("Animated image plot is applicable only to real data.")
+        # Checking for numeric type
+        try:
+            d.data[0,0] += 1
+        except TypeError:
+            raise TypeError("Animated image plot is applicable only to numeric data.")
+        
+        yrange = _options['Y range']
+        if (yrange is not None):
+            if ((type(yrange) is not list) or (len(yrange) != 2)):
+                raise ValueError("Invalid Y range setting.")
+
+        # Processing axes
+        # Although the plot will be cleared the existing plot axes will be considered
+        default_axes = [d.coordinates[0].unit.name, d.coordinates[1].unit.name,d.coordinates[2].unit.name,'__Data__']
+        try:
+            pdd_list, ax_list = _plot_id.check_axes(d, 
+                                                    axes, 
+                                                    clear=_options['Clear'], 
+                                                    default_axes=default_axes, 
+                                                    force=_options['Force axes'])
+        except ValueError as e:
+            raise e
+        
+        if (not ((pdd_list[3].data_type == PddType.Data) and (pdd_list[3].data_object == d))):
+            raise ValueError("For anim-image/anim-contour plot only data can be plotted on the z axis.")
+        if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
+            raise ValueError("X and y coordinates of anim-image/anim-contour plot type should be coordinates.")
+        if (pdd_list[2].data_type != PddType.Coordinate) :
+            raise ValueError("Time coordinate of anim-image/anim-contour plot should be coordinate.")
+
+        coord_x = pdd_list[0].value
+        coord_y = pdd_list[1].value
+        coord_t = pdd_list[2].value
+        
+        if (len(coord_t.dimension_list) != 1):
+            raise ValueError("Time coordinate for anim-image/anim-contour plot should be changing only along one dimension.")
+        try:
+            coord_x.dimension_list.index(coord_t.dimension_list[0])
+            badx = True
+        except:
+            badx = False
+        try:
+            coord_y.dimension_list.index(coord_t.dimension_list[0])
+            bady = True
+        except:
+            bady = False
+        if (badx or bady):
+            raise ValueError("X and y coordinate for anim-image plot should not change in time dimension.")
+            
+        index = [0] * 3
+        index[coord_t.dimension_list[0]] = ...
+        tdata = coord_t.data(data_shape=d.shape,index=index)[0].flatten()
+        if (not coord_y.isnumeric()):
+            raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
+
+        if ((coord_x.mode.equidistant) and (len(coord_x.dimension_list) == 1) and
+            (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
+            # This data is image-like with data points on a rectangular array
+            image_like = True
+        elif ((len(coord_x.dimension_list) == 1) and (len(coord_y.dimension_list) == 1)):
+            if (not coord_x.isnumeric()):
+                raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
+            if (not coord_y.isnumeric()):
+                raise ValueError('Coordinate '+coord_y.unit.name+' is not numeric.')
+            index = [0] * len(d.shape)
+            index[coord_x.dimension_list[0]] = ...
+            xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape,index=index)
+            xdata = xdata.flatten()
+            dx = xdata[1:] - xdata[:-1]
+            index = [0] * len(d.shape)
+            index[coord_y.dimension_list[0]] = ...
+            ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape,index=index)
+            ydata = ydata.flatten()
+            dy = ydata[1:] - ydata[:-1]
+            if ((np.nonzero(np.abs(dx - dx[0]) / math.fabs(dx[0]) > 0.01)[0].size == 0) and
+                (np.nonzero(np.abs(dy - dy[0]) / math.fabs(dy[0]) > 0.01)[0].size == 0)):
+                # Actually the non-equidistant coordinates are equidistant
+                image_like = True
+            else:
+                image_like = False
+        else:
+            image_like = False
+        if (image_like):        
+            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
+            ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
+            ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
+            xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
+        else:
+            index = [...]*3
+            index[coord_t.dimension_list[0]] = 0
+            xdata_range = None
+            ydata_range = None
+            ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
+            xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
+            
+        try:
+            cmap_obj = plt.cm.get_cmap(cmap)
+            if (_options['Nan color'] is not None):
+                cmap_obj.set_bad(_options['Nan color'])
+        except ValueError:
+            raise ValueError("Invalid color map.")
+
+        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+#        ax=plt.plot()
+        _plot_id.plt_axis_list = []
+        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+#        plt.subplot(_plot_id.base_subplot)
+#        plt.plot()
+#        plt.cla()
+#        ax=plt.gca()
+
+        oargs=(ax_list, axes, d, xdata, ydata, tdata, xdata_range, ydata_range,
+               cmap_obj, contour_levels, 
+               coord_t, coord_x, coord_y, cmap, _options, 
+               xrange, yrange, zrange, image_like, 
+               _plot_options, language, _plot_id, gs)
+        
+        anim = PlotAnimation(*oargs)
+        anim.animate()
+        
+
 #    print("------ plot finished, show() ----")
     plt.show(block=False)       
  
