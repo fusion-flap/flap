@@ -3740,7 +3740,12 @@ def get_data(data_source,
         _coordinates = coordinates
 
     try:
-        d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates, data_source=data_source)
+        if ("data_source" in locals()):
+            data_source_local=data_source
+        else:
+            data_source_local=None
+            d = f(exp_id, data_name=name, no_data=no_data, options=options, 
+                  coordinates=_coordinates, data_source=data_source_local)
     except TypeError:
         # Trying without data_source as this was not part of earlier version
         try:
