@@ -375,7 +375,7 @@ class PlotAnimation:
                 if (flux_object.coordinates[0].unit.name != 'Time'):
                     raise ValueError('Time should be the first coordinate in the flux data object.')
                 self.efit_data['flux']['Data']=flux_object.data
-                self.efit_data['flux']['Time']=flux_object.time[:,0,0] #TIME IS NOT ALWAYS THE FIRST COORDINATE, ELLIPSIS CHANGE SHOULD BE IMPLEMENTED
+                self.efit_data['flux']['Time']=flux_object.coordinate('Time')[0][:,0,0] #TIME IS NOT ALWAYS THE FIRST COORDINATE, ELLIPSIS CHANGE SHOULD BE IMPLEMENTED
                 self.efit_data['flux']['X coord']=flux_object.coordinate(flux_object.coordinates[1].unit.name)[0]
                 self.efit_data['flux']['Y coord']=flux_object.coordinate(flux_object.coordinates[2].unit.name)[0]
                 
