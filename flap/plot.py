@@ -3,6 +3,7 @@
 Created on Sat May 18 18:37:06 2019
 
 @author: Zoletnik
+@coauthor: Lampert
 """
 """ Notes on how to use subplots.
     plt.gca() returns the current subplot
@@ -199,7 +200,20 @@ class PlotAnimation:
         plt.subplot(self.plot_id.base_subplot)
         
         self.ax_act = plt.subplot(self.gs[0,0])
-        self.ax_act.axis('equal')
+
+#The following lines set the axes to be equal if the units of the axes-to-be-plotted are the same
+
+        axes_coordinate_decrypt=[0] * len(self.axes)
+        for i_axes in range(len(self.axes)):
+            for j_coordinate in range(len(self.d.coordinates)):
+                if (self.d.coordinates[j_coordinate].unit.name == self.axes[i_axes]):
+                    axes_coordinate_decrypt[i_axes]=j_coordinate
+        for i_check in range(len(self.axes))        :
+            for j_check in range(i_check+1,len(self.axes)):
+                if (self.d.coordinates[axes_coordinate_decrypt[i_check]].unit.unit ==
+                    self.d.coordinates[axes_coordinate_decrypt[j_check]].unit.unit):
+                    self.ax_act.axis('equal')
+            
         
         time_index = [slice(0,dim) for dim in self.d.data.shape]
         time_index[self.coord_t.dimension_list[0]] = 0
@@ -245,7 +259,10 @@ class PlotAnimation:
             except Exception as e:
                 raise e
         else:
-            xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
+            if (len(self.xdata.shape) == 3 and len(self.xdata.shape) == 3):
+                xgrid, ygrid = grid_to_box(self.xdata[0,:,:],self.ydata[0,:,:]) #Same issue, time is not necessarily the first coordinate.
+            else:
+                xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
             im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
                 img = plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
@@ -428,6 +445,7 @@ class PlotAnimation:
                     self.efit_data['flux']['Y coord resampled']=np.zeros([self.tdata.shape[0],
                                                                           self.efit_data['flux']['Y coord'].shape[1],
                                                                           self.efit_data['flux']['Y coord'].shape[2]])
+                    
                     for index_x in range(0,self.efit_data['flux']['Data'].shape[1]):
                         for index_y in range(0,self.efit_data['flux']['Data'].shape[2]):
                             self.efit_data['flux']['Data resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
@@ -496,14 +514,17 @@ class PlotAnimation:
             except Exception as e:
                 raise e
         else:
+            if (len(self.xdata.shape) == 3 and len(self.xdata.shape) == 3):
+                xgrid, ygrid = grid_to_box(self.xdata[time_index,:,:],self.ydata[time_index,:,:]) #Same issue, time is not necessarily the first coordinate.
+            else:
                 xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
-                im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
-                try:
-                    plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
-                                   vmax=self.vmax,**plot_opt)
-                except Exception as e:
-                    raise e
-                del im
+            im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+            try:
+                plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
+                               vmax=self.vmax,**plot_opt)
+            except Exception as e:
+                raise e
+            del im
         if ('EFIT options' in self.options and self.options['EFIT options'] != None):        
             for setting in ['limiter','separatrix']:
                 if (self.efit_options['Plot '+setting]):
@@ -905,7 +926,6 @@ def _plot(data_object,
                 'nlevels': Number of contour lines for the flux surface plotting
             
     """
-    
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
@@ -933,7 +953,6 @@ def _plot(data_object,
         d = data_object.slice_data(slicing=slicing, summing=summing, options=slicing_options)
     else:
         d = data_object        
-    
     # Determining a PlotID:
     # argument, actual or a new one
     if (type(plot_id) is PlotID):
@@ -1048,7 +1067,6 @@ def _plot(data_object,
         raise ValueError("Colormap should be a string.")
     
     contour_levels = _options['Levels']    
-        
     # Here _plot_id is a valid (maybe empty) PlotID
 
     if ((_plot_type == 'xy') or (_plot_type == 'scatter')):
@@ -1979,11 +1997,11 @@ def _plot(data_object,
             raise e
         
         if (not ((pdd_list[3].data_type == PddType.Data) and (pdd_list[3].data_object == d))):
-            raise ValueError("For anim-image/anim-contour plot only data can be plotted on the z axis.")
+            raise ValueError("For the animation plot only data can be plotted on the z axis.")
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
-            raise ValueError("X and y coordinates of anim-image/anim-contour plot type should be coordinates.")
+            raise ValueError("X and y coordinates of the animation plot type should be coordinates.")
         if (pdd_list[2].data_type != PddType.Coordinate) :
-            raise ValueError("Time coordinate of anim-image/anim-contour plot should be coordinate.")
+            raise ValueError("Time coordinate of the animation plot should be coordinate.")
 
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
@@ -1991,18 +2009,6 @@ def _plot(data_object,
         
         if (len(coord_t.dimension_list) != 1):
             raise ValueError("Time coordinate for anim-image/anim-contour plot should be changing only along one dimension.")
-        try:
-            coord_x.dimension_list.index(coord_t.dimension_list[0])
-            badx = True
-        except:
-            badx = False
-        try:
-            coord_y.dimension_list.index(coord_t.dimension_list[0])
-            bady = True
-        except:
-            bady = False
-        if (badx or bady):
-            raise ValueError("X and y coordinate for anim-image plot should not change in time dimension.")
             
         index = [0] * 3
         index[coord_t.dimension_list[0]] = ...
@@ -2058,13 +2064,9 @@ def _plot(data_object,
             raise ValueError("Invalid color map.")
 
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
-#        ax=plt.plot()
+
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
-#        plt.subplot(_plot_id.base_subplot)
-#        plt.plot()
-#        plt.cla()
-#        ax=plt.gca()
 
         oargs=(ax_list, axes, d, xdata, ydata, tdata, xdata_range, ydata_range,
                cmap_obj, contour_levels, 
@@ -2074,7 +2076,6 @@ def _plot(data_object,
         
         anim = PlotAnimation(*oargs)
         anim.animate()
-        
 
 #    print("------ plot finished, show() ----")
     plt.show(block=False)       
@@ -2092,4 +2093,3 @@ def _plot(data_object,
     set_plot_id(_plot_id)
 
     return _plot_id
-
