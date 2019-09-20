@@ -1416,7 +1416,7 @@ def _plot(data_object,
                     im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     try:
                         img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
-                                          origin='lower',vmax=vmax,**_plot_opt)
+                                          vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
                     del im
