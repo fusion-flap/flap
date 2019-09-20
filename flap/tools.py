@@ -448,6 +448,30 @@ def time_unit_translation(time_unit=None):
     else:
         print(_time_unit+' was not found in the translation. Returning 1.')
         return 1
+    
+def spatial_unit_translation(spatial_unit=None):
+    _spatial_unit=spatial_unit.lower()
+    translation={'meters':1,
+                 'meter':1,
+                 'm':1,
+                 'millimeters':1e-3,
+                 'millimeter':1e-3,
+                 'mm':1e-3,
+                 'micrometers':1e-6,
+                 'micrometer':1e-6,
+                 'um':1e-6,
+                 'nanometers':1e-9,
+                 'nanometer':1e-9,
+                 'nm':1e-9,
+                 'picometers':1e-12,
+                 'picometer':1e-12,
+                 'pm':1e-12,
+                 }
+    if (_spatial_unit in translation.keys()):
+        return translation[_spatial_unit]
+    else:
+        print(_spatial_unit+' was not found in the translation. Returning 1.')
+        return 1
 
 #import matplotlib.pyplot as plt
 
