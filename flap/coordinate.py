@@ -9,7 +9,9 @@ This is the coordinate description for FLAP
 
 import math
 import numpy as np
+
 from .tools import *
+import flap.config
 
 class Intervals:
     """ A class to describe a series of intervals.
@@ -560,16 +562,13 @@ class Coordinate:
         """ Return the list of dimensions of the data array along which this coordinate
             changes
         """
-        if (len(self.shape) is 0):
-            return []
         return self.dimension_list
 
     def nochange_dimensions(self,data_shape):
         """ Return the list of dimensions of the data array along which this coordinate
             changes
         """
-        if (((type(self.shape) is tuple) or (type(self.shape) is list))
-            and (len(self.shape) is 0)):
+        if (self.change_dimensions == []):
             return list(range(len(data_shape)))
 
         nochange_list = []
@@ -599,8 +598,13 @@ class Coordinate:
 
         Return value:
             values, value_range_low, value range_high
-            The low and high values are teh absolut values not the differentce from values
+            The low and high values are the absolute values not the difference from values
         """
+        default_options = {'Interpolation': 'Linear',
+                           'Change only': False}
+        
+        _options = flap.config.merge_options(default_options, options)
+        
         if (data_shape is None):
             raise ValueError("Missing data_shape argument in flap.Coordinate.data()")
         if (type(data_shape) is not np.ndarray):
@@ -608,6 +612,15 @@ class Coordinate:
         else:
             _data_shape = data_shape
 
+        if ((index is not None) and _options['Change only']):
+            raise ValueError("index and 'Change only' option cannot be used at the same time in Coordinate.data().")
+        if (_options['Change only']):
+            if (self.change_dimensions is []):
+                index = ...
+            else:    
+                index = [0] * len(data_shape)
+                for i in self.change_dimensions():
+                    index[i] = ...            
         if (index is None) or (index is Ellipsis):
             _index = [...] * len(data_shape)
         else:
