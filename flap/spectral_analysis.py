@@ -9,10 +9,11 @@ Spectral analysis tools fro FLAP
 import math
 import numpy as np
 import flap.config
-from .coordinate import *
+import flap.coordinate
+#from .coordinate import *
 from scipy import signal
-
-import matplotlib.pyplot as plt
+import copy
+#import matplotlib.pyplot as plt
 
 def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
     """ Helper function for spectral and correlation calculation.
@@ -165,12 +166,12 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
         proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
     else:
         step = -coord.step[0]
-        npoint = d.shape[coord.dimension_list[0]]
+        #npoint = d.shape[coord.dimension_list[0]]                              #UNUSED VARIABLE
         proc_interval_index_len = int(round(proc_interval_len / step)) - 2
         proc_interval_index_start = np.round((proc_interval_end - coord.start) / coord.step[0]).astype(np.int32) + 1
         proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
-    return Intervals(proc_interval_start, proc_interval_end),  \
-           Intervals(proc_interval_index_start, proc_interval_index_end),
+    return flap.coordinate.Intervals(proc_interval_start, proc_interval_end),  \
+           flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end),
 
 
 def _trend_removal(d,ax,trend,x=None):
@@ -465,13 +466,13 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
                     error=out_err,
                     coordinates=d.coordinates,
                     exp_id=d.exp_id,
-                    data_unit=Unit("Spectral density"))
+                    data_unit=flap.coordinate.Unit("Spectral density"))
 
     if (wavenumber):
         out_name = 'Wavenumber'
         out_unit = '1/'+coord_obj.unit.unit
         res *= 2 * math.pi
-        fcent *= 2* math.pi
+        #fcent *= 2* math.pi                                                        #UNUSED VARIABLE
     else:
         out_name = 'Frequency'
         out_unit = 'Hz'
@@ -489,20 +490,20 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
         d_out.del_coordinate(c)
 
     if (log_scale):
-        c = Coordinate(name = out_name,
-                       unit = out_unit,
-                       mode = CoordinateMode(equidistant=False),
-                       shape = [f_cent.size],
-                       values = f_cent,
-                       dimension_list=[proc_dim])
+        c = flap.coordinate.Coordinate(name = out_name,
+                                       unit = out_unit,
+                                       mode = flap.coordinate.CoordinateMode(equidistant=False),
+                                       shape = [f_cent.size],
+                                       values = f_cent,
+                                       dimension_list=[proc_dim])
     else:
-        c = Coordinate(name = out_name,
-                       unit = out_unit,
-                       mode = CoordinateMode(equidistant=True),
-                       shape = [],
-                       start = (fcent_index_range[0] - zero_ind) * res,
-                       step = res,
-                       dimension_list=[proc_dim])
+        c = flap.coordinate.Coordinate(name = out_name,
+                                       unit = out_unit,
+                                       mode = flap.coordinate.CoordinateMode(equidistant=True),
+                                       shape = [],
+                                       start = (fcent_index_range[0] - zero_ind) * res,
+                                       step = res,
+                                       dimension_list=[proc_dim])
     d_out.add_coordinate_object(c,index=0)
 
     return d_out
@@ -831,7 +832,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         # For complex data negative frequencies are also valuable
         # n_apsd is the number of valuable points in the spectrum after rearrangement but before
         # and range and resolution transformation
-        n_cpsd = index_int_high[0] - index_int_low[0] + 1
+        n_apsd = index_int_high[0] - index_int_low[0] + 1                                   #THIS WAS n_cpsd BEFORE, WOULD HAVE CAUSED AN ERROR
         # These will be tuples used in reorganizing the raw FFT spectra into continuous
         # frequency scale. We need this as for complex data the negative frequencies are
         # in the second half of the array
@@ -980,9 +981,9 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         # Calculating FFT
         dfft = np.fft.fft(data_proc,axis=proc_dim)
         dfft_ref = np.fft.fft(data_proc_ref,axis=proc_dim_ref)
-        dps, axis_source, axis_number = multiply_along_axes(dfft, 
-                                                            dfft_ref.conjugate(), 
-                                                            [proc_dim, proc_dim_ref])
+        dps, axis_source, axis_number = flap.tools.multiply_along_axes(dfft, 
+                                                                       dfft_ref.conjugate(), 
+                                                                       [proc_dim, proc_dim_ref])
         if (aps_calc):
             dfft_aps = (dfft * dfft.conjugate()).real
             dfft_aps_ref = (dfft_ref * dfft_ref.conjugate()).real
@@ -993,7 +994,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             dps1[tuple(ind_out2)] = dps[tuple(ind_in2)]
             dps = dps1
             if (aps_calc):
-                dfft_aps1 = np.empty(dfft_aps1.shape,dtype=dfft_aps.dtype)
+                dfft_aps1 = np.empty(dfft_aps.shape,dtype=dfft_aps.dtype)   #THIS USED TO BE dfft_aps1 WHICH IS UNDEFINED
                 dfft_aps1[tuple(ind_out1_apsd)] = dfft_aps[tuple(ind_in1_apsd)]
                 dfft_aps1[tuple(ind_out2_apsd)] = dfft_aps[tuple(ind_in2_apsd)]
                 dfft_aps = dfft_aps1
@@ -1046,9 +1047,9 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                         
     out_data /= n_proc_int
     if (aps_calc):
-       apsd_norm, axis_source, axis_number = multiply_along_axes(apsd, 
-                                                    apsd_ref, 
-                                                    [proc_dim, proc_dim_ref])
+       apsd_norm, axis_source, axis_number = flap.tools.multiply_along_axes(apsd, 
+                                                                            apsd_ref, 
+                                                                            [proc_dim, proc_dim_ref])
        apsd_norm /= n_proc_int ** 2
     if (norm): 
        if (ind_nonzero is not None):
@@ -1121,25 +1122,25 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         out_name = 'Wavenumber'
         out_unit = '1/'+coord_obj.unit.unit
         res *= 2 * math.pi
-        fcent *= 2* math.pi
+        #fcent *= 2* math.pi                                                        #UNUSED VARIABLE
     else:
         out_name = 'Frequency'
         out_unit = 'Hz'
     if (log_scale):
-        c = Coordinate(name = out_name,
-                       unit = out_unit,
-                       mode = CoordinateMode(equidistant=False),
-                       shape = [f_cent.size],
-                       values = f_cent,
-                       dimension_list=[proc_dim])
+        c = flap.coordinate.Coordinate(name = out_name,
+                                       unit = out_unit,
+                                       mode = flap.coordinate.CoordinateMode(equidistant=False),
+                                       shape = [f_cent.size],
+                                       values = f_cent,
+                                       dimension_list=[proc_dim])
     else:
-        c = Coordinate(name = out_name,
-                       unit = out_unit,
-                       mode = CoordinateMode(equidistant=True),
-                       shape = [],
-                       start = (fcent_index_range[0] - zero_ind) * res,
-                       step = res,
-                       dimension_list=[proc_dim])
+        c = flap.coordinate.Coordinate(name = out_name,
+                                       unit = out_unit,
+                                       mode = flap.coordinate.CoordinateMode(equidistant=True),
+                                       shape = [],
+                                       start = (fcent_index_range[0] - zero_ind) * res,
+                                       step = res,
+                                       dimension_list=[proc_dim])
     coord_list.append(c)
 
     if (norm):
@@ -1157,7 +1158,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                     error = error,
                     coordinates = coord_list,
                     exp_id = exp_id_out,
-                    data_unit = Unit(unit_name)
+                    data_unit = flap.coordinate.Unit(unit_name)
                     )
     
     return d_out
@@ -1606,7 +1607,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                 if (out_dtype is float):
                     res_acf = np.real(res_acf)
                 # we need to move the correlation axes to the end to be consistent with the CCF
-                res_acf, ax_map = move_axes_to_end(res_acf,correlation_dimensions)
+                res_acf, ax_map = flap.tools.move_axes_to_end(res_acf,correlation_dimensions)
                 corr_acf = np.empty(res_acf.shape,dtype=res.dtype)
                 corr_acf[tuple(ind_out1_acf)] = res_acf[tuple(ind_in1_acf)]
                 corr_acf[tuple(ind_out2_acf)] = res_acf[tuple(ind_in2_acf)]
@@ -1623,7 +1624,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     if (out_dtype is float):
                         res_acf_ref = np.real(res_acf_ref)
                     # we need to move the correlation axes to the start to be consistent with the CCF
-                    res_acf_ref,ax_map_ref = move_axes_to_start(res_acf_ref,correlation_dimensions_ref)
+                    res_acf_ref,ax_map_ref = flap.tools.move_axes_to_start(res_acf_ref,correlation_dimensions_ref)
                     corr_acf_ref = np.empty(res_acf_ref.shape,dtype=res_acf.dtype)
                     corr_acf_ref[tuple(ind_out1_acf_ref)] = res_acf_ref[tuple(ind_in1_acf_ref)]
                     corr_acf_ref[tuple(ind_out2_acf_ref)] = res_acf_ref[tuple(ind_in2_acf_ref)]
@@ -1689,13 +1690,13 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     
     # Adding the correlation coordinates
     for i,c in enumerate(coord_obj):           
-        c_new = Coordinate(name = c.unit.name + ' lag',
-                           unit = c.unit.unit,
-                           mode = CoordinateMode(equidistant=True),
-                           shape = [],
-                           start = range_sampout[i][0] * corr_res_sample[i] * c.step[0],
-                           step = [corr_res_sample[i] * c.step[0]],
-                           dimension_list=[len(d.data.shape) - len(correlation_dimensions) + i])
+        c_new = flap.coordinate.Coordinate(name = c.unit.name + ' lag',
+                                           unit = c.unit.unit,
+                                           mode = flap.coordinate.CoordinateMode(equidistant=True),
+                                           shape = [],
+                                           start = range_sampout[i][0] * corr_res_sample[i] * c.step[0],
+                                           step = [corr_res_sample[i] * c.step[0]],
+                                           dimension_list=[len(d.data.shape) - len(correlation_dimensions) + i])
     coord_list.append(c_new)
 
     if (norm):
@@ -1713,7 +1714,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     error = out_error,
                     coordinates = coord_list,
                     exp_id = exp_id_out,
-                    data_unit = Unit(unit_name)
+                    data_unit = flap.coordinate.Unit(unit_name)
                     )
     
     return d_out
