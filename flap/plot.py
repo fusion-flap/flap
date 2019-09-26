@@ -48,9 +48,11 @@ except:
     print('OpenCV is not present on the computer. Video saving is not available.')
     cv2_presence = False
 
+#from .coordinate import *
+#from .tools import *
 import flap.config
-from .coordinate import *
-from .tools import *
+import flap.tools
+import flap.coordinate
 
 global act_plot_id, gca_invalid
 
@@ -125,7 +127,7 @@ def axes_to_pdd_list(d,axes):
             pdd = PlotDataDescription(data_type=PddType.Constant,
                                       value=val
                                       )
-            axx = Unit()
+            axx = flap.coordinate.Unit()
         pdd_list.append(pdd)
         ax_list.append(axx)
     return pdd_list,ax_list
@@ -260,9 +262,9 @@ class PlotAnimation:
                 raise e
         else:
             if (len(self.xdata.shape) == 3 and len(self.xdata.shape) == 3):
-                xgrid, ygrid = grid_to_box(self.xdata[0,:,:],self.ydata[0,:,:]) #Same issue, time is not necessarily the first coordinate.
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata[0,:,:],self.ydata[0,:,:]) #Same issue, time is not necessarily the first flap.coordinate.
             else:
-                xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata,self.ydata)
             im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
                 img = plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
@@ -280,7 +282,7 @@ class PlotAnimation:
 #EFIT overplot feature implementation:
             #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
             #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.
-        if ('EFIT options' in self.options and self.options['EFIT options'] != None):
+        if ('EFIT options' in self.options and self.options['EFIT options'] is not None):
             
             default_efit_options={'Plot limiter': None,
                                   'Limiter X': None,
@@ -343,11 +345,11 @@ class PlotAnimation:
                         #Spatial unit translation (mm vs m usually)
                         if (R_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
                             try:
-                                coeff_efit_spatial=spatial_unit_translation(R_object.data_unit.unit)
+                                coeff_efit_spatial=flap.tools.spatial_unit_translation(R_object.data_unit.unit)
                             except:
                                 raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
                             try:
-                                coeff_data_spatial=spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
+                                coeff_data_spatial=flap.tools.spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
                             except:
                                 raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
                             #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
@@ -363,11 +365,11 @@ class PlotAnimation:
                         
                         if (R_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
                             try:
-                                coeff_efit_time=time_unit_translation(R_object.coordinates[time_index_efit].unit.unit)
+                                coeff_efit_time=flap.tools.time_unit_translation(R_object.coordinates[time_index_efit].unit.unit)
                             except:
                                 raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
                             try:
-                                coeff_data_time=time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
+                                coeff_data_time=flap.tools.time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
                             except:
                                 raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
                             self.efit_data[setting]['Time'] *= coeff_efit_time/coeff_data_time         
@@ -403,11 +405,11 @@ class PlotAnimation:
                 #Spatial unit translation (mm vs m usually)
                 if (flux_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
                     try:
-                        coeff_efit_spatial=spatial_unit_translation(flux_object.data_unit.unit)
+                        coeff_efit_spatial=flap.tools.spatial_unit_translation(flux_object.data_unit.unit)
                     except:
                         raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
                     try:
-                        coeff_data_spatial=spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
+                        coeff_data_spatial=flap.tools.spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
                     except:
                         raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
                     #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
@@ -425,11 +427,11 @@ class PlotAnimation:
                 
                 if (flux_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
                     try:
-                        coeff_efit_time=time_unit_translation(flux_object.coordinates[time_index_efit].unit.unit)
+                        coeff_efit_time=flap.tools.time_unit_translation(flux_object.coordinates[time_index_efit].unit.unit)
                     except:
                         raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
                     try:
-                        coeff_data_time=time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
+                        coeff_data_time=flap.tools.time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
                     except:
                         raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
                     self.efit_data['flux']['Time'] *= coeff_efit_time/coeff_data_time         
@@ -498,26 +500,26 @@ class PlotAnimation:
             try: 
                 if (self.coord_x.dimension_list[0] == 0):
                     im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
-                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
-                                     cmap=self.cmap_obj,vmin=self.vmin,
-                                     aspect=self.options['Aspect ratio'],
-                                     interpolation=self.options['Interpolation'],
-                                     vmax=self.vmax,origin='lower',**plot_opt)
+                    plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                               cmap=self.cmap_obj,vmin=self.vmin,
+                               aspect=self.options['Aspect ratio'],
+                               interpolation=self.options['Interpolation'],
+                               vmax=self.vmax,origin='lower',**plot_opt)
                 else:
                     im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
-                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
-                                     cmap=self.cmap_obj,vmin=self.vmin,
-                                     aspect=self.options['Aspect ratio'],
-                                     interpolation=self.options['Interpolation'],
-                                     vmax=self.vmax,origin='lower',**plot_opt)            
+                    plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                               cmap=self.cmap_obj,vmin=self.vmin,
+                               aspect=self.options['Aspect ratio'],
+                               interpolation=self.options['Interpolation'],
+                               vmax=self.vmax,origin='lower',**plot_opt)            
                 del im
             except Exception as e:
                 raise e
         else:
             if (len(self.xdata.shape) == 3 and len(self.xdata.shape) == 3):
-                xgrid, ygrid = grid_to_box(self.xdata[time_index,:,:],self.ydata[time_index,:,:]) #Same issue, time is not necessarily the first coordinate.
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata[time_index,:,:],self.ydata[time_index,:,:]) #Same issue, time is not necessarily the first flap.coordinate.
             else:
-                xgrid, ygrid = grid_to_box(self.xdata,self.ydata)
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata,self.ydata)
             im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
                 plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
@@ -525,7 +527,7 @@ class PlotAnimation:
             except Exception as e:
                 raise e
             del im
-        if ('EFIT options' in self.options and self.options['EFIT options'] != None):        
+        if ('EFIT options' in self.options and self.options['EFIT options'] is not None):        
             for setting in ['limiter','separatrix']:
                 if (self.efit_options['Plot '+setting]):
                     self.ax_act.set_autoscale_on(False)
@@ -713,18 +715,18 @@ class PlotID:
 #                    ax_out_list.append(Unit())
                 if ((ax_in.name != ax_plot.name) or (ax_in.unit != ax_plot.unit)):
                     if (force):
-                        u = Unit()
+                        u = flap.coordinate.Unit()
                         if (ax_in.name == ax_plot.name):
                             u.name = ax_in.name
-                        elif ((ax_in.name is None) or (ax_in.name is '')):
+                        elif ((ax_in.name is None) or (ax_in.name == '')):
                             u.name = ax_plot.name 
-                        elif ((ax_plot.name is None) or (ax_plot.name is '')):
+                        elif ((ax_plot.name is None) or (ax_plot.name == '')):
                             u.name = ax_in.name    
                         if (ax_in.unit == ax_plot.unit):
                             u.unit = ax_in.unit
-                        elif ((ax_in.unit is None) or (ax_in.unit is '')):
+                        elif ((ax_in.unit is None) or (ax_in.unit == '')):
                             u.unit = ax_plot.unit 
-                        elif ((ax_plot.unit is None) or (ax_plot.unit is '')):
+                        elif ((ax_plot.unit is None) or (ax_plot.unit == '')):
                             u.unit = ax_in.unit        
                         ax_out_list.append(u)
                         continue
@@ -926,6 +928,7 @@ def _plot(data_object,
                 'nlevels': Number of contour lines for the flux surface plotting
             
     """
+
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
                        'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
                        'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
@@ -1001,7 +1004,7 @@ def _plot(data_object,
             raise ValueError("No default plot type for this kind of data, set plot_type.")
     else:
         try:
-            _plot_type = find_str_match(plot_type,known_plot_types)
+            _plot_type = flap.tools.find_str_match(plot_type,known_plot_types)
         except TypeError:
             raise TypeError("Invalid type for plot_type. String is expected.")
         except ValueError:
@@ -1032,7 +1035,7 @@ def _plot(data_object,
         raise ValueError("Invalid maxpoints setting.")
 
     try:
-        compt = find_str_match(_options['Complex mode'], ['Amp-phase','Real-imag'])
+        compt = flap.tools.find_str_match(_options['Complex mode'], ['Amp-phase','Real-imag'])
     except:
         raise ValueError("Invalid 'Complex mode' option:" +_options['Complex mode'])
     if (compt == 'Amp-phase'):
@@ -1092,8 +1095,8 @@ def _plot(data_object,
             raise e
         # Preparing data    
         plotdata = [0]*2
-        plotdata_low = [0]*2
-        plotdata_high = [0]*2
+        plotdata_low = [0]*2                                                    #UNUSED
+        plotdata_high = [0]*2                                                   #UNUSED
         ploterror = [0]*2
         for ax_ind in range(2):
             if (pdd_list[ax_ind].data_type == PddType.Data):
@@ -1288,7 +1291,7 @@ def _plot(data_object,
                     else:
                         ydata = np.full(xdata.size, ydata)
                     if (plot_error):
-                        yerror = d._plot_coord_ranges(c, ydata, ydata_low, ydata_high)
+                        yerror = d._plot_coord_ranges(c, ydata, ydata_low, ydata_high) #THESE ARE UNDEFINED
                     else:
                         yerror = None
                 if (np.isscalar(xdata)):
@@ -1297,7 +1300,7 @@ def _plot(data_object,
                     else:
                         xdata = np.full(ydata.size, xdata)
                     if (plot_error):
-                        xerror = d._plot_coord_ranges(c, xdata, xdata_low, xdata_high)
+                        xerror = d._plot_coord_ranges(c, xdata, xdata_low, xdata_high) #THESE ARE UNDEFINED
                     else:
                         xerror = None
         
@@ -1457,7 +1460,7 @@ def _plot(data_object,
         _plot_id.plt_axis_list = [ax]
         
         ysep = _options['Y separation']
-        if (ysep == None):
+        if (ysep is None):
             if (_plot_id.number_of_plots != 0):
                 ysep = _plot_id.options[-1]['Y separation']
             else:
@@ -1696,7 +1699,7 @@ def _plot(data_object,
                 raise e
         else:
             if (_plot_type == 'image'):
-                xgrid, ygrid = grid_to_box(xdata,ydata)
+                xgrid, ygrid = flap.tools.grid_to_box(xdata,ydata)
                 try:
                     img = ax.pcolormesh(xgrid,ygrid,np.clip(np.transpose(d.data),vmin,vmax),norm=norm,cmap=cmap,vmin=vmin,
                                         vmax=vmax,**_plot_opt)
@@ -1781,7 +1784,7 @@ def _plot(data_object,
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
             raise ValueError("X and y coordinates of anim-image/anim-contour plot type should be coordinates.")
         if (pdd_list[2].data_type != PddType.Coordinate) :
-            raise ValueError("Time coordinate of anim-image/anim-contour plot should be coordinate.")
+            raise ValueError("Time coordinate of anim-image/anim-contour plot should be flap.coordinate.")
 
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
@@ -1883,7 +1886,7 @@ def _plot(data_object,
                 locator = ticker.LogLocator(subs='all')
             else:
                 norm = None
-                locator = None
+                locator = None                                                  #UNUSED
                     
             if (contour_levels is None):
                 contour_levels = 255
@@ -1907,7 +1910,7 @@ def _plot(data_object,
                     raise e
             else:
                 if (_plot_type == 'anim-image'):
-                    xgrid, ygrid = grid_to_box(xdata,ydata)
+                    xgrid, ygrid = flap.tools.grid_to_box(xdata,ydata)
                     im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     try:
                         img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
@@ -1961,7 +1964,7 @@ def _plot(data_object,
                                             (width,height),
                                             isColor=True)
                 video.write(buf)
-        if (_options['Video file'] is not None):
+        if ((_options['Video file'] is not None) and (cv2_presence is not False)):
             cv2.destroyAllWindows()
             video.release()  
             del video
@@ -2001,7 +2004,7 @@ def _plot(data_object,
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
             raise ValueError("X and y coordinates of the animation plot type should be coordinates.")
         if (pdd_list[2].data_type != PddType.Coordinate) :
-            raise ValueError("Time coordinate of the animation plot should be coordinate.")
+            raise ValueError("Time coordinate of the animation plot should be flap.coordinate.")
 
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
