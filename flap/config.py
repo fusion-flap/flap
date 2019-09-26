@@ -6,6 +6,7 @@ Created on Wed Jan 23 21:45:43 2019
 """
 import configparser
 import copy
+import flap.tools
 
 class Config:
     def __init__(self):
@@ -121,7 +122,7 @@ def merge_options(default_options, input_options, data_source=None, section=None
       Return value:
           The merged options dictionary. Abbreviated keys are expanded to full name.
     """
-    if (default_options == None):
+    if (default_options is None):
         return {}
     if (section is not None):
         section_options = get_all_section(section)
@@ -182,7 +183,7 @@ def test_select_signals():
 #    signals = chlist(chrange=[1,20],prefix='ABC-',postfix='-SD')
     signals = ['ABC-3-SD','ABC-3-SD-3','ABC-4-SD-5']
     try:
-        chl, ilist = select_signals(signals,'ABC-[1-22]-SD-[4-7]')
+        chl, ilist = flap.tools.select_signals(signals,'ABC-[1-22]-SD-[4-7]')
     except Exception as e:
         print(e)
     print(chl)
