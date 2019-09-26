@@ -9,7 +9,9 @@ This is the coordinate description for FLAP
 
 import math
 import numpy as np
-from .tools import *
+import flap.tools
+import copy
+from decimal import Decimal
 
 class Intervals:
     """ A class to describe a series of intervals.
@@ -484,7 +486,7 @@ class Coordinate:
         """
         if (self.value_index is not None):
             return False
-        if (len(self.dimension_list) is 0):
+        if (len(self.dimension_list) == 0):
             return True
         if (data_shape is None):
             return True
@@ -542,14 +544,14 @@ class Coordinate:
 
     def isnumeric(self):
         dt = self.dtype()
-        if ((dt is int) or (dt is float) or (dt is complex) or (dt is Decimal)):
+        if ((dt == int) or (dt == float) or (dt == complex) or (dt == Decimal)):
             return True
         else:
             return False
 
     def string_subtype(self):
-        if (self.dtype is str):
-            if (isscalar(self.values)):
+        if (self.dtype == str):
+            if (np.isscalar(self.values)):
                 return type(self.values)
             else:
                 return self.values.dtype
@@ -560,7 +562,7 @@ class Coordinate:
         """ Return the list of dimensions of the data array along which this coordinate
             changes
         """
-        if (len(self.shape) is 0):
+        if (len(self.shape) == 0):
             return []
         return self.dimension_list
 
@@ -569,7 +571,7 @@ class Coordinate:
             changes
         """
         if (((type(self.shape) is tuple) or (type(self.shape) is list))
-            and (len(self.shape) is 0)):
+            and (len(self.shape) == 0)):
             return list(range(len(data_shape)))
 
         nochange_list = []
@@ -647,7 +649,7 @@ class Coordinate:
                 out_shape[i] = 1
                 out_index[i] = np.array([_index[i]])
 
-        if (len(self.dimension_list) is 0):
+        if (len(self.dimension_list) == 0):
             # If coordinate is constant, returning it
             if (self.mode.equidistant):
                 out_coord = np.full(tuple(out_shape),self.start)
@@ -745,7 +747,7 @@ class Coordinate:
                 #   --> no interpolation is necessary
                 if (len(value_index) == 0):
                     pass
-                value_index_arrays = submatrix_index(np.array(self.values).shape, value_index)
+                value_index_arrays = flap.tools.submatrix_index(np.array(self.values).shape, value_index)
                 value_mx = np.array(self.values)[value_index_arrays]
                 if (self.value_ranges is not None):
                     _value_ranges = np.array(self.value_ranges)
@@ -768,19 +770,19 @@ class Coordinate:
         # First creating a dimension list where this coordinate does not change
         nochange_list = self.nochange_dimensions(_data_shape)
         # If this list is empty, nothing to be done
-        if (len(nochange_list) is 0):
+        if (len(nochange_list) == 0):
             out_coord = value_mx
             out_coord_low = value_mx_low
             out_coord_high = value_mx_high
         else:
             # if we need to extend along the dimensions not in dimension_list
-            out_coord = expand_matrix(value_mx,out_shape,self.dimension_list)
+            out_coord = flap.tools.expand_matrix(value_mx,out_shape,self.dimension_list)
             if (value_mx_low is not None):
-                out_coord_low = expand_matrix(value_mx_low,out_shape,self.dimension_list)
+                out_coord_low = flap.tools.expand_matrix(value_mx_low,out_shape,self.dimension_list)
             else:
                 out_coord_low = None
             if (value_mx_high is not None):
-                out_coord_high = expand_matrix(value_mx_high,out_shape,self.dimension_list)
+                out_coord_high = flap.tools.expand_matrix(value_mx_high,out_shape,self.dimension_list)
             else:
                 out_coord_high = None
 
@@ -799,9 +801,9 @@ class Coordinate:
                     return [self.start]*2, [self.start]*2
                 else:
                     if (self.mode.range_symmetric):
-                        return [self.start]*2, [self.start-value_ranges, self.start+value_ranges]
+                        return [self.start]*2, [self.start-self.value_ranges, self.start+self.value_ranges]
                     else:
-                        return [self.start]*2, [self.start-value_ranges[0], self.start+value_ranges[1]]
+                        return [self.start]*2, [self.start-self.value_ranges[0], self.start+self.value_ranges[1]]
 
             # Calculating the coordinates of the corner points in the multi-dimensional space
             corner_coords = [self.start,
@@ -828,9 +830,9 @@ class Coordinate:
             value_range = [np.amin(self.values), np.amax(self.values)]
             if (self.value_ranges is not None):
                 if (type(self.value_ranges) is list):
-                    value_range_error = [np.amin(self.values-self.value_ranges[0]), np.amax(values+self.value_ranges[1])]
+                    value_range_error = [np.amin(self.values-self.value_ranges[0]), np.amax(self.values+self.value_ranges[1])]
                 else:
-                    value_range_error = [np.amin(self.values-self.value_ranges), np.amax(values+self.value_ranges)]
+                    value_range_error = [np.amin(self.values-self.value_ranges), np.amax(self.values+self.value_ranges)]
             else:
                 value_range_error = value_range
             return value_range, value_range_error
