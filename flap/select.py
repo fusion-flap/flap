@@ -8,9 +8,11 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib
 import time
-
-from .coordinate import *
-from .data_object import *
+import numpy as np
+#from .coordinate import *
+#from .data_object import *
+import flap.coordinate
+import flap.data_object
 
 def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, options=None, plot_options=None, output_name=None):
     """
@@ -110,10 +112,10 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
     # Getting the data object
     if (type(object_descr) is str):
         try:
-            d = get_data_object(object_descr,exp_id=exp_id)
+            d = flap.data_object.get_data_object(object_descr,exp_id=exp_id)
         except Exception as e:
             raise e
-    elif (type(object_descr) is DataObject):
+    elif (type(object_descr) is flap.data_object.DataObject):
         d = object_descr
     else:
         raise ValueError("Bad object description for interval selection. Use flap.DataObject or string.")
@@ -221,7 +223,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                 plt.clf()
             try:
                 d.plot(axes=coordinate,
-                       slicing={select_coordinate:Intervals(sel_int[0][i_int], sel_int[1][i_int])},
+                       slicing={select_coordinate:flap.coordinate.Intervals(sel_int[0][i_int], sel_int[1][i_int])},
                        options=plot_options)
             except Exception as e:
                 raise e
@@ -321,7 +323,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
 
     plt.clf()
     d.plot(axes=coordinate,
-           slicing={coordinate:Intervals(min(sel_int[0]), max(sel_int[1]))},
+           slicing={coordinate:flap.coordinate.Intervals(min(sel_int[0]), max(sel_int[1]))},
                options=plot_options)
 
     if (selected_n != 0):
@@ -333,33 +335,26 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
         start_coord = np.array(start_coord)
         end_coord = np.array(end_coord)
         err = [np.zeros(len(start_coord), dtype=start_coord.dtype), end_coord - start_coord]
-        coord_int = Coordinate(name='Interval',
+        coord_int = flap.coordinate.Coordinate(name='Interval',
                                unit='a.u.',
-                               mode=CoordinateMode(equidistant=True),
+                               mode=flap.coordinate.CoordinateMode(equidistant=True),
                                start=1,
                                step=1,
                                dimension_list=[0]
                                )
-        d_out= DataObject(data_array=start_coord,
+        d_out= flap.data_object.DataObject(data_array=start_coord,
                           error=err,
-                          data_unit = Unit(name=coordinate,unit=d.get_coordinate_object(coordinate).unit.unit),
+                          data_unit = flap.coordinate.Unit(name=coordinate,unit=d.get_coordinate_object(coordinate).unit.unit),
                           exp_id = d.exp_id,
                           data_source = d.data_source,
                           coordinates = [coord_int]
                           )
         if (output_name is not None):
             try:
-                add_data_object(d_out, output_name)
+                flap.data_object.add_data_object(d_out, output_name)
             except Exception as e:
                 raise e
 
         return d_out
     else:
         return None
-
-
-
-
-
-
-
