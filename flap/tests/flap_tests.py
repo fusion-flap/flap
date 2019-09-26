@@ -135,6 +135,13 @@ def test_coordinates():
     flap.add_coordinate('TESTDATA',exp_id='*',coordinates=['Device x','Device z', 'Device y'])
     print("**** Storage contents")
     flap.list_data_objects()  
+    print("**** Getting the time coordinate. The result will be a 3D object with 1 element in all dimensions except along the time.")
+    t = flap.get_data_object_ref('TESTDATA').coordinate('Time',options={'Chang':True})[0].flatten()
+    plt.figure()
+    plt.plot(t)
+    plt.xlabel('Index')
+    plt.ylabel('Time')
+
     
 def test_arithmetic():
     print()
@@ -705,7 +712,7 @@ if (False or test_all):
 if (False or test_all):
     test_saveload()
     input("Press Enter to continue...")
-if (False or test_all):
+if (True or test_all):
     test_coordinates()
     input("Press Enter to continue...")
 if (False or test_all):    
@@ -755,7 +762,7 @@ if (False or test_all):
     wait_for_key()
 if (False or test_all):
     test_ccf()
-if (True or test_all):
+if (False or test_all):
     test_image()
     show_plot()
     wait_for_key()
