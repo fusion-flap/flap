@@ -10,7 +10,7 @@ Tools for the FLAP module
 import copy
 import numpy as np
 import fnmatch
-from decimal import *
+#from decimal import Decimal                                                    #UNUSED
 
 def del_list_elements(input_list, indices):
     """ delete elements from a list
@@ -55,7 +55,7 @@ def select_signals(signal_list, signal_spec):
     else:
         _signal_spec = signal_spec
 
-    if ((len(_signal_spec) is 0) or (signal_list is [])):
+    if ((len(_signal_spec) == 0) or (signal_list == [])):
         raise ValueError("No signal list or signal specification.")
 
     select_list = []
@@ -179,6 +179,9 @@ def submatrix_index(mx_shape, index):
             if (j != i):
                 ind = np.repeat(ind,index[j].size,j)
         index_arrays.append(ind)
+
+#    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
+#        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT
     return tuple(index_arrays)
 
 
