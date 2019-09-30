@@ -113,7 +113,7 @@ class DataObject:
                 if (type(self.data) is np.float64):
                     self.data = np.asarray(self.data)
                 else:
-                    raise TypeError("Wrong data array. DataObject.data should be numpy.ndarray. It is "+str(type(self.data)))
+                    raise TypeError("Wrong data array. DataObject.data should be numpy.ndarray.")
             if (self.data.shape != self.shape):
                 raise ValueError("DataObject.data shape is not the same as DataObject.shape.")
         else:
@@ -545,10 +545,11 @@ class DataObject:
         
         return calc_int, calc_int_ind, sel_int, sel_int_ind
         
-    def coordinate(self, name, index=...):
+    def coordinate(self, name, index=None, options=None):
         """ Returns the coordinates of a subarray of the data array.
         name: Coordinate name (string)
         index: The indexes into the data array (tuple with various elements, see Coordinate.data())
+        options: The same options as for Coordinate.data()
 
         returns 3 np.arrays:
             data: the coordinates. The number of dimension is the same as the dimension of
@@ -564,7 +565,7 @@ class DataObject:
         else:
             raise ValueError("Coordinate '" + name + "' is not present in data object.")
         try:
-            d,d_low,d_high = c.data(data_shape=self.shape, index=index)
+            d,d_low,d_high = c.data(data_shape=self.shape, index=index, options=options)
         except Exception as e:
             raise e
         return d,d_low,d_high
@@ -2520,7 +2521,7 @@ class DataObject:
         try:
             d_slice.check()
         except Exception as e:
-            raise RuntimeError("Internal error. Bad data object after slicing: {:s}".format(str(e)))
+            raise RuntimeError("Internal error. Bad data object after slicing:{:s}".format(str(e)))
 
         return d_slice
     # End of slice_data
@@ -3439,6 +3440,24 @@ class FlapStorage:
             d = copy.deepcopy(self.__data_objects[nlist[0]])
             return d
 
+    def get_data_object_ref(self,name,exp_id='*'):
+        _name = name + '_exp_id:' + str(exp_id)
+        try:
+            d = self.__data_objects[_name]
+            return d
+        except KeyError:
+            nlist = []
+            for n in self.__data_objects.keys():
+                if (fnmatch.fnmatch(n,_name)):
+                    nlist.append(n)
+            if len(nlist) == 0:
+                raise KeyError("Data object " + name
+                               + "(exp_id:" + str(exp_id) + ") does not exists.")
+            if (len(nlist) > 1):
+                raise KeyError("Multiple data objects found for name "
+                               + name + "(exp_id:" + str(exp_id) + ").")
+            return self.__data_objects[nlist[0]]
+
     def list_data_objects(self,name, exp_id='*'):
         if (name is None):
             _name = '*'
@@ -3559,6 +3578,7 @@ def find_data_objects(name,exp_id='*'):
 
 def get_data_object(object_name,exp_id='*'):
     """  Return a data object from the flap storage
+         A coppy is returned not the object in the storage.
     """
     global flap_storage
     try:
@@ -3567,6 +3587,15 @@ def get_data_object(object_name,exp_id='*'):
         raise e
     return d
 
+def get_data_object_ref(object_name,exp_id='*'):
+    """  Return a data object reference from the flap storage.
+    """
+    global flap_storage
+    try:
+        d = flap_storage.get_data_object_ref(object_name,exp_id=exp_id)
+    except KeyError as e:
+        raise e
+    return d
 
 def list_data_objects(name='*', exp_id='*', screen=True):
     """ Prepare a printout of data objects is flap storage or the listed data objects.
