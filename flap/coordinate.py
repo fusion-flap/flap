@@ -7,7 +7,7 @@ Created on Wed Jan 23 09:44:50 2019
 This is the coordinate description for FLAP
 """
 
-import mathd
+import math
 import numpy as np
 import flap.tools
 import flap.config
