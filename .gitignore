@@ -9,6 +9,8 @@ __pycache__/
 # FLAP modules
 flap_*
 
+note*
+
 # Distribution / packaging
 .Python
 build/
