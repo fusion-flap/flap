@@ -553,7 +553,7 @@ class PlotAnimation:
             self.ax_act.set_ylim(self.yrange[0],self.yrange[1])        
         self.ax_act.set_xlabel(self.ax_list[0].title(language=self.language))
         self.ax_act.set_ylabel(self.ax_list[1].title(language=self.language))
-        title = self.coord_t.unit.name+' ='+"{:10f}".format(self.tdata[it])+' ['+self.coord_t.unit.unit+']'
+        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+' ='+"{:10f}".format(self.tdata[it])+' ['+self.coord_t.unit.unit+']'
         self.ax_act.set_title(title)
     
     def _reset_animation(self, event):
