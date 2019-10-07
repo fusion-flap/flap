@@ -10,6 +10,7 @@ Tools for the FLAP module
 import copy
 import numpy as np
 import fnmatch
+from flap import VERBOSE
 #from decimal import Decimal                                                    #UNUSED
 
 def del_list_elements(input_list, indices):
@@ -428,8 +429,23 @@ def grid_to_box(xdata,ydata):
     
     return xbox,ybox
 
-def time_unit_translation(time_unit=None):
-    _time_unit=time_unit.lower()
+def time_unit_translation(time_unit=None,max_value=None):
+    if type(time_unit) == str:
+        _time_unit=time_unit.lower()
+    else:
+        _time_unit=time_unit
+    if ((_time_unit == ' ') or (_time_unit is None)) and (max_value is not None):
+        #Raise awareness:
+        if VERBOSE:
+            print('Time unit: \''+str(_time_unit)+'\'')
+            print('Time unit translation based on values only works for shots under 1000s.')
+        value_translation=[[1,1e3,1e6,1e9,1e12],
+                           ['s','ms','us','ns','ps']]
+        for i in range(len(value_translation[0])-1):
+            if (max_value > value_translation[0][i] and max_value < value_translation[0][i+1]):
+                _time_unit=value_translation[1][i]
+            elif max_value > value_translation[0][4]:
+                _time_unit=value_translation[1][4]
     translation={'seconds':1,
                  'second':1,
                  's':1,
@@ -444,13 +460,20 @@ def time_unit_translation(time_unit=None):
                  'ns':1e-9,
                  'picoseconds':1e-12,
                  'picosecond':1e-12,
-                 'ps':1e-12,
+                 'ps':1e-12
                  }
     if (_time_unit in translation.keys()):
         return translation[_time_unit]
     else:
-        print(_time_unit+' was not found in the translation. Returning 1.')
-        return 1
+        if type(_time_unit) is not str:
+            backwards_translation=[[1,1e-3,1e-6,1e-9,1e-12],
+                                   ['s','ms','us','ns','ps']]
+            for i in range(len(backwards_translation[0])):
+                if backwards_translation[0][i] == _time_unit:
+                    return backwards_translation[1][i]
+        else:
+            print(_time_unit+' was not found in the translation. Returning 1.')
+            return 1
     
 def spatial_unit_translation(spatial_unit=None):
     _spatial_unit=spatial_unit.lower()

@@ -138,34 +138,38 @@ class PlotAnimation:
                  cmap_obj, contour_levels, coord_t, coord_x,
                  coord_y, cmap, options, xrange, yrange,
                  zrange, image_like, plot_options, language, plot_id, gs):
-        
-        self.pause = False
-        self.speed = 40.
-        self.current_frame = 0.
-        self.fig = plt.figure(plot_id.figure)      
-        self.tdata = tdata
-        self.xdata = xdata
-        self.ydata = ydata
-        self.xdata_range = xdata_range
-        self.ydata_range = ydata_range
-        self.xrange = xrange
-        self.yrange = yrange
-        self.zrange = zrange
-        self.contour_levels = contour_levels
+   
+        self.ax_list = ax_list
+        self.axes = axes        
+        self.contour_levels = contour_levels        
         self.cmap = cmap
         self.cmap_obj = cmap_obj
-        self.plot_options = plot_options
         self.coord_t = coord_t  
         self.coord_x = coord_x
-        self.coord_y = coord_y
+        self.coord_y = coord_y        
+        self.current_frame = 0.
         self.d = d
-        self.ax_list = ax_list
-        self.axes = axes
-        self.plot_id = plot_id
+        self.fig = plt.figure(plot_id.figure) 
+        self.gs = gs
         self.image_like = image_like
         self.language = language
         self.options = options
-        self.gs = gs
+        self.pause = False
+        self.plot_id = plot_id
+        self.plot_options = plot_options        
+        self.speed = 40.
+        
+        self.tdata = tdata
+        self.xdata = xdata
+        self.ydata = ydata
+        
+        self.xdata_range = xdata_range
+        self.ydata_range = ydata_range
+        
+        self.xrange = xrange
+        self.yrange = yrange
+        self.zrange = zrange
+
         
         if (self.contour_levels is None):
             self.contour_levels = 255
@@ -476,7 +480,6 @@ class PlotAnimation:
         plt.title(title)
 
         plt.show(block=False)        
-
         self.anim = animation.FuncAnimation(self.fig, self.animate_plot, 
                                             len(self.tdata),
                                             interval=self.speed,blit=False)
@@ -935,7 +938,7 @@ def _plot(data_object,
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
                        'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
                        'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi',
-                       'EFIT options':None
+                       'EFIT options':None,
                        }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
     
@@ -1948,11 +1951,12 @@ def _plot(data_object,
             plt.pause(0.001)
             if ((_options['Video file'] is not None) and (cv2_presence is not False)):
                 fig = plt.gcf()
-                fig.canvas.draw ( )
+                fig.canvas.draw()
                 # Get the RGBA buffer from the figure
                 w,h = fig.canvas.get_width_height()
                 buf = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
                 buf.shape = ( h, w, 3 )
+                buf = cv2.cvtColor(buf, cv2.COLOR_RGBA2BGR)
                 try:
                     video
                 except NameError:
@@ -2079,6 +2083,7 @@ def _plot(data_object,
         
         anim = PlotAnimation(*oargs)
         anim.animate()
+        
 
 #    print("------ plot finished, show() ----")
     plt.show(block=False)       
