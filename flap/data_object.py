@@ -3025,11 +3025,11 @@ class DataObject:
                 b = np.array([1])
                 ind_0 = list(ind)
                 ind_0[coord_obj.dimension_list[0]] = int_start_ind[i_int]
-                zi = d.data[tuple(ind_0)]
+                zi = d.data[tuple(ind_0)].astype(float)
                 zi = np.expand_dims(zi,coord_obj.dimension_list[0])
                 d.data[ind],zf = signal.lfilter(b, 
                                                 a, 
-                                                d.data[ind], 
+                                                d.data[ind].astype(float), 
                                                 axis=coord_obj.dimension_list[0],
                                                 zi=zi
                                                 )   
@@ -3040,12 +3040,12 @@ class DataObject:
                 b = np.array([1])
                 ind_0 = list(ind)
                 ind_0[coord_obj.dimension_list[0]] = int_start_ind[i_int]
-                zi = d.data[tuple(ind_0)]
+                zi = d.data[tuple(ind_0)].astype(float)
                 zi = np.expand_dims(zi,coord_obj.dimension_list[0])
                 zi = zi
                 dd,zf = signal.lfilter(b, 
                                        a, 
-                                       d.data[ind], 
+                                       d.data[ind].astype(float), 
                                        axis=coord_obj.dimension_list[0],
                                        zi=zi)   
                 d.data[ind] =  d.data[ind] - dd              
@@ -3067,8 +3067,8 @@ class DataObject:
                 zi_shape = [1]*start_data.ndim
                 zi_shape[coord_obj.dimension_list[0]] = len(zi)
                 zi = np.reshape(zi,zi_shape)
-                zi = zi * start_data
-                d.data[ind],zf = signal.lfilter(b,a,d.data[ind],axis=coord_obj.dimension_list[0],zi=zi)   
+                zi = zi * start_data.astype(float)
+                d.data[ind],zf = signal.lfilter(b,a,d.data[ind].astype(float),axis=coord_obj.dimension_list[0],zi=zi)   
             elif (filter_type == 'Highpass'):
                 try:
                     steep = float(_options['Steepness'])
@@ -3088,8 +3088,8 @@ class DataObject:
                 zi_shape = [1]*start_data.ndim
                 zi_shape[coord_obj.dimension_list[0]] = len(zi)
                 zi = np.reshape(zi,zi_shape)
-                zi = zi * start_data
-                d.data[ind],zf = signal.lfilter(b,a,d.data[ind],axis=coord_obj.dimension_list[0],zi=zi)   
+                zi = zi * start_data.astype(float)
+                d.data[ind],zf = signal.lfilter(b,a,d.data[ind].astype(float),axis=coord_obj.dimension_list[0],zi=zi)   
             elif (filter_type == 'Bandpass'):
                 try:
                     steep = float(_options['Steepness'])
@@ -3108,8 +3108,8 @@ class DataObject:
                 zi_shape = [1]*start_data.ndim
                 zi_shape[coord_obj.dimension_list[0]] = len(zi)
                 zi = np.reshape(zi,zi_shape)
-                zi = zi * start_data
-                d.data[ind],zf = signal.lfilter(b,a,d.data[ind],axis=coord_obj.dimension_list[0],zi=zi)   
+                zi = zi * start_data.astype(float)
+                d.data[ind],zf = signal.lfilter(b,a,d.data[ind].astype(float),axis=coord_obj.dimension_list[0],zi=zi)   
             if (_options['Power']):
                 d.data[ind] = d.data[ind] ** 2
                 if (_options['Inttime'] is not None):
@@ -3122,11 +3122,11 @@ class DataObject:
                 b = np.array([1])
                 ind_0 = list(ind)
                 ind_0[sel_coord_obj.dimension_list[0]] = int_start_ind[i_int]
-                zi = d.data[tuple(ind_0)]
+                zi = d.data[tuple(ind_0)].astype(float)
                 zi = np.expand_dims(zi,coord_obj.dimension_list[0])
                 d.data[ind],zo = signal.lfilter(b, 
                                                 a, 
-                                                d.data[ind], 
+                                                d.data[ind].astype(float), 
                                                 axis=coord_obj.dimension_list[0],
                                                 zi=zi
                                                 )   
