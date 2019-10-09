@@ -712,7 +712,7 @@ if (False or test_all):
 if (False or test_all):
     test_saveload()
     input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_coordinates()
     input("Press Enter to continue...")
 if (False or test_all):    
@@ -760,7 +760,7 @@ if (False or test_all):
     test_cpsd()
     show_plot()
     wait_for_key()
-if (False or test_all):
+if (True or test_all):
     test_ccf()
 if (False or test_all):
     test_image()
