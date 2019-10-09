@@ -197,4 +197,5 @@ except NameError:
     try:
         read()
     except OSError:
-        print("Warning: could not read configuration file.")
+        print("Warning: could not read configuration file '"+__flap_config.file_name+"'.")
+        print("Default location of configuration file is working directory.")
