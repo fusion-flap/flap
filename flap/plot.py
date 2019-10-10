@@ -251,16 +251,14 @@ class PlotAnimation:
 
         if (self.image_like):
             try: 
+                #There is a problem here, but I cant find it. Image is rotated with 90degree here, but not in anim-image.
                 if (self.coord_x.dimension_list[0] == 0):
                     im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
-                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
-                                    cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
-                                    vmax=self.vmax,origin='lower',**_plot_opt)
                 else:
                     im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
-                    img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
-                                    cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
-                                    vmax=self.vmax,origin='lower',**_plot_opt)            
+                img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                                cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
+                                vmax=self.vmax,origin='lower',**_plot_opt)            
                 del im
             except Exception as e:
                 raise e
@@ -503,18 +501,13 @@ class PlotAnimation:
             try: 
                 if (self.coord_x.dimension_list[0] == 0):
                     im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
-                    plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
-                               cmap=self.cmap_obj,vmin=self.vmin,
-                               aspect=self.options['Aspect ratio'],
-                               interpolation=self.options['Interpolation'],
-                               vmax=self.vmax,origin='lower',**plot_opt)
                 else:
                     im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
-                    plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
-                               cmap=self.cmap_obj,vmin=self.vmin,
-                               aspect=self.options['Aspect ratio'],
-                               interpolation=self.options['Interpolation'],
-                               vmax=self.vmax,origin='lower',**plot_opt)            
+                plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
+                           cmap=self.cmap_obj,vmin=self.vmin,
+                           aspect=self.options['Aspect ratio'],
+                           interpolation=self.options['Interpolation'],
+                           vmax=self.vmax,origin='lower',**plot_opt)            
                 del im
             except Exception as e:
                 raise e
@@ -1900,14 +1893,11 @@ def _plot(data_object,
                 try: 
                     if (coord_x.dimension_list[0] == 0):
                         im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
-                        img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                        cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
-                                        vmax=vmax,origin='lower',**_plot_opt)
                     else:
                         im = np.clip(d.data[time_index],vmin,vmax)
-                        img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                        cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
-                                        vmax=vmax,origin='lower',**_plot_opt)            
+                    img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
+                                     cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
+                                     vmax=vmax,origin='lower',**_plot_opt)            
                     del im
                 except Exception as e:
                     raise e
@@ -1917,7 +1907,7 @@ def _plot(data_object,
                     im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     try:
                         img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
-                                          vmax=vmax,**_plot_opt)
+                                             vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
                     del im
@@ -1925,7 +1915,7 @@ def _plot(data_object,
                     try:
                         im = np.clip(d.data[time_index],vmin,vmax)
                         img = plt.contourf(xdata,ydata,im,contour_levels,norm=norm,
-                                          origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
+                                           origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
                         del im
                     except Exception as e:
                         raise e
@@ -1933,7 +1923,7 @@ def _plot(data_object,
             if (_options['Colorbar']):
                 cbar = plt.colorbar(img,ax=ax_act)
                 cbar.set_label(d.data_unit.name)
-
+            
             if (xrange is not None):
                 plt.xlim(xrange[0],xrange[1])
             if (yrange is not None):
@@ -1944,7 +1934,7 @@ def _plot(data_object,
                 plt.xscale('log')
             if (_options['Log y']):
                 plt.yscale('log')
-            title = coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
+            title =  str(d.exp_id)+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
             plt.title(title)
             plt.show(block=False)
             time.sleep(_options['Waittime'])

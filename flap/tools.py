@@ -430,7 +430,8 @@ def grid_to_box(xdata,ydata):
     return xbox,ybox
 
 def time_unit_translation(time_unit=None,max_value=None):
-    if type(time_unit) == str:
+    if (str(type(time_unit)) == 'str' or 
+       str(type(time_unit)) == "<class 'numpy.str_'>"):
         _time_unit=time_unit.lower()
     else:
         _time_unit=time_unit
