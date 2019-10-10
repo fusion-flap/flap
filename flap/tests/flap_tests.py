@@ -701,7 +701,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = False
+test_all = True
 
 # Running tests
 plt.close('all')
@@ -712,7 +712,7 @@ if (False or test_all):
 if (False or test_all):
     test_saveload()
     input("Press Enter to continue...")
-if (True or test_all):
+if (False or test_all):
     test_coordinates()
     input("Press Enter to continue...")
 if (False or test_all):    
@@ -760,7 +760,7 @@ if (False or test_all):
     test_cpsd()
     show_plot()
     wait_for_key()
-if (False or test_all):
+if (True or test_all):
     test_ccf()
 if (False or test_all):
     test_image()
