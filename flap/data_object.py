@@ -21,6 +21,8 @@ import flap.config
 from .spectral_analysis import _apsd, _cpsd, _trend_removal, _ccf
 from .plot import _plot
 
+PICKLE_PROTOCOL = 3
+
 class DataObject:
     """ This is the data object
     """
@@ -3132,10 +3134,12 @@ class DataObject:
                                                 )   
         return d
 
-    def save(self,filename):
+    def save(self,filename,protocol=PICKLE_PROTOCOL):
         """
         Save the data object to a binary file using pickle.
         Use load to read the object.
+        Filename: The name of the output file
+        protocol: The pickle protocol to use
         """
         try:
             f = io.open(filename,"wb")
@@ -3143,7 +3147,7 @@ class DataObject:
             raise ValueError("Cannot open file "+filename)
         try:
             d = self
-            pickle.dump(d,f)
+            pickle.dump(d,f,protocol=protocol)
         except pickle.PicklingError:
             raise TypeError("Error encoding data object.")
         try:
@@ -4086,7 +4090,7 @@ def filter_data(object_name, exp_id='*', output_name=None, coordinate=None, inte
             raise e
     return ds
 
-def save(data, filename, exp_id='*',  options=None):
+def save(data, filename, exp_id='*',  options=None, protocol=PICKLE_PROTOCOL):
     """
     Save one or more flap.DataObject-s using pickle.
     
@@ -4098,6 +4102,7 @@ def save(data, filename, exp_id='*',  options=None):
               If any other object save it.
         exp_id: Experiment ID to use in conjuction with data of it is a string.
         options: None at present
+        protocol: The protocol to use
         filename: Name of the file to save to.
     """
     # Checking for string in data name.
@@ -4141,7 +4146,7 @@ def save(data, filename, exp_id='*',  options=None):
     except:
         raise IOError("Cannot open file: "+filename)
     try:
-        pickle.dump(save_data,f)
+        pickle.dump(save_data,f,protocol=protocol)
     except Exception as e:
         raise e
     try:
