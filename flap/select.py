@@ -45,7 +45,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                            'Center': Select center of interval.
                            None: No interactive selection
                  'Length': Length of intervals.
-                 'Event' : Dictionary desribing events to search for. A reference time will be
+                 'Event' : Dictionary describing events to search for. A reference time will be
                            determined for each event and a Length interval will be selected
                            symmetrically around it. Trend removal and/or filtering should be done
                            before calling this function.
@@ -53,11 +53,11 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                                      Will look for signal pieces above/below threshold
                                      and calculate maximum place of signal in this piece.
                                    'Max-weight' or 'Min-weight':
-                                     Same as Maximum and Minimum but selects senter of gravity
+                                     Same as Maximum and Minimum but selects center of gravity
                                      for signal piece.
                                    In each of the above cases the interval will be 'Length' long around the event.
                                    'Above', 'Below':
-                                      The intervals will be where the signal is above or below the threshold. 
+                                     The intervals will be where the signal is above or below the threshold. 
                            'Start delay', 'End delay': For the Above and Below events the start and end delay of the interval
                                                        in the coordinate units.
                            'Threshold': The threshold for the event.
