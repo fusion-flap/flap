@@ -217,7 +217,7 @@ The [Sphinx Python Documentation Generation](http://www.sphinx-doc.org/en/master
 
 It is capable of creating a whole documentation with separate documents (e.g. tutorials, detailed explanations, intentions etc.), but from the user point of view, the most important parts are the so-called docstrings. These are comment-like sections in the source code, where the user can on-the-fly describe the purpose and usage of the given part of the code. There are a few examples below.
 
-A full code example (grabbed from the [follwoing link]()) is below:
+A full code example (grabbed from the [following link](https://pythonhosted.org/an_example_pypi_project/sphinx.html)) is below:
 
 ```python
 """
