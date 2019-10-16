@@ -217,7 +217,7 @@ The [Sphinx Python Documentation Generation](http://www.sphinx-doc.org/en/master
 
 It is capable of creating a whole documentation with separate documents (e.g. tutorials, detailed explanations, intentions etc.), but from the user point of view, the most important parts are the so-called docstrings. These are comment-like sections in the source code, where the user can on-the-fly describe the purpose and usage of the given part of the code. There are a few examples below.
 
-A full code example (grabbed from the [following link](https://pythonhosted.org/an_example_pypi_project/sphinx.html)) is below:
+A full code example (grabbed from the [following link](https://pythonhosted.org/an_example_pypi_project/sphinx.html "Example Sphinx project")) is below:
 
 ```python
 """
@@ -267,3 +267,21 @@ class MyPublicClass(object):
         self._foo = foo
         self._bar = bar
 ```
+
+## How to create the documentation
+
+After properly written the documentation strings in the code, one can generate the full documentation of the project. To do this, you need to follow the steps below.
+
+1. Install [Sphinx](http://www.sphinx-doc.org/en/master/):
+
+> pip install -U Sphinx
+
+2. Navigate into your ***documentation*** (not necessarily the same as the code) directory and type:
+
+> sphinx-quickstart
+
+3. You'll need to answer a few questions (see [this link](https://pythonhosted.org/an_example_pypi_project/sphinx.html#sphinx-quickstart "Sphinx quickstart")).
+
+4. You got a basic documentation!
+
+Of course, the documentation can be tweaked later by hand and manual pages can also be added later. PDFs and various ebook file types also can be generated, but the default is a HTML structure, where you can search and navigate.
