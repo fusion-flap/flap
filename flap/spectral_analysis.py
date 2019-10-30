@@ -172,6 +172,10 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
     return Intervals(proc_interval_start, proc_interval_end),  \
            Intervals(proc_interval_index_start, proc_interval_index_end),
 
+def trend_removal_func(d,ax,trend,x=None):
+    """ This function makes the _trend_removal internal function public
+    """
+    _trend_removal(d,ax,trend,x=x)
 
 def _trend_removal(d,ax,trend,x=None):
     """
@@ -203,7 +207,7 @@ def _trend_removal(d,ax,trend,x=None):
                 order = int(trend[1])
             except ValueError:
                 raise ValueError("Bad order in polynomial trend removal.")
-            # This is a siple solution but not very effective.
+            # This is a simple solution but not very effective.
             if (x is None):
                 x = np.arange(d.shape[ax],dtype=float)
             if (d.ndim > 1):

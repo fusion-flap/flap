@@ -2875,7 +2875,7 @@ class DataObject:
                 try:
                     index = [0]*len(d.shape)
                     index[sel_coord_obj.dimension_list[0]] = slice(int_start_ind[i_int],int_end_ind[i_int])
-                    coord_data = coord_obj.data(data_shape=d.shape, index=index)[0]
+                    coord_data = coord_obj.data(data_shape=d.shape, index=index)[0].flatten()
                 except Exception as e:
                     raise e
                 _trend_removal(d.data[tuple(ind)],
