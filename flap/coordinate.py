@@ -125,7 +125,7 @@ class Intervals:
             if (ind.size != 0):
                 range_stops[ind] = limits[1]
 
-        if ((np.amin(range_starts) < limits[0]) or (np.amax(range_starts) > limits[1])):
+        if ((np.amax(range_stops) < limits[0]) or (np.amin(range_starts) > limits[1])):
             raise RuntimeError("Internal error: selected intervals outside of limits.")
         return range_starts, range_stops
 

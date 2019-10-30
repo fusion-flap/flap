@@ -466,7 +466,7 @@ class DataObject:
             
         if (len(coord_obj.dimension_list) != 1):
             raise ValueError("Processing coordinate may change only along one dimension.")
-            
+
         if (intervals is None):
             _intervals = None
             sel_coordinate = coordinate
