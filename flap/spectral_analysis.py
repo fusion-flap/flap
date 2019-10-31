@@ -172,12 +172,12 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
     return Intervals(proc_interval_start, proc_interval_end),  \
            Intervals(proc_interval_index_start, proc_interval_index_end),
 
-def trend_removal_func(d,ax,trend,x=None):
+def trend_removal_func(d,ax,trend,x=None,return_trend=False):
     """ This function makes the _trend_removal internal function public
     """
-    _trend_removal(d,ax,trend,x=x)
+    return _trend_removal(d,ax,trend,x=x,return_trend=return_trend)
 
-def _trend_removal(d,ax,trend,x=None):
+def _trend_removal(d,ax,trend,x=None,return_trend=False):
     """
     Removes the trend from the data. Operates on one axis between two indices of the data array.
     INPUT:
@@ -190,8 +190,10 @@ def _trend_removal(d,ax,trend,x=None):
                 Lists:
                     ['Poly', n]: Fit an n order polynomial to the data and subtract.
         x: X axis. If not used equidistant will be assumed.
+        return_trend: If True the trend data is returned
     RETURN value:
-        None. The input array is modified.
+        If return_trend == True the trend data is returned, otherwise nothing
+        The input array is modified.
     """
     if (trend is None):
         return
@@ -208,6 +210,8 @@ def _trend_removal(d,ax,trend,x=None):
             except ValueError:
                 raise ValueError("Bad order in polynomial trend removal.")
             # This is a simple solution but not very effective.
+            # Flattens all dimensions except x and handles all functions one-by-one
+            # Finally rearranges the data back to the original shape
             if (x is None):
                 x = np.arange(d.shape[ax],dtype=float)
             if (d.ndim > 1):
@@ -217,6 +221,8 @@ def _trend_removal(d,ax,trend,x=None):
                 if (d.ndim > 2):
                     new_shape = tuple([d.shape[0], d.size // d.shape[0]])
                     d = d.reshape(new_shape,order='F')
+                    if (return_trend):
+                        trend_data = np.ndarray(new_shape,dtype=d.dtype)
                 else:
                     new_shape = d.shape
                 xx = np.zeros((new_shape[0],order), dtype=float)
@@ -228,11 +234,20 @@ def _trend_removal(d,ax,trend,x=None):
                     for j in range(order):
                         tr += p[j + 1, i] * xx[:,j]
                     d[:,i] -= tr.astype(d.dtype)
+                    if (return_trend):
+                        trend_data[:,i] = tr.astype(d.dtype)
                 if (len(orig_shape) > 2):
                    d = d.reshape(orig_shape,order='F')
+                   if (return_trend):
+                       trend_data = trend_data.reshape(orig_shape,order='F')
                 if (ax != 0):
                     d = np.swapaxes(d,ax,0)
-                return
+                    if (return_trend):
+                        trend_data = np.swapaxes(trend_data,ax,0)
+                if (return_trend):
+                    return trend_data
+                else:
+                    return
             else:
                 p = np.polynomial.polynomial.polyfit(x,d,order)
                 d -= p[0]
