@@ -873,7 +873,7 @@ def _plot(data_object,
                       named in options['Signal name']
           'image': Plots a 2D data matrix as an image. Options: Colormap, Data range, ...
           'contour': Contour plot
-    plot_options: Dictionary or list of dictionories. Will be passed over to the plot call. For plots with multiple subplots this can be
+    plot_options: Dictionary or list of dictionaries. Will be passed over to the plot call. For plots with multiple subplots this can be
                   a list of dictionaries, each for one subplot.
     plot_id: A PlotID object is the plot should go into an existing plot.
     options:
