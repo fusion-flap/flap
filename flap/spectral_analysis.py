@@ -270,10 +270,10 @@ def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
                 else:
                     return
             else:
-                p = np.polynomial.polynomial.polyfit(x,d,order)
+                p = np.polynomial.polynomial.polyfit(_x,d,order)
                 d -= p[0]
                 for i in range(order):
-                    d -= p[i + 1] * x ** (i + 1)
+                    d -= p[i + 1] * _x ** (i + 1)
                 return
     raise ValueError("Unknown trend removal method.")
 
