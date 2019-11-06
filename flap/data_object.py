@@ -3426,6 +3426,8 @@ class FlapStorage:
                 
 
     def get_data_object(self,name,exp_id='*'):
+        if (type(name) is not str ):
+            raise ValueError("Object name should be a string.")
         _name = name + '_exp_id:' + str(exp_id)
         try:
             d = self.__data_objects[_name]
