@@ -3918,7 +3918,7 @@ def apsd(object_name,exp_id='*',output_name=None, coordinate=None, intervals=Non
 
 def cpsd(object_name, ref=None, exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
     """
-    Cross Power Spetctrum between two objects in flap storage. (ref can also be a data object.) 
+    Cross Power Spectrum between two objects in flap storage. (ref can also be a data object.) 
     This is a wrapper for DataObject.cpsd()
     If output name is set the CPSD object will be written back to the flap storage under this name.
     """

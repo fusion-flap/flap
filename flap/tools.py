@@ -499,6 +499,89 @@ def spatial_unit_translation(spatial_unit=None):
     else:
         print(_spatial_unit+' was not found in the translation. Returning 1.')
         return 1
+    
+def unit_conversion(original_unit=None,
+                    new_unit=None
+                    ):
+    
+    #The code provides a unit conversion between any unit types for most
+    #of the prefixes. 
+    #There are certain limitations:
+    #   The unit compatibility is not checked (e.g. mm-->MegaHertz is allowed)
+    
+    known_conversions_full={'Terra':1e12,
+                            'Giga':1e9,
+                            'Mega':1e6,
+                            'kilo':1e3,
+                            'milli':1e-3,
+                            'micro':1e-6,
+                            'nano':1e-9,
+                            'pico':1e-12,
+                            }
+    
+    known_conversions_short={'T':1e12,
+                             'G':1e9,
+                             'M':1e6,
+                             'k':1e3,
+                             'm':1e-3,
+                             'u':1e-6,
+                             'n':1e-9,
+                             'p':1e-12
+                             }
+    
+    original_unit_translation=None
+    new_unit_translation=None
+    
+    #Trying to find the long unit names in the inputs
+    
+    for keys_full in known_conversions_full:
+        if keys_full in original_unit:
+            original_unit_translation=known_conversions_full[keys_full]
+        if keys_full in new_unit:
+            new_unit_translation=known_conversions_full[keys_full]
+            
+    if original_unit_translation is None:
+        if len(original_unit) == 1 or len(original_unit) > 3 : # SI units are longer than 3 if using the full name
+            original_unit_translation=1.
+        else:
+            for keys_short in known_conversions_short:
+                if keys_short == original_unit[0]:
+                    original_unit_translation=known_conversions_short[keys_short]
+                    
+    if new_unit_translation is None:                    
+        if len(new_unit) == 1 or len(new_unit) > 3:
+            new_unit_translation=1.
+        else:
+            for keys_short in known_conversions_short:
+                if keys_short == new_unit[0]:
+                    new_unit_translation=known_conversions_short[keys_short]
+                    
+    if original_unit_translation is None: 
+        print('Unit translation cannot be done for the original unit. Returning 1.')
+        if len(original_unit) > 3:
+            print('Known conversion units are:')
+            print(known_conversions_full)
+        else:
+            print('Known conversion units are:')
+            print(known_conversions_short)
+        original_unit_translation=1.
+        
+    if new_unit_translation is None:
+        print('Unit translation cannot be done for the new unit. Returning 1.')
+        if len(original_unit) > 3:
+            print('Known conversion units are:')
+            print(known_conversions_full)
+        else:
+            print('Known conversion units are:')
+            print(known_conversions_short)
+        new_unit_translation=1.
+        
+    return original_unit_translation/new_unit_translation
+            
+    
+        
+        
+    
 
 #import matplotlib.pyplot as plt
 
