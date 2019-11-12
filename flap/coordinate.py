@@ -207,7 +207,7 @@ class Unit:
         self.name = name
         self.unit = unit
     
-    def title(self,language='EN',complex_txt=None):
+    def title(self,language='EN',complex_txt=None,new_unit=None):
         """ Returns a title string which will be used in plotting.
             complex_txt: List of 2 numbers:
                          [0,0]: Amplitude
@@ -219,7 +219,10 @@ class Unit:
             if ((self.unit is None) or (self.unit == '')):
                 unit_txt = ' [a.u.]'
             else:
-                unit_txt = ' [' + self.unit + ']'
+                if new_unit is None:
+                    unit_txt = ' [' + self.unit + ']'
+                else:
+                    unit_txt = ' [' + new_unit + ']'
             if (complex_txt is not None):
                 if (complex_txt == [0,0]):
                     if (self.name is None or (self.name == '')):

@@ -219,6 +219,27 @@ class PlotAnimation:
                 if (self.d.coordinates[axes_coordinate_decrypt[i_check]].unit.unit ==
                     self.d.coordinates[axes_coordinate_decrypt[j_check]].unit.unit):
                     self.ax_act.axis('equal')
+                    
+#These lines do the coordinate unit conversion
+        self.axes_unit_conversion=np.zeros(len(self.axes))
+        self.axes_unit_conversion[:]=1.
+        
+        if self.options['Plot units'] is not None:
+            unit_length=len(self.options['Plot units'])
+            if unit_length > 3:
+                raise ValueError('Only three units are allowed for the three coordinates.')
+            unit_conversion_coeff={}
+            for plot_unit_name in self.options['Plot units']:
+                for index_data_unit in range(len(self.d.coordinates)):
+                    if (plot_unit_name == self.d.coordinates[index_data_unit].unit.name):
+                        data_coordinate_unit=self.d.coordinates[index_data_unit].unit.unit
+                        plot_coordinate_unit=self.options['Plot units'][plot_unit_name]
+                        print(data_coordinate_unit,plot_coordinate_unit)
+                        unit_conversion_coeff[plot_unit_name]=flap.tools.unit_conversion(original_unit=data_coordinate_unit,
+                                                                                        new_unit=plot_coordinate_unit)
+            for index_axes in range(len(self.axes)):
+                if self.axes[index_axes] in self.options['Plot units']:
+                    self.axes_unit_conversion[index_axes]=unit_conversion_coeff[self.axes[index_axes]]
             
         
         time_index = [slice(0,dim) for dim in self.d.data.shape]
@@ -264,9 +285,10 @@ class PlotAnimation:
                 raise e
         else:
             if (len(self.xdata.shape) == 3 and len(self.xdata.shape) == 3):
-                xgrid, ygrid = flap.tools.grid_to_box(self.xdata[0,:,:],self.ydata[0,:,:]) #Same issue, time is not necessarily the first flap.coordinate.
+                #xgrid, ygrid = flap.tools.grid_to_box(self.xdata[0,:,:],self.ydata[0,:,:]) #Same issue, time is not necessarily the first flap.coordinate.
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata[0,:,:]*self.axes_unit_conversion[0],self.ydata[0,:,:]*self.axes_unit_conversion[1]) #Same issue, time is not necessarily the first flap.coordinate.
             else:
-                xgrid, ygrid = flap.tools.grid_to_box(self.xdata,self.ydata)
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],self.ydata*self.axes_unit_conversion[1])
             im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
                 img = plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
@@ -461,20 +483,40 @@ class PlotAnimation:
                             
             
         if (self.xrange is not None):
-            plt.xlim(self.xrange[0],self.xrange[1])
+            plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],self.xrange[1]*self.axes_unit_conversion[0])
             
         if (self.yrange is not None):
-            plt.ylim(self.yrange[0],self.yrange[1])        
+            plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],self.yrange[1]*self.axes_unit_conversion[1])        
             
-        plt.xlabel(self.ax_list[0].title(language=self.language))
-        plt.ylabel(self.ax_list[1].title(language=self.language))
-        
+        if self.axes_unit_conversion[0] == 1.:
+            plt.xlabel(self.ax_list[0].title(language=self.language))
+        else:
+            plt.xlabel(self.ax_list[0].title(language=self.language, new_unit=self.options['Plot units'][self.axes[0]]))
+            
+        if self.axes_unit_conversion[1] == 1.:
+            plt.ylabel(self.ax_list[1].title(language=self.language))
+        else:
+            plt.ylabel(self.ax_list[1].title(language=self.language, new_unit=self.options['Plot units'][self.axes[1]]))
+            
         if (self.options['Log x']):
             plt.xscale('log')
         if (self.options['Log y']):
             plt.yscale('log')
-        title = self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[0])+\
-                ' ['+self.coord_t.unit.unit+']'
+        
+        if self.options['Plot units'] is not None:
+            if self.axes[2] in self.options['Plot units']:
+                time_unit=self.options['Plot units'][self.axes[2]]
+                time_coeff=self.axes_unit_conversion[2]
+                print(self.axes_unit_conversion)
+            else:
+                time_unit=self.coord_t.unit.unit
+            time_coeff=1.
+        else:
+            time_unit=self.coord_t.unit.unit
+            time_coeff=1.
+        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[0]*time_coeff)+\
+                ' ['+time_unit+']'
+                              
         plt.title(title)
 
         plt.show(block=False)        
@@ -512,10 +554,10 @@ class PlotAnimation:
             except Exception as e:
                 raise e
         else:
-            if (len(self.xdata.shape) == 3 and len(self.xdata.shape) == 3):
-                xgrid, ygrid = flap.tools.grid_to_box(self.xdata[time_index,:,:],self.ydata[time_index,:,:]) #Same issue, time is not necessarily the first flap.coordinate.
+            if (len(self.xdata.shape) == 3 and len(self.ydata.shape) == 3):
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata[time_index,:,:]*self.axes_unit_conversion[0],self.ydata[time_index,:,:]*self.axes_unit_conversion[1]) #Same issue, time is not necessarily the first flap.coordinate.
             else:
-                xgrid, ygrid = flap.tools.grid_to_box(self.xdata,self.ydata)
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],self.ydata*self.axes_unit_conversion[1])
             im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
                 plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
@@ -547,9 +589,28 @@ class PlotAnimation:
             self.ax_act.set_xlim(self.xrange[0],self.xrange[1])
         if (self.yrange is not None):
             self.ax_act.set_ylim(self.yrange[0],self.yrange[1])        
-        self.ax_act.set_xlabel(self.ax_list[0].title(language=self.language))
-        self.ax_act.set_ylabel(self.ax_list[1].title(language=self.language))
-        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+' ='+"{:10f}".format(self.tdata[it])+' ['+self.coord_t.unit.unit+']'
+            
+        if self.axes_unit_conversion[0] == 1.:
+            plt.xlabel(self.ax_list[0].title(language=self.language))
+        else:
+            plt.xlabel(self.ax_list[0].title(language=self.language, new_unit=self.options['Plot units'][self.axes[0]]))
+            
+        if self.axes_unit_conversion[1] == 1.:
+            plt.ylabel(self.ax_list[1].title(language=self.language))
+        else:
+            plt.ylabel(self.ax_list[1].title(language=self.language, new_unit=self.options['Plot units'][self.axes[1]]))
+        
+        if self.options['Plot units'] is not None:
+            if self.axes[2] in self.options['Plot units']:
+                time_unit=self.options['Plot units'][self.axes[2]]
+                time_coeff=self.axes_unit_conversion[2]
+        else:
+            time_unit=self.coord_t.unit.unit
+            time_coeff=1.
+            
+        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[it]*time_coeff)+\
+                ' ['+time_unit+']'
+        
         self.ax_act.set_title(title)
     
     def _reset_animation(self, event):
@@ -922,6 +983,8 @@ def _plot(data_object,
             'Plot flux surfaces': Name of the 2D flap.DataObject for the flux surfaces
                 (should have the same coordinate names as the plot)
                 'nlevels': Number of contour lines for the flux surface plotting
+        'Prevent saturation': Prevents saturation of the video signal when it exceeds zrange[1]
+            It uses data modulo zrange[1] to overcome the saturation. (works for animation)
             
     """
 
@@ -931,7 +994,7 @@ def _plot(data_object,
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
                        'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
                        'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi',
-                       'EFIT options':None,
+                       'EFIT options':None, 'Prevent saturation':False, 'Plot units':None,
                        }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
     
@@ -947,11 +1010,12 @@ def _plot(data_object,
         raise TypeError("Invalid type for option Clear. Should be boolean.")
     if (type(_options['Force axes']) is not bool):
         raise TypeError("Invalid type for option 'Force axes'. Should be boolean.")    
-
+    
     if ((slicing is not None) or (summing is not None)):
         d = data_object.slice_data(slicing=slicing, summing=summing, options=slicing_options)
     else:
         d = data_object        
+        
     # Determining a PlotID:
     # argument, actual or a new one
     if (type(plot_id) is PlotID):
@@ -1980,7 +2044,8 @@ def _plot(data_object,
         if (yrange is not None):
             if ((type(yrange) is not list) or (len(yrange) != 2)):
                 raise ValueError("Invalid Y range setting.")
-
+        if (zrange is not None) and (_options['Prevent saturation']):
+            d.data=np.mod(d.data,zrange[1])
         # Processing axes
         # Although the plot will be cleared the existing plot axes will be considered
         default_axes = [d.coordinates[0].unit.name, d.coordinates[1].unit.name,d.coordinates[2].unit.name,'__Data__']
@@ -1990,6 +2055,7 @@ def _plot(data_object,
                                                     clear=_options['Clear'], 
                                                     default_axes=default_axes, 
                                                     force=_options['Force axes'])
+            print(pdd_list,ax_list)
         except ValueError as e:
             raise e
         
