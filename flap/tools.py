@@ -558,23 +558,25 @@ def unit_conversion(original_unit=None,
                     
     if original_unit_translation is None: 
         print('Unit translation cannot be done for the original unit. Returning 1.')
-        if len(original_unit) > 3:
-            print('Known conversion units are:')
-            print(known_conversions_full)
-        else:
-            print('Known conversion units are:')
-            print(known_conversions_short)
+        if VERBOSE:
+            if len(original_unit) > 3:
+                print('Known conversion units are:')
+                print(known_conversions_full)
+            else:
+                print('Known conversion units are:')
+                print(known_conversions_short)
         original_unit_translation=1.
         
     if new_unit_translation is None:
         print('Unit translation cannot be done for the new unit. Returning 1.')
-        if len(original_unit) > 3:
-            print('Known conversion units are:')
-            print(known_conversions_full)
-        else:
-            print('Known conversion units are:')
-            print(known_conversions_short)
-        new_unit_translation=1.
+        if VERBOSE:
+            if len(original_unit) > 3:
+                print('Known conversion units are:')
+                print(known_conversions_full)
+            else:
+                print('Known conversion units are:')
+                print(known_conversions_short)
+            new_unit_translation=1.
         
     return original_unit_translation/new_unit_translation
             

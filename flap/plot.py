@@ -176,6 +176,26 @@ class PlotAnimation:
             
     def animate(self):
         
+        #These lines do the coordinate unit conversion
+        self.axes_unit_conversion=np.zeros(len(self.axes))
+        self.axes_unit_conversion[:]=1.
+        
+        if self.options['Plot units'] is not None:
+            unit_length=len(self.options['Plot units'])
+            if unit_length > 3:
+                raise ValueError('Only three units are allowed for the three coordinates.')
+            unit_conversion_coeff={}
+            for plot_unit_name in self.options['Plot units']:
+                for index_data_unit in range(len(self.d.coordinates)):
+                    if (plot_unit_name == self.d.coordinates[index_data_unit].unit.name):
+                        data_coordinate_unit=self.d.coordinates[index_data_unit].unit.unit
+                        plot_coordinate_unit=self.options['Plot units'][plot_unit_name]
+                        unit_conversion_coeff[plot_unit_name]=flap.tools.unit_conversion(original_unit=data_coordinate_unit,
+                                                                                        new_unit=plot_coordinate_unit)
+            for index_axes in range(len(self.axes)):
+                if self.axes[index_axes] in self.options['Plot units']:
+                    self.axes_unit_conversion[index_axes]=unit_conversion_coeff[self.axes[index_axes]]
+        
         pause_ax = plt.figure(self.plot_id.figure).add_axes((0.78, 0.94, 0.1, 0.04))
         self.pause_button = Button(pause_ax, 'Pause', hovercolor='0.975')
         self.pause_button.on_clicked(self._pause_animation)
@@ -198,9 +218,10 @@ class PlotAnimation:
         
         
         slider_ax = plt.figure(self.plot_id.figure).add_axes((0.1, 0.94, 0.5, 0.04))
-        self.time_slider = Slider(slider_ax, label='Time',
-                             valmin=self.tdata[0], valmax=self.tdata[-1],
-                             valinit=self.tdata[0])
+        self.time_slider = Slider(slider_ax, label=self.axes[2],
+                                  valmin=self.tdata[0]*self.axes_unit_conversion[2], 
+                                  valmax=self.tdata[-1]*self.axes_unit_conversion[2],
+                                  valinit=self.tdata[0]*self.axes_unit_conversion[2])
         self.time_slider.on_changed(self._set_animation)
 
         plt.subplot(self.plot_id.base_subplot)
@@ -220,26 +241,6 @@ class PlotAnimation:
                     self.d.coordinates[axes_coordinate_decrypt[j_check]].unit.unit):
                     self.ax_act.axis('equal')
                     
-#These lines do the coordinate unit conversion
-        self.axes_unit_conversion=np.zeros(len(self.axes))
-        self.axes_unit_conversion[:]=1.
-        
-        if self.options['Plot units'] is not None:
-            unit_length=len(self.options['Plot units'])
-            if unit_length > 3:
-                raise ValueError('Only three units are allowed for the three coordinates.')
-            unit_conversion_coeff={}
-            for plot_unit_name in self.options['Plot units']:
-                for index_data_unit in range(len(self.d.coordinates)):
-                    if (plot_unit_name == self.d.coordinates[index_data_unit].unit.name):
-                        data_coordinate_unit=self.d.coordinates[index_data_unit].unit.unit
-                        plot_coordinate_unit=self.options['Plot units'][plot_unit_name]
-                        print(data_coordinate_unit,plot_coordinate_unit)
-                        unit_conversion_coeff[plot_unit_name]=flap.tools.unit_conversion(original_unit=data_coordinate_unit,
-                                                                                        new_unit=plot_coordinate_unit)
-            for index_axes in range(len(self.axes)):
-                if self.axes[index_axes] in self.options['Plot units']:
-                    self.axes_unit_conversion[index_axes]=unit_conversion_coeff[self.axes[index_axes]]
             
         
         time_index = [slice(0,dim) for dim in self.d.data.shape]
@@ -507,7 +508,6 @@ class PlotAnimation:
             if self.axes[2] in self.options['Plot units']:
                 time_unit=self.options['Plot units'][self.axes[2]]
                 time_coeff=self.axes_unit_conversion[2]
-                print(self.axes_unit_conversion)
             else:
                 time_unit=self.coord_t.unit.unit
             time_coeff=1.
@@ -531,7 +531,7 @@ class PlotAnimation:
         time_index = tuple(time_index)
         
         self.time_slider.eventson = False
-        self.time_slider.set_val(self.tdata[it])
+        self.time_slider.set_val(self.tdata[it]*self.axes_unit_conversion[2])
         self.time_slider.eventson = True       
         
         self.current_frame = it
@@ -633,7 +633,7 @@ class PlotAnimation:
         
     def _set_animation(self, time):
         self.anim.event_source.stop()
-        frame=(np.abs(self.tdata-time)).argmin()
+        frame=(np.abs(self.tdata*self.axes_unit_conversion[2]-time)).argmin()
         self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
                                             frames=np.arange(frame,len(self.tdata)-1),
                                             interval=self.speed,blit=False)
@@ -2055,7 +2055,6 @@ def _plot(data_object,
                                                     clear=_options['Clear'], 
                                                     default_axes=default_axes, 
                                                     force=_options['Force axes'])
-            print(pdd_list,ax_list)
         except ValueError as e:
             raise e
         
