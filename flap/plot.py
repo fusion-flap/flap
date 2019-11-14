@@ -246,6 +246,7 @@ class PlotAnimation:
         time_index = [slice(0,dim) for dim in self.d.data.shape]
         time_index[self.coord_t.dimension_list[0]] = 0
         time_index = tuple(time_index)
+        
         act_ax_pos=self.ax_act.get_position()
         slider_ax.set_position([act_ax_pos.x0,0.94,0.5,0.04])
 
@@ -281,10 +282,11 @@ class PlotAnimation:
         if (self.image_like):
             try: 
                 #There is a problem here, but I cant find it. Image is rotated with 90degree here, but not in anim-image.
-                if (self.coord_x.dimension_list[0] == 0):
-                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
-                else:
+                #if (self.coord_x.dimension_list[0] == 0):
+                if (self.coord_x.dimension_list[0] < self.coord_y.dimension_list[0]):
                     im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                else:
+                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
                 img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
                                 cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
                                 vmax=self.vmax,origin='lower',**_plot_opt)            
@@ -550,10 +552,11 @@ class PlotAnimation:
         
         if (self.image_like):
             try: 
-                if (self.coord_x.dimension_list[0] == 0):
-                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
-                else:
+#                if (self.coord_x.dimension_list[0] == 0):
+                if (self.coord_x.dimension_list[0] < self.coord_y.dimension_list[0]):
                     im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
+                else:
+                    im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
                 plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
                            cmap=self.cmap_obj,vmin=self.vmin,
                            aspect=self.options['Aspect ratio'],
@@ -1755,7 +1758,8 @@ def _plot(data_object,
 
         if (image_like):
             try: 
-                if (coord_x.dimension_list[0] == 0):
+#                if (coord_x.dimension_list[0] == 0):
+                if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
                     im=np.clip(np.transpose(d.data),vmin,vmax)
                 else:
                     im=np.clip(d.data,vmin,vmax)
@@ -1963,7 +1967,8 @@ def _plot(data_object,
     
             if (image_like and (_plot_type == 'anim-image')):
                 try:
-                    if (coord_x.dimension_list[0] != 0):
+                    #if (coord_x.dimension_list[0] == 0):
+                    if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
                         im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     else:
                         im = np.clip(d.data[time_index],vmin,vmax)
