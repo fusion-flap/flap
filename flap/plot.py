@@ -250,11 +250,18 @@ class PlotAnimation:
         slider_ax.set_position([act_ax_pos.x0,0.94,0.5,0.04])
 
         if (self.zrange is None):
-            self.vmin = np.nanmin(self.d.data[time_index])
-            self.vmax = np.nanmax(self.d.data[time_index])
-        else:
-            self.vmin = self.zrange[0]
-            self.vmax = self.zrange[1]
+            self.zrange=[np.nanmin(self.d.data),
+                         np.nanmax(self.d.data)]
+        self.vmin = self.zrange[0]
+        self.vmax = self.zrange[1]
+        
+#        if (self.zrange is None):
+#            self.vmin = np.nanmin(self.d.data[time_index])
+#            self.vmax = np.nanmax(self.d.data[time_index])
+#        else:
+#            self.vmin = self.zrange[0]
+#            self.vmax = self.zrange[1]
+
 
         if (self.vmax <= self.vmin):
             raise ValueError("Invalid z range.")
@@ -275,9 +282,9 @@ class PlotAnimation:
             try: 
                 #There is a problem here, but I cant find it. Image is rotated with 90degree here, but not in anim-image.
                 if (self.coord_x.dimension_list[0] == 0):
-                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
-                else:
                     im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
+                else:
+                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
                 img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
                                 cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
                                 vmax=self.vmax,origin='lower',**_plot_opt)            
@@ -289,7 +296,9 @@ class PlotAnimation:
                 #xgrid, ygrid = flap.tools.grid_to_box(self.xdata[0,:,:],self.ydata[0,:,:]) #Same issue, time is not necessarily the first flap.coordinate.
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata[0,:,:]*self.axes_unit_conversion[0],self.ydata[0,:,:]*self.axes_unit_conversion[1]) #Same issue, time is not necessarily the first flap.coordinate.
             else:
-                xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],self.ydata*self.axes_unit_conversion[1])
+                xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],
+                                                      self.ydata*self.axes_unit_conversion[1])
+                
             im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
                 img = plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
@@ -542,9 +551,9 @@ class PlotAnimation:
         if (self.image_like):
             try: 
                 if (self.coord_x.dimension_list[0] == 0):
-                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
-                else:
                     im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
+                else:
+                    im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
                 plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
                            cmap=self.cmap_obj,vmin=self.vmin,
                            aspect=self.options['Aspect ratio'],
@@ -1747,14 +1756,13 @@ def _plot(data_object,
         if (image_like):
             try: 
                 if (coord_x.dimension_list[0] == 0):
-                    img = ax.imshow(np.clip(np.transpose(d.data),vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
-                                    vmax=vmax,origin='lower',**_plot_opt)
+                    im=np.clip(np.transpose(d.data),vmin,vmax)
                 else:
-                    img = ax.imshow(np.clip(d.data,vmin,vmax),extent=xdata_range + ydata_range,norm=norm,
-                                    cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
-                                    vmax=vmax,origin='lower',**_plot_opt)
-                    
+                    im=np.clip(d.data,vmin,vmax)
+                img = ax.imshow(im,extent=xdata_range + ydata_range,norm=norm,
+                                cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
+                                vmax=vmax,origin='lower',**_plot_opt)
+                del im                    
             except Exception as e:
                 raise e
         else:
@@ -1954,14 +1962,17 @@ def _plot(data_object,
             _plot_opt = _plot_options[0]
     
             if (image_like and (_plot_type == 'anim-image')):
-                try: 
-                    if (coord_x.dimension_list[0] == 0):
+                try:
+                    if (coord_x.dimension_list[0] != 0):
                         im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     else:
                         im = np.clip(d.data[time_index],vmin,vmax)
+                        
                     img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                     cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
-                                     vmax=vmax,origin='lower',**_plot_opt)            
+                                     cmap=cmap_obj,vmin=vmin,vmax=vmax,
+                                     aspect=_options['Aspect ratio'],
+                                     interpolation=_options['Interpolation'],
+                                     origin='lower',**_plot_opt)            
                     del im
                 except Exception as e:
                     raise e

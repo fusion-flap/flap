@@ -223,8 +223,8 @@ def _trend_removal(d,ax,trend,x=None):
                 for i in range(new_shape[1]):
                     tr = p[0,i]
                     for j in range(order):
-                        tr += p[j + 1, i] * xx[:,j]
-                    d[:,i] -= tr.astype(d.dtype)
+                        tr = tr + p[j + 1, i] * xx[:,j]
+                    d[:,i] = d[:,i] - tr.astype(d.dtype)
                 if (len(orig_shape) > 2):
                    d = d.reshape(orig_shape,order='F')
                 if (ax != 0):
@@ -232,9 +232,9 @@ def _trend_removal(d,ax,trend,x=None):
                 return
             else:
                 p = np.polynomial.polynomial.polyfit(x,d,order)
-                d -= p[0]
+                d = d - p[0]
                 for i in range(order):
-                    d -= p[i + 1] * x ** (i + 1)
+                    d = d - p[i + 1] * x ** (i + 1)
                 return
     raise ValueError("Unknown trend removal method.")
 
