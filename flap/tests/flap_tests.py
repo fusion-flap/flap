@@ -627,7 +627,7 @@ def test_ccf():
     flap.plot('CCF_ref',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
 
 def test_image():
-    plt.close('all')
+#    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -701,7 +701,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = True
+test_all = False
 
 # Running tests
 plt.close('all')
@@ -748,7 +748,7 @@ if (False or test_all):
     test_detrend()
     plt.pause(0.05)
     wait_for_key()
-if (False or test_all):
+if (True or test_all):
     test_apsd()
     show_plot()
     wait_for_key()
