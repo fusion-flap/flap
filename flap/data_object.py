@@ -3762,7 +3762,22 @@ def get_data(data_source,
              coordinates=None,
              object_name=None):
     """ This is a general data read interface. It will call the specific data read interface
-        for the registered data sources
+        for the registered data sources.
+        data_source: The name of the data source (string)
+        exp_id: Experiment ID
+        coordinates: Two options:
+                     1. List of flap.Coordinate objects. Thes can precisely describe which part of the data to read
+                     2. Dictionary. Each key is a coordinate name, the values can be 
+                         - A list of two elements (describes a range in the coordinate). 
+                         - A single element. Will be converted into a list with two identical elements
+                        The dictionary will be converted to a list of flap.Coordinate objects and
+                        the data source modulee will get that. 
+        name: The name of the data to get
+        no_data: Set to True to check data but do not read
+        options: Module specific options
+        object_name: the name of the data object in flap storage where data will be placed.
+        
+        Return value is the data object.
     """
     if (name is None):
         raise ValueError("Data name is not given.")
@@ -3775,7 +3790,12 @@ def get_data(data_source,
     if (type(coordinates) is dict):
         _coordinates = []
         for c_name in coordinates.keys():
-            _coordinates.append(flap.coordinate.Coordinate(name=c_name,c_range=coordinates[c_name]))
+            if (type(coordinates[c_name]) is list):
+                if (len(coordinates[c_name]) != 2):
+                    raise ValueError("coordinates keyword argument must be either a list of flap.Coordinates a value or a list of two values.")
+                _coordinates.append(flap.coordinate.Coordinate(name=c_name,c_range=coordinates[c_name]))
+            else:
+                _coordinates.append(flap.coordinate.Coordinate(name=c_name,c_range=[coordinates[c_name]]*2))
     else:
         _coordinates = coordinates
 
@@ -3784,9 +3804,14 @@ def get_data(data_source,
             data_source_local=data_source
         else:
             data_source_local=None
+        # Calling the data module get_data function
         d = f(exp_id, data_name=name, no_data=no_data, options=options, 
               coordinates=_coordinates, data_source=data_source_local)
-    except KeyError:
+    except TypeError as e:
+        # Checking whethet the error os due to unknown data_source argument
+        if (str(e).find("unexpected keyword argument 'data_source'") < 0):
+            # If nat raise the error
+            raise e
         # Trying without data_source as this was not part of earlier version
         try:
             d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates)
