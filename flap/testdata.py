@@ -42,8 +42,6 @@ import copy
 # These are the measurement parameters
 ROW_NUMBER = 10
 COLUMN_NUMBER = 15
-IMAGE_XSIZE = 1280
-IMAGE_YSIZE = 1024
 meas_ADC_step = 0.001  # ADC resolution in Volt
 alpha = 18. # degree angle of measurement matrix
 
@@ -60,7 +58,11 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                       'Complex-Sin': Same as Sine but an imaginary cosine is added
                       'Random': Random (normal dist.) signal in all channels
             'Image' : 'Gauss' Gaussian spot
-            'Frequency' : <number> Fixed frequency
+                      'Random'  Random int16 values between 0 and 4095
+            'Spotsize': Full width at half maximum of spot in pixels
+            'Width'   : Image width in pixels (x size)
+            'Height'  : Image height in pixels (y size)
+            'Frequency' : <number> Fixed frequency of signals
                         : [f2,f2]: Changes from channel-to-channel between these frequencies
             'Length': Length in second. The sample rate is 1 MHz
             'Samplerate': Sample rate [Hz]
@@ -96,7 +98,10 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                            'Frequency': 30,
                            'Length': 0.1,
                            'Samplerate':1e3,
-                           'Image':None
+                           'Image':'Gauss',
+                           'Width': 1280,
+                           'Height': 1024,
+                           'Spotsize': 100
                            }
     else:
         default_options = {'Signal': 'Sin',
@@ -104,7 +109,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                            'Frequency': 1E3,
                            'Length': 0.1,
                            'Samplerate':1e6,
-                           'Image':'Gauss'
+                           'Image':None
                            }
         
     _options = flap.config.merge_options(default_options,options,data_source=data_source)
@@ -389,17 +394,23 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
     
     else:
         # VIDEO
+        image_xsize = _options['Width']
+        image_ysize = _options['Height']
+        spotwidth = _options['Spotsize']
         if (no_data == False):
-            f = float(_options['Frequency'])
-            t = np.arange(ndata,dtype=float) * meas_sampletime
-            amp = np.sin(t * 4.5 * math.pi * f) ** 2 * 3000 + 1000
-            center_x = IMAGE_XSIZE/2 + (np.sin(t*2*math.pi*f) * IMAGE_XSIZE / 4) * (t / t[-1] + 0.2)
-            center_y = IMAGE_YSIZE/2 + (np.cos(t*2*math.pi*f) * IMAGE_YSIZE / 4) * (t / t[-1] + 0.2)
-            x,y = np.meshgrid(range(0,IMAGE_XSIZE), range(0,IMAGE_YSIZE))
-            data_arr = np.empty((x.shape[0], x.shape[1], t.size),dtype=np.int16)
-            for it in range(len(t)):
-                data_arr[:,:,it] = (np.exp(-((x - center_x[it]) ** 2 + (y - center_y[it]) ** 2)
-                                   /2/((IMAGE_XSIZE/10) ** 2 + (IMAGE_YSIZE/10) ** 2)) * amp[it]).astype(np.int16)
+            if (_options['Image'] == 'Gauss'):
+                f = float(_options['Frequency'])
+                t = np.arange(ndata,dtype=float) * meas_sampletime
+                amp = np.sin(t * 4.5 * math.pi * f) ** 2 * 3000 + 1000
+                center_x = image_xsize/2 + (np.sin(t*2*math.pi*f) * image_xsize / 4) * (t / t[-1] + 0.2)
+                center_y = image_ysize/2 + (np.cos(t*2*math.pi*f) * image_ysize / 4) * (t / t[-1] + 0.2)
+                x,y = np.meshgrid(range(0,image_xsize), range(0,image_ysize))
+                data_arr = np.empty((x.shape[0], x.shape[1], t.size),dtype=np.int16)
+                for it in range(len(t)):
+                    data_arr[:,:,it] = (np.exp(-((x - center_x[it]) ** 2 + (y - center_y[it]) ** 2)
+                                       /2/(spotwidth ** 2 + spotwidth  ** 2)) * amp[it]).astype(np.int16)
+            elif(_options['Image'] == 'Random'):
+                data_arr = np.random.randint(0,high=4095,size=(image_xsize,image_ysize,ndata),dtype=np.int16)                
         coord = [None]*4
         coord[0] = copy.deepcopy(flap.Coordinate(name='Time',
                                                  unit='Second',

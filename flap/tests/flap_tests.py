@@ -413,9 +413,39 @@ def test_select_multislice():
                       slicing={'Interval(Time)':i},
                       axes='Rel. Time in int(Time)')
 
-def test_detrend():
-    plt.close('all')
+def test_binning():
     print()
+    print()
+    print('>>>>>>> Test image binning through multi-slice<<<<<<<<<<<')
+    print("**** Generating a sequence of test images")
+    flap.get_data('TESTDATA',
+                  name='VIDEO',
+                  object_name='TEST_VIDEO',
+                  options={'Length':0.05,'Width':500,'Height':800,'Image':'Gauss','Spotsize':10})
+    print("***** Showing one image")
+    plt.figure()
+    flap.plot('TEST_VIDEO',
+              slicing={'Time':30e-3/3},
+              plot_type='image',
+              axes=['Image x','Image y'],
+              options={'Clear':True,'Interpolation':None,'Aspect':'equal'})
+    flap.slice_data('TEST_VIDEO',
+                    slicing={'Image x':flap.Intervals(0,4,step=5), 'Image y':flap.Intervals(0,9,step=10)},
+                    summing={'Interval(Image x) sample index':'Mean','Interval(Image y) sample index':'Mean'},
+                    output_name='TEST_VIDEO_binned'
+                    )
+    print("***** Showing one image of the (5,10) binned video ")
+    plt.figure()
+    flap.plot('TEST_VIDEO_binned',
+              slicing={'Time':30e-3/3},
+              plot_type='image',
+              axes=['Image x','Image y'],
+              options={'Clear':True,'Interpolation':None,'Aspect':'equal'})
+    flap.list_data_objects()
+
+def test_detrend():
+    plt.close('all')            
+    print()    
     print('>>>>>>>>>>>>>>>>>>> Test detrend <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
     print("**** Generating 8 sine signals with variable frequency.")
@@ -706,7 +736,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = True
+test_all = False
 
 # Running tests
 plt.close('all')
@@ -753,6 +783,10 @@ if (False or test_all):
     test_select_multislice()
     show_plot()
     wait_for_key()
+if (True or test_all):
+    test_binning()
+    show_plot()
+    wait_for_key()    
 if (False or test_all): 
     test_detrend()
     plt.pause(0.05)

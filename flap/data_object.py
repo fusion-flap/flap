@@ -1420,11 +1420,17 @@ class DataObject:
                                  None: Automatically select. For slicing data in case b multi slice, otherwise simple
                    'Interpolation: 'Closest value'
                                    'Linear'
+                   'Regenerate coordinates': True/False  (defaultL True)
+                                             If True and summing is done then looks for pairs of coordinates
+                                             'Rel. <coord> in int(<coord1>)'  'Start <coord> in int(<coord1>)'.
+                                             If such pairs are found and they change on the same dimension or one of them is constant then
+                                             coordinate <coord> is regenerated and these are removed.
         """
 
         default_options = {'Partial intervals': True,
                            'Slice type': None,
                            'Interpolation': 'Closest value',
+                           'Regenerate coordinates': True
                            }
         _options = flap.config.merge_options(default_options, options, data_source=self.data_source, section='Slicing')
 
@@ -2516,6 +2522,8 @@ class DataObject:
                         check_coord.dimension_list[i] = dimension_mapping[check_coord.dimension_list[i]]
                         if (check_coord.dimension_list[i] is None):
                             raise RuntimeError("Internal error in dimension mapping: None dimension")
+            if (_options['Regenerate coordinates']):
+                d_slice.regenerate_coordinates()
         elif (summing is None):
             pass
         else:
@@ -2529,6 +2537,74 @@ class DataObject:
         return d_slice
     # End of slice_data
 
+    def regenerate_coordinates(self):
+        while (True):
+            rel_coord = None
+            start_coord = None
+            orig_coord = None
+            slice_coord = None
+            for i,coord in enumerate(self.coordinates):
+                cname = coord.unit.name
+                if (orig_coord is None):
+                    if ((cname[:len('Start ')] == 'Start ') 
+                        and (cname.find(' in int(') > 0) 
+                        and (cname[-1] == ')'
+                        )):
+                        orig_coord = cname[len('Start '):cname.find(' in int(')]
+                        slice_coord = cname[cname.find(' in int(') + len(' in int(') : -1]
+                        start_coord = i
+                        continue
+                    if ((cname[:len('Rel. ')] == 'Rel. ') 
+                        and (cname.find(' in int(') > 0) 
+                        and (cname[-1] == ')'
+                        )):
+                        orig_coord = cname[len('Rel. '):cname.find(' in int(')]
+                        slice_coord = cname[cname.find(' in int(') + len(' in int(') : -1]
+                        rel_coord = i
+                        continue
+                else:
+                    start_name = 'Start '+orig_coord+' in int('+slice_coord+')'
+                    rel_name = 'Rel. '+orig_coord+' in int('+slice_coord+')'
+                    if (cname == start_name):
+                        start_coord = i
+                        break
+                    if (cname == rel_name):
+                        rel_coord = i
+                        break
+            # End while cycle if no suitable coordinate pairs are found
+            if ((start_coord is None) and (rel_coord is None)):
+                break
+            
+            # Do the changes
+            del_list = []
+            rel_coord_obj = self.coordinates[rel_coord]
+            start_coord_obj = self.coordinates[start_coord]
+            if (len(rel_coord_obj.dimension_list) == 0):
+                if (start_coord_obj.mode.equidistant):
+                   start_coord_obj.start += rel_coord_obj.values
+                else:
+                   start_coord_obj.values += rel_coord_obj.values
+                start_coord_obj.unit.name = orig_coord
+                del_list.append(rel_coord_obj.unit.name)
+                del_list.append('Interval('+slice_coord+')')
+                del_list.append('Interval('+slice_coord+') sample index')
+            elif ((len(rel_coord_obj.dimension_list) == 1) and (len(start_coord_obj.dimension_list) == 1)
+                    and (rel_coord_obj.dimension_list[0] == start_coord_obj.dimension_list[0])):
+                if (not rel_coord_obj.mode.equidistant):
+                    d = start_coord.data(data_shape=self.shape)[0]
+                    dr = rel_coord.data(data_shape=self.shape)[0]
+                    start_coord.mode.equidistant = False
+                    start_coord.values = d + dr
+                    start_coord_obj.unit.name = orig_coord
+                    del_list.append(rel_coord_obj.unit.name)
+                    del_list.append('Interval('+slice_coord+')')
+                    del_list.append('Interval('+slice_coord+') sample index')
+            for coord in del_list:
+                try:
+                    self.del_coordinate(coord)
+                except Exception:
+                    pass
+                
     def real(self):
         if ((self.data is None) or (self.data.dtype.kind != 'c')):
             return copy.deepcopy(self)
