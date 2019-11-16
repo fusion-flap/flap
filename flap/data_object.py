@@ -8,15 +8,17 @@ Created on Tue Jan 22 17:37:32 2019
 import numpy as np
 from scipy import signal
 import fnmatch
-from decimal import *
+from decimal import Decimal
 import copy
-import matplotlib.pyplot as plt
 import math
 import io
 import pickle
-
-from .tools import *
-from .coordinate import *
+#import time
+#from .tools import *
+#from .coordinate import *
+#import matplotlib.pyplot as plt
+import flap.tools
+import flap.coordinate
 import flap.config
 from .spectral_analysis import _apsd, _cpsd, _trend_removal, _ccf
 from .plot import _plot
@@ -59,12 +61,12 @@ class DataObject:
         self.shape = data_shape
 
         if (data_unit is not None):
-            if (type(data_unit) is not Unit):
+            if (type(data_unit) is not flap.coordinate.Unit):
                 raise ValueError("data_unit for DataObject must be a flap.Unit.")
             else:
                 self.data_unit = copy.deepcopy(data_unit)
         else:
-            self.data_unit = Unit()
+            self.data_unit = flap.coordinate.Unit()
 
         if (data_array is None):
             self.data = None
@@ -99,10 +101,10 @@ class DataObject:
                 return
             if (type(coordinates) is list):
                 for c in coordinates:
-                    if (type(c) is not Coordinate):
+                    if (type(c) != flap.coordinate.Coordinate):
                        raise TypeError("Bad type in coordinates list.")
                 self.__coordinates = copy.deepcopy(coordinates)
-            elif (type(coordinates) is Coordinate):
+            elif (type(coordinates) == flap.coordinate.Coordinate):
                 self.__coordinates = [copy.deepcopy(coordinates)]
             else:
                 raise TypeError("Bad type for coordinates.")
@@ -123,7 +125,7 @@ class DataObject:
                 raise ValueError("DataObject.shape is none. Even if no data is present shape should be set otherwise coordinates cannot be determined.")                
         if (self.error is not None):
             if (type(self.error) is list):
-                if (len(self.error) is not 2):
+                if (len(self.error) != 2):
                     raise ValueError("Wrong number of elements in error. If DataObject.error is a list it should have two elements." )
                 error = self.error
             else:
@@ -156,7 +158,7 @@ class DataObject:
                         raise TypeError("Wrong dimension number in coordinate '{:s}'.".format(c.unit.name))                         
                 if (type(c.unit) is not flap.Unit):
                     raise TypeError("Wrong coordinate unit in coordinate #{:d}. Should be flap.Unit().".format(i))
-                if (type(c.mode) is not CoordinateMode):
+                if (type(c.mode) is not flap.coordinate.CoordinateMode):
                     raise TypeError("Wrong coordinate mode type in '{:s}'. Should be flap.CoordinateMode().".format(c.unit.name))
                 if (c.mode.equidistant):
                     if (c.start is None):
@@ -195,7 +197,7 @@ class DataObject:
                         else:
                             if (type(c.value_ranges) is not list):
                                 raise TypeError("Invalid type for value_ranges in asymmetric coordinate '{:s}'.".format(c.unit.name))
-                            if (len(c.value_ranges) is not 2):
+                            if (len(c.value_ranges) != 2):
                                 raise TypeError("Invalid list length for value_ranges in asymmetric coordinate '{:s}'.".format(c.unit.name))
                             for c_value_ranges in c.value_ranges:
                                 try:
@@ -338,17 +340,17 @@ class DataObject:
                     number = self.shape[coord_obj.dimension_list[0]]
                     step = coord_obj.step[0]
                 if (coord_obj.mode.range_symmetric):
-                    intervals = Intervals(coord_obj.start - coord_obj.value_ranges,
-                                          coord_obj.start + coord_obj.value_ranges,
-                                          step = step,
-                                          number = number
-                                          )
+                    intervals = flap.coordinate.Intervals(coord_obj.start - coord_obj.value_ranges,
+                                                          coord_obj.start + coord_obj.value_ranges,
+                                                          step = step,
+                                                          number = number
+                                                          )
                 else:
-                    intervals = Intervals(coord_obj.start - coord_obj.value_ranges[0],
-                                          coord_obj.start + coord_obj.value_ranges[1],
-                                          step = step,
-                                          number = number
-                                          )
+                    intervals = flap.coordinate.Intervals(coord_obj.start - coord_obj.value_ranges[0],
+                                                          coord_obj.start + coord_obj.value_ranges[1],
+                                                          step = step,
+                                                          number = number
+                                                          )
             else:
                 index = [0] * len(self.shape)
                 index[coord_obj.dimension_list[0]] = ...
@@ -356,18 +358,18 @@ class DataObject:
                     d, d_low, d_high = coord_obj.data(data_shape=self.shape,index=index)
                 except Exception as e:
                     raise e
-                intervals = Intervals(d_low, d_high)
+                intervals = flap.coordinate.Intervals(d_low, d_high)
         else:
             if ((self.data is None) or (self.error is None)):
                 raise ValueError("To use a data object as interval it must have data and error.")
             if (type(self.error) is list):
-                intervals = Intervals(self.data.flatten() - self.error[0].flatten(),
-                                      self.data.flatten() + self.error[1].flatten()
-                                      )
+                intervals = flap.coordinate.Intervals(self.data.flatten() - self.error[0].flatten(),
+                                                      self.data.flatten() + self.error[1].flatten()
+                                                      )
             else:
-                intervals = Intervals(self.data.flatten() - self.error.flatten(),
-                                      self.data.flatten() + self.error.flatten()
-                                      )
+                intervals = flap.coordinate.Intervals(self.data.flatten() - self.error.flatten(),
+                                                      self.data.flatten() + self.error.flatten()
+                                                      )
         return intervals
 
     def slicing_to_intervals(self,slicing):
@@ -395,7 +397,7 @@ class DataObject:
                 err1 = slicing_description.error.flatten()
                 err2 = err1
             data = slicing_description.data.flatten()
-            intervals = Intervals(data-err1, data+err2)
+            intervals = flap.coordinate.Intervals(data-err1, data+err2)
         elif ((type(slicing_description) is DataObject) and
               (slicing_description.data_unit.name != slicing_coord.unit.name)):
             try:
@@ -404,7 +406,7 @@ class DataObject:
                 raise e
             if (not coord_obj.isnumeric()):
                 raise ValueError("Cannot do multi-slice with string type coordinate.")
-            if (len(coord_obj.dimension_list) is not 1):
+            if (len(coord_obj.dimension_list) != 1):
                 raise ValueError("Cannot do multi-slice with coordinate changing along multiple dimensions.")
             if (coord_obj.mode.equidistant):
                 if (coord_obj.mode.range_symmetric):
@@ -413,17 +415,17 @@ class DataObject:
                 else:
                     start = coord_obj.start - coord_obj.value_ranges[0]
                     stop = coord_obj.start + coord_obj.value_ranges[1]
-                intervals = Intervals(start,
-                                      stop,
-                                      step=coord_obj.step[0],
-                                      number=slicing_description.shape[coord_obj.dimension_list[0]])
+                intervals = flap.coordinate.Intervals(start,
+                                                      stop,
+                                                      step=coord_obj.step[0],
+                                                      number=slicing_description.shape[coord_obj.dimension_list[0]])
             else:
                 try:
                     c, c_low, c_high = coord_obj.data(data_shape=slicing_description.shape,index='...')
                 except Exception as e:
                     raise e
-                intervals = Intervals(c_low, c_high)
-        elif (type(slicing_description) is Intervals):
+                intervals = flap.coordinate.Intervals(c_low, c_high)
+        elif (type(slicing_description) == flap.coordinate.Intervals):
             intervals = slicing_description
         else:
             raise TypeError("Invalid slicing description.")
@@ -491,8 +493,8 @@ class DataObject:
         if (_intervals is None):
             input_intervals = None
         elif ((type(_intervals) is list) and (len(_intervals) == 2)):
-            input_intervals = Intervals(_intervals[0], _intervals[1])
-        elif (type(_intervals) is Intervals):
+            input_intervals = flap.coordinate.Intervals(_intervals[0], _intervals[1])
+        elif (type(_intervals) is flap.coordinate.Intervals):
             input_intervals = _intervals
         elif (type(_intervals) is DataObject):
             try:
@@ -541,7 +543,7 @@ class DataObject:
                                 np.array([self.shape[coord_obj.dimension_list[0]]],dtype=np.int32)]
             # Converting from index to coordinate
             ind = [0]*len(self.shape)
-            ind[calc_obj.dimension_list[0]] = np.concatenate((calc_int_ind[0],calc_int_ind[1]))
+            ind[coord_obj.dimension_list[0]] = np.concatenate((calc_int_ind[0],calc_int_ind[1])) #there was calc_obj.dimension_list[0] here instead of coord_obj
             c, cl, ch = coord_obj(data_shape=self.shape, index=ind)
             calc_int = [c[0:len(c)/2], c[len(c)/2:]]
         
@@ -786,41 +788,40 @@ class DataObject:
     def __fill_nan(self, ind):
         """ This is an internal function to fill certain elements in the data and error with NaN.
         """
-        if (self.data.dtype.kind is 'f'):
+        if (self.data.dtype.kind == 'f'):
             self.data[ind] = np.NaN
-        elif (self.data.dtype.kind is 'c'):
+        elif (self.data.dtype.kind == 'c'):
             self.data[ind] = complex(np.NaN,np.NaN)
-        elif ((self.data.dtype.kind is 'u') or (self.data.dtype.kind is 'i')):
+        elif ((self.data.dtype.kind == 'u') or (self.data.dtype.kind == 'i')):
             self.data[ind] = 0
-        elif (self.data.dtype.kind is 'O'):
+        elif (self.data.dtype.kind == 'O'):
             self.data[ind] = None
 
         if (self.error is not None):
-            if (type(self.error) is list):
+            if (type(self.error) == list):
                 for i in range(2):
-                    if (self.error.dtype.kind is 'f'):
+                    if (self.error.dtype.kind == 'f'):
                         self.error[i][ind] = np.NaN
-                    elif (self.error.dtype.kind is 'c'):
+                    elif (self.error.dtype.kind == 'c'):
                         self.error[i][ind] = complex(np.NaN,np.NaN)
-                    elif ((self.error.dtype.kind is 'u') or (self.error.dtype.kind is 'i')):
+                    elif ((self.error.dtype.kind == 'u') or (self.error.dtype.kind == 'i')):
                         self.error[i][ind] = 0
-                    elif (self.error.dtype.kind is 'O'):
+                    elif (self.error.dtype.kind == 'O'):
                         self.error[i][ind] = None
             else:
-                if (self.error.dtype.kind is 'f'):
+                if (self.error.dtype.kind == 'f'):
                     self.error[ind] = np.NaN
-                elif (self.error.dtype.kind is 'c'):
+                elif (self.error.dtype.kind == 'c'):
                     self.error[ind] = complex(np.NaN,np.NaN)
-                elif ((self.error.dtype.kind is 'u') or (self.error.dtype.kind is 'i')):
+                elif ((self.error.dtype.kind == 'u') or (self.error.dtype.kind == 'i')):
                     self.error[ind] = 0
-                elif (self.error.dtype.kind is 'O'):
+                elif (self.error.dtype.kind == 'O'):
                     self.error[ind] = None
 
     def __check_coords_after_simple_slice(self,sliced_dimensions, sliced_removed, ind_slice_coord, original_shape, 
                                           dimension_mapping, slicing_equidistant,slicing_coord,_options):
         """ This is an internal function to modify the coordinates after a simple (non-interval) slice operation
         """
-        
         for check_coord in self.coordinates:
             # Do nothing for scalar dimension
             if (len(check_coord.dimension_list) == 0):
@@ -872,7 +873,7 @@ class DataObject:
                     # This coordinate will be non-equidistant
                     # Determining dimension list containing dimensions from this coordinate
                     # and the sliced ones
-                    unified_dims = unify_list(check_coord.dimension_list, sliced_dimensions)
+                    unified_dims = flap.tools.unify_list(check_coord.dimension_list, sliced_dimensions)
                     # Getting coordinate data for this unified array
                     index = [0]*len(original_shape)
                     for d in unified_dims:
@@ -891,14 +892,14 @@ class DataObject:
                         except ValueError:
                             pass
                     # Flattening these dimensions in the coordinate data matrix
-                    new_coord_data, flat_dim_mapping = flatten_multidim(new_coord_data, flattened_in_unified)
+                    new_coord_data, flat_dim_mapping = flap.tools.flatten_multidim(new_coord_data, flattened_in_unified)
                     # Doing the same with coordinate ranges
                     if (data_low is not None):
                         data_low = np.reshape(data_low,tuple(unified_shape))
-                        data_low, xxx = flatten_multidim(data_low, flattened_in_unified)
+                        data_low, xxx = flap.tools.flatten_multidim(data_low, flattened_in_unified)
                         if (not check_coord.mode.range_symmetric):
                            data_high = np.reshape(data_high,tuple(unified_shape))
-                           data_high, xxx = flatten_multidim(data_high, flattened_in_unified)
+                           data_high, xxx = flap.tools.flatten_multidim(data_high, flattened_in_unified)
                     # Creating a list of slices for all dimension, so as all elements are copied
                     ind_slice = [slice(0,x) for x in new_coord_data.shape]
                     if ((_options['Interpolation'] == 'Closest value') or (type(ind_slice_coord) is slice)
@@ -990,7 +991,7 @@ class DataObject:
                 check_coord.dimension_list = []
             else:
                 check_coord.dimension_list = new_dimension_list
-
+            
     def __check_coords_after_multi_slice(self,slicing,
                                          original_shape,
                                          joint_slices,
@@ -1066,19 +1067,19 @@ class DataObject:
                 if (check_coord.isnumeric()):
                     # These coordinates make sense only for numerical values
                     # For string the original coordinate will be kept
-                    cc_new_in_int = copy.deepcopy(Coordinate(name="Rel. " +
-                                                             check_coord.unit.name +
-                                                             " in int("+
-                                                             slicing_coord_names + ")",
-                                                             unit=check_coord.unit.unit,
-                                                             mode=copy.deepcopy(mode)))
+                    cc_new_in_int = copy.deepcopy(flap.coordinate.Coordinate(name="Rel. " +
+                                                                            check_coord.unit.name +
+                                                                            " in int("+
+                                                                            slicing_coord_names + ")",
+                                                                            unit=check_coord.unit.unit,
+                                                                            mode=copy.deepcopy(mode)))
                     add_in_int_coord = True
-                    cc_new_int = copy.deepcopy(Coordinate(name="Start " +
-                                                          check_coord.unit.name +
-                                                          " in int(" +
-                                                          slicing_coord_names + ")",
-                                                          unit=check_coord.unit.unit,
-                                                          mode=copy.deepcopy(mode)))
+                    cc_new_int = copy.deepcopy(flap.coordinate.Coordinate(name="Start " +
+                                                                          check_coord.unit.name +
+                                                                          " in int(" +
+                                                                          slicing_coord_names + ")",
+                                                                          unit=check_coord.unit.unit,
+                                                                          mode=copy.deepcopy(mode)))
                     add_int_coord = True
                     del_coords.append(i_check_coord)
                     change_check_coord = False
@@ -1124,7 +1125,7 @@ class DataObject:
 
                 if (not coord_int_filled or not coord_in_int_filled):
                     # We need to get the coordinate data and extract the coordinates
-                    unified_dimensions = unify_list(check_coord.dimension_list, joint_dimension_list)
+                    unified_dimensions = flap.tools.unify_list(check_coord.dimension_list, joint_dimension_list)
                     index = [0] * len(original_shape)
                     for d in unified_dimensions:
                         index[d] = ...
@@ -1143,7 +1144,7 @@ class DataObject:
                         except ValueError:
                             pass
                     # Flattening these dimensions in the coordinate data matrix
-                    coord_data, flat_dim_mapping = flatten_multidim(coord_data, flattened_in_unified)
+                    coord_data, flat_dim_mapping = flap.tools.flatten_multidim(coord_data, flattened_in_unified)
                 if (add_int_coord and not coord_int_filled):
                     # Filling data for the in-interval coordinate
                     # Creating a list of slices for all dimension, so as all elements are copied
@@ -1165,7 +1166,7 @@ class DataObject:
                             if (check_coord.mode.range_symmetric):
                                 data_low = data_low[tuple(ind)]
                                 cc_new_int.value_ranges = cc_new_int.values - data_low
-                                np_moveaxis(cc_new_int.value_ranges,
+                                np.moveaxis(cc_new_int.value_ranges,
                                             flattened_in_unified[0],
                                             cc_new_int.values.ndim-1)
                             else:
@@ -1230,9 +1231,9 @@ class DataObject:
                                           slice_description.step)
                                 ind_out[interval_dimension_in_coord] = s
                                 if (check_coord.isnumeric):
-                                    new_data[tuple(ind_out)] = coord_data[tuple(ind)] - np.amin(coord_data[tuple(ind)])
+                                    new_coord_data[tuple(ind_out)] = coord_data[tuple(ind)] - np.amin(coord_data[tuple(ind)])
                                 else:
-                                    new_data[tuple(ind_out)] = coord_data[tuple(ind)]
+                                    new_coord_data[tuple(ind_out)] = coord_data[tuple(ind)] #USED TO BE new_data but that is undefined
                                 if (data_low is not None):
                                     new_data_low[tuple(ind_out)] = data_low[tuple(ind)]
                                     new_data_high[tuple(ind_out)] = data_high[tuple(ind)]
@@ -1350,19 +1351,19 @@ class DataObject:
             except ValueError:
                 new_coord_list.append(self.coordinates[i])
         self.coordinates = copy.deepcopy(new_coord_list)
-        c = copy.deepcopy(Coordinate(name="Interval(" + slicing_coord_names + ")",
-                                     unit="[n.a.]",
-                                     mode=copy.deepcopy(CoordinateMode(equidistant=True)),
-                                     start = 0,
-                                     step = 1,
-                                     dimension_list = interval_dimension))
+        c = copy.deepcopy(flap.coordinate.Coordinate(name="Interval(" + slicing_coord_names + ")",
+                                                     unit="[n.a.]",
+                                                     mode=copy.deepcopy(flap.coordinate.CoordinateMode(equidistant=True)),
+                                                     start = 0,
+                                                     step = 1,
+                                                     dimension_list = interval_dimension))
         self.coordinates.append(c)
-        c = copy.deepcopy(Coordinate(name="Interval(" + slicing_coord_names + ") sample index",
-                                     unit="[n.a.]",
-                                     mode=copy.deepcopy(CoordinateMode(equidistant=True)),
-                                     start = 0,
-                                     step = 1,
-                                     dimension_list = in_interval_dimension))
+        c = copy.deepcopy(flap.coordinate.Coordinate(name="Interval(" + slicing_coord_names + ") sample index",
+                                                     unit="[n.a.]",
+                                                     mode=copy.deepcopy(flap.coordinate.CoordinateMode(equidistant=True)),
+                                                     start = 0,
+                                                     step = 1,
+                                                     dimension_list = in_interval_dimension))
         self.coordinates.append(c)
 
 
@@ -1429,12 +1430,12 @@ class DataObject:
 
         if (_options['Slice type'] is not None):
             try:
-                _options['Slice type'] = find_str_match(_options['Slice type'], ['Simple','Multi'])
+                _options['Slice type'] = flap.tools.find_str_match(_options['Slice type'], ['Simple','Multi'])
             except ValueError as e:
                 raise e
         if (_options['Interpolation'] is not None):
             try:
-                _options['Interpolation'] = find_str_match(_options['Interpolation'], ['Closest value','Linear'])
+                _options['Interpolation'] = flap.tools.find_str_match(_options['Interpolation'], ['Closest value','Linear'])
             except ValueError as e:
                 raise e
         
@@ -1466,7 +1467,7 @@ class DataObject:
                         return False
                     else:
                         return True
-            if (type(slicing) is Intervals):
+            if (type(slicing) is flap.coordinate.Intervals):
                 if (slicing.number == 1):
                     return False
                 else:
@@ -1486,7 +1487,7 @@ class DataObject:
                 # with it. Later it will be checked whether it is consistent with the equidistant coordinate.
                 # regular_slice is in coordinate units.
                 if ((type(slicing) is slice) or (type(slicing) is range)) :
-                    if (slicing.step == None):
+                    if (slicing.step is None):
                         regular_slice = slice(slicing.start, slicing.stop, 1)
                     else:
                         regular_slice = slice(slicing.start, slicing.stop, slicing.step)
@@ -1504,7 +1505,7 @@ class DataObject:
                                               coord_obj.start + coord_obj.step[0] *
                                                  (slicing.shape[coord_obj.dimension_list[0]] - 1),
                                               coord_obj.step[0])
-                if ((type(slicing) is Intervals) 
+                if ((type(slicing) is flap.coordinate.Intervals) 
                     # Regular slice is possible only with a single interval
                     and ((slicing.step is None) and (len(slicing.start) == 1) or
                         (slicing.step is not None) and (slicing.number == 1))):
@@ -1619,11 +1620,11 @@ class DataObject:
                             d, int_l, int_h = coord_obj.data(index=...,data_shape=slicing.shape)
                     try:
                         int_l
-                        slicing_intervals = Intervals(int_l,int_h)
+                        slicing_intervals = flap.coordinate.Intervals(int_l,int_h)
                         interval_slice = True
                     except NameError:
                         pass
-                if (type(slicing) is Intervals):
+                if (type(slicing) is flap.coordinate.Intervals):
                     slicing_intervals = slicing
                     interval_slice = True
                      
@@ -1674,7 +1675,7 @@ class DataObject:
 
                     # Creating an ind_coord array with the indices into the data array
                     # This might be a float value as interpolation might need a non-integer index
-                    if (slicing_arr.dtype.kind is 'U'):
+                    if (slicing_arr.dtype.kind == 'U'):
                         if (_options['Interpolation'] != 'Closest value'):
                             raise ValueError("Cannot do interpolation with string values.")
                         # For strings requiring exact match but wildcards are allowed
@@ -1684,7 +1685,7 @@ class DataObject:
                         else:
                             coord_data_list = [coord_data]
                         for i in range(len(slicing_arr)):
-                            selected_str, select_ind = select_signals(coord_data_list, [slicing_arr[i]])
+                            selected_str, select_ind = flap.tools.select_signals(coord_data_list, [slicing_arr[i]])
                             ind_coord = np.concatenate((ind_coord, np.array(select_ind)))
                         if (len(ind_coord) == 0):
                             raise ValueError("No matching elements found in slicing.")
@@ -1752,7 +1753,7 @@ class DataObject:
                     slicing_type = 'String'
                 else:
                     slicing_type = 'Numeric'
-            elif (type(slicing_description) is Intervals):
+            elif (type(slicing_description) is flap.coordinate.Intervals):
                 slicing_type = 'Numeric'
             elif (type(slicing_description) is np.ndarray):
                 dtype = type(slicing_description.flatten()[0])
@@ -1862,17 +1863,17 @@ class DataObject:
                     except ValueError as e:
                         raise e
                     # Flatten the data array along the coordinate dimensions
-                    d_flat, dimension_mapping = flatten_multidim(d_slice.data,
-                                                                 slicing_coords[i_sc].dimension_list)
+                    d_flat, dimension_mapping = flap.tools.flatten_multidim(d_slice.data,
+                                                                            slicing_coords[i_sc].dimension_list)
                     if (d_slice.error is not None):
                         if (type(d_slice.error) is list):
-                            d_err_flat_1, xx = flatten_multidim(d_slice.error[0],
-                                                                 slicing_coords[i_sc].dimension_list)
-                            d_err_flat_2, xx = flatten_multidim(d_slice.error[1],
-                                                                 slicing_coords[i_sc].dimension_list)
+                            d_err_flat_1, xx = flap.tools.flatten_multidim(d_slice.error[0],
+                                                                           slicing_coords[i_sc].dimension_list)
+                            d_err_flat_2, xx = flap.tools.flatten_multidim(d_slice.error[1],
+                                                                           slicing_coords[i_sc].dimension_list)
                         else:
-                            d_err, xx = flatten_multidim(d_slice.error,
-                                                                 slicing_coords[i_sc].dimension_list)
+                            d_err, xx = flap.tools.flatten_multidim(d_slice.error,
+                                                                    slicing_coords[i_sc].dimension_list)
                     # Create a list of slices for each dimension for the whole array
                     ind_slice = [slice(0,d_flat.shape[i]) for i in range(d_flat.ndim)]
                     if ((_options['Interpolation'] == 'Closest value') or (type(ind_slice_coord) is slice)):
@@ -1946,7 +1947,7 @@ class DataObject:
                             if (sliced_removed):
                                 d_err_flat_1 = np.squeeze(d_err_flat_1)
                                 d_err_flat_2 = np.squeeze(d_err_flat_2)
-                            d_slice.error = [d_err_flat_1, d_error_flat_2]
+                            d_slice.error = [d_err_flat_1, d_err_flat_2]
                         else:
                             d_slice.error  = np.squeeze(d_err)
                             
@@ -1985,7 +1986,7 @@ class DataObject:
                                 slicing_equidistant = True
                             else:
                                 slicing_equidistant = False            
-                    elif ((type(slicing_description[i_sc]) is Intervals) and
+                    elif ((type(slicing_description[i_sc]) is flap.coordinate.Intervals) and
                           (slicing_description[i_sc].interval_number()[0] == 1) and
                           (len(slicing_coords[i_sc].dimension_list) == 1) and
                           slicing_coords[i_sc].mode.equidistant
@@ -2011,19 +2012,19 @@ class DataObject:
                     joint_slices.append(i_sc)
                     joint_dimension_list = []
                     for i in joint_slices:
-                        joint_dimension_list = unify_list(joint_dimension_list,
-                                                          slicing_coords[i].dimension_list)
+                        joint_dimension_list = flap.tools.unify_list(joint_dimension_list,
+                                                                     slicing_coords[i].dimension_list)
                     original_shape = d_slice.shape
                     #flattening data for the joint_dimensions
-                    d_slice.data, dimension_mapping = flatten_multidim(d_slice.data, joint_dimension_list)
+                    d_slice.data, dimension_mapping = flap.tools.flatten_multidim(d_slice.data, joint_dimension_list)
                     if (d_slice.error is not None):
                         if (type(d_slice.error) is list):
                             err_flat = []
                             for i in range(2):
-                                err, xx = flatten_multidim(d_slice.error[i], joint_dimension_list)
+                                err, xx = flap.tools.flatten_multidim(d_slice.error[i], joint_dimension_list)
                                 err_flat.append(err)
                         else:
-                            err_flat, xx = flatten_multidim(d_slice.error, joint_dimension_list)
+                            err_flat, xx = flap.tools.flatten_multidim(d_slice.error, joint_dimension_list)
                         d_slice.error = err_flat
 
                     # Converting all slicing descriptions to Intervals object
@@ -2041,7 +2042,7 @@ class DataObject:
                                 err1 = slicing_description[i].error.flatten()
                                 err2 = err1
                             data = slicing_description[i].data.flatten()
-                            intervals.append(Intervals(data-err1, data+err2))
+                            intervals.append(flap.coordinate.Intervals(data-err1, data+err2))
                         elif ((type(slicing_description[i]) is DataObject) and
                               (slicing_description[i].data_unit.name != slicing_coords[i].unit.name)):
                             try:
@@ -2050,7 +2051,7 @@ class DataObject:
                                 raise e
                             if (not coord_obj.isnumeric()):
                                 raise ValueError("Cannot do multi-slice with string type coordinate.")
-                            if (len(coord_obj.dimension_list) is not 1):
+                            if (len(coord_obj.dimension_list) != 1):
                                 raise ValueError("Cannot do multi-slice with coordinate changing along multiple dimensions.")
                             if (coord_obj.mode.equidistant):
                                 if (coord_obj.mode.range_symmetric):
@@ -2059,17 +2060,17 @@ class DataObject:
                                 else:
                                     start = coord_obj.start - coord_obj.value_ranges[0]
                                     stop = coord_obj.start + coord_obj.value_ranges[1]
-                                intervals.append(Intervals(start,
-                                                           stop,
-                                                           step=coord_obj.step[0],
-                                                           number=slicing_description[i].shape[coord_obj.dimension_list[0]]))
+                                intervals.append(flap.coordinate.Intervals(start,
+                                                                           stop,
+                                                                           step=coord_obj.step[0],
+                                                                           number=slicing_description[i].shape[coord_obj.dimension_list[0]]))
                             else:
                                 try:
                                     c, c_low, c_high = coord_obj.data(data_shape=slicing_description[i].shape,index='...')
                                 except Exception as e:
                                     raise e
-                                intervals.append(Intervals(c_low, c_high))
-                        elif (type(slicing_description[i]) is Intervals):
+                                intervals.append(flap.coordinate.Intervals(c_low, c_high))
+                        elif (type(slicing_description[i]) is flap.coordinate.Intervals):
                             intervals.append(slicing_description[i])
 
                     # This is an index to get the data for the joined dimensions
@@ -2251,7 +2252,7 @@ class DataObject:
 
                         # end if len(joint_slices) == 1
                     elif (len(joint_slices) == 2):
-                        raise NotImplemented("Multi-slice for multiple dependent coordinates is not implemented yet.")
+                        raise NotImplementedError("Multi-slice for multiple dependent coordinates is not implemented yet.")
                         # Getting the data for the two coordinates
                     else :
                         raise("Cannot do range slicing with more than 2 dependent coordinates.")
@@ -2293,18 +2294,18 @@ class DataObject:
                     continue
                 
                 # Flattening the data array for the dimensions
-                d_flat, dimension_mapping = flatten_multidim(d_slice.data,
-                                                             summing_coords[i_sc].dimension_list)
+                d_flat, dimension_mapping = flap.tools.flatten_multidim(d_slice.data,
+                                                                        summing_coords[i_sc].dimension_list)
                 if (d_slice.error is not None):
                     if (type(d_slice.error) is list):
-                        err_flat_1, dmap = flatten_multidim(d_slice.error[0],
-                                                            summing_coords[i_sc].dimension_list)
-                        err_flat_2, dmap = flatten_multidim(d_slice.error[1],
-                                                            summing_coords[i_sc].dimension_list)
+                        err_flat_1, dmap = flap.tools.flatten_multidim(d_slice.error[0],
+                                                                       summing_coords[i_sc].dimension_list)
+                        err_flat_2, dmap = flap.tools.flatten_multidim(d_slice.error[1],
+                                                                       summing_coords[i_sc].dimension_list)
 
                     else:
-                        d_slice.error, dmap = flatten_multidim(d_slice.error,
-                                                            summing_coords[i_sc].dimension_list)
+                        d_slice.error, dmap = flap.tools.flatten_multidim(d_slice.error,
+                                                                          summing_coords[i_sc].dimension_list)
 
                 if (summing_description[i_sc] == 'Sum'):
                     d_slice.data = np.sum(d_flat,axis=summing_coords[i_sc].dimension_list[0])
@@ -2321,7 +2322,7 @@ class DataObject:
                                                      axis=summing_coords[i_sc].dimension_list[0]))
                     if (d_slice.error is not None):
                         if (type(d_slice.error) is list):
-                            n = err_flat1.shape[summing_coords[i_sc].dimension_list[0]]
+                            n = err_flat_1.shape[summing_coords[i_sc].dimension_list[0]] #TYPO err_flat1 --> err_flat_1
                             err = np.maximum(err_flat_1,err_flat_2)
                             d_slice.error = np.sqrt(np.sum(err**2,
                                                            axis=summing_coords[i_sc].dimension_list[0]) / n +\
@@ -2343,7 +2344,7 @@ class DataObject:
                     # in the flattened dimension indexes only one element
                     index = [np.arange(x) for x in d_flat.shape]
                     index[summing_coords[i_sc].dimension_list[0]] = np.arange(1)
-                    mx_ind = list(submatrix_index(d_flat.shape,index))
+                    mx_ind = list(flap.tools.submatrix_index(d_flat.shape,index))
                     # Replacing the indexing matrix with the index matrix to the selected elements
                     mx_ind[summing_coords[i_sc].dimension_list[0]] = minmax_ind
                     d_slice.data = np.squeeze(d_flat[tuple(mx_ind)])
@@ -2384,8 +2385,8 @@ class DataObject:
                              or (not check_coord.mode.equidistant)):
                             # In all these cases we must get the data for the selected elements
                             # Getting coordinate data in the unified dims
-                            unified_dims = unify_list(check_coord.dimension_list,
-                                                          summing_coords_orig[i_sc].dimension_list)
+                            unified_dims = flap.tools.unify_list(check_coord.dimension_list,
+                                                                 summing_coords_orig[i_sc].dimension_list)
                             ind = [0]*len(original_shape)
                             for d in unified_dims:
                                 ind[d] = ...
@@ -2396,7 +2397,7 @@ class DataObject:
                             # indices of summing dimensions in unified dimension list
                             summing_in_unified = [unified_dims.index(d) for d in summing_coords_orig[i_sc].dimension_list]
                             data = np.squeeze(data)
-                            data, dims = flatten_multidim(data, summing_in_unified)
+                            data, dims = flap.tools.flatten_multidim(data, summing_in_unified)
                             if ((summing_description[i_sc] == 'Sum') \
                                  or (summing_description[i_sc] == 'Mean')):
                                 if (not check_coord.isnumeric()):
@@ -2499,9 +2500,9 @@ class DataObject:
                                 check_coord.start += (original_shape[check_coord.dimension_list[i_dim]]-1) / 2 \
                                                      * check_coord.step[i_dim]
                             # Removing steps related to summed dimensions
-                            check_coord.step = del_list_elements(check_coord.step, common_in_dimlist)
+                            check_coord.step = flap.tools.del_list_elements(check_coord.step, common_in_dimlist)
                         # For both equidistant and non-equidistant removing summed dimensions from list
-                        orig_dimension_list = copy.deepcopy(check_coord.dimension_list)
+                        orig_dimension_list = copy.deepcopy(check_coord.dimension_list) #UNUSED
                         for d in common_dims:
                             i = check_coord.dimension_list.index(d)
                             del check_coord.dimension_list[i]
@@ -2852,13 +2853,13 @@ class DataObject:
         int_start_ind = sel_int_ind[0]
         int_end_ind = sel_int_ind[1]
         int_start = sel_int[0]
-        int_end = sel_int[1]
+        int_end = sel_int[1]                                                    #UNUSED
 
         if (type(intervals) is dict):
             sel_coordinate = list(intervals.keys())[0]
             sel_coord_obj = self.get_coordinate_object(_coordinate)
         else:
-            sel_coordinate = _coordinate
+            sel_coordinate = _coordinate                                        #UNUSED
             sel_coord_obj = coord_obj
 
 
@@ -2977,7 +2978,7 @@ class DataObject:
             f_low = _options['f_low']
             if (f_low is None):
                 raise ValueError("Missing f_low parameter for highpass filter.")
-        elif (filter_type == None):
+        elif (filter_type is None):
             pass
         else:
             ValueError("Invalid filter type.")
@@ -3005,7 +3006,7 @@ class DataObject:
         int_start_ind = sel_int_ind[0]
         int_end_ind = sel_int_ind[1]
         int_start = sel_int[0]
-        int_end = sel_int[1]
+        int_end = sel_int[1]                                                    #UNUSED
 
         if (type(intervals) is dict):
             sel_coordinate = list(intervals.keys())[0]
@@ -3100,8 +3101,8 @@ class DataObject:
                 fn = 1./coord_obj.step[0] / 2
                 wp = [(f_low + f_low * steep / 2) / fn, (f_high - f_high * steep / 2) / fn]
                 ws = [(f_low - f_low * steep / 2) / fn, (f_high + f_high * steep / 2) / fn]
-                gpass = 3
-                gstop = 40
+                gpass = 3                                                       #UNUSED
+                gstop = 40                                                      #UNUSED
                 b, a = signal.iirdesign(wp,ws,loss,attenuation,ftype=design,output='ba')
                 start_data = np.take(d.data, [int_start_ind[i_int]], axis=coord_obj.dimension_list[0])
                 start_data = np.squeeze(start_data)
@@ -3153,7 +3154,7 @@ class DataObject:
         try:
             f.close()
         except Exception:
-            raise e
+            raise ValueError("Cannot close file "+filename)
 
     def __add__(self, d1):
         """ Addition for DataObject
@@ -3299,17 +3300,17 @@ class DataObject:
                 err = None
             else:
                 if (type(self.error) is list):
-                    err1 = sqrt(self.error[0] ** 2 + self.error[1] ** 2)
+                    err1 = np.sqrt(self.error[0] ** 2 + self.error[1] ** 2)
                 else:
                     err1 = self.error
                 if (type(d1.error) is list):
-                    err2 = sqrt(d1.error[0] ** 2 + d1.error[1] ** 2)
+                    err2 = np.sqrt(d1.error[0] ** 2 + d1.error[1] ** 2)
                 else:
                     err2 = d1.error
                 err = np.sqrt(err1 ** 2 * err2 ** 2 
                               + self.data ** 2 * err2 ** 2
                               + d1.data **2 * err1 ** 2)
-            new_unit = Unit()
+            new_unit = flap.coordinate.Unit()
             if (d1.data_unit.name == self.data_unit.name):
                 new_unit.name = self.data_unit.name+'^2'
             else:
@@ -3675,7 +3676,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
             c = d.coordinates[i]
             s += c.unit.title()
             s += "(Dims:"
-            if (len(c.dimension_list) is not 0):
+            if (len(c.dimension_list) != 0):
                 try:
                     c.dimension_list.index(None)
                     print("None in dim. list!")
@@ -3690,7 +3691,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
                     shape = [c.shape]
                 else:
                     shape = c.shape
-                if (len(shape) is not 0):
+                if (len(shape) != 0):
                     for i1 in range(len(shape)):
                         s += str(shape[i1])
                         if (i1 != len(shape) - 1):
@@ -3710,7 +3711,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
                    if (i_step < len(c.step)-1):
                        s +=", "
             else:
-                if (len(c.dimension_list)) is not 0:
+                if (len(c.dimension_list)) != 0:
                     ind = [0] * len(data_shape)
                     for dim in c.dimension_list:
                         ind[dim] = ...
@@ -3774,13 +3775,18 @@ def get_data(data_source,
     if (type(coordinates) is dict):
         _coordinates = []
         for c_name in coordinates.keys():
-            _coordinates.append(Coordinate(name=c_name,c_range=coordinates[c_name]))
+            _coordinates.append(flap.coordinate.Coordinate(name=c_name,c_range=coordinates[c_name]))
     else:
         _coordinates = coordinates
 
     try:
-        d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates, data_source=None)
-    except TypeError:
+        if ("data_source" in locals()):
+            data_source_local=data_source
+        else:
+            data_source_local=None
+        d = f(exp_id, data_name=name, no_data=no_data, options=options, 
+              coordinates=_coordinates, data_source=data_source_local)
+    except KeyError:
         # Trying without data_source as this was not part of earlier version
         try:
             d = f(exp_id, data_name=name, no_data=no_data, options=options, coordinates=_coordinates)
@@ -3918,7 +3924,7 @@ def apsd(object_name,exp_id='*',output_name=None, coordinate=None, intervals=Non
 
 def cpsd(object_name, ref=None, exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
     """
-    Cross Power Spetctrum between two objects in flap storage. (ref can also be a data object.) 
+    Cross Power Spectrum between two objects in flap storage. (ref can also be a data object.) 
     This is a wrapper for DataObject.cpsd()
     If output name is set the CPSD object will be written back to the flap storage under this name.
     """
@@ -4306,7 +4312,3 @@ def error_value(object_name,exp_id='*',output_name=None, options=None):
         except Exception as e:
             raise e
     return d_out
-    
-    
-    
-

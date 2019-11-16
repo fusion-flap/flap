@@ -69,11 +69,11 @@ class FlapXml:
             section_index = len(self.section_elements) - 1
 
         if (comment is None):
-            child = ET.SubElement(s, element, attrib={"Value":value_str,
+            child = ET.SubElement(s, element, attrib={"Value":value_str,        #DEFINED BUT UNUSED
                                                       "Unit":unit_str,
                                                       "Type":type_str,})
         else:
-            child = ET.SubElement(s, element, attrib={"Value":value_str,
+            child = ET.SubElement(s, element, attrib={"Value":value_str,        #DEFINED BUT UNUSED
                                                       "Unit":unit_str,
                                                       "Type":type_str,
                                                       "Comment":comment})
@@ -121,10 +121,5 @@ def test_write():
 
 
 def test_read():
-    m = FLAPXml()
+    m = FlapXml()
     m.read_file("xx.xml")
-
-
-
-
-

@@ -31,11 +31,11 @@ Created on Thu Jan 17 10:29:56 2019
 """
 
 import math
-import os.path
-import random
+#import os.path                                                                 #UNUSED
+#import random                                                                  #UNUSED
 
 import flap
-from decimal import *
+#from decimal import *
 import numpy as np
 import copy
 
@@ -65,7 +65,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             'Length': Length in second. The sample rate is 1 MHz
             'Samplerate': Sample rate [Hz]
     """
-    if (data_source is None):
+    if (data_source is None ):
         data_source = 'TESTDATA'
     
     # creating a list of signal names
@@ -115,23 +115,23 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
     
     read_range = None
     read_samplerange = None
-    # Checking whether time or sample range selection is present
+    # Checking whether time or sample range selection == present
     if (coordinates is not None):
-        if (type(coordinates) is not list):
+        if (type(coordinates) != list):
             _coordinates = [coordinates]
         else:
             _coordinates = coordinates
         for coord in _coordinates:
-            if (type(coord) is not flap.Coordinate):
+            if (type(coord) != flap.Coordinate):
                 raise TypeError("Coordinate description should be flap.Coordinate.")
-            if (coord.unit.name is 'Time'):
+            if (coord.unit.name == 'Time'):
                 if (coord.mode.equidistant):
                     read_range = [float(coord.c_range[0]),
                                   float(coord.c_range[1])]
                 else:
                     raise NotImplementedError("Non-equidistant Time axis is not implemented yet.")
                 break
-            if coord.unit.name is 'Sample':
+            if coord.unit.name == 'Sample':
                 if (coord.mode.equidistant):
                     read_samplerange = coord.c_range
                 else:
@@ -139,7 +139,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                 break
 
     # If no sample or time range is given read all data
-    if ((read_range is None) and (read_samplerange is None)):
+    if ((read_range is None ) and (read_samplerange is None )):
         read_samplerange = [0, meas_sample]
 
     # Determining the read_samplerange and read_range
@@ -160,13 +160,13 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
     ndata = int(read_samplerange[1]-read_samplerange[0]+1 )
 
     # Checking whether scaling to Volt is requested
-    if (_options['Scaling'] is 'Volt'):
+    if (_options['Scaling'] == 'Volt'):
         scale_to_volts = True
-        dtype = float
+        #dtype = float                                                          #UNUSED
         data_unit = flap.Unit(name='Signal', unit='Volt')
     else:
         scale_to_volts = False
-        dtype = np.int16
+        #dtype = np.int16                                                       #UNUSED
         data_unit = flap.Unit(name='Signal', unit='Digit')
 
     if (not test_image):
@@ -189,7 +189,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             rows_act[r-1] += 1
             columns_act[c-1] += 1
     
-        if (len(signal_select) is 1):
+        if (len(signal_select) == 1):
             twodim = False
         else:
             # Determining whether the channel matrix fills a rectangular area
@@ -201,23 +201,23 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                       and (np.min(columns_act[ind_columns_act_n0])
                            == np.max(columns_act[ind_columns_act_n0])))
             if ((len(ind_rows_act_n0)*len(ind_columns_act_n0) != len(signal_select)) \
-                or (len(ind_rows_act_n0) is 1) or (len(ind_columns_act_n0) is 1)):
+                or (len(ind_rows_act_n0) == 1) or (len(ind_columns_act_n0) == 1)):
                 twodim = False
     
         data_arr = None
     
-        if (len(signal_select) is not 1):
+        if (len(signal_select) != 1):
             if (twodim):
                 row_coords = np.arange(ROW_NUMBER, dtype=int)[ind_rows_act_n0]+1
                 column_coords = np.arange(COLUMN_NUMBER, dtype=int)[ind_columns_act_n0]+1
                 data_shape = (len(column_coords), len(row_coords), ndata)
-    #            if (no_data is False):
+    #            if (no_data == False):
     #                data_arr = np.empty(data_shape, dtype=dtype)
                 signal_matrix = np.empty((len(column_coords), len(row_coords)),
                                          dtype=np.dtype(object))
             else:
                 data_shape = (len(signal_select), ndata)
-     #           if (no_data is False):
+     #           if (no_data == False):
      #               data_arr = np.empty(data_shape, dtype=dtype)
         else:
             data_shape = [ndata]
@@ -234,7 +234,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                 amp = math.exp(-amp)
                 s = np.linspace(float(meas_timerange[0]), float(meas_timerange[1]),
                                 num=meas_sample)
-                if (type(_options['Frequency']) is list):
+                if (type(_options['Frequency']) == list):
                     flist = _options['Frequency']
                     f = float(flist[1] - flist[0])/(len(signal_select)-1)*i + flist[0]
                 else:
@@ -259,34 +259,36 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
     
             # The actual signal read. Excepts are not necessary here only if
             # file read is involved.
-            if (len(signal_select) is 1):
+            if (len(signal_select) == 1):
                 try:
-                    if (no_data is False):
+                    if (no_data == False):
                         data_arr = signal[int(read_samplerange[0]):int(read_samplerange[1])+1]
                 except Exception as e:
+                    e
                     raise IOError("Error reading from file.")
             else:
                 try:
-                    if (no_data is False):
+                    if (no_data == False):
                         d = signal[int(read_samplerange[0]):int(read_samplerange[1])+1]
                 except Exception as e:
+                    e
                     raise IOError("Error reading from file.")
                 if (twodim):
-                     if (no_data is False):
-                        if (data_arr is None):
+                     if (no_data == False):
+                        if (data_arr is None ):
                              data_arr = np.empty(data_shape, dtype=d.dtype)
                         data_arr[list(column_coords).index(c),
                                  list(row_coords).index(r), :] = d
                      signal_matrix[list(column_coords).index(c),
                                   list(row_coords).index(r)] = signal_select[i]
                 else:
-                    if (no_data is False):
-                        if (data_arr is None):
+                    if (no_data == False):
+                        if (data_arr is None ):
                             data_arr = np.empty(data_shape, dtype=d.dtype)
                         data_arr[i, :] = d
         
         if (scale_to_volts):
-            if (no_data is False):
+            if (no_data == False):
                 data_arr = data_arr*meas_ADC_step
     
         # Adding coordinates: Sample, Time, Signal name, Column, Row
@@ -297,7 +299,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
         if (twodim):
             dimension_list = [2]
         else:
-            if (len(signal_select) is 1):
+            if (len(signal_select) == 1):
                 dimension_list = [0]
             else:
                 dimension_list = [1]
@@ -324,7 +326,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             shape = signal_matrix.shape
         else:
             value = signal_select
-            if (len(signal_select) is 1):
+            if (len(signal_select) == 1):
                 dimension_list = []
                 shape = []
             else:
@@ -345,7 +347,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             shape = len(values)
         else:
             values = column_list
-            if (len(values) is 1):
+            if (len(values) == 1):
                 dimension_list = []
                 shape = []
             else:
@@ -365,7 +367,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             shape = len(values)
         else:
             values = row_list
-            if (len(values) is 1):
+            if (len(values) == 1):
                 dimension_list = []
                 shape = shape
             else:
@@ -379,7 +381,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                                                  dimension_list=dimension_list))
     
         data_title = "Test data"
-        if (len(signal_select) is 1):
+        if (len(signal_select) == 1):
             data_title += " ("+signal_select[0]+")"
         d = flap.DataObject(data_array=data_arr, data_unit=data_unit,
                             coordinates=coord, exp_id=exp_id,
@@ -387,7 +389,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
     
     else:
         # VIDEO
-        if (no_data is False):
+        if (no_data == False):
             f = float(_options['Frequency'])
             t = np.arange(ndata,dtype=float) * meas_sampletime
             amp = np.sin(t * 4.5 * math.pi * f) ** 2 * 3000 + 1000
@@ -480,10 +482,10 @@ def add_coordinate(data_object,
                 # Creating the dimension list of the new coordinate which will be the combined
                 # list of Row and Column
                 dimension_list = copy.copy(c_column.dimension_list)
-                if (type(dimension_list) is not list):
+                if (type(dimension_list) != list):
                     dimension_list = [dimension_list]
                 dimlist_row = copy.copy(c_row.dimension_list)
-                if (type(dimlist_row) is not list):
+                if (type(dimlist_row) != list):
                     dimlist_row = [dimlist_row]
                 for d in dimlist_row:
                     try:
@@ -492,8 +494,8 @@ def add_coordinate(data_object,
                         dimension_list.append(d)
                 # Creating an index list where these dimensions are fully indexed, the rest is 0
                 index = [0]*len(data_object.shape)
-                if (len(dimension_list) is not 0):
-                    # If at least one of the coordinates is not scalar
+                if (len(dimension_list) != 0):
+                    # If at least one of the coordinates != scalar
                     dimension_list.sort()
                     for i in dimension_list:
                         index[i] = ...
@@ -503,7 +505,7 @@ def add_coordinate(data_object,
                     column, column_l, column_h = data_object.coordinate('Column',index=index)
                 except Exception as e:
                     raise e
-                if (len(dimension_list) is not 0):
+                if (len(dimension_list) != 0):
                     sh = []
                     for i in dimension_list:
                         sh.append(data_object.shape[i])
@@ -515,7 +517,7 @@ def add_coordinate(data_object,
                 alpha_rad = alpha/180.*math.pi
                 Device_x = xr * math.cos(alpha_rad) - zr * math.sin(alpha_rad)
                 Device_z = xr * math.sin(alpha_rad) + zr * math.cos(alpha_rad)
-                if (Device_x.size is 1):
+                if (Device_x.size == 1):
                     shape = []
                 else:
                     shape = Device_x.shape
@@ -535,7 +537,7 @@ def add_coordinate(data_object,
 
 
 def register(data_source=None):
-    if (data_source is None):
+    if (data_source is None ):
         data_source = 'TESTDATA'
     flap.register_data_source('TESTDATA',
                           get_data_func=testdata_get_data,

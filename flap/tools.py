@@ -10,7 +10,8 @@ Tools for the FLAP module
 import copy
 import numpy as np
 import fnmatch
-from decimal import *
+from flap import VERBOSE
+#from decimal import Decimal                                                    #UNUSED
 
 def del_list_elements(input_list, indices):
     """ delete elements from a list
@@ -55,7 +56,7 @@ def select_signals(signal_list, signal_spec):
     else:
         _signal_spec = signal_spec
 
-    if ((len(_signal_spec) is 0) or (signal_list is [])):
+    if ((len(_signal_spec) == 0) or (signal_list == [])):
         raise ValueError("No signal list or signal specification.")
 
     select_list = []
@@ -179,6 +180,9 @@ def submatrix_index(mx_shape, index):
             if (j != i):
                 ind = np.repeat(ind,index[j].size,j)
         index_arrays.append(ind)
+
+#    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
+#        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT
     return tuple(index_arrays)
 
 
@@ -425,8 +429,24 @@ def grid_to_box(xdata,ydata):
     
     return xbox,ybox
 
-def time_unit_translation(time_unit=None):
-    _time_unit=time_unit.lower()
+def time_unit_translation(time_unit=None,max_value=None):
+    if (str(type(time_unit)) == 'str' or 
+       str(type(time_unit)) == "<class 'numpy.str_'>"):
+        _time_unit=time_unit.lower()
+    else:
+        _time_unit=time_unit
+    if ((_time_unit == ' ') or (_time_unit is None)) and (max_value is not None):
+        #Raise awareness:
+        if VERBOSE:
+            print('Time unit: \''+str(_time_unit)+'\'')
+            print('Time unit translation based on values only works for shots under 1000s.')
+        value_translation=[[1,1e3,1e6,1e9,1e12],
+                           ['s','ms','us','ns','ps']]
+        for i in range(len(value_translation[0])-1):
+            if (max_value > value_translation[0][i] and max_value < value_translation[0][i+1]):
+                _time_unit=value_translation[1][i]
+            elif max_value > value_translation[0][4]:
+                _time_unit=value_translation[1][4]
     translation={'seconds':1,
                  'second':1,
                  's':1,
@@ -441,13 +461,20 @@ def time_unit_translation(time_unit=None):
                  'ns':1e-9,
                  'picoseconds':1e-12,
                  'picosecond':1e-12,
-                 'ps':1e-12,
+                 'ps':1e-12
                  }
     if (_time_unit in translation.keys()):
         return translation[_time_unit]
     else:
-        print(_time_unit+' was not found in the translation. Returning 1.')
-        return 1
+        if type(_time_unit) is not str:
+            backwards_translation=[[1,1e-3,1e-6,1e-9,1e-12],
+                                   ['s','ms','us','ns','ps']]
+            for i in range(len(backwards_translation[0])):
+                if backwards_translation[0][i] == _time_unit:
+                    return backwards_translation[1][i]
+        else:
+            print(_time_unit+' was not found in the translation. Returning 1.')
+            return 1
     
 def spatial_unit_translation(spatial_unit=None):
     _spatial_unit=spatial_unit.lower()
@@ -472,6 +499,91 @@ def spatial_unit_translation(spatial_unit=None):
     else:
         print(_spatial_unit+' was not found in the translation. Returning 1.')
         return 1
+    
+def unit_conversion(original_unit=None,
+                    new_unit=None
+                    ):
+    
+    #The code provides a unit conversion between any unit types for most
+    #of the prefixes. 
+    #There are certain limitations:
+    #   The unit compatibility is not checked (e.g. mm-->MegaHertz is allowed)
+    
+    known_conversions_full={'Terra':1e12,
+                            'Giga':1e9,
+                            'Mega':1e6,
+                            'kilo':1e3,
+                            'milli':1e-3,
+                            'micro':1e-6,
+                            'nano':1e-9,
+                            'pico':1e-12,
+                            }
+    
+    known_conversions_short={'T':1e12,
+                             'G':1e9,
+                             'M':1e6,
+                             'k':1e3,
+                             'm':1e-3,
+                             'u':1e-6,
+                             'n':1e-9,
+                             'p':1e-12
+                             }
+    
+    original_unit_translation=None
+    new_unit_translation=None
+    
+    #Trying to find the long unit names in the inputs
+    
+    for keys_full in known_conversions_full:
+        if keys_full in original_unit:
+            original_unit_translation=known_conversions_full[keys_full]
+        if keys_full in new_unit:
+            new_unit_translation=known_conversions_full[keys_full]
+            
+    if original_unit_translation is None:
+        if len(original_unit) == 1 or len(original_unit) > 3 : # SI units are longer than 3 if using the full name
+            original_unit_translation=1.
+        else:
+            for keys_short in known_conversions_short:
+                if keys_short == original_unit[0]:
+                    original_unit_translation=known_conversions_short[keys_short]
+                    
+    if new_unit_translation is None:                    
+        if len(new_unit) == 1 or len(new_unit) > 3:
+            new_unit_translation=1.
+        else:
+            for keys_short in known_conversions_short:
+                if keys_short == new_unit[0]:
+                    new_unit_translation=known_conversions_short[keys_short]
+                    
+    if original_unit_translation is None: 
+        print('Unit translation cannot be done for the original unit. Returning 1.')
+        if VERBOSE:
+            if len(original_unit) > 3:
+                print('Known conversion units are:')
+                print(known_conversions_full)
+            else:
+                print('Known conversion units are:')
+                print(known_conversions_short)
+        original_unit_translation=1.
+        
+    if new_unit_translation is None:
+        print('Unit translation cannot be done for the new unit. Returning 1.')
+        if VERBOSE:
+            if len(original_unit) > 3:
+                print('Known conversion units are:')
+                print(known_conversions_full)
+            else:
+                print('Known conversion units are:')
+                print(known_conversions_short)
+            new_unit_translation=1.
+        
+    return original_unit_translation/new_unit_translation
+            
+    
+        
+        
+    
 
 #import matplotlib.pyplot as plt
 
