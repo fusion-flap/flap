@@ -126,7 +126,7 @@ class Intervals:
             if (ind.size != 0):
                 range_stops[ind] = limits[1]
 
-        if ((np.amin(range_starts) < limits[0]) or (np.amax(range_starts) > limits[1])):
+        if ((np.amax(range_stops) < limits[0]) or (np.amin(range_starts) > limits[1])):
             raise RuntimeError("Internal error: selected intervals outside of limits.")
         return range_starts, range_stops
 
@@ -600,6 +600,9 @@ class Coordinate:
         options: Dictionary with options for processing:
                    'Interpolation': 'Linear' (default, for non-equidistant axis when values shape is 
                                               different from data shape)
+                   'Change only': Return only the data for those dimensions where this coordinate changes. 
+                                  E.g. if it changes only along one dimension the output array will have 1 element
+                                  in all other dimensions.
 
         Return value:
             values, value_range_low, value range_high

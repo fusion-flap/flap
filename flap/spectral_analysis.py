@@ -173,8 +173,12 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
     return flap.coordinate.Intervals(proc_interval_start, proc_interval_end),  \
            flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end),
 
+def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=False):
+    """ This function makes the _trend_removal internal function public
+    """
+    return _trend_removal(d, ax, trend, x=x, return_trend=return_trend, return_poly=return_poly)
 
-def _trend_removal(d,ax,trend,x=None):
+def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
     """
     Removes the trend from the data. Operates on one axis between two indices of the data array.
     INPUT:
@@ -187,11 +191,22 @@ def _trend_removal(d,ax,trend,x=None):
                 Lists:
                     ['Poly', n]: Fit an n order polynomial to the data and subtract.
         x: X axis. If not used equidistant will be assumed.
+        return_trend: If True the trend data is returned
+        return_poly: Return polynomial coefficients for poly trend removal. The coefficients will
+                     be in axis ax.
     RETURN value:
-        None. The input array is modified.
+        If return_trend == True the trend data is returned
+        If (return_poly == True) and polyfit then return polynomial parameters
+        Otherwise return None
+        The input array is modified.
     """
     if (trend is None):
         return
+    if ((type(trend) is list) and (trend[0] == 'Poly')):
+        pass
+    else:
+        if (return_poly):
+            raise ValueError("Polynomial trend fit parameters can be returned only for polynomial trend removal.")
     if (type(trend) is str):
         if (trend == 'Mean'):
             d[:] = signal.detrend(d, axis=ax, type='constant')
@@ -204,9 +219,15 @@ def _trend_removal(d,ax,trend,x=None):
                 order = int(trend[1])
             except ValueError:
                 raise ValueError("Bad order in polynomial trend removal.")
-            # This is a siple solution but not very effective.
+            # This is a simple solution but not very effective.
+            # Flattens all dimensions except x and handles all functions one-by-one
+            # Finally rearranges the data back to the original shape
             if (x is None):
-                x = np.arange(d.shape[ax],dtype=float)
+                _x = np.arange(d.shape[ax],dtype=float)
+            else:
+                _x = copy.deepcopy(x)
+            if ((_x.dtype.kind == 'i') or (_x.dtype.kind == 'u')):
+                _x = np.asarray(_x,'float')
             if (d.ndim > 1):
                 if (ax != 0):
                     d = np.swapaxes(d,ax,0)
@@ -214,22 +235,41 @@ def _trend_removal(d,ax,trend,x=None):
                 if (d.ndim > 2):
                     new_shape = tuple([d.shape[0], d.size // d.shape[0]])
                     d = d.reshape(new_shape,order='F')
+                    if (return_trend):
+                        trend_data = np.ndarray(new_shape,dtype=d.dtype)
                 else:
                     new_shape = d.shape
                 xx = np.zeros((new_shape[0],order), dtype=float)
                 for i in range(order):
-                    xx[:,i] = x ** (i + 1)
-                p = np.polynomial.polynomial.polyfit(x,d,order)
+                    xx[:,i] = _x ** (i + 1)
+                p = np.polynomial.polynomial.polyfit(_x,d,order)
                 for i in range(new_shape[1]):
                     tr = p[0,i]
                     for j in range(order):
                         tr = tr + p[j + 1, i] * xx[:,j]
                     d[:,i] = d[:,i] - tr.astype(d.dtype)
+                    if (return_trend):
+                        trend_data[:,i] = tr.astype(d.dtype)
                 if (len(orig_shape) > 2):
                    d = d.reshape(orig_shape,order='F')
+                   if (return_trend):
+                       trend_data = trend_data.reshape(orig_shape,order='F')
+                   if (return_poly):
+                       p_shape = list(orig_shape)
+                       p_shape[0] = p.shape[0]
+                       p = p.reshape(p_shape,order='F')
                 if (ax != 0):
                     d = np.swapaxes(d,ax,0)
-                return
+                    if (return_trend):
+                        trend_data = np.swapaxes(trend_data,ax,0)
+                    if (return_poly):
+                        p = np.swapaxes(p,ax,0)
+                if (return_trend):
+                    return trend_data
+                elif(return_poly):
+                    return p
+                else:
+                    return
             else:
                 p = np.polynomial.polynomial.polyfit(x,d,order)
                 d = d - p[0]
