@@ -5,6 +5,10 @@ Created on Thu Dec  6 22:11:28 2018
 @author: Sandor Zoletnik  (zoletnik.sandor@wigner.mta.hu)
 
 Example/test programs for FLAP.
+Will run various tests and print/plot the result. 
+As default all testst will be run. 
+If you don't want all tests look for "test_all = True" and change True to False
+Below that you can set each test step to True/False to run them separately.
 
 """
 
@@ -16,6 +20,7 @@ from scipy import signal
 import copy
 import time
 import math
+from tkinter import Tk  # Needed for getting the screen size
 
 # Importing the FLAP
 import flap
@@ -627,7 +632,7 @@ def test_ccf():
     flap.plot('CCF_ref',slicing={'Row (Ref)':3,'Column (Ref)':3,'Column':3},axes=['Time lag'],plot_type='multi xy')
 
 def test_image():
-#    plt.close('all')
+    plt.close('all')
     print()
     print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
@@ -701,10 +706,14 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = False
+test_all = True
 
 # Running tests
 plt.close('all')
+
+root = Tk()
+dpi = plt.rcParams["figure.dpi"]
+plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.7/dpi, root.winfo_screenheight()*0.7/dpi]
 
 if (False or test_all):
     test_storage()
@@ -748,7 +757,7 @@ if (False or test_all):
     test_detrend()
     plt.pause(0.05)
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_apsd()
     show_plot()
     wait_for_key()
@@ -760,7 +769,7 @@ if (False or test_all):
     test_cpsd()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_ccf()
 if (False or test_all):
     test_image()
