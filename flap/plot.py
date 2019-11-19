@@ -525,7 +525,6 @@ class PlotAnimation:
             if (len(self.xdata.shape) == 3 and len(self.ydata.shape) == 3):
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata[time_index]*self.axes_unit_conversion[0],
                                                       self.ydata[time_index]*self.axes_unit_conversion[1]) #Same issue, time is not necessarily the first flap.coordinate.
-                print('lofasz')
             else:
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],
                                                       self.ydata*self.axes_unit_conversion[1])
