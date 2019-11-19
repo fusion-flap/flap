@@ -183,6 +183,7 @@ def submatrix_index(mx_shape, index):
 
 #    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
 #        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT
+        
     return tuple(index_arrays)
 
 
@@ -430,6 +431,16 @@ def grid_to_box(xdata,ydata):
     return xbox,ybox
 
 def time_unit_translation(time_unit=None,max_value=None):
+    
+    """
+    This tool returns the numerical pre-fix of the time_unit. It is almost
+    obsolate due to the existance of the methos named unit_conversion, but
+    this script can provide backwards conversion (used by flap_mdsplus.py)
+    time_unit: can be a string e.g. ms or a number e.g. 1e-3
+    max_value: returns a suspected time unit based on this input
+                e.g.: max_value=1000. 
+    """
+    
     if (str(type(time_unit)) == 'str' or 
        str(type(time_unit)) == "<class 'numpy.str_'>"):
         _time_unit=time_unit.lower()
@@ -440,7 +451,7 @@ def time_unit_translation(time_unit=None,max_value=None):
         if VERBOSE:
             print('Time unit: \''+str(_time_unit)+'\'')
             print('Time unit translation based on values only works for shots under 1000s.')
-        value_translation=[[1,1e3,1e6,1e9,1e12],
+        value_translation=[[0.,1e3,1e6,1e9,1e12],
                            ['s','ms','us','ns','ps']]
         for i in range(len(value_translation[0])-1):
             if (max_value > value_translation[0][i] and max_value < value_translation[0][i+1]):
@@ -475,30 +486,6 @@ def time_unit_translation(time_unit=None,max_value=None):
         else:
             print(_time_unit+' was not found in the translation. Returning 1.')
             return 1
-    
-def spatial_unit_translation(spatial_unit=None):
-    _spatial_unit=spatial_unit.lower()
-    translation={'meters':1,
-                 'meter':1,
-                 'm':1,
-                 'millimeters':1e-3,
-                 'millimeter':1e-3,
-                 'mm':1e-3,
-                 'micrometers':1e-6,
-                 'micrometer':1e-6,
-                 'um':1e-6,
-                 'nanometers':1e-9,
-                 'nanometer':1e-9,
-                 'nm':1e-9,
-                 'picometers':1e-12,
-                 'picometer':1e-12,
-                 'pm':1e-12,
-                 }
-    if (_spatial_unit in translation.keys()):
-        return translation[_spatial_unit]
-    else:
-        print(_spatial_unit+' was not found in the translation. Returning 1.')
-        return 1
     
 def unit_conversion(original_unit=None,
                     new_unit=None
@@ -541,7 +528,7 @@ def unit_conversion(original_unit=None,
             new_unit_translation=known_conversions_full[keys_full]
             
     if original_unit_translation is None:
-        if len(original_unit) == 1 or len(original_unit) > 3 : # SI units are longer than 3 if using the full name
+        if ((len(original_unit) == 1) or (len(original_unit) > 3)): # SI units are longer than 3 if using the full name
             original_unit_translation=1.
         else:
             for keys_short in known_conversions_short:
@@ -549,7 +536,7 @@ def unit_conversion(original_unit=None,
                     original_unit_translation=known_conversions_short[keys_short]
                     
     if new_unit_translation is None:                    
-        if len(new_unit) == 1 or len(new_unit) > 3:
+        if ((len(new_unit) == 1) or (len(new_unit) > 3)):
             new_unit_translation=1.
         else:
             for keys_short in known_conversions_short:
@@ -557,44 +544,29 @@ def unit_conversion(original_unit=None,
                     new_unit_translation=known_conversions_short[keys_short]
                     
     if original_unit_translation is None: 
-        print('Unit translation cannot be done for the original unit. Returning 1.')
+        print('Unit translation cannot be done for the original unit, '+original_unit+'. Returning 1.')
         if VERBOSE:
             if len(original_unit) > 3:
                 print('Known conversion units are:')
                 print(known_conversions_full)
+                print('\n')
             else:
                 print('Known conversion units are:')
                 print(known_conversions_short)
+                print('\n')
         original_unit_translation=1.
         
     if new_unit_translation is None:
-        print('Unit translation cannot be done for the new unit. Returning 1.')
+        print('Unit translation cannot be done for the new unit, '+new_unit+'. Returning 1.')
         if VERBOSE:
             if len(original_unit) > 3:
                 print('Known conversion units are:')
                 print(known_conversions_full)
+                print('\n')
             else:
                 print('Known conversion units are:')
                 print(known_conversions_short)
+                print('\n')
             new_unit_translation=1.
         
     return original_unit_translation/new_unit_translation
-            
-    
-        
-        
-    
-
-#import matplotlib.pyplot as plt
-
-#plt.clf()
-#ydata, xdata = np.meshgrid(np.arange(10),np.arange(20))
-#xdata = xdata.astype(float)
-#ydata = ydata.astype(float)
-#xdata += ydata*0.1
-#ydata += xdata*0.2
-#xbox, ybox = grid_to_box(xdata,ydata)
-#data =  (xdata + ydata)
-#plt.pcolormesh(xbox,ybox,np.transpose(data),cmap='Greys')
-#plt.scatter(xdata.flatten(), ydata.flatten())
-
