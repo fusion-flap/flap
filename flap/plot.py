@@ -136,7 +136,7 @@ class PlotAnimation:
     
     def __init__(self, ax_list, axes, axes_unit_conversion, d, xdata, ydata, tdata, xdata_range, ydata_range,
                  cmap_obj, contour_levels, coord_t, coord_x,
-                 coord_y, cmap, options, xrange, yrange,
+                 coord_y, cmap, options, overplot_options, xrange, yrange,
                  zrange, image_like, plot_options, language, plot_id, gs):
    
         self.ax_list = ax_list
@@ -155,6 +155,7 @@ class PlotAnimation:
         self.image_like = image_like
         self.language = language
         self.options = options
+        self.overplot_options = overplot_options
         self.pause = False
         self.plot_id = plot_id
         self.plot_options = plot_options        
@@ -266,7 +267,7 @@ class PlotAnimation:
         else:
             if (len(self.xdata.shape) == 3 and len(self.ydata.shape) == 3):
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata[time_index]*self.axes_unit_conversion[0],
-                                                      self.ydata[time_index]*self.axes_unit_conversion[1]) #Same issue, time is not necessarily the first flap.coordinate.
+                                                      self.ydata[time_index]*self.axes_unit_conversion[1])
             else:
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],
                                                       self.ydata*self.axes_unit_conversion[1])
@@ -287,166 +288,7 @@ class PlotAnimation:
             cbar.set_label(self.d.data_unit.name)
 #EFIT overplot feature implementation:
             #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
-            #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.
-        if ('EFIT options' in self.options and self.options['EFIT options'] is not None):
-            
-            default_efit_options={'Plot limiter': None,
-                                  'Limiter X': None,
-                                  'Limiter Y': None,
-                                  'Limiter 2D': None,
-                                  'Limiter color': 'white',
-                                  'Plot separatrix': None,
-                                  'Separatrix X': None,
-                                  'Separatrix Y': None,
-                                  'Separatrix 2D': None,
-                                  'Separatrix color': 'red',
-                                  'Plot flux': None,
-                                  'Flux XY': None,
-                                  'Flux nlevel': 51}
-            
-            self.efit_options=flap.config.merge_options(default_efit_options,self.options['EFIT options'],data_source=self.d.data_source)
-            self.efit_data={'limiter':   {'Time':[],'Data':[]},
-                            'separatrix':{'Time':[],'Data':[]},
-                            'flux':      {'Time':[],'Data':[]}}
-            
-            for setting in ['limiter','separatrix']:
-                if (self.efit_options['Plot '+setting]):
-                    if (((self.efit_options[setting.capitalize()+' X']) and
-                         (self.efit_options[setting.capitalize()+' Y' ])) or
-                         (self.efit_options[setting.capitalize()+' 2D'])):
-                    
-                        if ((self.efit_options[setting.capitalize()+' X']) and
-                            (self.efit_options[setting.capitalize()+' Y'])):
-                            try:
-                                R_object=flap.get_data_object_ref(self.efit_options[setting.capitalize()+' X'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' X']+" cannot be read.")
-                            try:
-                                Z_object=flap.get_data_object_ref(self.efit_options[setting.capitalize()+' Y'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' Y']+" cannot be read.")
-                            if (len(R_object.data.shape) != 2 or len(Z_object.data.shape) != 2):
-                                raise ValueError("The "+setting.capitalize()+' Y'+" data is not 1D. Use 2D or modify data reading.")
-                           
-                            self.efit_data[setting]['Data']=np.asarray([R_object.data,Z_object.data])
-                        elif (self.efit_options[setting.capitalize()+' 2D']):
-                            try:
-                                R_object=flap.get_data_object_ref(self.efit_options[setting.capitalize()+' 2D'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError(setting.capitalize()+'  2D data is not available. FLAP data object needs to be read first.')  
-                            if R_object.data.shape[2] == 2:
-                                self.efit_data[setting]['Data']=np.asarray([R_object.data[:,:,0],R_object.data[:,:,1]])
-                            else:
-                                raise ValueError(setting.capitalize()+' 2D data needs to be in the format [n_time,n_points,2 (xy)]')
-                        else:
-                            raise ValueError('Both '+setting.capitalize()+' X and'+
-                                             setting.capitalize()+' Y or '+
-                                             setting.capitalize()+' 2D need to be set.')
-                        #Finding the time coordinate
-                        for index_time in range(len(R_object.coordinates)):
-                            if (R_object.coordinates[index_time].unit.name == 'Time'):
-                                time_dimension_efit=R_object.coordinates[index_time].dimension_list[0]
-                                time_index_efit=index_time
-                        #Gathering the 1D time vector for the EFIT data        
-                        time_data=R_object.coordinate('Time')[0]
-                        coordinate_index=[0]*len(time_data.shape)
-                        coordinate_index[time_dimension_efit]=Ellipsis
-                        self.efit_data[setting]['Time']=time_data[tuple(coordinate_index)]
-                        
-                        #Gathering the spatial unit for translation
-                        for index_coordinate in range(len(self.d.coordinates)):
-                            if ((self.d.coordinates[index_coordinate].unit.name in self.axes) and
-                                (self.d.coordinates[index_coordinate].unit.name != 'Time')):
-                                spatial_coordinate_index=index_coordinate
-                        self.efit_data[setting]['Data'] *= flap.tools.unit_conversion(original_unit=R_object.data_unit.unit,
-                                                                                      new_unit=self.d.coordinates[spatial_coordinate_index].unit.unit) #Assumes that R and z data is in the same units
-                        
-                        #Time translation (usually ms vs s)
-                        for index_time in range(len(self.d.coordinates)):
-                            if (self.d.coordinates[index_time].unit.name == 'Time'):
-                                time_index_data=index_time                        
-                        
-                        self.efit_data[setting]['Time'] *= flap.tools.unit_conversion(original_unit=R_object.coordinates[time_index_efit].unit.unit,
-                                                                                      new_unit=self.d.coordinates[time_index_data].unit.unit)
-                    else:
-                        raise ValueError(setting.capitalize()+' keywords are not set for the data objects.')
-                        
-                    #Interpolating EFIT data for the time vector of the data    
-                    if ((self.efit_data[setting]['Data'] != []) and (self.efit_data[setting]['Time'] != [])):
-                        self.efit_data[setting]['Data resampled']=np.zeros([2,self.tdata.shape[0],self.efit_data[setting]['Data'].shape[2]])
-                        for index_xy in range(0,2):
-                            for index_coordinate in range(0,self.efit_data[setting]['Data'].shape[2]):
-                                self.efit_data[setting]['Data resampled'][index_xy,:,index_coordinate]=np.interp(self.tdata,self.efit_data[setting]['Time'],
-                                                                                                                 self.efit_data[setting]['Data'][index_xy,:,index_coordinate])
-                                
-            if (self.efit_options['Plot flux']):
-                try:
-                    flux_object=flap.get_data_object(self.efit_options['Flux XY'],exp_id=self.d.exp_id)
-                except:
-                    raise ValueError('Flux  XY data is not available. FLAP data object needs to be read first.')  
-                if len(flux_object.data.shape) != 3:
-                    raise ValueError('Flux XY data needs to be a 3D matrix (r,z,t), not necessarily in this order.')
-                self.efit_data['flux']['Data']=flux_object.data
-                                        
-                for index_time in range(len(flux_object.coordinates)):
-                    if (flux_object.coordinates[index_time].unit.name == 'Time'):
-                        time_dimension_efit=flux_object.coordinates[index_time].dimension_list[0]
-                        time_index_efit=index_time
-                
-                #Gathering the 1D time vector for the EFIT data        
-                time_data=flux_object.coordinate('Time')[0]
-                coordinate_index=[0]*len(time_data.shape)
-                coordinate_index[time_dimension_efit]=Ellipsis
-                self.efit_data['flux']['Time']=time_data[tuple(coordinate_index)]
-                
-                try:
-                    self.efit_data['flux']['X coord']=flux_object.coordinate(self.axes[0])[0]
-                    self.efit_data['flux']['Y coord']=flux_object.coordinate(self.axes[1])[0]
-                except:
-                    raise ValueError('The requested axes, '+self.axes[0]+' and '+self.axes[1]+', are not available in the given EFIT data.')
-                    
-                for index_coordinate in range(len(self.d.coordinates)):
-                    if ((self.d.coordinates[index_coordinate].unit.name in self.axes) and
-                        (self.d.coordinates[index_coordinate].unit.name != 'Time')):
-                        coordinate_index=index_coordinate
-                        
-                #Spatial unit translation (mm vs m usually)                
-                spat_conversion_coeff=flap.tools.unit_conversion(original_unit=flux_object.data_unit.unit,
-                                                                 new_unit=self.d.coordinates[coordinate_index].unit.unit)
-                
-                self.efit_data['flux']['X coord'] *= spat_conversion_coeff
-                self.efit_data['flux']['Y coord'] *= spat_conversion_coeff
-                
-                #Time translation (usually ms vs s)
-                for index_time in range(len(self.d.coordinates)):
-                    if (self.d.coordinates[index_time].unit.name == 'Time'):
-                        time_index_data=index_time   
-                
-                self.efit_data['flux']['Time'] *= flap.tools.unit_conversion(original_unit=flux_object.coordinates[time_index_efit].unit.unit,
-                                                                             new_unit=self.d.coordinates[time_index_data].unit.unit)
-                
-                #Interpolating EFIT data for the time vector of the data    
-                if ((self.efit_data['flux']['Data'] != []) and (self.efit_data['flux']['Time'] != [])):
-                    self.efit_data['flux']['Data resampled']=np.zeros([self.tdata.shape[0],
-                                                                       self.efit_data['flux']['Data'].shape[1], #THESE SHAPES NEED TO BE REVISED
-                                                                       self.efit_data['flux']['Data'].shape[2]])
-                    self.efit_data['flux']['X coord resampled']=np.zeros([self.tdata.shape[0],
-                                                                          self.efit_data['flux']['X coord'].shape[1],
-                                                                          self.efit_data['flux']['X coord'].shape[2]])
-                    self.efit_data['flux']['Y coord resampled']=np.zeros([self.tdata.shape[0],
-                                                                          self.efit_data['flux']['Y coord'].shape[1],
-                                                                          self.efit_data['flux']['Y coord'].shape[2]])
-                    
-                    for index_x in range(0,self.efit_data['flux']['Data'].shape[1]):  #THESE SHAPES NEED TO BE REVISED
-                        for index_y in range(0,self.efit_data['flux']['Data'].shape[2]):
-                            self.efit_data['flux']['Data resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
-                                                                                                  self.efit_data['flux']['Data'][:,index_x,index_y])
-                            self.efit_data['flux']['X coord resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
-                                                                                                     self.efit_data['flux']['X coord'][:,index_x,index_y])
-                            self.efit_data['flux']['Y coord resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
-                                                                                                     self.efit_data['flux']['Y coord'][:,index_x,index_y])
-                            
-            
+            #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.            
         if (self.xrange is not None):
             plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],
                      self.xrange[1]*self.axes_unit_conversion[0])
@@ -525,7 +367,6 @@ class PlotAnimation:
             if (len(self.xdata.shape) == 3 and len(self.ydata.shape) == 3):
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata[time_index]*self.axes_unit_conversion[0],
                                                       self.ydata[time_index]*self.axes_unit_conversion[1]) #Same issue, time is not necessarily the first flap.coordinate.
-                print('lofasz')
             else:
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],
                                                       self.ydata*self.axes_unit_conversion[1])
@@ -536,20 +377,22 @@ class PlotAnimation:
             except Exception as e:
                 raise e
             del im
-        if ('EFIT options' in self.options and self.options['EFIT options'] is not None):        
-            for setting in ['limiter','separatrix']:
-                if (self.efit_options['Plot '+setting]):
-                    self.ax_act.set_autoscale_on(False)
-                    im = plt.plot(self.efit_data[setting]['Data resampled'][0,it,:]*self.axes_unit_conversion[0],
-                                  self.efit_data[setting]['Data resampled'][1,it,:]*self.axes_unit_conversion[1],
-                                  color=self.efit_options[setting.capitalize()+' color'])
 
-            if (self.efit_options['Plot flux']):
-                self.ax_act.set_autoscale_on(False)
-                im = plt.contour(self.efit_data['flux']['X coord resampled'][it,:,:].transpose()*self.axes_unit_conversion[0],
-                                 self.efit_data['flux']['Y coord resampled'][it,:,:].transpose()*self.axes_unit_conversion[1],
-                                 self.efit_data['flux']['Data resampled'][it,:,:],
-                                 levels=self.efit_options['Flux nlevel'])
+        if (self.overplot_options is not None):
+            self.ax_act.set_autoscale_on(False)
+            for path_obj_keys in self.overplot_options['path']:
+                if self.overplot_options['path'][path_obj_keys]['Plot']:
+                    im = plt.plot(self.overplot_options['path'][path_obj_keys]['data']['Data resampled'][0,it,:]*self.axes_unit_conversion[0],
+                                  self.overplot_options['path'][path_obj_keys]['data']['Data resampled'][1,it,:]*self.axes_unit_conversion[1],
+                                  color=self.overplot_options['path'][path_obj_keys]['Color'])
+
+            for contour_obj_keys in self.overplot_options['contour']:
+                if self.overplot_options['contour'][contour_obj_keys]['Plot']:
+                    im = plt.contour(self.overplot_options['contour'][contour_obj_keys]['data']['X coord resampled'][it,:,:].transpose()*self.axes_unit_conversion[0],
+                                     self.overplot_options['contour'][contour_obj_keys]['data']['Y coord resampled'][it,:,:].transpose()*self.axes_unit_conversion[1],
+                                     self.overplot_options['contour'][contour_obj_keys]['data']['Data resampled'][it,:,:],
+                                     levels=self.overplot_options['contour'][contour_obj_keys]['nlevel'],
+                                     cmap=self.overplot_options['contour'][contour_obj_keys]['Colormap'])
                 
         if (self.xrange is not None):
             self.ax_act.set_xlim(self.xrange[0]*self.axes_unit_conversion[0],
@@ -931,7 +774,7 @@ def _plot(data_object,
         'Nan color': The color to use in image data plotting for np.nan (not-a-number) values
         'Interpolation': Interpolation method for image plot.
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
-        'EFIT options': Dictionary of EFIT plotting options:
+        'Overplot options': Dictionary of overplotting options (EFIT for now):
             'Plot separatrix': Set to plot the separatrix onto the video
                 'Separatrix X': Name of the flap.DataObject for the separatrix X data (usually R)
                 'Separatrix Y': Name of the flap.DataObject for the separatrix Y data (usually z)
@@ -963,7 +806,7 @@ def _plot(data_object,
                        'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
                        'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
                        'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi',
-                       'EFIT options':None, 'Prevent saturation':False, 'Plot units':None,
+                       'Video saving only':False, 'Overplot options':None, 'Prevent saturation':False, 'Plot units':None,
                        }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
     
@@ -1114,7 +957,140 @@ def _plot(data_object,
         for index_axes in range(len(axes)):
             if axes[index_axes] in _options['Plot units']:
                 axes_unit_conversion[index_axes]=unit_conversion_coeff[axes[index_axes]]
-            
+
+    #overplot_available_plot_types=['image', 'anim-image','contour','anim-contour','animation']
+    overplot_available_plot_types=['anim-image','anim-contour','animation']
+    overplot_options=None
+    if _options['Overplot options'] is not None:
+        if not plot_type in overplot_available_plot_types:
+            raise ValueError('Overplotting is not available in '+plot_type+' plotting.')
+        
+        default_overplot_options={'contour':{'NAME':{'Data object':None,
+                                                     'Plot':False,
+                                                     'Colormap':None,
+                                                     'nlevel':51,
+                                                     }},
+    
+                                  'path':{'NAME':{'Data object X':None,
+                                                  'Data object Y':None,
+                                                  'Plot':False,
+                                                  'Color':'black',
+                                                  }}
+                                  }
+        
+        overplot_options=flap.config.merge_options(default_overplot_options,_options['Overplot options'],data_source=data_object.data_source)
+        
+        for index_time in range(len(d.coordinates)):
+            if (d.coordinates[index_time].unit.name == axes[2]):
+                if len(d.coordinates[index_time].dimension_list) != 1:
+                    raise ValueError('The time coordinate is changing along multiple dimensions.')
+                time_dimension_data=d.coordinates[index_time].dimension_list[0]
+                data_time_index_coordinate=index_time
+                
+        time_index=[0]*len(d.coordinate(axes[2])[0].shape)
+        time_index[time_dimension_data]=Ellipsis
+        tdata=d.coordinate(axes[2])[0][tuple(time_index)]
+                
+        for path_obj_keys in overplot_options['path']:
+            if (overplot_options['path'][path_obj_keys]['Plot']):              
+                try:
+                    x_object_name=overplot_options['path'][path_obj_keys]['Data object X']
+                    x_object=flap.get_data_object_ref(x_object_name,exp_id=d.exp_id)
+                except:
+                    raise ValueError("The object "+x_object_name+" cannot be read.")
+                try:
+                    y_object_name=overplot_options['path'][path_obj_keys]['Data object Y']
+                    y_object=flap.get_data_object_ref(y_object_name,exp_id=d.exp_id)
+                except:
+                    raise ValueError("The object "+y_object_name+" cannot be read.")
+                #Error handling
+                if (len(x_object.data.shape) != 2 or len(y_object.data.shape) != 2):
+                    raise ValueError("The "+overplot_options['path'][path_obj_keys]['Data object X']+' or '
+                                     "the "+overplot_options['path'][path_obj_keys]['Data object Y']+" data is not 1D.")    
+                    
+                for index_coordinate in range(len(x_object.coordinates)):
+                    if (x_object.coordinates[index_coordinate].unit.name == axes[2]):
+                        oplot_x_time_index_coordinate=index_coordinate
+                for index_coordinate in range(len(x_object.coordinates)):
+                    if (x_object.coordinates[index_coordinate].unit.name == axes[2]):
+                        oplot_y_time_index_coordinate=index_coordinate
+                        
+                if (d.coordinates[data_time_index_coordinate].unit.unit != x_object.coordinates[oplot_x_time_index_coordinate].unit.unit or
+                    d.coordinates[data_time_index_coordinate].unit.unit != x_object.coordinates[oplot_y_time_index_coordinate].unit.unit):
+                    raise TypeError('The '+axes[2]+' unit of the overplotted contour object differs from the data\'s. Interpolation cannot be done.')
+                    
+                #Interpolate the path data to the time vector of the original data
+                try:
+                    x_object_interp=flap.slice_data(x_object_name,
+                                                     slicing={axes[2]:tdata},
+                                                     options={'Interpolation':'Linear'},
+                                                     output_name='X OBJ INTERP')                    
+                except:
+                    raise ValueError('Interpolation cannot be done for the \'Data object X\' along axis '+axes[2]+'.')    
+                try:
+                    y_object_interp=flap.slice_data(y_object_name,
+                                                     slicing={axes[2]:tdata},
+                                                     options={'Interpolation':'Linear'},
+                                                     output_name='Y OBJ INTERP')
+                except:
+                    raise ValueError('Interpolation cannot be done for the \'Data object Y\' along axis '+axes[2]+'.')
+                
+                #Finding the time coordinate
+                for index_time in range(len(x_object.coordinates)):
+                    if (x_object.coordinates[index_time].unit.name == axes[2]):
+                        time_dimension_oplot=x_object.coordinates[index_time].dimension_list[0]
+                        
+                #Convert the units of the path if its coordinates are not the same as the data object's.
+                unit_conversion_coeff=[1]*2
+                original_units=[x_object.data_unit.unit,y_object.data_unit.unit]
+                for index_coordinate in range(len(d.coordinates)):
+                    for index_axes in range(2):
+                        if (d.coordinates[index_coordinate].unit.name == axes[index_axes]):                
+                            unit_conversion_coeff[index_axes] = flap.tools.unit_conversion(original_unit=original_units[index_axes],
+                                                                                           new_unit=d.coordinates[index_coordinate].unit.unit) #Assumes that R and z data is in the same units
+                overplot_options['path'][path_obj_keys]['data']={}
+                overplot_options['path'][path_obj_keys]['data']['Data resampled']=np.asarray([x_object_interp.data*unit_conversion_coeff[0],
+                                                                                              y_object_interp.data*unit_conversion_coeff[1]])
+                overplot_options['path'][path_obj_keys]['data']['Time dimension']=time_dimension_oplot
+                            
+        for contour_obj_keys in overplot_options['contour']:
+            if (overplot_options['contour'][contour_obj_keys]['Plot']):   
+                try:
+                    xy_object_name=overplot_options['contour'][contour_obj_keys]['Data object']
+                    xy_object=flap.get_data_object(xy_object_name,exp_id=d.exp_id)
+                except:
+                    raise ValueError(xy_object_name+'data is not available. The data object needs to be read first.')  
+                if len(xy_object.data.shape) != 3:
+                    raise ValueError('Contour object\'s, ('+xy_object_name+') data needs to be a 3D matrix (x,y,temporal), not necessarily in this order.')
+                    
+                for index_coordinate in range(len(xy_object.coordinates)):
+                    if (xy_object.coordinates[index_coordinate].unit.name == axes[2]):
+                        time_dimension_index=xy_object.coordinates[index_coordinate].dimension_list[0]
+                        oplot_time_index_coordinate=index_coordinate
+                        
+                if d.coordinates[data_time_index_coordinate].unit.unit != xy_object.coordinates[oplot_time_index_coordinate].unit.unit:
+                    raise TypeError('The '+axes[2]+' unit of the overplotted contour object differs from the data\'s. Interpolation cannot be done.')
+                
+                unit_conversion_coeff=[1.] * 3
+                for index_data_coordinate in range(len(d.coordinates)):
+                    for index_oplot_coordinate in range(len(xy_object.coordinates)):
+                        for index_axes in range(3):
+                            if ((d.coordinates[index_data_coordinate].unit.name == axes[index_axes]) and
+                               (xy_object.coordinates[index_oplot_coordinate].unit.name) == axes[index_axes]):                
+                                unit_conversion_coeff[index_axes] = flap.tools.unit_conversion(original_unit=xy_object.coordinates[index_oplot_coordinate].unit.unit,
+                                                                                               new_unit=d.coordinates[index_data_coordinate].unit.unit) #Assumes that R and z data is in the same units
+                                
+                xy_object_interp=flap.slice_data(xy_object_name,
+                                               slicing={axes[2]:tdata},
+                                               options={'Interpolation':'Linear'},
+                                               output_name='XY OBJ INTERP')
+                overplot_options['contour'][contour_obj_keys]['data']={}
+                overplot_options['contour'][contour_obj_keys]['data']['Data resampled']=xy_object_interp.data
+                overplot_options['contour'][contour_obj_keys]['data']['X coord resampled']=xy_object_interp.coordinate(axes[0])[0]*unit_conversion_coeff[0]
+                overplot_options['contour'][contour_obj_keys]['data']['Y coord resampled']=xy_object_interp.coordinate(axes[1])[0]*unit_conversion_coeff[1]
+                overplot_options['contour'][contour_obj_keys]['data'][axes[2]]=tdata
+                overplot_options['contour'][contour_obj_keys]['data']['Time dimension']=time_dimension_index
+
     # X range and Z range is processed here, but Y range not as it might have multiple entries for some plots
     xrange = _options['X range']
     if (xrange is not None):
@@ -2096,6 +2072,28 @@ def _plot(data_object,
                         del im
                     except Exception as e:
                         raise e
+                        
+            if (overplot_options is not None):
+                ax_act.set_autoscale_on(False)
+                for path_obj_keys in overplot_options['path']:
+                    if overplot_options['path'][path_obj_keys]['Plot']:
+                        time_index = [slice(0,dim) for dim in overplot_options['path'][path_obj_keys]['data']['Data resampled'][0].shape]
+                        time_index[overplot_options['path'][path_obj_keys]['data']['Time dimension']] = it
+                        time_index = tuple(time_index)
+                        im = plt.plot(overplot_options['path'][path_obj_keys]['data']['Data resampled'][0][time_index]*axes_unit_conversion[0],
+                                      overplot_options['path'][path_obj_keys]['data']['Data resampled'][1][time_index]*axes_unit_conversion[1],
+                                      color=overplot_options['path'][path_obj_keys]['Color'])
+                
+                for contour_obj_keys in overplot_options['contour']:
+                    if overplot_options['contour'][contour_obj_keys]['Plot']:
+                        time_index = [slice(0,dim) for dim in overplot_options['contour'][contour_obj_keys]['data']['Data resampled'].shape]
+                        time_index[overplot_options['contour'][contour_obj_keys]['data']['Time dimension']] = it
+                        time_index = tuple(time_index)
+                        im = plt.contour(overplot_options['contour'][contour_obj_keys]['data']['X coord resampled'][time_index].transpose()*axes_unit_conversion[0],
+                                         overplot_options['contour'][contour_obj_keys]['data']['Y coord resampled'][time_index].transpose()*axes_unit_conversion[1],
+                                         overplot_options['contour'][contour_obj_keys]['data']['Data resampled'][time_index],
+                                         levels=overplot_options['contour'][contour_obj_keys]['nlevel'],
+                                         cmap=overplot_options['contour'][contour_obj_keys]['Colormap'])      
 
             if (_options['Colorbar']):
                 cbar = plt.colorbar(img,ax=ax_act)
@@ -2149,7 +2147,10 @@ def _plot(data_object,
                 # Get the RGBA buffer from the figure
                 w,h = fig.canvas.get_width_height()
                 buf = np.frombuffer(fig.canvas.tostring_rgb(), dtype=np.uint8)
-                buf.shape = ( h, w, 3 )
+                if buf.shape[0] == h*2 * w*2 * 3:
+                    buf.shape = ( h*2, w*2, 3 ) #ON THE MAC'S INTERNAL SCREEN, THIS COULD HAPPEN NEEDS A MORE ELEGANT FIX
+                else:
+                    buf.shape = ( h, w, 3 )
                 buf = cv2.cvtColor(buf, cv2.COLOR_RGBA2BGR)
                 try:
                     video
@@ -2276,7 +2277,7 @@ def _plot(data_object,
 
         oargs=(ax_list, axes, axes_unit_conversion, d, xdata, ydata, tdata, xdata_range, ydata_range,
                cmap_obj, contour_levels, 
-               coord_t, coord_x, coord_y, cmap, _options, 
+               coord_t, coord_x, coord_y, cmap, _options, overplot_options,
                xrange, yrange, zrange, image_like, 
                _plot_options, language, _plot_id, gs)
         
