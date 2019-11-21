@@ -677,7 +677,7 @@ class DataObject:
         else:
             return self.error[_index].flatten()
 
-    def _plot_coord_ranges(self,coord, c_data, c_low, c_high):
+    def _plot_coord_ranges(self, coord, c_data, c_low, c_high):
         """ Helper function to return error low and high limits from coordiniate data
             in the format needed by matplotlib
         """

@@ -27,11 +27,12 @@ Created on Sat May 18 18:37:06 2019
     - Constants are considered as unit-less, therefore they don't need forcing.
     
 """    
-
+import os
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
 import matplotlib.animation as animation
+import matplotlib.lines as mlines
 from matplotlib.widgets import Button, Slider
 from matplotlib import ticker
 
@@ -244,10 +245,11 @@ class PlotAnimation:
             if (self.vmin <= 0):
                 raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
             self.norm = colors.LogNorm(vmin=self.vmin, vmax=self.vmax)
-            self.locator = ticker.LogLocator(subs='all')
+            #self.locator = ticker.LogLocator(subs='all')
+            ticker.LogLocator(subs='all')
         else:
             self.norm = None
-            self.locator = None
+            #self.locator = None
                 
             
         _plot_opt = self.plot_options[0]
@@ -393,6 +395,22 @@ class PlotAnimation:
                                      self.overplot_options['contour'][contour_obj_keys]['data']['Data resampled'][it,:,:],
                                      levels=self.overplot_options['contour'][contour_obj_keys]['nlevel'],
                                      cmap=self.overplot_options['contour'][contour_obj_keys]['Colormap'])
+            for line_obj_keys in self.overplot_options['line']:
+                xmin, xmax = self.ax_act.get_xbound()
+                ymin, ymax = self.ax_act.get_ybound()
+                if self.overplot_options['line'][line_obj_keys]['Plot']:
+                    if self.overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                        h_coords=self.overplot_options['line'][line_obj_keys]['Horizontal']
+                        for segments in h_coords:
+                            if segments[0] > ymin and segments[0] < ymax:
+                                l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                self.ax_act.add_line(l) 
+                    if self.overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                        v_coords=self.overplot_options['line'][line_obj_keys]['Vertical']
+                        for segments in v_coords:
+                            if segments[0] > xmin and segments[0] < xmax:
+                                l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                self.ax_act.add_line(l)
                 
         if (self.xrange is not None):
             self.ax_act.set_xlim(self.xrange[0]*self.axes_unit_conversion[0],
@@ -635,12 +653,12 @@ def __get_gca_invalid():
         This flag is set invalid when set_plot changes the default plot and this way
         the Matplotlib current axis (get_gca()) becomes invalid for this plot.
     """
+    global gca_invalid
     try:
         gca_invalid
     except NameError:
         gca_invalid = False
-    return gca_invalid
-        
+    return gca_invalid        
    
 def sample_for_plot(x,y,x_error,y_error,n_points):
     """
@@ -767,29 +785,61 @@ def _plot(data_object,
         'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
         'Video file': Name of output video file for anim-... plots
         'Video framerate':  Frame rate for output video.
-        'Video format': Format of the video. Valid: 'avi'
+        'Video format': Format of the video. Valid: 'avi' (windows,macOS,linux), 
+                                                    'mkv', 'mp4' (macOS,linux)
+                        Note for macOS: mp4 is the only embeddable in Powerpoint.
         'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
         'Force axes': Force overplotting even if axes are incpomatible
         'Colorbar': Boolelan. Switch on/off colorbar
         'Nan color': The color to use in image data plotting for np.nan (not-a-number) values
         'Interpolation': Interpolation method for image plot.
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
-        'Overplot options': Dictionary of overplotting options (EFIT for now):
-            'Plot separatrix': Set to plot the separatrix onto the video
-                'Separatrix X': Name of the flap.DataObject for the separatrix X data (usually R)
-                'Separatrix Y': Name of the flap.DataObject for the separatrix Y data (usually z)
-                'Separatrix XY': Name of the 2D flap.DataObject for the separatrix XY data (usually Rz)
-                'Separatrix color': Color of the separatrix for the plot
-            'Plot limiter': Set to plot the limiter onto the video
-                'Limiter X': Name of the flap.DataObject for the limiter X data (usually R)
-                'Limiter Y': Name of the flap.DataObject for the limiter Y data (usually z)
-                'Limiter XY': Name of the 2D flap.DataObject for the limiter XY data (usually Rz)
-                'Limiter color': Color of the limiter for the plot
-            'Plot flux surfaces': Name of the 2D flap.DataObject for the flux surfaces
-                (should have the same coordinate names as the plot)
-                'nlevels': Number of contour lines for the flux surface plotting
+        'Overplot options': Dictionary of overplotting options:
+            Path, contour or line overplotting for the different plot-types:
+            Dictionary with keys of 'contour', 'path' or 'line':
+            
+            Example options['Overplot options']['contour']:
+                
+                options['Overplot options']['contour']=\
+                {'CNAME':{'Data object':None, #2D spatial FLAP object name
+                          'Plot':False,       #Boolean for plotting
+                          'Colormap':None,    #Colormap for the contour
+                          'nlevel':51,        #Level for the contour
+                          'Slicing':None,     #Slicing for the FLAP object
+                          }}    
+                Can contain multiple CNAME (contour name) keywords, each is 
+                plotted. Works in 2D plots. Should be in the same time unit as
+                the data is in the animations.
+                
+            Example options['Overplot options']['path']:  
+                
+                options['Overplot options']['path']=\
+                {'PNAME':{'Data object X':None, #1D spatial FLAP object name
+                          'Data object Y':None, #1D spatial FLAP object name
+                          'Plot':False,         #BOOlean for plotting
+                          'Color':'black',      #Color of the path
+                          'Slicing':None,       #Slicing for the FLAP object
+                          }}
+                Can contain multiple PNAME (path name) keyword, each is 
+                plotted. Works in 2D plots. Should be in the same time unit as
+                the data is in the animations.
+                
+            Example options['Overplot options']['line']:                  
+                
+                options['Overplot options']['path']=\
+                {'LNAME':{'Vertical':[X_coord,'red'], #[X coordinate in the unit of the plot, plot color]
+                          'Horizontal':[Y_coord,'blue'], #[Y coordinate in the unit of the plot, plot color]
+                          'Plot':False,
+                          }}
+                Can contain multiple LNAME (line name) keywords. If 'Vertical'
+                keyword is present, a line is vertical plotted at X_coord.
+                If 'Horizontal' keyword is present, a line is plottad at Y_coord.
+                Works in all plot types.
+                
         'Prevent saturation': Prevents saturation of the video signal when it exceeds zrange[1]
             It uses data modulo zrange[1] to overcome the saturation. (works for animation)
+            (default: False)
+            Caveat: doubles the memory usage of the plotted dataset during the plotting time.
         'Plot units': The plotting units for each axis. It can be a dictionary or a list. Its
             use is different for the two cases as such:
             Dictionary input: keywords: axis name (e.g. 'Device R'), value: unit (e.g. 'mm')
@@ -797,6 +847,11 @@ def _plot(data_object,
                 e.g.: options['Plot units']={'Device R':'mm', 'Device z':'mm', 'Time':'ms'}
             List input: the number of values should correspond to the axes input as such:
                 e.g.: axes=['Device R','Device z','Time'] --> options['Plot units']=['mm','mm','ms']
+        'Equal axes': IF the units of the x and y axes coordinates match, it makes the plot's
+            axes to have equal spacing. Doesn't care about the plot units, just data units.
+            (default: False)
+        'Axes visibility': Hides the title and labels of the axes if set to [False,False]. First
+            value is for the X axis and the second is for the Y axis. (default: [True,True])
             
     """
 
@@ -809,6 +864,7 @@ def _plot(data_object,
                        'Overplot options':None, 'Prevent saturation':False, 'Plot units':None,
                        'Equal axes':False, 'Axes visibility':[True,True],
                        }
+    
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
     
     if (plot_options is None):
@@ -823,11 +879,21 @@ def _plot(data_object,
         raise TypeError("Invalid type for option Clear. Should be boolean.")
     if (type(_options['Force axes']) is not bool):
         raise TypeError("Invalid type for option 'Force axes'. Should be boolean.")    
-    
-    if ((slicing is not None) or (summing is not None)):
-        d = data_object.slice_data(slicing=slicing, summing=summing, options=slicing_options)
+        
+    if (_options['Z range'] is not None) and (_options['Prevent saturation']):
+        if (_options['Z range'] is not None):
+            if ((type(_options['Z range']) is not list) or (len(_options['Z range']) != 2)):
+                raise ValueError("Invalid Z range setting.")
+        if ((slicing is not None) or (summing is not None)):
+            d = copy.deepcopy(data_object.slice_data(slicing=slicing, summing=summing, options=slicing_options))
+        else:
+            d = copy.deepcopy(data_object)  
+        d.data=np.mod(d.data,_options['Z range'][1])
     else:
-        d = data_object        
+        if ((slicing is not None) or (summing is not None)):
+            d = data_object.slice_data(slicing=slicing, summing=summing, options=slicing_options)
+        else:
+            d = data_object        
         
     # Determining a PlotID:
     # argument, actual or a new one
@@ -921,10 +987,15 @@ def _plot(data_object,
     language = _options['Language']
     
     if (_options['Video file'] is not None):
-        if (_options['Video format'] == 'avi'):
-            video_codec_code = 'XVID'
-        else:
-            raise ValueError("Cannot write video in format '"+_options['Video format']+"'.")
+        if ((os.sys.platform == 'darwin' or 'linux' in os.sys.platform) and 
+            (options['Video format'] not in ['avi','mkv', 'mp4'])):
+            raise ValueError("The chosen video format is not cupported on macOS.")
+        if os.sys.platform == 'win32' and _options['Video format'] != 'avi':
+            raise ValueError("The chosen video format is not cupported on Windowd.")
+        video_codec_decrypt={'avi':'XVID',
+                             'mkv':'X264',
+                             'mp4':'mp4v'}
+        video_codec_code=video_codec_decrypt[_options['Video format']]                   
             
     #These lines do the coordinate unit conversion
     axes_unit_conversion=np.zeros(len(axes))
@@ -968,7 +1039,6 @@ def _plot(data_object,
                                                      'Colormap':None,
                                                      'nlevel':51,
                                                      'Slicing':None,
-                                                     'Summing':None,
                                                      }},
     
                                   'path':{'NAME':{'Data object X':None,
@@ -976,13 +1046,11 @@ def _plot(data_object,
                                                   'Plot':False,
                                                   'Color':'black',
                                                   'Slicing':None,
-                                                  'Summing':None,
                                                   }},
                                                   
-                                  'line':{'NAME':{'Coord1':None,
-                                                  'Coord2':None,
+                                  'line':{'NAME':{'Vertical':[0,'red'],
+                                                  'Horizontal':[1,'blue'],
                                                   'Plot':False,
-                                                  'Color':None,
                                                   }}
                                   }
         
@@ -1054,7 +1122,7 @@ def _plot(data_object,
                     overplot_options['contour'][contour_obj_keys]['data']['Data']=xy_object.data
                     overplot_options['contour'][contour_obj_keys]['data']['X coord']=xy_object.coordinate(axes[0])[0]*unit_conversion_coeff[0]
                     overplot_options['contour'][contour_obj_keys]['data']['Y coord']=xy_object.coordinate(axes[1])[0]*unit_conversion_coeff[1]
-        
+        #TIME (AXES(2)) DEPENDENT OVERPLOTTING OBJECT CREATION
         if plot_type in ['anim-image','anim-contour','animation'] :
             for index_time in range(len(d.coordinates)):
                 if (d.coordinates[index_time].unit.name == axes[2]):
@@ -1211,8 +1279,8 @@ def _plot(data_object,
             raise e
         # Preparing data    
         plotdata = [0]*2
-        plotdata_low = [0]*2                                                    #UNUSED
-        plotdata_high = [0]*2                                                   #UNUSED
+#        plotdata_low = [0]*2                                                    #UNUSED
+#        plotdata_high = [0]*2                                                   #UNUSED
         ploterror = [0]*2
         for ax_ind in range(2):
             if (pdd_list[ax_ind].data_type == PddType.Data):
@@ -1333,7 +1401,24 @@ def _plot(data_object,
                 
             if (yrange is not None):
                 ax.set_ylim(yrange[0],
-                            yrange[1])        
+                            yrange[1])
+            if overplot_options['line'] is not None:
+                for line_obj_keys in overplot_options['line']:
+                    xmin, xmax = ax.get_xbound()
+                    ymin, ymax = ax.get_ybound()
+                    if overplot_options['line'][line_obj_keys]['Plot']:
+                        if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                            h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                            for segments in h_coords:
+                                if segments[0] > ymin and segments[0] < ymax:
+                                    l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                    ax.add_line(l) 
+                        if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                            v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                            for segments in v_coords:
+                                if segments[0] > xmin and segments[0] < xmax:
+                                    l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                    ax.add_line(l)
             # Setting axis labels    
             if axes_unit_conversion[0] == 1.:
                 ax.set_xlabel(ax_list[0].title(language=language))
@@ -1428,24 +1513,30 @@ def _plot(data_object,
                         yerror = yerror_abs
 
                 # Checking for constants, converting to numpy array
-                if (np.isscalar(ydata)):
-                    if (np.isscalar(xdata)):
-                        ydata = np.full(1, ydata)
-                    else:
-                        ydata = np.full(xdata.size, ydata)
-                    if (plot_error):
-                        yerror = d._plot_coord_ranges(c, ydata, ydata_low, ydata_high) #THESE ARE UNDEFINED
-                    else:
-                        yerror = None
                 if (np.isscalar(xdata)):
                     if (np.isscalar(ydata)):
                         xdata = np.full(1, xdata)
                     else:
                         xdata = np.full(ydata.size, xdata)
                     if (plot_error):
-                        xerror = d._plot_coord_ranges(c, xdata, xdata_low, xdata_high) #THESE ARE UNDEFINED
+                        c=pdd_list[0].value #THESE THREE VARIABLES WERE UNDIFINED
+                        xdata_low=np.min(xdata)
+                        xdata_high=np.max(xdata)
+                        xerror = d._plot_coord_ranges(c, xdata, xdata_low, xdata_high)
                     else:
-                        xerror = None
+                        xerror = None                
+                if (np.isscalar(ydata)):
+                    if (np.isscalar(xdata)):
+                        ydata = np.full(1, ydata)
+                    else:
+                        ydata = np.full(xdata.size, ydata)
+                    if (plot_error):
+                        c=pdd_list[1].value #THESE THREE VARIABLES WERE UNDIFINED
+                        ydata_low=np.min(ydata)
+                        ydata_high=np.max(ydata)
+                        yerror = d._plot_coord_ranges(c, ydata, ydata_low, ydata_high)
+                    else:
+                        yerror = None
         
                 if (all_points is True):
                     x = xdata
@@ -1504,6 +1595,25 @@ def _plot(data_object,
                     
                 if (yrange is not None):
                     ax.set_ylim(yrange[i_comp][0],yrange[i_comp][1])        
+                    
+                if overplot_options['line'] is not None:
+                    for line_obj_keys in overplot_options['line']:
+                        xmin, xmax = ax.get_xbound()
+                        ymin, ymax = ax.get_ybound()
+                        if overplot_options['line'][line_obj_keys]['Plot']:
+                            if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                                h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                                for segments in h_coords:
+                                    if segments[0] > ymin and segments[0] < ymax:
+                                        l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                        ax.add_line(l) 
+                            if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                                v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                                for segments in v_coords:
+                                    if segments[0] > xmin and segments[0] < xmax:
+                                        l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                        ax.add_line(l)
+                    
                 # Setting axis labels    
                 if axes_unit_conversion[0] == 1.:
                     ax.set_xlabel(ax_list[0].title(language=language))
@@ -1731,6 +1841,24 @@ def _plot(data_object,
         if (yrange is not None):
             ax.set_ylim(yrange[0],yrange[1])
             
+        if overplot_options['line'] is not None:
+            for line_obj_keys in overplot_options['line']:
+                xmin, xmax = ax.get_xbound()
+                ymin, ymax = ax.get_ybound()
+                if overplot_options['line'][line_obj_keys]['Plot']:
+                    if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                        h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                        for segments in h_coords:
+                            if segments[0] > ymin and segments[0] < ymax:
+                                l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                ax.add_line(l) 
+                    if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                        v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                        for segments in v_coords:
+                            if segments[0] > xmin and segments[0] < xmax:
+                                l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                ax.add_line(l)
+            
         if axes_unit_conversion[0] == 1.:
             ax.set_xlabel(ax_list[0].title(language=language))
         else:
@@ -1777,7 +1905,7 @@ def _plot(data_object,
             raise TypeError("Image/contour plot is applicable only to real data.")
         # Checking for numeric type
         try:
-            d.data[0,0] += 1
+            d.data[0,0]+1
         except TypeError:
             raise TypeError("Image plot is applicable only to numeric data.")
         
@@ -1868,10 +1996,11 @@ def _plot(data_object,
             if (vmin <= 0):
                 raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
             norm = colors.LogNorm(vmin=vmin, vmax=vmax)
-            locator = ticker.LogLocator(subs='all')
+            ticker.LogLocator(subs='all')
+            #locator = ticker.LogLocator(subs='all')                            #VARIABLE WAS UNUSED --> UNASSIGNED NOW
         else:
             norm = None
-            locator = None
+            #locator = None
                 
         if (contour_levels is None):
             contour_levels = 255
@@ -1934,7 +2063,23 @@ def _plot(data_object,
                                overplot_options['contour'][contour_obj_keys]['data']['Y coord'].transpose()*axes_unit_conversion[1],
                                overplot_options['contour'][contour_obj_keys]['data']['Data'],
                                levels=overplot_options['contour'][contour_obj_keys]['nlevel'],
-                               cmap=overplot_options['contour'][contour_obj_keys]['Colormap']) 
+                               cmap=overplot_options['contour'][contour_obj_keys]['Colormap'])
+            for line_obj_keys in overplot_options['line']:
+                xmin, xmax = ax.get_xbound()
+                ymin, ymax = ax.get_ybound()
+                if overplot_options['line'][line_obj_keys]['Plot']:
+                    if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                        h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                        for segments in h_coords:
+                            if segments[0] > ymin and segments[0] < ymax:
+                                l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                ax.add_line(l) 
+                    if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                        v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                        for segments in v_coords:
+                            if segments[0] > xmin and segments[0] < xmax:
+                                l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                ax.add_line(l)
             
         if (_options['Colorbar']):
             cbar = plt.colorbar(img,ax=ax)
@@ -1964,6 +2109,7 @@ def _plot(data_object,
                           new_unit=_options['Plot units'][axes[1]]))
         ax.get_xaxis().set_visible(_options['Axes visibility'][0])
         ax.get_yaxis().set_visible(_options['Axes visibility'][1])    
+        
         if (_options['Log x']):
             ax.set_xscale('log')
         if (_options['Log y']):
@@ -2001,7 +2147,7 @@ def _plot(data_object,
             raise TypeError("Animated image plot is applicable only to real data.")
         # Checking for numeric type
         try:
-            d.data[0,0] += 1
+            d.data[0,0]+1                                                       #THERE WAS A BUG HERE +=1 assigns the value to the element and messes up the data.
         except TypeError:
             raise TypeError("Animated image plot is applicable only to numeric data.")
         
@@ -2089,7 +2235,6 @@ def _plot(data_object,
             index[coord_t.dimension_list[0]] = 0
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
-            
         try:
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
@@ -2127,16 +2272,16 @@ def _plot(data_object,
                 if (vmin <= 0):
                     raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
                 norm = colors.LogNorm(vmin=vmin, vmax=vmax)
-                locator = ticker.LogLocator(subs='all')
+                #locator = ticker.LogLocator(subs='all')
+                ticker.LogLocator(subs='all')
             else:
                 norm = None
-                locator = None                                                  #UNUSED
+                #locator = None
                     
             if (contour_levels is None):
                 contour_levels = 255
                 
             _plot_opt = _plot_options[0]
-    
             if (image_like and (_plot_type == 'anim-image')):
                 try:
                     if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
@@ -2195,11 +2340,24 @@ def _plot(data_object,
                                          overplot_options['contour'][contour_obj_keys]['data']['Y coord resampled'][time_index].transpose()*axes_unit_conversion[1],
                                          overplot_options['contour'][contour_obj_keys]['data']['Data resampled'][time_index],
                                          levels=overplot_options['contour'][contour_obj_keys]['nlevel'],
-                                         cmap=overplot_options['contour'][contour_obj_keys]['Colormap'])      
+                                         cmap=overplot_options['contour'][contour_obj_keys]['Colormap'])
             
-
-            if (coord_x.unit.unit == coord_y.unit.unit):
-                ax_act.axis('equal')
+                for line_obj_keys in overplot_options['line']:
+                    xmin, xmax = ax_act.get_xbound()
+                    ymin, ymax = ax_act.get_ybound()
+                    if overplot_options['line'][line_obj_keys]['Plot']:
+                        if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                            h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                            for segments in h_coords:
+                                if segments[0] > ymin and segments[0] < ymax:
+                                    l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                    ax_act.add_line(l) 
+                        if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                            v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                            for segments in v_coords:
+                                if segments[0] > xmin and segments[0] < xmax:
+                                    l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                    ax_act.add_line(l)
                     
             if (_options['Colorbar']):
                 cbar = plt.colorbar(img,ax=ax_act)
@@ -2287,7 +2445,7 @@ def _plot(data_object,
             raise TypeError("Animated image plot is applicable only to real data.")
         # Checking for numeric type
         try:
-            d.data[0,0] += 1
+            d.data[0,0]+1
         except TypeError:
             raise TypeError("Animated image plot is applicable only to numeric data.")
         
@@ -2295,8 +2453,6 @@ def _plot(data_object,
         if (yrange is not None):
             if ((type(yrange) is not list) or (len(yrange) != 2)):
                 raise ValueError("Invalid Y range setting.")
-        if (zrange is not None) and (_options['Prevent saturation']):
-            d.data=np.mod(d.data,zrange[1])
         # Processing axes
         # Although the plot will be cleared the existing plot axes will be considered
         default_axes = [d.coordinates[0].unit.name, d.coordinates[1].unit.name,d.coordinates[2].unit.name,'__Data__']
@@ -2389,11 +2545,13 @@ def _plot(data_object,
         
         anim = PlotAnimation(*oargs)
         anim.animate()
-    plt.show(block=False)       
+    plt.show(block=False)
     _plot_id.axes = ax_list
     _plot_id.plot_data.append(pdd_list)
     #Setting this one the default plot ID
     _plot_id.options.append(_options)
     _plot_id.plot_type = _plot_type
     set_plot_id(_plot_id)
+    if _options['Prevent saturation']:
+        del d
     return _plot_id
