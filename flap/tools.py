@@ -163,26 +163,27 @@ def submatrix_index(mx_shape, index):
     """
 
     index_arrays = []
-    mx_dim = len(mx_shape)
-    for i in range(mx_dim):
-        # Creating a matrix with 1 element in each direction and the
-        # number of elements in index[i] in the i-th dimension
-        shape = [1] * mx_dim
-        shape[i] = index[i].size
-        # Creating this matrix
-        ind = np.zeros(tuple(shape),dtype=int)
-        # Creating a list of indices with 0 at all places except at i where '...'
-        ind_ind = [0] * mx_dim
-        ind_ind[i] = ...
-        ind[tuple(ind_ind)] = index[i]
-        # Expanding this matrix in all other dimensions
-        for j in range(mx_dim):
-            if (j != i):
-                ind = np.repeat(ind,index[j].size,j)
-        index_arrays.append(ind)
+    
+#    mx_dim = len(mx_shape)
+#    for i in range(mx_dim):
+#        # Creating a matrix with 1 element in each direction and the
+#        # number of elements in index[i] in the i-th dimension
+#        shape = [1] * mx_dim
+#        shape[i] = index[i].size
+#        # Creating this matrix
+#        ind = np.zeros(tuple(shape),dtype=int)
+#        # Creating a list of indices with 0 at all places except at i where '...'
+#        ind_ind = [0] * mx_dim
+#        ind_ind[i] = ...
+#        ind[tuple(ind_ind)] = index[i]
+#        # Expanding this matrix in all other dimensions
+#        for j in range(mx_dim):
+#            if (j != i):
+#                ind = np.repeat(ind,index[j].size,j)
+#        index_arrays.append(ind)
 
-#    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
-#        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT
+    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
+        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT
         
     return tuple(index_arrays)
 
