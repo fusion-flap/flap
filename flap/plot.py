@@ -166,8 +166,10 @@ class PlotAnimation:
         self.xdata = xdata
         self.ydata = ydata
         
-        self.xdata_range = xdata_range
-        self.ydata_range = ydata_range
+        self.xdata_range = [self.axes_unit_conversion[0] * xdata_range[0],
+                            self.axes_unit_conversion[0] * xdata_range[1]]
+        self.ydata_range = [self.axes_unit_conversion[1] * ydata_range[0],
+                            self.axes_unit_conversion[1] * ydata_range[1]]
         
         self.xrange = xrange
         self.yrange = yrange
@@ -347,10 +349,9 @@ class PlotAnimation:
         self.time_slider.eventson = True       
         
         self.current_frame = it
-            
+        print(self.axes_unit_conversion)    
         plot_opt = copy.deepcopy(self.plot_options[0])
         self.ax_act.clear()
-        
         if (self.image_like):
             try: 
                 if (self.coord_x.dimension_list[0] < self.coord_y.dimension_list[0]):
@@ -1978,6 +1979,10 @@ def _plot(data_object,
         if (image_like):        
             xdata_range = coord_x.data_range(data_shape=d.shape)[0]
             ydata_range = coord_y.data_range(data_shape=d.shape)[0]
+            xdata_range = [axes_unit_conversion[0] * xdata_range[0],
+                           axes_unit_conversion[0] * xdata_range[1]]
+            ydata_range = [axes_unit_conversion[1] * ydata_range[0],
+                           axes_unit_conversion[1] * ydata_range[1]]
         else:
             xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
             ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape)
@@ -2230,6 +2235,10 @@ def _plot(data_object,
         if (image_like and (_plot_type == 'anim-image')):        
             xdata_range = coord_x.data_range(data_shape=d.shape)[0]
             ydata_range = coord_y.data_range(data_shape=d.shape)[0]
+            xdata_range = [axes_unit_conversion[0] * xdata_range[0],
+                           axes_unit_conversion[0] * xdata_range[1]]
+            ydata_range = [axes_unit_conversion[1] * ydata_range[0],
+                           axes_unit_conversion[1] * ydata_range[1]]
         else:
             index = [...]*3
             index[coord_t.dimension_list[0]] = 0
