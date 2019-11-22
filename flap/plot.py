@@ -2559,6 +2559,7 @@ def _plot(data_object,
         
         anim = PlotAnimation(*oargs)
         anim.animate()
+        
     plt.show(block=False)
     _plot_id.axes = ax_list
     _plot_id.plot_data.append(pdd_list)
