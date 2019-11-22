@@ -972,14 +972,15 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     if (hanning):
         hanning_window = np.hanning(index_int_high[0] - index_int_low[0] + 1) 
         hanning_window /= math.sqrt(3./8)
+        hanning_window_ref=hanning_window
         if (len(d.shape) > 1):
             han_sh = [1] * len(d.shape)
             han_sh[proc_dim] = hanning_window.size
             hanning_window = hanning_window.reshape(han_sh)
         if (len(_ref.shape) > 1):
             han_sh = [1] * len(_ref.shape)
-            han_sh[proc_dim_ref] = hanning_window.size
-            hanning_window_ref = hanning_window.reshape(han_sh)
+            han_sh[proc_dim_ref] = hanning_window_ref.size
+            hanning_window_ref = hanning_window_ref.reshape(han_sh)
 
     # We need to determine a shape to which the out_data_num array will be broadcasted to 
     # allow dividing all spectra. bs is this shape
@@ -1016,8 +1017,9 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             except Exception as e:
                 raise e
         if (hanning):
-           data_proc *= hanning_window.astype(data_proc.dtype)
-           data_proc_ref *= hanning_window_ref.astype(data_proc_ref.dtype)
+            data_proc = data_proc * hanning_window.astype(data_proc.dtype)
+            data_proc_ref = data_proc_ref * hanning_window_ref.astype(data_proc_ref.dtype)
+
         # Calculating FFT
         dfft = np.fft.fft(data_proc,axis=proc_dim)
         dfft_ref = np.fft.fft(data_proc_ref,axis=proc_dim_ref)

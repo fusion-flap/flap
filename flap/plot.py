@@ -165,11 +165,16 @@ class PlotAnimation:
         self.tdata = tdata
         self.xdata = xdata
         self.ydata = ydata
-        
-        self.xdata_range = [self.axes_unit_conversion[0] * xdata_range[0],
-                            self.axes_unit_conversion[0] * xdata_range[1]]
-        self.ydata_range = [self.axes_unit_conversion[1] * ydata_range[0],
-                            self.axes_unit_conversion[1] * ydata_range[1]]
+        if xdata_range is not None:
+            self.xdata_range = [self.axes_unit_conversion[0] * xdata_range[0],
+                                self.axes_unit_conversion[0] * xdata_range[1]]
+        else:
+            self.xdata_range=None
+        if ydata_range is not None:
+            self.ydata_range = [self.axes_unit_conversion[1] * ydata_range[0],
+                                self.axes_unit_conversion[1] * ydata_range[1]]
+        else:
+            self.ydata_range=None
         
         self.xrange = xrange
         self.yrange = yrange
@@ -349,7 +354,7 @@ class PlotAnimation:
         self.time_slider.eventson = True       
         
         self.current_frame = it
-        print(self.axes_unit_conversion)    
+
         plot_opt = copy.deepcopy(self.plot_options[0])
         self.ax_act.clear()
         if (self.image_like):
