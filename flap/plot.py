@@ -1003,8 +1003,11 @@ def _plot(data_object,
         video_codec_code=video_codec_decrypt[_options['Video format']]                   
             
     #These lines do the coordinate unit conversion
-    axes_unit_conversion=np.zeros(len(axes))
-    axes_unit_conversion[:]=1.
+    if axes is not None:
+        axes_unit_conversion=np.zeros(len(axes))
+        axes_unit_conversion[:]=1.
+    else:
+        axes_unit_conversion=[1.,1.,1.]
 
     if _options['Plot units'] is not None:
         unit_length=len(_options['Plot units'])
@@ -1407,23 +1410,24 @@ def _plot(data_object,
             if (yrange is not None):
                 ax.set_ylim(yrange[0],
                             yrange[1])
-            if overplot_options['line'] is not None:
-                for line_obj_keys in overplot_options['line']:
-                    xmin, xmax = ax.get_xbound()
-                    ymin, ymax = ax.get_ybound()
-                    if overplot_options['line'][line_obj_keys]['Plot']:
-                        if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
-                            h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
-                            for segments in h_coords:
-                                if segments[0] > ymin and segments[0] < ymax:
-                                    l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
-                                    ax.add_line(l) 
-                        if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
-                            v_coords=overplot_options['line'][line_obj_keys]['Vertical']
-                            for segments in v_coords:
-                                if segments[0] > xmin and segments[0] < xmax:
-                                    l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
-                                    ax.add_line(l)
+            if (overplot_options is not None):
+                if overplot_options['line'] is not None:
+                    for line_obj_keys in overplot_options['line']:
+                        xmin, xmax = ax.get_xbound()
+                        ymin, ymax = ax.get_ybound()
+                        if overplot_options['line'][line_obj_keys]['Plot']:
+                            if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                                h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                                for segments in h_coords:
+                                    if segments[0] > ymin and segments[0] < ymax:
+                                        l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                        ax.add_line(l) 
+                            if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                                v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                                for segments in v_coords:
+                                    if segments[0] > xmin and segments[0] < xmax:
+                                        l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                        ax.add_line(l)
             # Setting axis labels    
             if axes_unit_conversion[0] == 1.:
                 ax.set_xlabel(ax_list[0].title(language=language))
