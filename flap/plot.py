@@ -301,11 +301,16 @@ class PlotAnimation:
         if (self.xrange is not None):
             plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],
                      self.xrange[1]*self.axes_unit_conversion[0])
-            
+        else:
+            plt.xlim(np.min(self.xdata)*self.axes_unit_conversion[0],
+                     np.max(self.xdata)*self.axes_unit_conversion[0])
         if (self.yrange is not None):
             plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],
-                     self.yrange[1]*self.axes_unit_conversion[1])        
-            
+                     self.yrange[1]*self.axes_unit_conversion[1])
+        else:
+            plt.ylim(np.min(self.ydata)*self.axes_unit_conversion[0],
+                     np.max(self.ydata)*self.axes_unit_conversion[0])   
+
         if self.axes_unit_conversion[0] == 1.:
             plt.xlabel(self.ax_list[0].title(language=self.language))
         else:
@@ -2194,18 +2199,18 @@ def _plot(data_object,
         
         if (len(coord_t.dimension_list) != 1):
             raise ValueError("Time coordinate for anim-image/anim-contour plot should be changing only along one dimension.")
-        try:
-            coord_x.dimension_list.index(coord_t.dimension_list[0])
-            badx = True
-        except:
-            badx = False
-        try:
-            coord_y.dimension_list.index(coord_t.dimension_list[0])
-            bady = True
-        except:
-            bady = False
-        if (badx or bady):
-            raise ValueError("X and y coordinate for anim-image plot should not change in time dimension.")
+#        try:
+#            coord_x.dimension_list.index(coord_t.dimension_list[0])
+#            badx = True
+#        except:
+#            badx = False
+#        try:
+#            coord_y.dimension_list.index(coord_t.dimension_list[0])
+#            bady = True
+#        except:
+#            bady = False
+#        if (badx or bady):
+#            raise ValueError("X and y coordinate for anim-image plot should not change in time dimension.")
             
         index = [0] * 3
         index[coord_t.dimension_list[0]] = ...
@@ -2249,7 +2254,7 @@ def _plot(data_object,
                            axes_unit_conversion[1] * ydata_range[1]]
         else:
             index = [...]*3
-            index[coord_t.dimension_list[0]] = 0
+            #index[coord_t.dimension_list[0]] = 0
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
         try:
@@ -2262,22 +2267,20 @@ def _plot(data_object,
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
-
+        if _options['Equal axes'] and not coord_x.unit.unit == coord_y.unit.unit:
+            print('Equal axis is not possible. The axes units are not equal.')
         for it in range(len(tdata)):
             plt.subplot(_plot_id.base_subplot)
             ax_act = plt.subplot(gs[0,0])
-            if _options['Equal axes']:
-                if (coord_x.unit.unit == coord_y.unit.unit):
-                    ax_act.axis('equal')
-                else:
-                    print('Equal axis is not possible. The axes units are not equal.')
+            if _options['Equal axes'] and coord_x.unit.unit == coord_y.unit.unit:
+                ax_act.axis('equal')
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
             time_index = tuple(time_index)
     
             if (zrange is None):
-                vmin = np.nanmin(d.data[time_index])
-                vmax = np.nanmax(d.data[time_index])
+                vmin = np.nanmin(d.data)
+                vmax = np.nanmax(d.data)
             else:
                 vmin = zrange[0]
                 vmax = zrange[1]
@@ -2316,8 +2319,14 @@ def _plot(data_object,
                     raise e
             else:
                 if (_plot_type == 'anim-image'):
-                    xgrid, ygrid = flap.tools.grid_to_box(xdata*axes_unit_conversion[0],
-                                                          ydata*axes_unit_conversion[1])
+                    #xgrid, ygrid = flap.tools.grid_to_box(xdata*axes_unit_conversion[0],
+                    #                                      ydata*axes_unit_conversion[1])
+                    if (len(xdata.shape) == 3 and len(ydata.shape) == 3):
+                        xgrid, ygrid = flap.tools.grid_to_box(xdata[time_index]*axes_unit_conversion[0],
+                                                              ydata[time_index]*axes_unit_conversion[1])
+                    else:
+                        xgrid, ygrid = flap.tools.grid_to_box(xdata*axes_unit_conversion[0],
+                                                              ydata*axes_unit_conversion[1])
                     im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     try:
                         img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
@@ -2327,9 +2336,15 @@ def _plot(data_object,
                     del im
                 else:
                     try:
+                        if (len(xdata.shape) == 3 and len(ydata.shape) == 3):
+                            xgrid=xdata[time_index]*axes_unit_conversion[1]
+                            ygrid=ydata[time_index]*axes_unit_conversion[1]
+                        else:
+                            xgrid=xdata*axes_unit_conversion[0]
+                            ygrid=ydata*axes_unit_conversion[1]
                         im = np.clip(d.data[time_index],vmin,vmax)
-                        img = plt.contourf(xdata*axes_unit_conversion[0],
-                                           ydata*axes_unit_conversion[1],
+                        img = plt.contourf(xgrid,
+                                           ygrid,
                                            im,
                                            contour_levels,norm=norm,origin='lower',
                                            cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
@@ -2383,10 +2398,16 @@ def _plot(data_object,
             if (xrange is not None):
                 plt.xlim(xrange[0]*axes_unit_conversion[0],
                          xrange[1]*axes_unit_conversion[0])
+            else:
+                plt.xlim(np.min(xdata)*axes_unit_conversion[0],
+                         np.max(xdata)*axes_unit_conversion[0])
                 
             if (yrange is not None):
                 plt.ylim(yrange[0]*axes_unit_conversion[1],
-                         yrange[1]*axes_unit_conversion[1])        
+                         yrange[1]*axes_unit_conversion[1])
+            else:
+                plt.ylim(np.min(ydata)*axes_unit_conversion[0],
+                         np.max(ydata)*axes_unit_conversion[0])
                 
             if axes_unit_conversion[0] == 1.:
                 plt.xlabel(ax_list[0].title(language=language))
@@ -2536,12 +2557,11 @@ def _plot(data_object,
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
         else:
             index = [...]*3
-            index[coord_t.dimension_list[0]] = 0
+            #index[coord_t.dimension_list[0]] = 0 #Why is this even needed? It prevents temporal change in coordinates.
             xdata_range = None
             ydata_range = None
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
-            
         try:
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
