@@ -217,7 +217,11 @@ class PlotAnimation:
         plt.subplot(self.plot_id.base_subplot)
         
         self.ax_act = plt.subplot(self.gs[0,0])
-
+        if (len(self.coord_x.dimension_list) == 3 or
+            len(self.coord_y.dimension_list) == 3):
+            self.ax_act.set_autoscale_on(False)
+            
+            
 #The following lines set the axes to be equal if the units of the axes-to-be-plotted are the same
         if self.options['Equal axes']:
             axes_coordinate_decrypt=[0] * len(self.axes)
@@ -298,19 +302,16 @@ class PlotAnimation:
 #EFIT overplot feature implementation:
             #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
             #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.            
-        if (self.xrange is not None):
-            plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],
-                     self.xrange[1]*self.axes_unit_conversion[0])
-        else:
-            plt.xlim(np.min(self.xdata)*self.axes_unit_conversion[0],
-                     np.max(self.xdata)*self.axes_unit_conversion[0])
-        if (self.yrange is not None):
-            plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],
-                     self.yrange[1]*self.axes_unit_conversion[1])
-        else:
-            plt.ylim(np.min(self.ydata)*self.axes_unit_conversion[0],
-                     np.max(self.ydata)*self.axes_unit_conversion[0])   
-
+        if (self.xrange is None):
+            self.xrange=[np.min(self.xdata),np.max(self.xdata)]
+        plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],
+                 self.xrange[1]*self.axes_unit_conversion[0])
+            
+        if (self.yrange is None):
+            self.yrange=[np.min(self.ydata),np.max(self.ydata)]
+        plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],
+                 self.yrange[1]*self.axes_unit_conversion[1]) 
+        
         if self.axes_unit_conversion[0] == 1.:
             plt.xlabel(self.ax_list[0].title(language=self.language))
         else:
@@ -362,6 +363,13 @@ class PlotAnimation:
 
         plot_opt = copy.deepcopy(self.plot_options[0])
         self.ax_act.clear()
+        self.ax_act.set_autoscale_on(False)
+
+        self.ax_act.set_xlim(self.xrange[0]*self.axes_unit_conversion[0],
+                             self.xrange[1]*self.axes_unit_conversion[0])  
+        self.ax_act.set_ylim(self.yrange[0]*self.axes_unit_conversion[1],
+                             self.yrange[1]*self.axes_unit_conversion[1])
+        
         if (self.image_like):
             try: 
                 if (self.coord_x.dimension_list[0] < self.coord_y.dimension_list[0]):
@@ -390,9 +398,8 @@ class PlotAnimation:
             except Exception as e:
                 raise e
             del im
-
+        
         if (self.overplot_options is not None):
-            self.ax_act.set_autoscale_on(False)
             for path_obj_keys in self.overplot_options['path']:
                 if self.overplot_options['path'][path_obj_keys]['Plot']:
                     im = plt.plot(self.overplot_options['path'][path_obj_keys]['data']['Data resampled'][0,it,:]*self.axes_unit_conversion[0],
@@ -410,26 +417,21 @@ class PlotAnimation:
                 xmin, xmax = self.ax_act.get_xbound()
                 ymin, ymax = self.ax_act.get_ybound()
                 if self.overplot_options['line'][line_obj_keys]['Plot']:
-                    if self.overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                    
+                    if 'Horizontal' in self.overplot_options['line'][line_obj_keys]:
                         h_coords=self.overplot_options['line'][line_obj_keys]['Horizontal']
                         for segments in h_coords:
                             if segments[0] > ymin and segments[0] < ymax:
                                 l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
-                                self.ax_act.add_line(l) 
-                    if self.overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                                self.ax_act.add_line(l)
+                                
+                    if 'Vertical' in self.overplot_options['line'][line_obj_keys]:
                         v_coords=self.overplot_options['line'][line_obj_keys]['Vertical']
                         for segments in v_coords:
                             if segments[0] > xmin and segments[0] < xmax:
                                 l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
                                 self.ax_act.add_line(l)
-                
-        if (self.xrange is not None):
-            self.ax_act.set_xlim(self.xrange[0]*self.axes_unit_conversion[0],
-                                 self.xrange[1]*self.axes_unit_conversion[0])
-        if (self.yrange is not None):
-            self.ax_act.set_ylim(self.yrange[0]*self.axes_unit_conversion[1],
-                                 self.yrange[1]*self.axes_unit_conversion[1])        
-            
+
         if self.axes_unit_conversion[0] == 1.:
             plt.xlabel(self.ax_list[0].title(language=self.language))
         else:
@@ -1415,19 +1417,20 @@ def _plot(data_object,
             if (yrange is not None):
                 ax.set_ylim(yrange[0],
                             yrange[1])
+                
             if (overplot_options is not None):
                 if overplot_options['line'] is not None:
                     for line_obj_keys in overplot_options['line']:
                         xmin, xmax = ax.get_xbound()
                         ymin, ymax = ax.get_ybound()
                         if overplot_options['line'][line_obj_keys]['Plot']:
-                            if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                            if 'Horizontal' in overplot_options['line'][line_obj_keys]:
                                 h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
                                 for segments in h_coords:
                                     if segments[0] > ymin and segments[0] < ymax:
                                         l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
                                         ax.add_line(l) 
-                            if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                            if 'Vertical' in overplot_options['line'][line_obj_keys]:
                                 v_coords=overplot_options['line'][line_obj_keys]['Vertical']
                                 for segments in v_coords:
                                     if segments[0] > xmin and segments[0] < xmax:
@@ -1614,14 +1617,16 @@ def _plot(data_object,
                     for line_obj_keys in overplot_options['line']:
                         xmin, xmax = ax.get_xbound()
                         ymin, ymax = ax.get_ybound()
+                        
                         if overplot_options['line'][line_obj_keys]['Plot']:
-                            if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                            if 'Horizontal' in overplot_options['line'][line_obj_keys]:
                                 h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
                                 for segments in h_coords:
                                     if segments[0] > ymin and segments[0] < ymax:
                                         l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
                                         ax.add_line(l) 
-                            if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                                        
+                            if 'Vertical' in overplot_options['line'][line_obj_keys]:
                                 v_coords=overplot_options['line'][line_obj_keys]['Vertical']
                                 for segments in v_coords:
                                     if segments[0] > xmin and segments[0] < xmax:
@@ -1860,13 +1865,13 @@ def _plot(data_object,
                 xmin, xmax = ax.get_xbound()
                 ymin, ymax = ax.get_ybound()
                 if overplot_options['line'][line_obj_keys]['Plot']:
-                    if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                    if 'Horizontal' in overplot_options['line'][line_obj_keys]:
                         h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
                         for segments in h_coords:
                             if segments[0] > ymin and segments[0] < ymax:
                                 l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
                                 ax.add_line(l) 
-                    if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                    if 'Vertical' in overplot_options['line'][line_obj_keys]:
                         v_coords=overplot_options['line'][line_obj_keys]['Vertical']
                         for segments in v_coords:
                             if segments[0] > xmin and segments[0] < xmax:
@@ -2086,13 +2091,13 @@ def _plot(data_object,
                 xmin, xmax = ax.get_xbound()
                 ymin, ymax = ax.get_ybound()
                 if overplot_options['line'][line_obj_keys]['Plot']:
-                    if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                    if 'Horizontal' in overplot_options['line'][line_obj_keys]:
                         h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
                         for segments in h_coords:
                             if segments[0] > ymin and segments[0] < ymax:
                                 l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
                                 ax.add_line(l) 
-                    if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                    if 'Vertical' in overplot_options['line'][line_obj_keys]:
                         v_coords=overplot_options['line'][line_obj_keys]['Vertical']
                         for segments in v_coords:
                             if segments[0] > xmin and segments[0] < xmax:
@@ -2113,7 +2118,8 @@ def _plot(data_object,
             
         if (yrange is not None):
             ax.set_ylim(yrange[0]*axes_unit_conversion[1],
-                        yrange[1]*axes_unit_conversion[1])        
+                        yrange[1]*axes_unit_conversion[1])
+            
         if axes_unit_conversion[0] == 1.:
             ax.set_xlabel(ax_list[0].title(language=language))
         else:
@@ -2199,18 +2205,6 @@ def _plot(data_object,
         
         if (len(coord_t.dimension_list) != 1):
             raise ValueError("Time coordinate for anim-image/anim-contour plot should be changing only along one dimension.")
-#        try:
-#            coord_x.dimension_list.index(coord_t.dimension_list[0])
-#            badx = True
-#        except:
-#            badx = False
-#        try:
-#            coord_y.dimension_list.index(coord_t.dimension_list[0])
-#            bady = True
-#        except:
-#            bady = False
-#        if (badx or bady):
-#            raise ValueError("X and y coordinate for anim-image plot should not change in time dimension.")
             
         index = [0] * 3
         index[coord_t.dimension_list[0]] = ...
@@ -2254,7 +2248,9 @@ def _plot(data_object,
                            axes_unit_conversion[1] * ydata_range[1]]
         else:
             index = [...]*3
-            #index[coord_t.dimension_list[0]] = 0
+            if (len(coord_x.dimension_list) < 3 and 
+                len(coord_y.dimension_list) < 3):
+                index[coord_t.dimension_list[0]] = 0
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
         try:
@@ -2300,6 +2296,21 @@ def _plot(data_object,
                     
             if (contour_levels is None):
                 contour_levels = 255
+            ax_act.clear()
+            ax_act.set_autoscale_on(False)
+            if (xrange is not None):
+                plt.xlim(xrange[0]*axes_unit_conversion[0],
+                         xrange[1]*axes_unit_conversion[0])
+            else:
+                plt.xlim(np.min(xdata)*axes_unit_conversion[0],
+                         np.max(xdata)*axes_unit_conversion[0])
+                
+            if (yrange is not None):
+                plt.ylim(yrange[0]*axes_unit_conversion[1],
+                         yrange[1]*axes_unit_conversion[1])
+            else:
+                plt.ylim(np.min(ydata)*axes_unit_conversion[0],
+                         np.max(ydata)*axes_unit_conversion[0])
                 
             _plot_opt = _plot_options[0]
             if (image_like and (_plot_type == 'anim-image')):
@@ -2378,13 +2389,13 @@ def _plot(data_object,
                     xmin, xmax = ax_act.get_xbound()
                     ymin, ymax = ax_act.get_ybound()
                     if overplot_options['line'][line_obj_keys]['Plot']:
-                        if overplot_options['line'][line_obj_keys]['Horizontal'] is not None:
+                        if 'Horizontal' in overplot_options['line'][line_obj_keys]:
                             h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
                             for segments in h_coords:
                                 if segments[0] > ymin and segments[0] < ymax:
                                     l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
                                     ax_act.add_line(l) 
-                        if overplot_options['line'][line_obj_keys]['Vertical'] is not None:
+                        if 'Vertical' in overplot_options['line'][line_obj_keys]:
                             v_coords=overplot_options['line'][line_obj_keys]['Vertical']
                             for segments in v_coords:
                                 if segments[0] > xmin and segments[0] < xmax:
@@ -2394,20 +2405,6 @@ def _plot(data_object,
             if (_options['Colorbar']):
                 cbar = plt.colorbar(img,ax=ax_act)
                 cbar.set_label(d.data_unit.name)
-            
-            if (xrange is not None):
-                plt.xlim(xrange[0]*axes_unit_conversion[0],
-                         xrange[1]*axes_unit_conversion[0])
-            else:
-                plt.xlim(np.min(xdata)*axes_unit_conversion[0],
-                         np.max(xdata)*axes_unit_conversion[0])
-                
-            if (yrange is not None):
-                plt.ylim(yrange[0]*axes_unit_conversion[1],
-                         yrange[1]*axes_unit_conversion[1])
-            else:
-                plt.ylim(np.min(ydata)*axes_unit_conversion[0],
-                         np.max(ydata)*axes_unit_conversion[0])
                 
             if axes_unit_conversion[0] == 1.:
                 plt.xlabel(ax_list[0].title(language=language))
@@ -2557,7 +2554,9 @@ def _plot(data_object,
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
         else:
             index = [...]*3
-            #index[coord_t.dimension_list[0]] = 0 #Why is this even needed? It prevents temporal change in coordinates.
+            if (len(coord_x.dimension_list) < 3 and 
+                len(coord_y.dimension_list) < 3):
+                index[coord_t.dimension_list[0]] = 0
             xdata_range = None
             ydata_range = None
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
