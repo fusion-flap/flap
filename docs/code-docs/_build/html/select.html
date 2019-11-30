@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Select &#8212; FLAP  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Spectral analysis" href="spectral_analysis.html" />
+    <link rel="prev" title="Plot" href="plot.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-flap.select">
+<span id="select"></span><h1>Select<a class="headerlink" href="#module-flap.select" title="Permalink to this headline">¶</a></h1>
+<p>Created on Fri Apr 12 19:23:25 2019</p>
+<p>&#64;author: Zoletnik</p>
+<dl class="function">
+<dt id="flap.select.select_intervals">
+<code class="sig-prename descclassname">flap.select.</code><code class="sig-name descname">select_intervals</code><span class="sig-paren">(</span><em class="sig-param">object_descr</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em>, <em class="sig-param">plot_options=None</em>, <em class="sig-param">output_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/select.html#select_intervals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.select.select_intervals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select intervals from data interactively.
+INPUT:</p>
+<blockquote>
+<div><dl>
+<dt>object_descr: If a data object: Plot this data object to select.</dt><dd><p>String: Will be interpreted as a data object name in flap storage.</p>
+</dd>
+<dt>exp_id: The exp_id if dobject_descr is a string</dt><dd><dl>
+<dt>intervals: Information of processing intervals.</dt><dd><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None it is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</dd>
+</dl>
+</dd>
+<dt>coordinate: The name of the coordinate to use for x axis. (string) This will be the</dt><dd><p>coordinate of the selection.</p>
+</dd>
+</dl>
+<p>plot_options: Passed to plot().
+options: Dictionary of options:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>‘Select’: ‘Start’: Select start of intervals. (Needs Lenght to be set.)</dt><dd><p>‘End’: Select end of intervals. (Needs Lenght to be set.)
+‘Full’: Select start and end of interval.
+‘Center’: Select center of interval.
+None: No interactive selection</p>
+</dd>
+</dl>
+<p>‘Length’: Length of intervals.
+‘Event’ : Dictionary describing events to search for. A reference time will be</p>
+<blockquote>
+<div><p>determined for each event and a Length interval will be selected
+symmetrically around it. Trend removal and/or filtering should be done
+before calling this function.
+‘Type’: ‘Maximum’ or ‘Minimum’:</p>
+<blockquote>
+<div><blockquote>
+<div><p>Will look for signal pieces above/below threshold
+and calculate maximum place of signal in this piece.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>‘Max-weight’ or ‘Min-weight’:</dt><dd><p>Same as Maximum and Minimum but selects center of gravity
+for signal piece.</p>
+</dd>
+</dl>
+<p>In each of the above cases the interval will be ‘Length’ long around the event.
+‘Above’, ‘Below’:</p>
+<blockquote>
+<div><p>The intervals will be where the signal is above or below the threshold.</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="simple">
+<dt>‘Start delay’, ‘End delay’: For the Above and Below events the start and end delay of the interval</dt><dd><p>in the coordinate units.</p>
+</dd>
+</dl>
+<p>‘Threshold’: The threshold for the event.
+‘Thr-type’ Threshold type:</p>
+<blockquote>
+<div><p>‘Absolute’: Absolute signal value
+‘Sigma’: Threshold times sigma</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<p>output_name: Output object name in flap storage.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Return value:</dt><dd><p>A data object. Data name is the coordinate name. The error gives the intervals.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">FLAP</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="styleguide.html">FLAP Styleguide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="sourcecode.html">FLAP source code documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="config.html">Config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="coordinate.html">Coordinate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_object.html">Data object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap_xml.html">FLAP XML</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot.html">Plot</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Select</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spectral_analysis.html">Spectral analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_data.html">Test data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tools.html">Tools</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage of FLAP (tips/tricks/faq)</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="sourcecode.html">FLAP source code documentation</a><ul>
+      <li>Previous: <a href="plot.html" title="previous chapter">Plot</a></li>
+      <li>Next: <a href="spectral_analysis.html" title="next chapter">Spectral analysis</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, S. Zoletnik et al..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/select.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

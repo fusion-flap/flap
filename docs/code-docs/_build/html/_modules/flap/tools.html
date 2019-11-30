@@ -1,0 +1,703 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>flap.tools &#8212; FLAP  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for flap.tools</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Jan 23 13:18:25 2019</span>
+
+<span class="sd">@author: Zoletnik</span>
+
+<span class="sd">Tools for the FLAP module</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">from</span> <span class="nn">flap</span> <span class="kn">import</span> <span class="n">VERBOSE</span>
+<span class="c1">#from decimal import Decimal                                                    #UNUSED</span>
+
+<div class="viewcode-block" id="del_list_elements"><a class="viewcode-back" href="../../tools.html#flap.tools.del_list_elements">[docs]</a><span class="k">def</span> <span class="nf">del_list_elements</span><span class="p">(</span><span class="n">input_list</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; delete elements from a list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">input_list</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">del</span> <span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">l</span></div>
+
+
+<div class="viewcode-block" id="unify_list"><a class="viewcode-back" href="../../tools.html#flap.tools.unify_list">[docs]</a><span class="k">def</span> <span class="nf">unify_list</span><span class="p">(</span><span class="n">list1</span><span class="p">,</span> <span class="n">list2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Returns list with elements present in any of the two lists.</span>
+<span class="sd">        Output list is sorted.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">unified_list</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">list1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">list2</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">unified_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">unified_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unified_list</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="select_signals"><a class="viewcode-back" href="../../tools.html#flap.tools.select_signals">[docs]</a><span class="k">def</span> <span class="nf">select_signals</span><span class="p">(</span><span class="n">signal_list</span><span class="p">,</span> <span class="n">signal_spec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Selects signals from a signal list following signal specifications.</span>
+
+<span class="sd">    signal_list: List of strings of possible signal names</span>
+
+<span class="sd">    signal_spec: List of strings with signal specifications including wildcards</span>
+<span class="sd">                 Normal Unix file name wildcards are accepted and extended with</span>
+<span class="sd">                 [&lt;num&gt;-&lt;num&gt;] type expressions so as e.g. a channel range can be selected.</span>
+
+<span class="sd">    Returs select_list, select_index</span>
+<span class="sd">       select_list: List of strings with selected signal names</span>
+<span class="sd">       select_index: List of indices to signal list of the selected signals</span>
+
+<span class="sd">    Raises ValueError if there is no match for one specification</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">signal_spec</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">_signal_spec</span> <span class="o">=</span> <span class="p">[</span><span class="n">signal_spec</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_signal_spec</span> <span class="o">=</span> <span class="n">signal_spec</span>
+
+    <span class="k">if</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">_signal_spec</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">signal_list</span> <span class="o">==</span> <span class="p">[])):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No signal list or signal specification.&quot;</span><span class="p">)</span>
+
+    <span class="n">select_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">select_index</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">_signal_spec</span><span class="p">:</span>
+        <span class="c1"># This will add a list of possible channel names to the _signal_spec while [&lt;num&gt;-&lt;num&gt;} is found</span>
+        <span class="n">startpos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">extended</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">extended_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Searching for opening and closing []</span>
+            <span class="k">for</span> <span class="n">i1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">startpos</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ch</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="n">i1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;[&#39;</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i1</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="k">for</span> <span class="n">i2</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i1</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ch</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">ch</span><span class="p">[</span><span class="n">i2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;]&#39;</span><span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="c1"># found the opening and closing bracket</span>
+            <span class="c1"># Trying to interpret the string between the brackets as &lt;int&gt; - &lt;int&gt;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">nums</span> <span class="o">=</span> <span class="n">ch</span><span class="p">[</span><span class="n">i1</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                <span class="n">nums</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                <span class="c1"># Extracting the strings before and after the []</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">i2</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="n">startpos</span> <span class="o">=</span> <span class="n">i2</span><span class="o">+</span><span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i1</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">str1</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">str1</span> <span class="o">=</span> <span class="n">ch</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">str2</span> <span class="o">=</span> <span class="n">ch</span><span class="p">[</span><span class="n">i2</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">ch</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">str2</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">extended</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nums</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">nums</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># Adding all the possible strings</span>
+                <span class="n">extended_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str1</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="n">str2</span><span class="p">)</span>
+            <span class="n">startpos</span> <span class="o">=</span> <span class="n">i2</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">continue</span>
+
+        <span class="n">ch_match</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># if extended list is created not checking original name</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">extended</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">signal_list</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">signal_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ch</span><span class="p">)):</span>
+                    <span class="n">select_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">signal_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">select_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    <span class="n">ch_match</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">extended</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">signal_list</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">che</span> <span class="ow">in</span> <span class="n">extended_list</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">signal_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">che</span><span class="p">)):</span>
+                        <span class="n">select_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">signal_list</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="n">select_index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                        <span class="n">ch_match</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ch_match</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Signal name: &quot;</span> <span class="o">+</span> <span class="n">ch</span> <span class="o">+</span> <span class="s2">&quot; is not present.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">select_list</span><span class="p">,</span> <span class="n">select_index</span></div>
+
+<div class="viewcode-block" id="chlist"><a class="viewcode-back" href="../../tools.html#flap.tools.chlist">[docs]</a><span class="k">def</span> <span class="nf">chlist</span><span class="p">(</span><span class="n">chlist</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chrange</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">postfix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a channel (signal) list name from a prefix, postfix a channel list and a list of channel</span>
+<span class="sd">    ranges</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ch</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">chlist</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">ch</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">chlist</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">chrange</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">chrange</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="n">ch</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">chrange</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">],</span><span class="n">chrange</span><span class="p">[</span><span class="n">i</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="n">ch_str</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">ch</span><span class="p">:</span>
+        <span class="n">ch_str</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="o">+</span> <span class="n">postfix</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ch_str</span></div>
+
+
+<div class="viewcode-block" id="submatrix_index"><a class="viewcode-back" href="../../tools.html#flap.tools.submatrix_index">[docs]</a><span class="k">def</span> <span class="nf">submatrix_index</span><span class="p">(</span><span class="n">mx_shape</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Given an arbitrary dimension matrix with shape mx_shape the tuple to</span>
+<span class="sd">        extract a submatrix is created and returned.</span>
+<span class="sd">        The elements in each dimension are selected by index.</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">        mx_shape: Shape of the matrix</span>
+<span class="sd">        index: Tuple or list of 1D numpy arrays. The length should be equal to the</span>
+<span class="sd">        length of mx_shape. Each array contains the indices for the</span>
+<span class="sd">               corresponding dimension.</span>
+<span class="sd">    Return value:</span>
+<span class="sd">        A tuple of index matrices. Each index matrix has the same shape as</span>
+<span class="sd">        described by index. Each matrix contains the indices for one dimension</span>
+<span class="sd">        of the matrix. This tuple can be directly used for indexing the matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">index_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">mx_dim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mx_shape</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mx_dim</span><span class="p">):</span>
+        <span class="c1"># Creating a matrix with 1 element in each direction and the</span>
+        <span class="c1"># number of elements in index[i] in the i-th dimension</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">mx_dim</span>
+        <span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+        <span class="c1"># Creating this matrix</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="c1"># Creating a list of indices with 0 at all places except at i where &#39;...&#39;</span>
+        <span class="n">ind_ind</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">mx_dim</span>
+        <span class="n">ind_ind</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="o">...</span>
+        <span class="n">ind</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ind_ind</span><span class="p">)]</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="c1"># Expanding this matrix in all other dimensions</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mx_dim</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">j</span> <span class="o">!=</span> <span class="n">i</span><span class="p">):</span>
+                <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span><span class="n">index</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
+        <span class="n">index_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+
+<span class="c1">#    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED</span>
+<span class="c1">#        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">index_arrays</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="expand_matrix"><a class="viewcode-back" href="../../tools.html#flap.tools.expand_matrix">[docs]</a><span class="k">def</span> <span class="nf">expand_matrix</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span><span class="n">new_shape</span><span class="p">,</span><span class="n">dim_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Insert new dimensions to a matrix so as it has &lt;new shape&gt; shape.</span>
+<span class="sd">        The original dimensions are at dim_list dimensions</span>
+
+<span class="sd">        Input:</span>
+<span class="sd">            mx: The matrix with arbitrary dimensions.</span>
+<span class="sd">            new_shape: This will be the new shape</span>
+<span class="sd">            dim_list: This is a list of dimensions where mx is in the output</span>
+<span class="sd">                      matrix. len(dim_list) == mx.ndim</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">act_dim</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">act_list</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">dim_list</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">_dim_list</span> <span class="o">=</span> <span class="n">dim_list</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_dim_list</span> <span class="o">=</span> <span class="n">dim_list</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">new_shape</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">act_list</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">_dim_list</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="n">act_dim</span> <span class="o">&lt;</span> <span class="n">_dim_list</span><span class="p">[</span><span class="n">act_list</span><span class="p">])):</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span><span class="n">act_dim</span><span class="p">)</span>
+            <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span><span class="n">new_shape</span><span class="p">[</span><span class="n">act_dim</span><span class="p">],</span><span class="n">act_dim</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">act_list</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">act_dim</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">mx</span></div>
+    
+<div class="viewcode-block" id="flatten_multidim"><a class="viewcode-back" href="../../tools.html#flap.tools.flatten_multidim">[docs]</a><span class="k">def</span> <span class="nf">flatten_multidim</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span> <span class="n">dim_list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Flatten the dimensions in dim_list to dim_list[0]</span>
+<span class="sd">        Returns the modified matrix and a mapping from the original to the new dimension list.</span>
+<span class="sd">        The mapping will be None for the flattened dimension in dim_list even if</span>
+<span class="sd">        flattening was not done. The dimension numbers in the dimension list assume that</span>
+<span class="sd">        the flattened dimensions are removed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dim_list</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">dimension_mapping</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dim_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">dimension_mapping</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">count</span>
+                <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">mx</span><span class="p">,</span> <span class="n">dimension_mapping</span>
+
+    <span class="n">out_shape</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">flat_size</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dim_list</span><span class="p">:</span>
+        <span class="n">flat_size</span> <span class="o">*=</span> <span class="n">mx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">d</span><span class="p">]</span>
+    <span class="c1">#This is the mapping from the remaining dimensions to the output matrix dimensions</span>
+    <span class="n">out_dim_mapping</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="n">flat_dim_mapping</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="n">out_dim_counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">flat_dim_counter</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dim_list_i</span> <span class="o">=</span> <span class="n">dim_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">dim_list_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">out_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flat_size</span><span class="p">)</span>
+                <span class="n">flat_dim_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">out_shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">out_dim_mapping</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">out_dim_counter</span>
+            <span class="n">flat_dim_mapping</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">flat_dim_counter</span>
+            <span class="n">out_dim_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">flat_dim_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Creating index matrices for each dimension of dimension list and flattening them to</span>
+    <span class="c1"># create index</span>
+    <span class="n">flat_submx_shape</span> <span class="o">=</span> <span class="p">[</span> <span class="n">mx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dim_list</span><span class="p">]</span>
+    <span class="n">ind_flat_list</span> <span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">flat_submx_shape</span><span class="p">)):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">flat_submx_shape</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">ind_flat_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expand_matrix</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">flat_submx_shape</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="c1"># Creating as many index matrices as the number of dimensions of mx</span>
+    <span class="n">mx_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dim_list_i</span> <span class="o">=</span> <span class="n">dim_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">ind_flat_list</span><span class="p">[</span><span class="n">dim_list_i</span><span class="p">]</span>
+            <span class="n">out_dim</span> <span class="o">=</span> <span class="n">dim_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">mx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">out_dim</span> <span class="o">=</span> <span class="n">flat_dim_mapping</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">mx_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">expand_matrix</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">out_shape</span><span class="p">,</span> <span class="p">[</span><span class="n">out_dim</span><span class="p">]))</span>
+
+    <span class="k">return</span>  <span class="n">mx</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="n">mx_list</span><span class="p">)],</span> <span class="n">out_dim_mapping</span></div>
+
+<div class="viewcode-block" id="multiply_along_axes"><a class="viewcode-back" href="../../tools.html#flap.tools.multiply_along_axes">[docs]</a><span class="k">def</span> <span class="nf">multiply_along_axes</span><span class="p">(</span><span class="n">a1_orig</span><span class="p">,</span> <span class="n">a2_orig</span><span class="p">,</span> <span class="n">axes</span><span class="p">,</span><span class="n">keep_a1_dims</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">    Multiplies two arrays along given axes. </span>
+<span class="sd">    INPUT:</span>
+<span class="sd">        a1_orig: Array 1.</span>
+<span class="sd">        a2_orig: Array 2.</span>
+<span class="sd">        axes: List of two axis numbers or list of two lists of axis numbers</span>
+<span class="sd">        keep_1_dims: (bool) </span>
+<span class="sd">                     If True: The output array has dimensions of a1 followed by a2 with the common dims removed</span>
+<span class="sd">                     If False: The output array has the a1 dimensions without common dims then the common dims</span>
+<span class="sd">                               followed by a2 with the common dims removed</span>
+<span class="sd">    Return values:</span>
+<span class="sd">        a, axis_source, axis_number</span>
+<span class="sd">            a: An array with dimension number a1.dim+a2.dim-1. </span>
+<span class="sd">            axis_source: List of integers telling the source array for each output axis ( 0 or 1)</span>
+<span class="sd">            axis_number: Axis numbers in the arrays listed in axes_source</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>       
+        <span class="k">if</span> <span class="p">(</span><span class="n">a1_orig</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]]</span> <span class="o">!=</span> <span class="n">a2_orig</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Incompatible shapes.&quot;</span><span class="p">)</span>
+
+    <span class="n">a1</span> <span class="o">=</span> <span class="n">a1_orig</span>
+    <span class="n">a2</span> <span class="o">=</span> <span class="n">a2_orig</span>
+    <span class="n">a1_shape</span> <span class="o">=</span> <span class="n">a1</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">a1_axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">a1</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+    <span class="n">a2_shape</span> <span class="o">=</span> <span class="n">a2</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">a2_axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">a2</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+        <span class="c1"># Finding the axis</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">a1_axes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1"># Move from a1 the processing axis to the end</span>
+        <span class="n">a1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="n">ind</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Following this change in the axis list</span>
+        <span class="k">del</span> <span class="n">a1_axes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="n">a1_axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1"># Move from a2 the processing axis to the front</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">a2_axes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">a2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span><span class="n">ind</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">a2_axes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="n">a2_axes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">out_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">a1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">a2</span><span class="o">.</span><span class="n">shape</span><span class="p">)[</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]):]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_shape</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">a1_shape</span><span class="p">)):</span>
+        <span class="n">a1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">a1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">out_shape</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">a2_shape</span><span class="p">)):</span>
+        <span class="n">a2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">a2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>    
+    <span class="n">r</span> <span class="o">=</span> <span class="n">a1</span> <span class="o">*</span> <span class="n">a2</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">keep_a1_dims</span><span class="p">):</span>
+        <span class="c1"># Moving the processing axes back where they were in the original array</span>
+        <span class="c1"># We have to move the axis in increasing destination order</span>
+        <span class="n">sort_axes</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sort_axes</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sort_axes</span><span class="p">)):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">a1_axes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">sort_axes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">sort_axes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">del</span> <span class="n">a1_axes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">a1_axes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">sort_axes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">sort_axes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">axis_source</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">a1_orig</span><span class="o">.</span><span class="n">ndim</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">a2_orig</span><span class="o">.</span><span class="n">ndim</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">axis_number</span> <span class="o">=</span> <span class="n">a1_axes</span> <span class="o">+</span> <span class="n">a2_axes</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]):]</span>
+    <span class="k">return</span> <span class="n">r</span><span class="p">,</span> <span class="n">axis_source</span><span class="p">,</span> <span class="n">axis_number</span></div>
+
+<div class="viewcode-block" id="move_axes_to_end"><a class="viewcode-back" href="../../tools.html#flap.tools.move_axes_to_end">[docs]</a><span class="k">def</span> <span class="nf">move_axes_to_end</span><span class="p">(</span><span class="n">mx_orig</span><span class="p">,</span><span class="n">axes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Moves the listed axes to the end.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="n">mx_orig</span>
+    <span class="n">mx_axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+        <span class="c1"># Finding the axis</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">mx_axes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1"># Move from to the end</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span><span class="n">ind</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Following this change in the axis list</span>
+        <span class="k">del</span> <span class="n">mx_axes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="n">mx_axes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">mx</span><span class="p">,</span> <span class="n">mx_axes</span></div>
+    
+<div class="viewcode-block" id="move_axes_to_start"><a class="viewcode-back" href="../../tools.html#flap.tools.move_axes_to_start">[docs]</a><span class="k">def</span> <span class="nf">move_axes_to_start</span><span class="p">(</span><span class="n">mx_orig</span><span class="p">,</span><span class="n">axes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Moves the listed axes to the start axes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mx</span> <span class="o">=</span> <span class="n">mx_orig</span>
+    <span class="n">mx_axes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">mx</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+        <span class="c1"># Finding the axis</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">mx_axes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="c1"># Move from to the end</span>
+        <span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">moveaxis</span><span class="p">(</span><span class="n">mx</span><span class="p">,</span><span class="n">ind</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># Following this change in the axis list</span>
+        <span class="k">del</span> <span class="n">mx_axes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="n">mx_axes</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">mx</span><span class="p">,</span> <span class="n">mx_axes</span></div>
+    
+<div class="viewcode-block" id="find_str_match"><a class="viewcode-back" href="../../tools.html#flap.tools.find_str_match">[docs]</a><span class="k">def</span> <span class="nf">find_str_match</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given value string and a list of possibilities in the list of strings option</span>
+<span class="sd">    find matches assuming value is an abbreviation. Return ValueError if no match </span>
+<span class="sd">    or multiple match is found.</span>
+<span class="sd">    If one match is found return the matching string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Invalid value.&quot;</span><span class="p">)</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">min</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)])]):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Too short abbreviation: &quot;</span><span class="o">+</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No match for &quot;</span><span class="o">+</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="grid_to_box"><a class="viewcode-back" href="../../tools.html#flap.tools.grid_to_box">[docs]</a><span class="k">def</span> <span class="nf">grid_to_box</span><span class="p">(</span><span class="n">xdata</span><span class="p">,</span><span class="n">ydata</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given 2D x and y coordinate matrices create box coordinates around the points as</span>
+<span class="sd">    needed by matplotlib.pcolomesh.</span>
+<span class="sd">    xdata: X coordinates. </span>
+<span class="sd">    ydata: Y coordinates. </span>
+<span class="sd">    In both arrays x direction is along first dimension, y direction along second dimension.</span>
+<span class="sd">    Returns xbox, ybox.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">xdata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">xdata</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+    <span class="n">xbox_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">xdata</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">xbox_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">xbox_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">xbox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">xbox_shape</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">xdata</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">xdata</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xdata</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span> 
+    <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">xdata</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xdata</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">xdata</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xdata</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">xdata</span><span class="p">[</span><span class="mi">0</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xdata</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">xdata</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xdata</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">xbox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> 
+    <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">xbox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+      
+    <span class="n">ydata</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">ydata</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+    <span class="n">ybox_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ydata</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">ybox_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">ybox_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">ybox</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">ybox_shape</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">ydata</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ydata</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ydata</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span> 
+    <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">ydata</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ydata</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">ydata</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ydata</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">ydata</span><span class="p">[</span><span class="mi">0</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ydata</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">ydata</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ydata</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">ybox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> 
+    <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ybox</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">xbox</span><span class="p">,</span><span class="n">ybox</span></div>
+
+<span class="k">def</span> <span class="nf">time_unit_translation</span><span class="p">(</span><span class="n">time_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">max_value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">time_unit</span><span class="p">))</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span> <span class="ow">or</span> 
+       <span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">time_unit</span><span class="p">))</span> <span class="o">==</span> <span class="s2">&quot;&lt;class &#39;numpy.str_&#39;&gt;&quot;</span><span class="p">):</span>
+        <span class="n">_time_unit</span><span class="o">=</span><span class="n">time_unit</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_time_unit</span><span class="o">=</span><span class="n">time_unit</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">_time_unit</span> <span class="o">==</span> <span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">_time_unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">))</span> <span class="ow">and</span> <span class="p">(</span><span class="n">max_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="c1">#Raise awareness:</span>
+        <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time unit: </span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">_time_unit</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Time unit translation based on values only works for shots under 1000s.&#39;</span><span class="p">)</span>
+        <span class="n">value_translation</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mf">1e3</span><span class="p">,</span><span class="mf">1e6</span><span class="p">,</span><span class="mf">1e9</span><span class="p">,</span><span class="mf">1e12</span><span class="p">],</span>
+                           <span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span><span class="s1">&#39;us&#39;</span><span class="p">,</span><span class="s1">&#39;ns&#39;</span><span class="p">,</span><span class="s1">&#39;ps&#39;</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value_translation</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">max_value</span> <span class="o">&gt;</span> <span class="n">value_translation</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="n">max_value</span> <span class="o">&lt;</span> <span class="n">value_translation</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">_time_unit</span><span class="o">=</span><span class="n">value_translation</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">max_value</span> <span class="o">&gt;</span> <span class="n">value_translation</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">4</span><span class="p">]:</span>
+                <span class="n">_time_unit</span><span class="o">=</span><span class="n">value_translation</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">translation</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;seconds&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="s1">&#39;second&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="s1">&#39;s&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="s1">&#39;milliseconds&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                 <span class="s1">&#39;millisecond&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                 <span class="s1">&#39;ms&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                 <span class="s1">&#39;microseconds&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="s1">&#39;microsecond&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="s1">&#39;us&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="s1">&#39;nanoseconds&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                 <span class="s1">&#39;nanosecond&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                 <span class="s1">&#39;ns&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                 <span class="s1">&#39;picoseconds&#39;</span><span class="p">:</span><span class="mf">1e-12</span><span class="p">,</span>
+                 <span class="s1">&#39;picosecond&#39;</span><span class="p">:</span><span class="mf">1e-12</span><span class="p">,</span>
+                 <span class="s1">&#39;ps&#39;</span><span class="p">:</span><span class="mf">1e-12</span>
+                 <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">_time_unit</span> <span class="ow">in</span> <span class="n">translation</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">translation</span><span class="p">[</span><span class="n">_time_unit</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">_time_unit</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">backwards_translation</span><span class="o">=</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mf">1e-3</span><span class="p">,</span><span class="mf">1e-6</span><span class="p">,</span><span class="mf">1e-9</span><span class="p">,</span><span class="mf">1e-12</span><span class="p">],</span>
+                                   <span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="s1">&#39;ms&#39;</span><span class="p">,</span><span class="s1">&#39;us&#39;</span><span class="p">,</span><span class="s1">&#39;ns&#39;</span><span class="p">,</span><span class="s1">&#39;ps&#39;</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">backwards_translation</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                <span class="k">if</span> <span class="n">backwards_translation</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">_time_unit</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">backwards_translation</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">_time_unit</span><span class="o">+</span><span class="s1">&#39; was not found in the translation. Returning 1.&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">1</span>
+    
+<span class="k">def</span> <span class="nf">spatial_unit_translation</span><span class="p">(</span><span class="n">spatial_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">_spatial_unit</span><span class="o">=</span><span class="n">spatial_unit</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">translation</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;meters&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="s1">&#39;meter&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="s1">&#39;m&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="s1">&#39;millimeters&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                 <span class="s1">&#39;millimeter&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                 <span class="s1">&#39;mm&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                 <span class="s1">&#39;micrometers&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="s1">&#39;micrometer&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="s1">&#39;um&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                 <span class="s1">&#39;nanometers&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                 <span class="s1">&#39;nanometer&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                 <span class="s1">&#39;nm&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                 <span class="s1">&#39;picometers&#39;</span><span class="p">:</span><span class="mf">1e-12</span><span class="p">,</span>
+                 <span class="s1">&#39;picometer&#39;</span><span class="p">:</span><span class="mf">1e-12</span><span class="p">,</span>
+                 <span class="s1">&#39;pm&#39;</span><span class="p">:</span><span class="mf">1e-12</span><span class="p">,</span>
+                 <span class="p">}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">_spatial_unit</span> <span class="ow">in</span> <span class="n">translation</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">translation</span><span class="p">[</span><span class="n">_spatial_unit</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">_spatial_unit</span><span class="o">+</span><span class="s1">&#39; was not found in the translation. Returning 1.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    
+<span class="k">def</span> <span class="nf">unit_conversion</span><span class="p">(</span><span class="n">original_unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">new_unit</span><span class="o">=</span><span class="kc">None</span>
+                    <span class="p">):</span>
+    
+    <span class="c1">#The code provides a unit conversion between any unit types for most</span>
+    <span class="c1">#of the prefixes. </span>
+    <span class="c1">#There are certain limitations:</span>
+    <span class="c1">#   The unit compatibility is not checked (e.g. mm--&gt;MegaHertz is allowed)</span>
+    
+    <span class="n">known_conversions_full</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Terra&#39;</span><span class="p">:</span><span class="mf">1e12</span><span class="p">,</span>
+                            <span class="s1">&#39;Giga&#39;</span><span class="p">:</span><span class="mf">1e9</span><span class="p">,</span>
+                            <span class="s1">&#39;Mega&#39;</span><span class="p">:</span><span class="mf">1e6</span><span class="p">,</span>
+                            <span class="s1">&#39;kilo&#39;</span><span class="p">:</span><span class="mf">1e3</span><span class="p">,</span>
+                            <span class="s1">&#39;milli&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                            <span class="s1">&#39;micro&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                            <span class="s1">&#39;nano&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                            <span class="s1">&#39;pico&#39;</span><span class="p">:</span><span class="mf">1e-12</span><span class="p">,</span>
+                            <span class="p">}</span>
+    
+    <span class="n">known_conversions_short</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="mf">1e12</span><span class="p">,</span>
+                             <span class="s1">&#39;G&#39;</span><span class="p">:</span><span class="mf">1e9</span><span class="p">,</span>
+                             <span class="s1">&#39;M&#39;</span><span class="p">:</span><span class="mf">1e6</span><span class="p">,</span>
+                             <span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="mf">1e3</span><span class="p">,</span>
+                             <span class="s1">&#39;m&#39;</span><span class="p">:</span><span class="mf">1e-3</span><span class="p">,</span>
+                             <span class="s1">&#39;u&#39;</span><span class="p">:</span><span class="mf">1e-6</span><span class="p">,</span>
+                             <span class="s1">&#39;n&#39;</span><span class="p">:</span><span class="mf">1e-9</span><span class="p">,</span>
+                             <span class="s1">&#39;p&#39;</span><span class="p">:</span><span class="mf">1e-12</span>
+                             <span class="p">}</span>
+    
+    <span class="n">original_unit_translation</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">new_unit_translation</span><span class="o">=</span><span class="kc">None</span>
+    
+    <span class="c1">#Trying to find the long unit names in the inputs</span>
+    
+    <span class="k">for</span> <span class="n">keys_full</span> <span class="ow">in</span> <span class="n">known_conversions_full</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">keys_full</span> <span class="ow">in</span> <span class="n">original_unit</span><span class="p">:</span>
+            <span class="n">original_unit_translation</span><span class="o">=</span><span class="n">known_conversions_full</span><span class="p">[</span><span class="n">keys_full</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">keys_full</span> <span class="ow">in</span> <span class="n">new_unit</span><span class="p">:</span>
+            <span class="n">new_unit_translation</span><span class="o">=</span><span class="n">known_conversions_full</span><span class="p">[</span><span class="n">keys_full</span><span class="p">]</span>
+            
+    <span class="k">if</span> <span class="n">original_unit_translation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_unit</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_unit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="p">:</span> <span class="c1"># SI units are longer than 3 if using the full name</span>
+            <span class="n">original_unit_translation</span><span class="o">=</span><span class="mf">1.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">keys_short</span> <span class="ow">in</span> <span class="n">known_conversions_short</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">keys_short</span> <span class="o">==</span> <span class="n">original_unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">original_unit_translation</span><span class="o">=</span><span class="n">known_conversions_short</span><span class="p">[</span><span class="n">keys_short</span><span class="p">]</span>
+                    
+    <span class="k">if</span> <span class="n">new_unit_translation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>                    
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_unit</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_unit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">new_unit_translation</span><span class="o">=</span><span class="mf">1.</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">keys_short</span> <span class="ow">in</span> <span class="n">known_conversions_short</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">keys_short</span> <span class="o">==</span> <span class="n">new_unit</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="n">new_unit_translation</span><span class="o">=</span><span class="n">known_conversions_short</span><span class="p">[</span><span class="n">keys_short</span><span class="p">]</span>
+                    
+    <span class="k">if</span> <span class="n">original_unit_translation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unit translation cannot be done for the original unit. Returning 1.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_unit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Known conversion units are:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">known_conversions_full</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Known conversion units are:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">known_conversions_short</span><span class="p">)</span>
+        <span class="n">original_unit_translation</span><span class="o">=</span><span class="mf">1.</span>
+        
+    <span class="k">if</span> <span class="n">new_unit_translation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unit translation cannot be done for the new unit. Returning 1.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">original_unit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Known conversion units are:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">known_conversions_full</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Known conversion units are:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">known_conversions_short</span><span class="p">)</span>
+            <span class="n">new_unit_translation</span><span class="o">=</span><span class="mf">1.</span>
+        
+    <span class="k">return</span> <span class="n">original_unit_translation</span><span class="o">/</span><span class="n">new_unit_translation</span>
+            
+    
+        
+        
+    
+
+<span class="c1">#import matplotlib.pyplot as plt</span>
+
+<span class="c1">#plt.clf()</span>
+<span class="c1">#ydata, xdata = np.meshgrid(np.arange(10),np.arange(20))</span>
+<span class="c1">#xdata = xdata.astype(float)</span>
+<span class="c1">#ydata = ydata.astype(float)</span>
+<span class="c1">#xdata += ydata*0.1</span>
+<span class="c1">#ydata += xdata*0.2</span>
+<span class="c1">#xbox, ybox = grid_to_box(xdata,ydata)</span>
+<span class="c1">#data =  (xdata + ydata)</span>
+<span class="c1">#plt.pcolormesh(xbox,ybox,np.transpose(data),cmap=&#39;Greys&#39;)</span>
+<span class="c1">#plt.scatter(xdata.flatten(), ydata.flatten())</span>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">FLAP</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../styleguide.html">FLAP Styleguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sourcecode.html">FLAP source code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage of FLAP (tips/tricks/faq)</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, S. Zoletnik et al..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,463 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>flap.select &#8212; FLAP  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for flap.select</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Fri Apr 12 19:23:25 2019</span>
+
+<span class="sd">@author: Zoletnik</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="c1">#from .coordinate import *</span>
+<span class="c1">#from .data_object import *</span>
+<span class="kn">import</span> <span class="nn">flap.coordinate</span>
+<span class="kn">import</span> <span class="nn">flap.data_object</span>
+
+<div class="viewcode-block" id="select_intervals"><a class="viewcode-back" href="../../select.html#flap.select.select_intervals">[docs]</a><span class="k">def</span> <span class="nf">select_intervals</span><span class="p">(</span><span class="n">object_descr</span><span class="p">,</span> <span class="n">coordinate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exp_id</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">intervals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plot_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">output_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Select intervals from data interactively.</span>
+<span class="sd">    INPUT:</span>
+<span class="sd">        object_descr: If a data object: Plot this data object to select.</span>
+<span class="sd">           String: Will be interpreted as a data object name in flap storage.</span>
+<span class="sd">        exp_id: The exp_id if dobject_descr is a string</span>
+<span class="sd">                intervals: Information of processing intervals.</span>
+<span class="sd">                           If dictionary with a single key: {selection coordinate: description})</span>
+<span class="sd">                               Key is a coordinate name which can be different from the calculation</span>
+<span class="sd">                               coordinate.</span>
+<span class="sd">                               Description can be flap.Intervals, flap.DataObject or</span>
+<span class="sd">                               a list of two numbers. If it is a data object with data name identical to</span>
+<span class="sd">                               the coordinate the error ranges of the data object will be used for</span>
+<span class="sd">                               interval. If the data name is not the same as coordinate a coordinate with the</span>
+<span class="sd">                               same name will be searched for in the data object and the value_ranges</span>
+<span class="sd">                               will be used fromm it to set the intervals.</span>
+<span class="sd">                           If not a dictionary and not None it is interpreted as the interval</span>
+<span class="sd">                               description, the selection coordinate is taken the same as</span>
+<span class="sd">                               coordinate.</span>
+<span class="sd">                           If None, the whole data interval will be used as a single interval.</span>
+<span class="sd">        coordinate: The name of the coordinate to use for x axis. (string) This will be the</span>
+<span class="sd">                    coordinate of the selection.</span>
+<span class="sd">        plot_options: Passed to plot().</span>
+<span class="sd">        options: Dictionary of options:</span>
+<span class="sd">                 &#39;Select&#39;: &#39;Start&#39;: Select start of intervals. (Needs Lenght to be set.)</span>
+<span class="sd">                           &#39;End&#39;: Select end of intervals. (Needs Lenght to be set.)</span>
+<span class="sd">                           &#39;Full&#39;: Select start and end of interval.</span>
+<span class="sd">                           &#39;Center&#39;: Select center of interval.</span>
+<span class="sd">                           None: No interactive selection</span>
+<span class="sd">                 &#39;Length&#39;: Length of intervals.</span>
+<span class="sd">                 &#39;Event&#39; : Dictionary describing events to search for. A reference time will be</span>
+<span class="sd">                           determined for each event and a Length interval will be selected</span>
+<span class="sd">                           symmetrically around it. Trend removal and/or filtering should be done</span>
+<span class="sd">                           before calling this function.</span>
+<span class="sd">                           &#39;Type&#39;: &#39;Maximum&#39; or &#39;Minimum&#39;:</span>
+<span class="sd">                                     Will look for signal pieces above/below threshold</span>
+<span class="sd">                                     and calculate maximum place of signal in this piece.</span>
+<span class="sd">                                   &#39;Max-weight&#39; or &#39;Min-weight&#39;:</span>
+<span class="sd">                                     Same as Maximum and Minimum but selects center of gravity</span>
+<span class="sd">                                     for signal piece.</span>
+<span class="sd">                                   In each of the above cases the interval will be &#39;Length&#39; long around the event.</span>
+<span class="sd">                                   &#39;Above&#39;, &#39;Below&#39;:</span>
+<span class="sd">                                     The intervals will be where the signal is above or below the threshold. </span>
+<span class="sd">                           &#39;Start delay&#39;, &#39;End delay&#39;: For the Above and Below events the start and end delay of the interval</span>
+<span class="sd">                                                       in the coordinate units.</span>
+<span class="sd">                           &#39;Threshold&#39;: The threshold for the event.</span>
+<span class="sd">                           &#39;Thr-type&#39; Threshold type:</span>
+<span class="sd">                                         &#39;Absolute&#39;: Absolute signal value</span>
+<span class="sd">                                         &#39;Sigma&#39;: Threshold times sigma</span>
+
+<span class="sd">        output_name: Output object name in flap storage.</span>
+
+<span class="sd">    Return value:</span>
+<span class="sd">        A data object. Data name is the coordinate name. The error gives the intervals.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">stop_select</span><span class="p">,</span> <span class="n">start_coord</span><span class="p">,</span> <span class="n">end_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">_options</span><span class="p">,</span> <span class="n">length</span>
+
+    <span class="k">def</span> <span class="nf">mouse_event_press</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">stop_select</span><span class="p">,</span> <span class="n">start_coord</span><span class="p">,</span> <span class="n">end_coord</span><span class="p">,</span> <span class="n">y_coord</span><span class="p">,</span> <span class="n">_options</span><span class="p">,</span> <span class="n">length</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">event</span><span class="p">)</span> <span class="ow">is</span>  <span class="n">matplotlib</span><span class="o">.</span><span class="n">backend_bases</span><span class="o">.</span><span class="n">KeyEvent</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="n">stop_select</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;stop&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Full&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Start&#39;</span><span class="p">)):</span>
+                <span class="n">start_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Start&#39;</span><span class="p">):</span>
+                    <span class="n">end_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">+</span> <span class="n">length</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Center&#39;</span><span class="p">):</span>
+                <span class="n">start_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">-</span> <span class="n">length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">end_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">+</span> <span class="n">length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">end_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">)</span>
+                <span class="n">start_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">-</span> <span class="n">length</span><span class="p">)</span>
+            <span class="n">y_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">ydata</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">mouse_event_release</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">stop_select</span><span class="p">,</span> <span class="n">start_coord</span><span class="p">,</span> <span class="n">end_coord</span><span class="p">,</span> <span class="n">_options</span><span class="p">,</span> <span class="n">length</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">event</span><span class="p">)</span> <span class="ow">is</span>  <span class="n">matplotlib</span><span class="o">.</span><span class="n">backend_bases</span><span class="o">.</span><span class="n">KeyEvent</span><span class="p">):</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">button</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Full&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span> <span class="o">&lt;=</span> <span class="n">start_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bad interval&quot;</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">start_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">y_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">end_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">xdata</span><span class="p">)</span>
+
+    <span class="c1"># Getting the data object</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">object_descr</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">data_object</span><span class="o">.</span><span class="n">get_data_object</span><span class="p">(</span><span class="n">object_descr</span><span class="p">,</span><span class="n">exp_id</span><span class="o">=</span><span class="n">exp_id</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">object_descr</span><span class="p">)</span> <span class="ow">is</span> <span class="n">flap</span><span class="o">.</span><span class="n">data_object</span><span class="o">.</span><span class="n">DataObject</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">object_descr</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Bad object description for interval selection. Use flap.DataObject or string.&quot;</span><span class="p">)</span>
+
+    <span class="n">default_options</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Select&#39;</span><span class="p">:</span><span class="s1">&#39;Full&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;Length&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="s1">&#39;Event&#39;</span><span class="p">:</span> <span class="kc">None</span>
+                       <span class="p">}</span>
+    <span class="c1"># Handling options here, as we need the data source</span>
+    <span class="n">_options</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">merge_options</span><span class="p">(</span><span class="n">default_options</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">data_source</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="s1">&#39;Select&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">((</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Start&#39;</span><span class="p">)</span>
+         <span class="ow">and</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;End&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Full&#39;</span><span class="p">)</span>
+         <span class="ow">and</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Center&#39;</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid value for Select option: &quot;</span> <span class="o">+</span> <span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Length&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Length&#39;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid value to Lenght.&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Event&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Either Select or Event option must be set.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Event selection can be done on 1D data only.&quot;</span><span class="p">)</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Event&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ev_type</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Event type is not set. Use Maximum, Minimum, Max-weight, Min-weight, Above or Below&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ev_thr</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;Threshold&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Event Threshold is not set.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ev_thr_type</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;Thr-type&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Event threshold type (Thr-type) is not set. Use Absolute or Sigma.&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">start_delay</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;Start delay&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">start_delay</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">end_delay</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s1">&#39;End delay&#39;</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">end_delay</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(((</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Start&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;End&#39;</span><span class="p">)</span>
+             <span class="ow">or</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Center&#39;</span><span class="p">))</span>
+             <span class="ow">and</span> <span class="p">(</span><span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing interval lenght in options.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">coordinate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Coordinate should be set for select_intervals.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Getting the coordinate object for the selection coordinate</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">coord_obj</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get_coordinate_object</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">e</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coord_obj</span><span class="o">.</span><span class="n">dimension_list</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Select can be done only for coordinates changing along one dimension.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">intervals</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">select_coordinate</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">intervals</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">select_coord_obj</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get_coordinate_object</span><span class="p">(</span><span class="n">select_coordinate</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">e</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">select_coordinate</span> <span class="o">=</span> <span class="n">coordinate</span>
+        <span class="n">select_coord_obj</span> <span class="o">=</span> <span class="n">coord_obj</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">select_coord_obj</span><span class="o">.</span><span class="n">dimension_list</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Interval selection can be done only for coordinates changing along one dimension.&quot;</span><span class="p">)</span>
+
+    <span class="n">calc_int</span><span class="p">,</span> <span class="n">calc_int_ind</span><span class="p">,</span> <span class="n">sel_int</span><span class="p">,</span> <span class="n">sel_int_ind</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">proc_interval_limits</span><span class="p">(</span><span class="n">coordinate</span><span class="p">,</span> <span class="n">intervals</span><span class="o">=</span><span class="n">intervals</span><span class="p">)</span>
+    <span class="n">interval_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sel_int</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="p">((</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ev_thr_type</span> <span class="o">==</span> <span class="s1">&#39;Sigma&#39;</span><span class="p">)):</span>
+        <span class="c1"># Determining the signal scatter (sigma)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">ndat</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i_int</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">interval_n</span><span class="p">):</span>
+            <span class="c1"># For event selection the data object is suerly 1D</span>
+            <span class="n">var</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_int</span><span class="p">]:</span><span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i_int</span><span class="p">]]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">ndat</span> <span class="o">+=</span> <span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i_int</span><span class="p">]</span> <span class="o">-</span> <span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_int</span><span class="p">]</span>
+        <span class="n">ev_thr</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var</span> <span class="o">/</span> <span class="n">ndat</span><span class="p">)</span> <span class="o">*</span> <span class="n">ev_thr</span>
+
+
+    <span class="c1">#plt.ioff()</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+    <span class="n">selected_n</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">start_coord</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">end_coord</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">y_coord</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">i_int</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">interval_n</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i_int</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="n">coordinate</span><span class="p">,</span>
+                       <span class="n">slicing</span><span class="o">=</span><span class="p">{</span><span class="n">select_coordinate</span><span class="p">:</span><span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">Intervals</span><span class="p">(</span><span class="n">sel_int</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_int</span><span class="p">],</span> <span class="n">sel_int</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i_int</span><span class="p">])},</span>
+                       <span class="n">options</span><span class="o">=</span><span class="n">plot_options</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">interval_n</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing selection interval #&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i_int</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Full&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Select intervals by clicking and dragging mouse. Click right mouse button to finish.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Start&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Select interval starts by clicking with mouse. Click right mouse button to finish.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;End&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Select interval ends by clicking with mouse. Click right mouse button to finish.&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">_options</span><span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Center&#39;</span><span class="p">):</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Select interval centers by clicking with mouse. Click right mouse button to finish.&quot;</span><span class="p">)</span>
+            <span class="n">cid_press</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;button_press_event&#39;</span><span class="p">,</span> <span class="n">mouse_event_press</span><span class="p">)</span>
+            <span class="n">cid_release</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s1">&#39;button_release_event&#39;</span><span class="p">,</span> <span class="n">mouse_event_release</span><span class="p">)</span>
+            <span class="n">stop_select</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">while</span> <span class="n">stop_select</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">start_coord</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">end_coord</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">end_coord</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">selected_n</span><span class="p">):</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">start_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">end_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]),[</span><span class="n">y_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">y_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+                        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+                        <span class="n">selected_n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">end_coord</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_disconnect</span><span class="p">(</span><span class="n">cid_press</span><span class="p">)</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_disconnect</span><span class="p">(</span><span class="n">cid_release</span><span class="p">)</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Getting the data and the coordinate for this interval</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+            <span class="n">data_act</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_int</span><span class="p">]:</span><span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i_int</span><span class="p">]]</span>
+            <span class="n">ind</span><span class="p">[</span><span class="n">select_coord_obj</span><span class="o">.</span><span class="n">dimension_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_int</span><span class="p">],</span> <span class="n">sel_int_ind</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i_int</span><span class="p">])</span>
+            <span class="n">coord_act</span><span class="p">,</span> <span class="n">cl</span><span class="p">,</span> <span class="n">ch</span> <span class="o">=</span> <span class="n">coord_obj</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">data_shape</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">ind</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">sel_int</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i_int</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">sel_int</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">i_int</span><span class="p">]):</span>
+                <span class="n">data_act</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">data_act</span><span class="p">)</span>
+                <span class="n">coord_act</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">coord_act</span><span class="p">)</span>
+            <span class="c1"># Finding indices where the condition switches on and off</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Maximum&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Max-weight&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Above&#39;</span><span class="p">)):</span>
+                <span class="n">cond_on</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&gt;</span> <span class="n">ev_thr</span><span class="p">,</span>
+                                         <span class="n">data_act</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">ev_thr</span><span class="p">)</span>
+                <span class="n">cond_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ev_thr</span><span class="p">,</span>
+                                         <span class="n">data_act</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;=</span> <span class="n">ev_thr</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">((</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Minimum&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Min-weight&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Below&#39;</span><span class="p">)):</span>
+                <span class="n">cond_on</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&lt;</span> <span class="n">ev_thr</span><span class="p">,</span>
+                                         <span class="n">data_act</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">ev_thr</span><span class="p">)</span>
+                <span class="n">cond_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">ev_thr</span><span class="p">,</span>
+                                         <span class="n">data_act</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">&gt;=</span> <span class="n">ev_thr</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid event condition.&quot;</span><span class="p">)</span>
+            <span class="n">ind_on</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">cond_on</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">ind_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">cond_off</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">ind_on</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">ind_off</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">ind_off</span> <span class="o">=</span> <span class="n">ind_off</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind_on</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind_off</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind_on</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">ind_on</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ind_on</span> <span class="o">=</span> <span class="n">ind_on</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind_off</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind_on</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind_off</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">ind_off</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ind_off</span> <span class="o">=</span> <span class="n">ind_on</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Above&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Below&#39;</span><span class="p">)):</span>
+                <span class="n">start_coord</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">coord_act</span><span class="p">[</span><span class="n">ind_on</span><span class="p">]</span> <span class="o">+</span> <span class="n">start_delay</span><span class="p">)</span>
+                <span class="n">end_coord</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">coord_act</span><span class="p">[</span><span class="n">ind_off</span><span class="p">]</span> <span class="o">+</span> <span class="n">end_delay</span><span class="p">)</span>
+                <span class="n">selected_n</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind_on</span><span class="p">)</span>
+                <span class="n">y_coord</span> <span class="o">+=</span> <span class="p">[</span><span class="n">ev_thr</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">ind_on</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>    
+                <span class="k">for</span> <span class="n">i_event</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ind_on</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Maximum&#39;</span><span class="p">):</span>
+                        <span class="n">act_ev_coord</span> <span class="o">=</span> <span class="n">coord_act</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="n">ind_on</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span>
+                                                                    <span class="p">:</span> <span class="n">ind_off</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                                                                    <span class="p">]</span>
+                                                           <span class="p">)</span> <span class="o">+</span> <span class="n">ind_on</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span>
+                                                 <span class="p">]</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Minimum&#39;</span><span class="p">):</span>
+                        <span class="n">act_ev_coord</span> <span class="o">=</span> <span class="n">coord_act</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="n">ind_on</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span>
+                                                                    <span class="p">:</span> <span class="n">ind_off</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+                                                                    <span class="p">]</span>
+                                                           <span class="p">)</span> <span class="o">+</span> <span class="n">ind_on</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span>
+                                                 <span class="p">]</span>
+                    <span class="k">elif</span> <span class="p">((</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Max-weight&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ev_type</span> <span class="o">==</span> <span class="s1">&#39;Min-weight&#39;</span><span class="p">)):</span>
+                        <span class="n">act_ev_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="n">ind_on</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="p">:</span> <span class="n">ind_off</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                                              <span class="o">*</span> <span class="n">coord_act</span><span class="p">[</span><span class="n">ind_on</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="p">:</span> <span class="n">ind_off</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                                              <span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data_act</span><span class="p">[</span><span class="n">ind_on</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="p">:</span> <span class="n">ind_off</span><span class="p">[</span><span class="n">i_event</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">act_ev_coord</span> <span class="o">-</span> <span class="n">length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&gt;</span> <span class="n">coord_act</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                         <span class="ow">and</span> <span class="p">(</span><span class="n">act_ev_coord</span> <span class="o">+</span> <span class="n">length</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="n">coord_act</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+                        <span class="n">start_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act_ev_coord</span> <span class="o">-</span> <span class="n">length</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                        <span class="n">end_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">start_coord</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">length</span><span class="p">)</span>
+                        <span class="n">y_coord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ev_thr</span><span class="p">)</span>
+                        <span class="n">selected_n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Selected &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">selected_n</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot; intervals.&quot;</span><span class="p">)</span>
+
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="n">coordinate</span><span class="p">,</span>
+           <span class="n">slicing</span><span class="o">=</span><span class="p">{</span><span class="n">coordinate</span><span class="p">:</span><span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">Intervals</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">sel_int</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">sel_int</span><span class="p">[</span><span class="mi">1</span><span class="p">]))},</span>
+               <span class="n">options</span><span class="o">=</span><span class="n">plot_options</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">selected_n</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">selected_n</span><span class="p">):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">start_coord</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">end_coord</span><span class="p">[</span><span class="n">i</span><span class="p">]]),[</span><span class="n">y_coord</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">y_coord</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">start_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">start_coord</span><span class="p">)</span>
+        <span class="n">end_coord</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">end_coord</span><span class="p">)</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">start_coord</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">start_coord</span><span class="o">.</span><span class="n">dtype</span><span class="p">),</span> <span class="n">end_coord</span> <span class="o">-</span> <span class="n">start_coord</span><span class="p">]</span>
+        <span class="n">coord_int</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">Coordinate</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Interval&#39;</span><span class="p">,</span>
+                               <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;a.u.&#39;</span><span class="p">,</span>
+                               <span class="n">mode</span><span class="o">=</span><span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">CoordinateMode</span><span class="p">(</span><span class="n">equidistant</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                               <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                               <span class="n">dimension_list</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                               <span class="p">)</span>
+        <span class="n">d_out</span><span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">data_object</span><span class="o">.</span><span class="n">DataObject</span><span class="p">(</span><span class="n">data_array</span><span class="o">=</span><span class="n">start_coord</span><span class="p">,</span>
+                          <span class="n">error</span><span class="o">=</span><span class="n">err</span><span class="p">,</span>
+                          <span class="n">data_unit</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">coordinate</span><span class="p">,</span><span class="n">unit</span><span class="o">=</span><span class="n">d</span><span class="o">.</span><span class="n">get_coordinate_object</span><span class="p">(</span><span class="n">coordinate</span><span class="p">)</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
+                          <span class="n">exp_id</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">exp_id</span><span class="p">,</span>
+                          <span class="n">data_source</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">data_source</span><span class="p">,</span>
+                          <span class="n">coordinates</span> <span class="o">=</span> <span class="p">[</span><span class="n">coord_int</span><span class="p">]</span>
+                          <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">output_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">flap</span><span class="o">.</span><span class="n">data_object</span><span class="o">.</span><span class="n">add_data_object</span><span class="p">(</span><span class="n">d_out</span><span class="p">,</span> <span class="n">output_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
+
+        <span class="k">return</span> <span class="n">d_out</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">FLAP</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../styleguide.html">FLAP Styleguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sourcecode.html">FLAP source code documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage of FLAP (tips/tricks/faq)</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, S. Zoletnik et al..
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
