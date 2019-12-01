@@ -466,7 +466,25 @@ If you want to update the existing (html) documentation, you should write (on Wi
 make.bat html
 \end{quote}
 
-Of course, if you need any other format, you can use that as well.
+Of course, if you need any other format, you can use that as well. For example
+\begin{quote}
+
+make.bat latex
+\end{quote}
+
+will generate LaTeX files for you, from which you can generate e.g. a pdf document.
+\begin{quote}
+
+make.bat epub
+\end{quote}
+
+will generate an ebook format of your documentation.
+
+The documentation by default is written in ReStructured Text format (.rst file extension), but there is a possibility to extend Sphinx’s capabilities to recognize MarkDown format (.md). For this you have to install the recommonmark module for your Python distribution with the following command.
+\begin{quote}
+
+pip install recommonmark
+\end{quote}
 
 
 \chapter{FLAP source code documentation}
