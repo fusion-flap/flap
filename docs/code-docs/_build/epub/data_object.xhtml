@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <title>Data object</title>
+    <link rel="stylesheet" href="_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-flap.data_object">
+<span id="data-object"></span><h1>Data object</h1>
+<p>Created on Tue Jan 22 17:37:32 2019</p>
+<p>&#64;author: Zoletnik</p>
+<dl class="class">
+<dt id="flap.data_object.DataObject">
+<em class="property">class </em><code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">DataObject</code><span class="sig-paren">(</span><em class="sig-param">data_array=None</em>, <em class="sig-param">error=None</em>, <em class="sig-param">data_unit=None</em>, <em class="sig-param">coordinates=None</em>, <em class="sig-param">exp_id=None</em>, <em class="sig-param">data_title=None</em>, <em class="sig-param">info=None</em>, <em class="sig-param">data_shape=None</em>, <em class="sig-param">data_source=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This is the data object</p>
+<dl class="method">
+<dt id="flap.data_object.DataObject.add_coordinate">
+<code class="sig-name descname">add_coordinate</code><span class="sig-paren">(</span><em class="sig-param">coordinates=None</em>, <em class="sig-param">data_source=None</em>, <em class="sig-param">exp_id=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.add_coordinate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="simple">
+<dt>This is a general coordinate conversion interface.</dt><dd><p>Adds the requested coordinate(s) to the data_object.</p>
+</dd>
+<dt>INPUT:</dt><dd><p>coordinates: List of coordinates to add. (string array)
+data_source: Optional data_source. Use this not the one in data_object
+exp_id: Optional exp_id. Use this not the one in data_object
+options: Dictionary of options.</p>
+</dd>
+</dl>
+<p>Returns the modified data object. Note that the input data object remanins the same.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.add_coordinate_object">
+<code class="sig-name descname">add_coordinate_object</code><span class="sig-paren">(</span><em class="sig-param">coordinate</em>, <em class="sig-param">index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.add_coordinate_object"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Adds a flap.Coordinate instance to the list of coordinates
+If index is not set adds to the end of the list. Otherwise adds to the position
+shown by index. (0 is beginning of list.)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.apsd">
+<code class="sig-name descname">apsd</code><span class="sig-paren">(</span><em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.apsd"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Auto power Spectral Density caclculation for the data object d.
+Returns a data object with the coordinate replaced by frequency or wavenumber.
+The power spectrum is calculated in multiple intervals (described by slicing)
+and the mean and variance will be returned.</p>
+<dl>
+<dt>INPUT:</dt><dd><p>d: A flap.DataObject.
+coordinate: The name of the coordinate (string) along which to calculate APSD.</p>
+<blockquote>
+<div><p>This coordinate should change only along one data dimension and should be equidistant.
+This and all other cordinates changing along the data dimension of
+this coordinate will be removed. A new coordinate with name
+Frequency/Wavenumber will be added. The unit will be
+derived from the unit of the coordinate (e.g., Hz cm-1, m-1)</p>
+</div></blockquote>
+<dl>
+<dt>intervals: Information of processing intervals.</dt><dd><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</dd>
+<dt>options: Dictionary. (Keys can be abbreviated)</dt><dd><dl class="simple">
+<dt>‘Wavenumber’<span class="classifier">True/False. Will use 2*Pi*f for the output coordinate scale, this is useful for</span></dt><dd><p>wavenumber calculation.</p>
+</dd>
+</dl>
+<p>‘Resolution’: Output resolution in the unit of the output coordinate.
+‘Range’: Output range in the unit of the output coordinate.
+‘Logarithmic’: True/False. If True will create logarithmic frequency binning.
+‘Interval_n’: Minimum number of intervals to use for the processing. These are identical</p>
+<blockquote>
+<div><p>length intervals inserted into the input interval list. Default is 8.</p>
+</div></blockquote>
+<dl>
+<dt>‘Error calculation’<span class="classifier">True/False. Calculate or not error. Omitting error calculation</span></dt><dd><p>increases speed. If Interval_n is 1 no error calculation is done.</p>
+</dd>
+<dt>‘Trend removal’: Trend removal description (see also _trend_removal()). A list, string or None.</dt><dd><blockquote>
+<div><blockquote>
+<div><p>None: Don’t remove trend.
+Strings:</p>
+<blockquote>
+<div><p>‘mean’: subtract mean</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Lists:</dt><dd><p>[‘poly’, n]: Fit an n order polynomial to the data and subtract.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>Trend removal will be applied to each interval separately.</p>
+</div></blockquote>
+<p>‘Hanning’: True/False Use a Hanning window.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<p>Return value: The new data object</p>
+<p>This method is implemented by the _apsd function in spectcral_analysis.py</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.ccf">
+<code class="sig-name descname">ccf</code><span class="sig-paren">(</span><em class="sig-param">ref=None</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.ccf"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>N dimensional Cross Correlation Function or covariance calculation for the data object self taking d_ref
+as reference. If ref is not set self is used as reference, that is all CCFs are calculated
+within self. Calculates all CCF between all signals in ref and sel, but not inside self and ref.
+Correlation is calculated along the coordinate(s) listed in coordinate which should be
+identical for the to input data objects.
+Returns a data object with dimension number self.dim+ref.dim-len(coordinate).
+The coordinates are replaced by coordinate+’ lag’.
+The CCF is calculated in multiple intervals (described by intervals)
+and the mean and variance will be returned.</p>
+<dl>
+<dt>INPUT:</dt><dd><p>self: A flap.DataObject.
+ref: Another flap.DataObject
+coordinate: The name of the coordinate (string) along which to calculate CCF or a list of names.</p>
+<blockquote>
+<div><p>Each coordinate should change only along one data dimension and should be equidistant.
+This and all other cordinates changing along the data dimension of
+these coordinates will be removed. New coordinates with name+’ lag’ will be added.</p>
+</div></blockquote>
+<dl>
+<dt>intervals: Information of processing intervals.</dt><dd><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</dd>
+<dt>options: Dictionary. (Keys can be abbreviated)</dt><dd><p>‘Resolution’: Output resolution for each coordinate. (list of values or single value)
+‘Range’: Output ranges for each coordinate. (List or list of lists)
+‘Interval_n’: Minimum number of intervals to use for the processing. These are identical</p>
+<blockquote>
+<div><p>length intervals inserted into the input interval list. Default is 8.</p>
+</div></blockquote>
+<dl>
+<dt>‘Error calculation’<span class="classifier">True/False. Calculate or not error. Omitting error calculation</span></dt><dd><p>increases speed. If Interval_n is 1 no error calculation is done.</p>
+</dd>
+<dt>‘Trend removal’: Trend removal description (see also _trend_removal()). A list, string or None.</dt><dd><blockquote>
+<div><p>None: Don’t remove trend.
+Strings:</p>
+<blockquote>
+<div><p>‘mean’: subtract mean</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Lists:</dt><dd><p>[‘poly’, n]: Fit an n order polynomial to the data and subtract.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>Trend removal will be applied to each interval separately.
+At present trend removal can be applied to 1D CCF only.</p>
+</dd>
+</dl>
+<p>‘Hanning’: True/False Use a Hanning window.
+‘Normalize’: Normalize with autocorrelations, that is calculate correlation instead of covariance.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.check">
+<code class="sig-name descname">check</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.check"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Does a consistency check for the data object and raises errors if problems found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.coordinate">
+<code class="sig-name descname">coordinate</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">index=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.coordinate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the coordinates of a subarray of the data array.
+name: Coordinate name (string)
+index: The indexes into the data array (tuple with various elements, see Coordinate.data())
+options: The same options as for Coordinate.data()</p>
+<dl>
+<dt>returns 3 np.arrays:</dt><dd><dl class="simple">
+<dt>data: the coordinates. The number of dimension is the same as the dimension of</dt><dd><p>the data array, but the number  of elements are taken from index.</p>
+</dd>
+</dl>
+<p>data_low: low ranges, same shape as data. None if no range data is present
+data_high: high ranges, same shape as data. None if no range data is present</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.coordinate_change_dimensions">
+<code class="sig-name descname">coordinate_change_dimensions</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.coordinate_change_dimensions"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the list of dimensions of the data array along which
+the named coordinate changes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.coordinate_change_indices">
+<code class="sig-name descname">coordinate_change_indices</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.coordinate_change_indices"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl class="simple">
+<dt>Returns the indices to the data array for which the coordinate changes.</dt><dd><p>The returned value is a tuple of indices, the number of elements equals the
+dimension of the data. This can be directly used to get the coordinate values
+using coordinate()</p>
+</dd>
+</dl>
+<p>name: Coordinate name (string)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.coordinate_names">
+<code class="sig-name descname">coordinate_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.coordinate_names"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns a list with the coordinate names.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.coordinate_nochange_dimensions">
+<code class="sig-name descname">coordinate_nochange_dimensions</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.coordinate_nochange_dimensions"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the list of dimensions of the data array along which
+the named coordinate changes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.coordinate_range">
+<code class="sig-name descname">coordinate_range</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">index=Ellipsis</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.coordinate_range"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the ranges of a coordinate.
+name: Coordinate name (string)</p>
+<p>Returns the data range and the data range with errors for the coordinate. Both are lists.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.cpsd">
+<code class="sig-name descname">cpsd</code><span class="sig-paren">(</span><em class="sig-param">ref=None</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.cpsd"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Complex Cross Power Spectrum calculation for the data object self taking d_ref as reference.
+If self is not set d is used as reference, that is all spectra are calculated within self.
+Calculates all spectra between all signals in ref and self, but not inside self and ref.
+self and ref both should have the same equidistant coordinate with equal sampling points.
+Returns a data object with dimension number self.dim+ref.dim-1. The coordinate is replaced
+by frequency or wavenumber.
+The spectrum is calculated in multiple intervals (described by intervals)
+and the mean and variance will be returned.</p>
+<dl>
+<dt>INPUT:</dt><dd><p>self: A flap.DataObject.
+ref: Another flap.DataObject
+coordinate: The name of the coordinate (string) along which to calculate CPSD.</p>
+<blockquote>
+<div><p>This coordinate should change only along one data dimension and should be equidistant.
+This and all other cordinates changing along the data dimension of
+this coordinate will be removed. A new coordinate with name
+Frequency/Wavenumber will be added. The unit will be
+derived from the unit of the coordinate (e.g., Hz cm-1, m-1)</p>
+</div></blockquote>
+<dl>
+<dt>intervals: Information of processing intervals.</dt><dd><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</dd>
+<dt>options: Dictionary. (Keys can be abbreviated)</dt><dd><dl class="simple">
+<dt>‘Wavenumber’<span class="classifier">True/False. Will use 2*Pi*f for the output coordinate scale, this is useful for</span></dt><dd><p>wavenumber calculation.</p>
+</dd>
+</dl>
+<p>‘Resolution’: Output resolution in the unit of the output coordinate.
+‘Range’: Output range in the unit of the output coordinate.
+‘Logarithmic’: True/False. If True will create logarithmic frequency binning.
+‘Interval_n’: Minimum number of intervals to use for the processing. These are identical</p>
+<blockquote>
+<div><p>length intervals inserted into the input interval list. Default is 8.</p>
+</div></blockquote>
+<dl>
+<dt>‘Error calculation’<span class="classifier">True/False. Calculate or not error. Omitting error calculation</span></dt><dd><p>increases speed. If Interval_n is 1 no error calculation is done.</p>
+</dd>
+<dt>‘Trend removal’: Trend removal description (see also _trend_removal()). A list, string or None.</dt><dd><blockquote>
+<div><p>None: Don’t remove trend.
+Strings:</p>
+<blockquote>
+<div><p>‘mean’: subtract mean</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Lists:</dt><dd><p>[‘poly’, n]: Fit an n order polynomial to the data and subtract.</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>Trend removal will be applied to each interval separately.</p>
+</dd>
+</dl>
+<p>‘Hanning’: True/False Use a Hanning window.
+‘Normalize’: Calculate coherency instead of crosspower</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.detrend">
+<code class="sig-name descname">detrend</code><span class="sig-paren">(</span><em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.detrend"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Trend removal.
+INPUT:</p>
+<blockquote>
+<div><p>coordinate: The x coordinate for the trend removal.
+intervals: Information of processing intervals.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</div></blockquote>
+<dl>
+<dt>options:</dt><dd><dl>
+<dt>‘Trend removal’: Trend removal description (see also _trend_removal()). A list, string or None.</dt><dd><p>None: Don’t remove trend.
+Strings:</p>
+<blockquote>
+<div><p>‘Mean’: subtract mean</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Lists:</dt><dd><dl class="simple">
+<dt>[‘Poly’, n]: Fit an n order polynomial to the data and subtract.</dt><dd><p>Trend removal will be applied to each interval defined by slicing
+separately.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<p>Return value: The data object with the trend removed data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.error_value">
+<code class="sig-name descname">error_value</code><span class="sig-paren">(</span><em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.error_value"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns a data object with the error of self in it.
+options: ‘High’: Use high error if error is asymmetric</p>
+<blockquote>
+<div><p>‘Low’: Use low error is error is asymmetric</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.filter_data">
+<code class="sig-name descname">filter_data</code><span class="sig-paren">(</span><em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.filter_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>1D Data filter.
+INPUT:</p>
+<blockquote>
+<div><p>coordinate: The x coordinate for the trend removal.
+intervals: Information of processing intervals.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</div></blockquote>
+<dl>
+<dt>options:</dt><dd><dl>
+<dt>‘Type’ :</dt><dd><p>None: Do nothing.
+‘Int’: Single term IIF filter, like RC integrator.
+‘Diff’: Single term IIF filter, like RC differentiator.
+‘Bandpass’, ‘Lowpass’, ‘Highpass’: Filters designed by scipy.signal.iirdesign.</p>
+<blockquote>
+<div><blockquote>
+<div><p>The filter type is in ‘Design’</p>
+</div></blockquote>
+<p>Bandpass: f_low - f_high
+Lowpass: - f_high
+Highpass: - f_low</p>
+</div></blockquote>
+</dd>
+<dt>‘Design’: The design type of the bandpass, lowpass or highpass filter.</dt><dd><p>(‘Elliptic’, ‘Butterworth, ‘Chebyshev I’, ‘Chebyshev II’, ‘Bessel’)
+The numpy.iirdesign function is used for generating the filter.
+Setting inconsistent parameters can cause strange results. E.g. too high attenuation
+at too low frequency relative to the smapling frequency can be a problem.</p>
+</dd>
+</dl>
+<p>‘f_low’, ‘f_high’: Cut on/off frequencies. (Middle between passband and stopband edge.)
+‘Steepness’: Difference between passband and stopband edge frequencies as a fraction</p>
+<blockquote>
+<div><blockquote>
+<div><p>of the middle frequency.</p>
+</div></blockquote>
+<p>‘Loss’: The maximum loss in the passband in dB
+‘Attenuation’: The minimum attenuation in the stopband dB</p>
+</div></blockquote>
+<p>‘Tau’: time constant for integrator/differentiator (in units of the coordinate)
+‘Power’: Calculate square of the signal after filtering. (boolean)
+‘Inttime’: Integration time after power calculation. (in units of oordinate)</p>
+</dd>
+</dl>
+</div></blockquote>
+<p>Return value: The data object with the filtered data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.get_coordinate_object">
+<code class="sig-name descname">get_coordinate_object</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.get_coordinate_object"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns the Coordinate class having the given name. The returned object is a link not a copy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.index_from_coordinate">
+<code class="sig-name descname">index_from_coordinate</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">coord_values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.index_from_coordinate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><dl>
+<dt>Returns the closest data indices of the coordinate values.</dt><dd><p>Coordinates should change only along one dimension.
+It is assumed that coordinates change monotonically.</p>
+</dd>
+<dt>INPUT:</dt><dd><p>name: Coordinate name (string)
+coord_values: The coordinate values to convert to indices.</p>
+<blockquote>
+<div><p>(numpy array or list is scalar)</p>
+</div></blockquote>
+</dd>
+<dt>Return value:</dt><dd><p>Returns the indices in the same format as the input coordinates.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">axes=None</em>, <em class="sig-param">slicing=None</em>, <em class="sig-param">slicing_options=None</em>, <em class="sig-param">summing=None</em>, <em class="sig-param">options=None</em>, <em class="sig-param">plot_type=None</em>, <em class="sig-param">plot_options=None</em>, <em class="sig-param">plot_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.plot"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Plot a data object.
+axes: A list of coordinate names (strings). They should be one of the coordinate</p>
+<blockquote>
+<div><p>names in the data object or ‘Data’
+They describes the axes of the plot.
+If the number of axes is less than the number required for the plot, ‘Data’ will be added.
+If no axes are given default will be used depending on the plot type. E.g. for
+x-y plot the default first axis is the firs coordinate, the second axis is ‘Data’</p>
+</div></blockquote>
+<dl>
+<dt>plot_type: The plot type (string)</dt><dd><p>‘xy’: Simple 1D plot. Default axes are: first coordinate, Data
+‘multi xy’: In case of 2D data plots 1D curves with vertical shift</p>
+<blockquote>
+<div><p>Default x axis is first coordinate, y axis is Data
+The signals are named in the label with the ‘Signal name’ coordinate or the one
+named in options[‘Signal name’]</p>
+</div></blockquote>
+</dd>
+</dl>
+<p>plot_options: Dictionary. Will be passed over to the plot call.
+slicing, summing: arguments for slice_data. Slicing will be applied before plotting.
+options:</p>
+<blockquote>
+<div><p>Matplotlib options like xtitle, xlimit, etc
+Plot options:</p>
+<blockquote>
+<div><dl class="simple">
+<dt>‘All points’ True or False</dt><dd><p>default is False. If True will plot all points otherwise will use
+the sample_to_plot function</p>
+</dd>
+<dt>‘Error’      True: Plot all error bars (default: True)</dt><dd><p>False: Do not plot errors
+number &gt; 0: Plot this many error bars in plot</p>
+</dd>
+<dt>‘Y separation’ Vertical separation of curves in multi xy plot. For linear scale this will</dt><dd><p>be added to consecutive cureves. For Log scale consecutive curves will be
+multiplied by this.</p>
+</dd>
+</dl>
+<p>‘Log x’ : Logscale X axis
+‘Log y’ : Logscale Y axis</p>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.proc_interval_limits">
+<code class="sig-name descname">proc_interval_limits</code><span class="sig-paren">(</span><em class="sig-param">coordinate</em>, <em class="sig-param">intervals=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.proc_interval_limits"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Determine processing interval limits, both in coordinates and data indices.
+This is a helper routine for all functions which do some calculation as a function
+of one coordinate and allow processing only a set of intervals instead of the whole dataset.
+INPUT:</p>
+<blockquote>
+<div><dl>
+<dt>coordinate: Name of the coordinate along which calculation will be done. This must</dt><dd><p>change only along a single data dimension.</p>
+</dd>
+<dt>intervals: Information of processing intervals.</dt><dd><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Return value:</dt><dd><p>calc_int, calc_int_ind, sel_int, sel_int_ind
+Each return value is a list of numpy arrays: [start, end]
+The calc_xxx values are for the calculation coordinate, the sel_xxx are for the
+selection coordinate. xxx_int is in coordinate values, xxx_int_ind is in data index
+values which follows the Python convention, end index is not included.
+The index start indices will be always smaller than the end indices.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.save">
+<code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">protocol=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.save"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Save the data object to a binary file using pickle.
+Use load to read the object.
+Filename: The name of the output file
+protocol: The pickle protocol to use</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.slice_data">
+<code class="sig-name descname">slice_data</code><span class="sig-paren">(</span><em class="sig-param">slicing=None</em>, <em class="sig-param">summing=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.slice_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Slice (select areas) from the data object along one or more coordinates.
+Return the sliced object.</p>
+<blockquote>
+<div><dl>
+<dt>slicing:</dt><dd><dl>
+<dt>Dictionary with keys referring to coordinates in the data object.</dt><dd><dl>
+<dt>Values can be:</dt><dd><dl>
+<dt>a:SIMPLE SLICE: cases when closest value or interpolated value is selected.</dt><dd><p>a1 slice objects, range objects, scalars, lists, numpy array.
+a2 flap.DataObjects without error and with data unit.name equal to</p>
+<blockquote>
+<div><p>the coordinate</p>
+</div></blockquote>
+<dl class="simple">
+<dt>a3 flap.DataObject with the name of one coordinate equal to the dictionary</dt><dd><p>key without having value_ranges values.</p>
+</dd>
+</dl>
+<p>a4 flap.Intervals objects with one interval</p>
+</dd>
+<dt>b: MULTI SLICE: Various range selection objects. In this case ranges are</dt><dd><p>selected and a new dimension is added to the data array
+(only of more than 1 interval is selected) going through the
+intervals. If intervals are of different length the longest will be used
+and missing elements filled with float(‘nan’).
+Two new coordinates are added: “&lt;coordinate&gt; in interval”,
+“&lt;coordinate&gt; interval”
+b1 flap.Intervals objects with more than one interval
+b2 flap.DataObjects with data unit.name equal to the slicing coordinate. The error</p>
+<blockquote>
+<div><p>values give the intervals.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>b3 flap.DataObject with the name of one coordinate equal to the slicing coordinate.</dt><dd><p>The value_ranges select the intervals.</p>
+</dd>
+</dl>
+<p>If range slicing is done with multiple coordinates which have common element in the
+dimension list they will be done in one step. Otherwise the slicing is done sequentially.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>summing:</dt><dd><p>Summing is applied to the sliced data. It processes data along one coordinate
+and the result is a scalar. This way summing reduces the number of dimensions.
+Dictionary with keys referring to coordinates and values as processing strings. If
+the processed coordinate changes along multiple dimensions those dimensions will be flattened.</p>
+<p>For mean and avereage data errors are calculated as error of independent variables, that is taking the square
+root of the squared sum of errors. For coordinates the mean of the ranges is taken.</p>
+<dl>
+<dt>Processing strings are the following:</dt><dd><blockquote>
+<div><p>None: Nothing to be done in this dimension</p>
+</div></blockquote>
+<p>‘Mean’ : take mean of values in selection/coordinate
+‘Sum’  : take sum of values in selection/coordinate
+‘Min’  : take the minimum of the values/coordinate
+‘Max’  : take the maximum of the values/coordinate</p>
+</dd>
+</dl>
+</dd>
+<dt>options: ‘Partial intervals’  (bool). If true processes intervals which extend over the coordinate limits.</dt><dd><blockquote>
+<div><p>If false only full intervals are processed.</p>
+</div></blockquote>
+<dl>
+<dt>‘Slice type’: ‘Simple’: Case a above: closest or interpolated values are selected, dimensions</dt><dd><blockquote>
+<div><p>are reduced or unchanged.</p>
+</div></blockquote>
+<dl class="simple">
+<dt>‘Multi’: Case b above: multiple intervals are selected and their data is placed into</dt><dd><p>new dimension.</p>
+</dd>
+</dl>
+<p>None: Automatically select. For slicing data in case b multi slice, otherwise simple</p>
+</dd>
+<dt>‘Interpolation: ‘Closest value’</dt><dd><p>‘Linear’</p>
+</dd>
+<dt>‘Regenerate coordinates’: True/False  (defaultL True)</dt><dd><p>If True and summing is done then looks for pairs of coordinates
+‘Rel. &lt;coord&gt; in int(&lt;coord1&gt;)’  ‘Start &lt;coord&gt; in int(&lt;coord1&gt;)’.
+If such pairs are found and they change on the same dimension or one of them is constant then
+coordinate &lt;coord&gt; is regenerated and these are removed.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.slicing_to_intervals">
+<code class="sig-name descname">slicing_to_intervals</code><span class="sig-paren">(</span><em class="sig-param">slicing</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.slicing_to_intervals"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Convert a multi-slicing description to an Intervals object.
+For possibilities see DataObject.slice_data().</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flap.data_object.DataObject.to_intervals">
+<code class="sig-name descname">to_intervals</code><span class="sig-paren">(</span><em class="sig-param">coordinate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#DataObject.to_intervals"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Create an Intervals class object from either the data error ranges or
+the coordinate value ranges.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="flap.data_object.FlapStorage">
+<em class="property">class </em><code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">FlapStorage</code><a class="reference internal" href="_modules/flap/data_object.xhtml#FlapStorage"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This class is for data and data source information storage</p>
+<dl class="method">
+<dt id="flap.data_object.FlapStorage.find_data_objects">
+<code class="sig-name descname">find_data_objects</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">exp_id='*'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#FlapStorage.find_data_objects"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>”
+Find data objects in flap storage.</p>
+<p>Returns name list, exp_ID list</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.abs_value">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">abs_value</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#abs_value"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Absolute value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.add_coordinate">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">add_coordinate</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">coordinates=None</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">options=None</em>, <em class="sig-param">output_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#add_coordinate"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This is the function to add coordinates to a data object in flap storage.
+This function is an interface to the add_coordinate method of flap.DataObject</p>
+<dl>
+<dt>INPUT:</dt><dd><p>object_name, exp_ID: These identify the data object in the storage
+coordinates: List of new coordinates (string list)
+output_name: The name of the new data object in the storage. If None</p>
+<blockquote>
+<div><p>the input will be overwritten</p>
+</div></blockquote>
+<dl>
+<dt>options: Dictionary</dt><dd><dl class="simple">
+<dt>‘exp_ID’: Use this exp_id for calculating coordinates instead of the one</dt><dd><p>in the data object</p>
+</dd>
+<dt>‘data_source’<span class="classifier">Use this data source instead of the one in the</span></dt><dd><p>data object.</p>
+</dd>
+</dl>
+<p>Other elements of options are passed over to flap.add_coordinate()</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.add_data_object">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">add_data_object</code><span class="sig-paren">(</span><em class="sig-param">d</em>, <em class="sig-param">object_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#add_data_object"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Add a data object to the flap storage</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.apsd">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">apsd</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#apsd"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Auto Power Spetctrum for an object in flap storage. This is a wrapper for DataObject.apsd()
+If output name is set the APSD object will be written back to the flap storage under this name.
+If not set the APSD object will be written back with its original name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.ccf">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">ccf</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">ref=None</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">ref_exp_id='*'</em>, <em class="sig-param">output_name=None</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#ccf"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Cross Corrrelation Function or covariance calculation between two objects in flap storage.
+This is a wrapper for DataObject.ccf()
+If output name is set the CPSD object will be written back to the flap storage under this name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.cpsd">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">cpsd</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">ref=None</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#cpsd"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Cross Power Spectrum between two objects in flap storage. (ref can also be a data object.)
+This is a wrapper for DataObject.cpsd()
+If output name is set the CPSD object will be written back to the flap storage under this name.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.delete_data_object">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">delete_data_object</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#delete_data_object"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Delete data object(s) from the flap storage</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.detrend">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">detrend</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#detrend"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>DETREND signal(s)
+INPUT:</p>
+<blockquote>
+<div><p>object_name: Name of the object in flap storage (string)
+exp_id: Experiment ID
+output_name: Name of the output object. If set result will be  stored under this name.
+coordinate: The coordinate for the detrend. If necessary data will be fitted with this coordinate</p>
+<blockquote>
+<div><p>as x value.</p>
+</div></blockquote>
+<dl>
+<dt>intervals: Information of processing intervals.</dt><dd><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</dd>
+<dt>options:</dt><dd><dl>
+<dt>‘Trend removal’: Trend removal description (see also _trend_removal()). A list, string or None.</dt><dd><p>None: Don’t remove trend.
+Strings:</p>
+<blockquote>
+<div><p>‘mean’: subtract mean</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Lists:</dt><dd><dl class="simple">
+<dt>[‘poly’, n]: Fit an n order polynomial to the data and subtract.</dt><dd><p>Trend removal will be applied to each interval defined by slicing
+separately.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="simple">
+<dt>Return value:</dt><dd><p>The resulting data object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.error_value">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">error_value</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#error_value"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Returns a data object with the error of self in it.
+options: ‘High’: Use high error if error is asymmetric</p>
+<blockquote>
+<div><p>‘Low’: Use low error is error is asymmetric</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.filter_data">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">filter_data</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">intervals=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#filter_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>1D Data filter.
+INPUT:</p>
+<blockquote>
+<div><p>object_name: Name of the object in flap storage (string)
+exp_id: Experiment ID
+output_name: Name of the output object. If not set object_name will be used.
+coordinate: The x coordinate for the trend removal.
+intervals: Information of processing intervals.</p>
+<blockquote>
+<div><blockquote>
+<div><dl class="simple">
+<dt>If dictionary with a single key: {selection coordinate: description})</dt><dd><p>Key is a coordinate name which can be different from the calculation
+coordinate.
+Description can be flap.Intervals, flap.DataObject or
+a list of two numbers. If it is a data object with data name identical to
+the coordinate the error ranges of the data object will be used for
+interval. If the data name is not the same as coordinate a coordinate with the
+same name will be searched for in the data object and the value_ranges
+will be used fromm it to set the intervals.</p>
+</dd>
+<dt>If not a dictionary and not None is is interpreted as the interval</dt><dd><p>description, the selection coordinate is taken the same as
+coordinate.</p>
+</dd>
+</dl>
+<p>If None, the whole data interval will be used as a single interval.</p>
+</div></blockquote>
+<dl>
+<dt>options:</dt><dd><dl>
+<dt>‘Type’ :</dt><dd><p>None: Do nothing.
+‘Int’: Single term IIF filter, like RC integrator.
+‘Diff’: Single term IIF filter, like RC differentiator.
+‘Bandpass’, ‘Lowpass’, ‘Highpass’: Filters designed by scipy.signal.iirdesign.</p>
+<blockquote>
+<div><blockquote>
+<div><p>The filter type is in ‘Design’</p>
+</div></blockquote>
+<p>Bandpass: f_low - f_high
+Lowpass: - f_high
+Highpass: - f_low</p>
+</div></blockquote>
+</dd>
+<dt>‘Design’: The design type of the bandpass, lowpass or highpass filter.</dt><dd><p>(‘Elliptic’, ‘Butterworth, ‘Chebyshev I’, ‘Chebyshev II’, ‘Bessel’)
+The numpy.iirdesign function is used for generating the filter.
+Setting inconsistent parameters can cause strange results. E.g. too high attenuation
+at too low frequency relative to the smapling frequency can be a problem.</p>
+</dd>
+</dl>
+<p>‘f_low’, ‘f_high’: Cut on/off frequencies. (Middle between passband and stopband edge.)
+‘Steepness’: Difference between passband and stopband edge frequencies as a fraction</p>
+<blockquote>
+<div><blockquote>
+<div><p>of the middle frequency.</p>
+</div></blockquote>
+<p>‘Loss’: The maximum loss in the passband in dB
+‘Attenuation’: The minimum attenuation in the stopband dB</p>
+</div></blockquote>
+<p>‘Tau’: time constant for integrator/differentiator (in units of the coordinate)
+‘Power’: Calculate square of the signal after filtering. (boolean)
+‘Inttime’: Integration time after power calculation. (in units of oordinate)    Return value: The data object with the filtered data.</p>
+</dd>
+</dl>
+</div></blockquote>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.find_data_objects">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">find_data_objects</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">exp_id='*'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#find_data_objects"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Find data objects in flap storage.</p>
+<p>Returns list of names, list of expID.s</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.get_addcoord_function">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">get_addcoord_function</code><span class="sig-paren">(</span><em class="sig-param">data_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#get_addcoord_function"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the add_coord function object for a given data source</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.get_data">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">get_data</code><span class="sig-paren">(</span><em class="sig-param">data_source</em>, <em class="sig-param">exp_id=None</em>, <em class="sig-param">name=None</em>, <em class="sig-param">no_data=False</em>, <em class="sig-param">options=None</em>, <em class="sig-param">coordinates=None</em>, <em class="sig-param">object_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#get_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>This is a general data read interface. It will call the specific data read interface
+for the registered data sources.
+data_source: The name of the data source (string)
+exp_id: Experiment ID
+coordinates: Two options:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>List of flap.Coordinate objects. Thes can precisely describe which part of the data to read</p></li>
+<li><dl class="simple">
+<dt>Dictionary. Each key is a coordinate name, the values can be</dt><dd><ul class="simple">
+<li><p>A list of two elements (describes a range in the coordinate).</p></li>
+<li><p>A single element. Will be converted into a list with two identical elements</p></li>
+</ul>
+</dd>
+</dl>
+<p>The dictionary will be converted to a list of flap.Coordinate objects and
+the data source modulee will get that.</p>
+</li>
+</ol>
+</div></blockquote>
+<p>name: The name of the data to get
+no_data: Set to True to check data but do not read
+options: Module specific options
+object_name: the name of the data object in flap storage where data will be placed.</p>
+<p>Return value is the data object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.get_data_function">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">get_data_function</code><span class="sig-paren">(</span><em class="sig-param">data_source</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#get_data_function"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return the get data function object for a given data source</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.get_data_object">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">get_data_object</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#get_data_object"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return a data object from the flap storage
+A coppy is returned not the object in the storage.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.get_data_object_ref">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">get_data_object_ref</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#get_data_object_ref"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return a data object reference from the flap storage.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.imag">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">imag</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#imag"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Real value. (Does nothing for real data)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.list_data_objects">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">list_data_objects</code><span class="sig-paren">(</span><em class="sig-param">name='*'</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">screen=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#list_data_objects"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Prepare a printout of data objects is flap storage or the listed data objects.
+name: name (with wildcards) or list of data objects
+exp_id: exp id for name
+screen: (bool) If True print to screen</p>
+<p>Return value: The text</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.list_data_sources">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">list_data_sources</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#list_data_sources"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Return a list of registered data source names as a list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.load">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">load</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#load"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Loads data saved with flap.save()
+If the data in the file were written from the flap storage it will also be
+loaded there, unless  no_storage is set to True.</p>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>filename: Name of the file to read.
+options: “No storage”: (bool) If True don’t store data in flap storage just return a list of them.</p>
+</dd>
+<dt>Return value:</dt><dd><p>If data was not written from flap storage the original object will be returned.
+If it was written out from flap storage a list of the read objects will be returned..</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.phase">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">phase</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#phase"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Phase</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.plot">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">axes=None</em>, <em class="sig-param">slicing=None</em>, <em class="sig-param">summing=None</em>, <em class="sig-param">options=None</em>, <em class="sig-param">plot_type=None</em>, <em class="sig-param">plot_options=None</em>, <em class="sig-param">plot_id=None</em>, <em class="sig-param">slicing_options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#plot"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>plot function for an object in flap storage. This is a wrapper for DataObject.plot()</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.real">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">real</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#real"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Real value. (Does nothing for real data)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.register_data_source">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">register_data_source</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">get_data_func=None</em>, <em class="sig-param">add_coord_func=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#register_data_source"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Register a new data source name and the associated functions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.save">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">save</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">filename</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">options=None</em>, <em class="sig-param">protocol=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#save"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Save one or more flap.DataObject-s using pickle.</p>
+<dl>
+<dt>INPUT:</dt><dd><dl class="simple">
+<dt>data: If flap.DataObject than save this.</dt><dd><p>If string or string list then find these data objects in flap storage and save them.
+Will also use exp_id to select data objects. These data objects can be restored
+into flap storage using load.
+If any other object save it.</p>
+</dd>
+</dl>
+<p>exp_id: Experiment ID to use in conjuction with data of it is a string.
+options: None at present
+protocol: The protocol to use
+filename: Name of the file to save to.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.data_object.slice_data">
+<code class="sig-prename descclassname">flap.data_object.</code><code class="sig-name descname">slice_data</code><span class="sig-paren">(</span><em class="sig-param">object_name</em>, <em class="sig-param">exp_id='*'</em>, <em class="sig-param">output_name=None</em>, <em class="sig-param">slicing=None</em>, <em class="sig-param">summing=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/data_object.xhtml#slice_data"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>slice function for an object in flap storage. This is a wrapper for DataObject.slicec_data()
+If output name is set the sliced object will be written back to the flap storage under this name.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

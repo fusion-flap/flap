@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<ncx version="2005-1" xmlns="http://www.daisy.org/z3986/2005/ncx/">
+  <head>
+    <meta name="dtb:uid" content="unknown"/>
+    <meta name="dtb:depth" content="3"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle>
+    <text>FLAP</text>
+  </docTitle>
+  <navMap>    
+    <navPoint id="navPoint1" playOrder="1">
+      <navLabel>
+        <text>Welcome to FLAP’s documentation!</text>
+      </navLabel>
+      <content src="index.xhtml" />  
+    </navPoint>
+    <navPoint id="navPoint2" playOrder="2">
+      <navLabel>
+        <text>FLAP Styleguide</text>
+      </navLabel>
+      <content src="styleguide.xhtml" />  
+      <navPoint id="navPoint3" playOrder="2">
+        <navLabel>
+          <text>FLAP Styleguide</text>
+        </navLabel>
+        <content src="styleguide.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint4" playOrder="3">
+        <navLabel>
+          <text>Extensions/packages for style checking</text>
+        </navLabel>
+        <content src="styleguide.xhtml#extensions-packages-for-style-checking" />  
+        <navPoint id="navPoint5" playOrder="3">
+          <navLabel>
+            <text>Extensions/packages for style checking</text>
+          </navLabel>
+          <content src="styleguide.xhtml#extensions-packages-for-style-checking" />  
+        </navPoint>
+        <navPoint id="navPoint6" playOrder="4">
+          <navLabel>
+            <text>Python extension for Visual Studio Code</text>
+          </navLabel>
+          <content src="styleguide.xhtml#python-extension-for-visual-studio-code" />  
+        </navPoint>
+        <navPoint id="navPoint7" playOrder="5">
+          <navLabel>
+            <text>Python with Spyder</text>
+          </navLabel>
+          <content src="styleguide.xhtml#python-with-spyder" />  
+        </navPoint>
+      </navPoint>
+      <navPoint id="navPoint8" playOrder="6">
+        <navLabel>
+          <text>Style guide - a short summary</text>
+        </navLabel>
+        <content src="styleguide.xhtml#style-guide-a-short-summary" />  
+      </navPoint>
+      <navPoint id="navPoint9" playOrder="7">
+        <navLabel>
+          <text>Logging</text>
+        </navLabel>
+        <content src="styleguide.xhtml#logging" />  
+      </navPoint>
+      <navPoint id="navPoint10" playOrder="8">
+        <navLabel>
+          <text>Documentation strings</text>
+        </navLabel>
+        <content src="styleguide.xhtml#documentation-strings" />  
+      </navPoint>
+      <navPoint id="navPoint11" playOrder="9">
+        <navLabel>
+          <text>How to create the documentation</text>
+        </navLabel>
+        <content src="styleguide.xhtml#how-to-create-the-documentation" />  
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint12" playOrder="10">
+      <navLabel>
+        <text>FLAP source code documentation</text>
+      </navLabel>
+      <content src="sourcecode.xhtml" />  
+      <navPoint id="navPoint13" playOrder="10">
+        <navLabel>
+          <text>FLAP source code documentation</text>
+        </navLabel>
+        <content src="sourcecode.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint14" playOrder="11">
+        <navLabel>
+          <text>Config</text>
+        </navLabel>
+        <content src="config.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint15" playOrder="12">
+        <navLabel>
+          <text>Coordinate</text>
+        </navLabel>
+        <content src="coordinate.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint16" playOrder="13">
+        <navLabel>
+          <text>Data object</text>
+        </navLabel>
+        <content src="data_object.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint17" playOrder="14">
+        <navLabel>
+          <text>FLAP XML</text>
+        </navLabel>
+        <content src="flap_xml.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint18" playOrder="15">
+        <navLabel>
+          <text>Plot</text>
+        </navLabel>
+        <content src="plot.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint19" playOrder="16">
+        <navLabel>
+          <text>Select</text>
+        </navLabel>
+        <content src="select.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint20" playOrder="17">
+        <navLabel>
+          <text>Spectral analysis</text>
+        </navLabel>
+        <content src="spectral_analysis.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint21" playOrder="18">
+        <navLabel>
+          <text>Test data</text>
+        </navLabel>
+        <content src="test_data.xhtml" />  
+      </navPoint>
+      <navPoint id="navPoint22" playOrder="19">
+        <navLabel>
+          <text>Tools</text>
+        </navLabel>
+        <content src="tools.xhtml" />  
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint23" playOrder="20">
+      <navLabel>
+        <text>Usage of FLAP (tips/tricks/faq)</text>
+      </navLabel>
+      <content src="usage.xhtml" />  
+    </navPoint>
+  </navMap>
+</ncx>

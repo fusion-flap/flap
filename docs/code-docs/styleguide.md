@@ -1,7 +1,7 @@
 # FLAP Styleguide
 
 > written by Gabor Cseh  
-> last modified: 30th November 2019
+> last modified: 1st December 2019
 
 The purpose of this document is to give an overview of the coding style requirements for developing the main components of the Fusion Library of Analysis Programs (FLAP) package. (It is not a requirement for developing your own user programs, however, it is still suggested to use this coding style, even when just using FLAP. Or always.).
 
@@ -285,3 +285,22 @@ After properly written the documentation strings in the code, one can generate t
 4. You got a basic documentation!
 
 Of course, the documentation can be tweaked later by hand and manual pages can also be added later. PDFs and various ebook file types also can be generated, but the default is a HTML structure, where you can search and navigate.
+
+If you want to update the existing (html) documentation, you should write (on Windows) the following command in the documentation source directory.
+
+> make.bat html
+
+Of course, if you need any other format, you can use that as well. For example
+
+> make.bat latex
+
+will generate LaTeX files for you, from which you can generate e.g. a pdf document.
+
+> make.bat epub
+
+will generate an ebook format of your documentation.
+
+The documentation by default is written in ReStructured Text format (.rst file extension), but there is a possibility to extend Sphinx's capabilities to recognize MarkDown format (.md). For this you have to install the recommonmark module for your Python distribution.
+
+> pip install recommonmark
+> 

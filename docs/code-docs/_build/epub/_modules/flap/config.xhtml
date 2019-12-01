@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <title>flap.config</title>
+    <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for flap.config</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Wed Jan 23 21:45:43 2019</span>
+
+<span class="sd">@author: Zoletnik</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">flap.tools</span>
+
+<span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">optionxform</span> <span class="o">=</span> <span class="nb">str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="s2">&quot;flap_defaults.cfg&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+    <span class="n">read_ok</span> <span class="o">=</span> <span class="n">__flap_config</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">read_ok</span> <span class="o">==</span> <span class="p">[]):</span>
+        <span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;Error reading configuration file &quot;</span><span class="o">+</span><span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Configuration has not been read.&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">txt</span> <span class="o">=</span> <span class="n">__flap_config</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">section</span><span class="p">][</span><span class="n">element</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No &#39;&quot;</span> <span class="o">+</span> <span class="n">element</span>
+                             <span class="o">+</span> <span class="s2">&quot;&#39; entry in section [&quot;</span> <span class="o">+</span> <span class="n">section</span><span class="o">+</span><span class="s2">&quot;] in config file:&quot;</span>
+                             <span class="o">+</span> <span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">default</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">datatype</span><span class="p">(</span><span class="n">txt</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid value (&quot;</span> <span class="o">+</span> <span class="n">txt</span> <span class="o">+</span> <span class="s2">&quot;) for &quot;</span> <span class="o">+</span> <span class="n">element</span>
+                             <span class="o">+</span> <span class="s2">&quot; entry in section [&quot;</span> <span class="o">+</span> <span class="n">section</span><span class="o">+</span><span class="s2">&quot;] in config file:&quot;</span>
+                             <span class="o">+</span> <span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_all_section</span><span class="p">(</span><span class="n">section</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Configuration has not been read.&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="n">__flap_config</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">l</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">[]):</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">interpret_config_value</span><span class="p">(</span><span class="n">e</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">e</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="n">val</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">d</span>
+    <span class="k">except</span> <span class="n">configparser</span><span class="o">.</span><span class="n">NoSectionError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="interpret_config_value"><a class="viewcode-back" href="../../config.xhtml#flap.config.interpret_config_value">[docs]</a><span class="k">def</span> <span class="nf">interpret_config_value</span><span class="p">(</span><span class="n">value_str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Determine the data type from the input string and convert.</span>
+<span class="sd">        Conversions:</span>
+<span class="sd">        &#39;True&#39;, &#39;Yes&#39; --&gt; True</span>
+<span class="sd">        &#39;False&#39;, &#39;No&#39; --&gt; False</span>
+<span class="sd">        Starting and ending with &#39; or &quot; --&gt; string</span>
+<span class="sd">        If can be converted to int, float or complex --&gt; converted numeric value</span>
+<span class="sd">        Starting and ending with [] --&gt; list</span>
+<span class="sd">        If all the above fails keep as string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">value_str</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">value_str</span> <span class="o">==</span> <span class="s1">&#39;Yes&#39;</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">value_str</span> <span class="o">==</span> <span class="s1">&#39;False&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">value_str</span> <span class="o">==</span> <span class="s1">&#39;No&#39;</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">value_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value_str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">value_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value_str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">value_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">convert_types</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">]</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">value_str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value_str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;]&#39;</span><span class="p">)):</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">value_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">values_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;Yes&#39;</span><span class="p">)):</span>
+                <span class="n">values_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;False&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">val</span> <span class="o">==</span> <span class="s1">&#39;No&#39;</span><span class="p">)):</span>
+                <span class="n">values_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)):</span>
+                <span class="n">values_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">convert_types</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">t</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                    <span class="n">values_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">values_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">values_list</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">convert_types</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">t</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">value_str</span></div>
+
+<div class="viewcode-block" id="merge_options"><a class="viewcode-back" href="../../config.xhtml#flap.config.merge_options">[docs]</a><span class="k">def</span> <span class="nf">merge_options</span><span class="p">(</span><span class="n">default_options</span><span class="p">,</span> <span class="n">input_options</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Merges options dictionaries. Uses default options of function, input options of function and</span>
+<span class="sd">    options read from config file from &lt;section&gt; section. If exp_id is set will also look for options</span>
+<span class="sd">    in section Module exp_id for options starting with {section}.</span>
+<span class="sd">    The precedence of options is:</span>
+<span class="sd">        default_options &lt; section options &lt; module options &lt; input_options</span>
+<span class="sd">      INPUT:</span>
+<span class="sd">        default_options: Default options in a function. This should contain all the possible options.</span>
+<span class="sd">        input_options: Contents of options argument of function. Option keys can also be abbreviated.</span>
+<span class="sd">        data_source: The data source of the measurement. (May be None)</span>
+<span class="sd">        section: Name of the section in the config file related to the fnction. (May be None.)</span>
+<span class="sd">      Return value:</span>
+<span class="sd">          The merged options dictionary. Abbreviated keys are expanded to full name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">default_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">section</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">section_options</span> <span class="o">=</span> <span class="n">get_all_section</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">section_options</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">data_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">module_options</span> <span class="o">=</span> <span class="n">get_all_section</span><span class="p">(</span><span class="s2">&quot;Module &quot;</span><span class="o">+</span><span class="n">data_source</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">module_options</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">options</span> <span class="o">=</span>  <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">default_options</span><span class="p">)</span>
+
+    <span class="c1"># MOdule separator keys</span>
+    <span class="n">module_sep</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span>
+
+    <span class="k">if</span> <span class="p">((</span><span class="n">section</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">data_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)):</span>
+        <span class="c1"># Looking for options in the data source which refer to this section, that is start with {section}</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">section_options</span><span class="p">)</span>
+        <span class="n">module_selected_options</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">module_key</span> <span class="ow">in</span> <span class="n">module_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">module_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">module_sep</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">module_key</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">module_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)):</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">module_key</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">module_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="p">((</span><span class="n">module_key</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">section</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">module_key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)):</span>
+                    <span class="n">option_name</span> <span class="o">=</span> <span class="n">module_key</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+                    <span class="n">module_selected_options</span><span class="p">[</span><span class="n">option_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module_options</span><span class="p">[</span><span class="n">module_key</span><span class="p">]</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">module_selected_options</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">section</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">data_source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)):</span>
+        <span class="c1"># Looking for module options which do not have {...} at the beginning</span>
+        <span class="n">module_selected_options</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">module_key</span> <span class="ow">in</span> <span class="n">module_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">module_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">module_sep</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">module_key</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">module_sep</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="n">module_selected_options</span><span class="p">[</span><span class="n">module_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">module_options</span><span class="p">[</span><span class="n">module_key</span><span class="p">]</span>
+        <span class="n">options</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">module_selected_options</span><span class="p">)</span>
+
+    <span class="c1"># Processing input options</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">input_options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">input_options</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Options must be a dictionary or None.&quot;</span><span class="p">)</span>
+        <span class="n">default_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">default_options</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">input_key</span> <span class="ow">in</span> <span class="n">input_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">n_match</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">default_keys</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">default_keys</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_key</span><span class="p">))</span>  \
+                    <span class="ow">and</span> <span class="p">(</span><span class="n">default_keys</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">input_key</span><span class="p">)]</span> <span class="o">==</span> <span class="n">input_key</span><span class="p">)):</span>
+                    <span class="n">n_match</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">n_match</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                        <span class="k">break</span>
+                    <span class="n">i_match</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="n">match_input_key</span> <span class="o">=</span> <span class="n">input_key</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">n_match</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input option key &#39;&quot;</span><span class="o">+</span><span class="n">input_key</span><span class="o">+</span><span class="s2">&quot;&#39; matches multiple possible options.&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">n_match</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input option key &#39;&quot;</span><span class="o">+</span><span class="n">input_key</span><span class="o">+</span><span class="s2">&quot;&#39; does not match any possible option.&quot;</span><span class="p">)</span>
+            <span class="n">options</span><span class="p">[</span><span class="n">default_keys</span><span class="p">[</span><span class="n">i_match</span><span class="p">]]</span> <span class="o">=</span> <span class="n">input_options</span><span class="p">[</span><span class="n">match_input_key</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">options</span></div>
+
+<span class="k">def</span> <span class="nf">test_select_signals</span><span class="p">():</span>
+<span class="c1">#    signals = chlist(chrange=[1,20],prefix=&#39;ABC-&#39;,postfix=&#39;-SD&#39;)</span>
+    <span class="n">signals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ABC-3-SD&#39;</span><span class="p">,</span><span class="s1">&#39;ABC-3-SD-3&#39;</span><span class="p">,</span><span class="s1">&#39;ABC-4-SD-5&#39;</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">chl</span><span class="p">,</span> <span class="n">ilist</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">select_signals</span><span class="p">(</span><span class="n">signals</span><span class="p">,</span><span class="s1">&#39;ABC-[1-22]-SD-[4-7]&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">chl</span><span class="p">)</span>
+
+
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">__flap_config</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+    <span class="n">__flap_config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">read</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: could not read configuration file &#39;&quot;</span><span class="o">+</span><span class="n">__flap_config</span><span class="o">.</span><span class="n">file_name</span><span class="o">+</span><span class="s2">&quot;&#39;.&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Default location of configuration file is working directory.&quot;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>

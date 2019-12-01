@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+  <head>
+    <meta charset="utf-8" />
+    <title>Config</title>
+    <link rel="stylesheet" href="_static/epub.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> 
+  </head><body>
+
+    <div class="document">
+      <div class="documentwrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-flap.config">
+<span id="config"></span><h1>Config</h1>
+<p>Created on Wed Jan 23 21:45:43 2019</p>
+<p>&#64;author: Zoletnik</p>
+<dl class="function">
+<dt id="flap.config.interpret_config_value">
+<code class="sig-prename descclassname">flap.config.</code><code class="sig-name descname">interpret_config_value</code><span class="sig-paren">(</span><em class="sig-param">value_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/config.xhtml#interpret_config_value"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Determine the data type from the input string and convert.
+Conversions:
+‘True’, ‘Yes’ –&gt; True
+‘False’, ‘No’ –&gt; False
+Starting and ending with ‘ or ” –&gt; string
+If can be converted to int, float or complex –&gt; converted numeric value
+Starting and ending with [] –&gt; list
+If all the above fails keep as string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="flap.config.merge_options">
+<code class="sig-prename descclassname">flap.config.</code><code class="sig-name descname">merge_options</code><span class="sig-paren">(</span><em class="sig-param">default_options</em>, <em class="sig-param">input_options</em>, <em class="sig-param">data_source=None</em>, <em class="sig-param">section=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/config.xhtml#merge_options"><span class="viewcode-link">[source]</span></a></dt>
+<dd><p>Merges options dictionaries. Uses default options of function, input options of function and
+options read from config file from &lt;section&gt; section. If exp_id is set will also look for options
+in section Module exp_id for options starting with {section}.
+The precedence of options is:</p>
+<blockquote>
+<div><blockquote>
+<div><p>default_options &lt; section options &lt; module options &lt; input_options</p>
+</div></blockquote>
+<dl class="simple">
+<dt>INPUT:</dt><dd><p>default_options: Default options in a function. This should contain all the possible options.
+input_options: Contents of options argument of function. Option keys can also be abbreviated.
+data_source: The data source of the measurement. (May be None)
+section: Name of the section in the config file related to the fnction. (May be None.)</p>
+</dd>
+<dt>Return value:</dt><dd><p>The merged options dictionary. Abbreviated keys are expanded to full name.</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</div>
+
+
+          </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  </body>
+</html>
