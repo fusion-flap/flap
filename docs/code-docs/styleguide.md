@@ -300,7 +300,6 @@ will generate LaTeX files for you, from which you can generate e.g. a pdf docume
 
 will generate an ebook format of your documentation.
 
-The documentation by default is written in ReStructured Text format (.rst file extension), but there is a possibility to extend Sphinx's capabilities to recognize MarkDown format (.md). For this you have to install the recommonmark module for your Python distribution.
+The documentation by default is written in ReStructured Text format (.rst file extension), but there is a possibility to extend Sphinx's capabilities to recognize MarkDown format (.md). For this you have to install the recommonmark module for your Python distribution with the following command.
 
 > pip install recommonmark
-> 
