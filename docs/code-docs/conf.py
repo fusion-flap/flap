@@ -57,3 +57,11 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# -- Options for Epub output ----------------------------------------------
+
+# Bibliographic Dublin Core info.
+epub_title = 'Fusion Library of Analysis Programs (FLAP)'
+epub_author = 'S. Zoletnik et al.'
+epub_publisher = 'S. Zoletnik et al.'
+epub_copyright = '2019, S. Zoletnik et al.'
