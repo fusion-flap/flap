@@ -295,6 +295,17 @@ class PlotAnimation:
             
             self.xdata_range=None
             self.ydata_range=None
+            if (self.xrange is None):
+                self.xrange=[np.min(self.xdata),np.max(self.xdata)]
+            
+            plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],
+                     self.xrange[1]*self.axes_unit_conversion[0])
+                
+            if (self.yrange is None):
+                self.yrange=[np.min(self.ydata),np.max(self.ydata)]
+                
+            plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],
+                     self.yrange[1]*self.axes_unit_conversion[1]) 
 
         if (self.options['Colorbar']):
             cbar = plt.colorbar(img,ax=self.ax_act)
@@ -302,15 +313,7 @@ class PlotAnimation:
 #EFIT overplot feature implementation:
             #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
             #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.            
-        if (self.xrange is None):
-            self.xrange=[np.min(self.xdata),np.max(self.xdata)]
-        plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],
-                 self.xrange[1]*self.axes_unit_conversion[0])
-            
-        if (self.yrange is None):
-            self.yrange=[np.min(self.ydata),np.max(self.ydata)]
-        plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],
-                 self.yrange[1]*self.axes_unit_conversion[1]) 
+
         
         if self.axes_unit_conversion[0] == 1.:
             plt.xlabel(self.ax_list[0].title(language=self.language))
@@ -363,12 +366,6 @@ class PlotAnimation:
 
         plot_opt = copy.deepcopy(self.plot_options[0])
         self.ax_act.clear()
-        self.ax_act.set_autoscale_on(False)
-
-        self.ax_act.set_xlim(self.xrange[0]*self.axes_unit_conversion[0],
-                             self.xrange[1]*self.axes_unit_conversion[0])  
-        self.ax_act.set_ylim(self.yrange[0]*self.axes_unit_conversion[1],
-                             self.yrange[1]*self.axes_unit_conversion[1])
         
         if (self.image_like):
             try: 
@@ -380,11 +377,16 @@ class PlotAnimation:
                            cmap=self.cmap_obj,vmin=self.vmin,
                            aspect=self.options['Aspect ratio'],
                            interpolation=self.options['Interpolation'],
-                           vmax=self.vmax,origin='lower',**plot_opt)            
+                           vmax=self.vmax,origin='lower',**plot_opt)
                 del im
             except Exception as e:
                 raise e
         else:
+            self.ax_act.set_autoscale_on(False)
+            self.ax_act.set_xlim(self.xrange[0]*self.axes_unit_conversion[0],
+                                 self.xrange[1]*self.axes_unit_conversion[0])  
+            self.ax_act.set_ylim(self.yrange[0]*self.axes_unit_conversion[1],
+                                 self.yrange[1]*self.axes_unit_conversion[1])
             if (len(self.xdata.shape) == 3 and len(self.ydata.shape) == 3):
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata[time_index]*self.axes_unit_conversion[0],
                                                       self.ydata[time_index]*self.axes_unit_conversion[1]) #Same issue, time is not necessarily the first flap.coordinate.
@@ -2263,8 +2265,15 @@ def _plot(data_object,
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        
         if _options['Equal axes'] and not coord_x.unit.unit == coord_y.unit.unit:
             print('Equal axis is not possible. The axes units are not equal.')
+            
+        if (xrange is None):
+            xrange=[np.min(xdata),np.max(xdata)]
+        if (yrange is None):
+            yrange=[np.min(ydata),np.max(ydata)]
+
         for it in range(len(tdata)):
             plt.subplot(_plot_id.base_subplot)
             ax_act = plt.subplot(gs[0,0])
@@ -2297,20 +2306,10 @@ def _plot(data_object,
             if (contour_levels is None):
                 contour_levels = 255
             ax_act.clear()
-            ax_act.set_autoscale_on(False)
-            if (xrange is not None):
-                plt.xlim(xrange[0]*axes_unit_conversion[0],
-                         xrange[1]*axes_unit_conversion[0])
-            else:
-                plt.xlim(np.min(xdata)*axes_unit_conversion[0],
-                         np.max(xdata)*axes_unit_conversion[0])
-                
-            if (yrange is not None):
-                plt.ylim(yrange[0]*axes_unit_conversion[1],
-                         yrange[1]*axes_unit_conversion[1])
-            else:
-                plt.ylim(np.min(ydata)*axes_unit_conversion[0],
-                         np.max(ydata)*axes_unit_conversion[0])
+            plt.xlim(xrange[0]*axes_unit_conversion[0],
+                     xrange[1]*axes_unit_conversion[0])
+            plt.ylim(yrange[0]*axes_unit_conversion[1],
+                     yrange[1]*axes_unit_conversion[1])
                 
             _plot_opt = _plot_options[0]
             if (image_like and (_plot_type == 'anim-image')):
@@ -2329,6 +2328,7 @@ def _plot(data_object,
                 except Exception as e:
                     raise e
             else:
+                ax_act.set_autoscale_on(False)
                 if (_plot_type == 'anim-image'):
                     #xgrid, ygrid = flap.tools.grid_to_box(xdata*axes_unit_conversion[0],
                     #                                      ydata*axes_unit_conversion[1])
@@ -2567,7 +2567,6 @@ def _plot(data_object,
                 cmap_obj.set_bad(_options['Nan color'])
         except ValueError:
             raise ValueError("Invalid color map.")
-
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
 
         _plot_id.plt_axis_list = []
