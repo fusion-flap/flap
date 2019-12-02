@@ -462,7 +462,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
             except Exception as e:
                 raise e
         if (hanning):
-           data_proc = data_proc * hanning_window
+            data_proc = data_proc * hanning_window
         # Calculating APS on natural resolution, full frequency scale
         dfft = np.fft.fft(data_proc,axis=proc_dim)
         dps = (dfft.conjugate() * dfft).real
@@ -1017,9 +1017,8 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             except Exception as e:
                 raise e
         if (hanning):
-            data_proc = data_proc * hanning_window.astype(data_proc.dtype)
-            data_proc_ref = data_proc_ref * hanning_window_ref.astype(data_proc_ref.dtype)
-
+            data_proc = (data_proc * hanning_window).astype(data_proc.dtype)
+            data_proc_ref = (data_proc_ref * hanning_window_ref).astype(data_proc_ref.dtype)
         # Calculating FFT
         dfft = np.fft.fft(data_proc,axis=proc_dim)
         dfft_ref = np.fft.fft(data_proc_ref,axis=proc_dim_ref)
