@@ -395,6 +395,7 @@ class Coordinate:
             if ((kind != 'u') and (kind != 'i') and (kind != 'f') and (kind != 'c')):
                 raise TypeError("Invalid coordinate step value.")
         self.__step = _step
+
     @property
     def dimension_list(self):
         return self.__dimension_list
