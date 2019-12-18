@@ -173,7 +173,7 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
     return flap.coordinate.Intervals(proc_interval_start, proc_interval_end),  \
            flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end),
 
-def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=False):
+def trend_removal_func(d, ax, trend, x=None, return_trend=False, return_poly=False):
     """ This function makes the _trend_removal internal function public
     """
     return _trend_removal(d, ax, trend, x=x, return_trend=return_trend, return_poly=return_poly)
@@ -1252,7 +1252,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                ['Poly', n]: Fit an n order polynomial to the data and subtract.
                             Trend removal will be applied to each interval separately.
                             At present trend removal can be applied to 1D CCF only.
-                'Normalize': Normalize with autocorrelations, that is calculate correlation instead of 
+                'Normalize': Normalize with autocorrelations, that is to calculate correlation instead of 
                              covariance.
                 'Verbose': Print progress messages
     """
@@ -1640,7 +1640,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                            = copy.deepcopy(ind_autocorr[0:len(autocorr_index_shape)])     
                     autocorr_mx = corr_binned[tuple(ind_autocorr)]
                     extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
-                    corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
+                    corr_binned /= np.sqrt(np.reshape(autocorr_mx, tuple(list(autocorr_mx.shape) + extend_shape)))
                     corr_binned /= np.sqrt(np.reshape(autocorr_mx, tuple(extend_shape + list(autocorr_mx.shape))))
             else:
                 # We do not have the autocorrelations, calculating

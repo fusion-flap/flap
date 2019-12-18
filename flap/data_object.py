@@ -1401,7 +1401,7 @@ class DataObject:
               Dictionary with keys referring to coordinates and values as processing strings. If
               the processed coordinate changes along multiple dimensions those dimensions will be flattened.
 
-              For mean and avereage data errors are calculated as error of independent variables, that is taking the square
+              For mean and average data errors are calculated as error of independent variables, that is taking the square
               root of the squared sum of errors. For coordinates the mean of the ranges is taken.
 
               Processing strings are the following:
@@ -1513,8 +1513,8 @@ class DataObject:
                                               coord_obj.step[0])
                 if ((type(slicing) is flap.coordinate.Intervals) 
                     # Regular slice is possible only with a single interval
-                    and ((slicing.step is None) and (len(slicing.start) == 1) or
-                        (slicing.step is not None) and (slicing.number == 1))):
+                and ((slicing.step is None) and (len(slicing.start) == 1) or
+                     (slicing.step is not None) and (slicing.number == 1))):
                     if (slicing_coord.step[0] > 0):
                         regular_slice = slice(slicing.start[0], slicing.stop[0], slicing_coord.step[0])
                     else:
