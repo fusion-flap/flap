@@ -1519,6 +1519,10 @@ class DataObject:
                         regular_slice = slice(slicing.start[0], slicing.stop[0], slicing_coord.step[0])
                     else:
                         regular_slice = slice(slicing.stop[0], slicing.start[0], slicing_coord.step[0])
+            else:
+                if ((type(slicing) is DataObject) and
+                    (slicing.data_unit.name != slicing_coord.unit.name)):
+                    coord_obj = slicing.get_coordinate_object(slicing_coord.unit.name)
             try:
                 # If regular_slice exists
                 regular_slice
@@ -2072,7 +2076,7 @@ class DataObject:
                                                                            number=slicing_description[i].shape[coord_obj.dimension_list[0]]))
                             else:
                                 try:
-                                    c, c_low, c_high = coord_obj.data(data_shape=slicing_description[i].shape,index='...')
+                                    c, c_low, c_high = coord_obj.data(data_shape=slicing_description[i].shape,index=Ellipsis)
                                 except Exception as e:
                                     raise e
                                 intervals.append(flap.coordinate.Intervals(c_low, c_high))
@@ -2186,8 +2190,8 @@ class DataObject:
                                     raise ValueError("Number of samples in interval is too small.")
                             # If the interval length are very much different too much space is needed, we don't
                             # do slicing
-                            if (n_in_int*n_int > d_slice.data.shape[joint_dimension_list[0]] * 3):
-                                raise ValueError("Interval length too much different cannot do multi-slicing.")
+                            # if (n_in_int*n_int > d_slice.data.shape[joint_dimension_list[0]] * 3):
+                            #    raise ValueError("Interval length too much different cannot do multi-slicing.")
                             # Creating the new data matrix
                         new_shape = list(copy.deepcopy(d_slice.data.shape))
                         # Removing the flattened dimension
