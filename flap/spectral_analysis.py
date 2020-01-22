@@ -1519,7 +1519,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     # zero_ind is the index where the 0 time lag will be after rearranging the CCF to final form
     zero_ind = [0] * len(correlation_dimensions)
     # A slicing list which will cut out the needed part of the CCF
-    # The CCF will have first the remaining dimensions of d, then the correlation dimensions, 
+    # The CCF will have the remaining dimensions of d first, then the correlation dimensions, 
     # then the remaining dimensions of ref
     ind_slice = [slice(0,d) for d in out_shape]
     ind_bin = copy.deepcopy(ind_slice)

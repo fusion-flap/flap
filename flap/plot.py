@@ -342,7 +342,7 @@ class PlotAnimation:
         else:
             time_unit=self.coord_t.unit.unit
             time_coeff=1.
-        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[0]*time_coeff)+\
+        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.7f}".format(self.tdata[0]*time_coeff)+\
                 ' ['+time_unit+']'
                               
         plt.title(title)
@@ -455,7 +455,7 @@ class PlotAnimation:
             time_unit=self.coord_t.unit.unit
             time_coeff=1.
             
-        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[it]*time_coeff)+\
+        title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.7f}".format(self.tdata[it]*time_coeff)+\
                 ' ['+time_unit+']'
         
         self.ax_act.set_title(title)

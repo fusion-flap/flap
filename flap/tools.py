@@ -3,6 +3,7 @@
 Created on Wed Jan 23 13:18:25 2019
 
 @author: Zoletnik
+@coauthor: Lampert
 
 Tools for the FLAP module
 
