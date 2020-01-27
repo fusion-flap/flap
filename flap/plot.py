@@ -1012,11 +1012,7 @@ def _plot(data_object,
         video_codec_code=video_codec_decrypt[_options['Video format']]                   
             
     #These lines do the coordinate unit conversion
-    if axes is not None:
-        axes_unit_conversion=np.zeros(len(axes))
-        axes_unit_conversion[:]=1.
-    else:
-        axes_unit_conversion=[1.,1.,1.]
+    axes_unit_conversion=[1.,1.,1.]
 
     if _options['Plot units'] is not None:
         unit_length=len(_options['Plot units'])

@@ -170,6 +170,7 @@ def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
         proc_interval_index_len = int(round(proc_interval_len / step)) - 2
         proc_interval_index_start = np.round((proc_interval_end - coord.start) / coord.step[0]).astype(np.int32) + 1
         proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
+        
     return flap.coordinate.Intervals(proc_interval_start, proc_interval_end),  \
            flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end),
 
@@ -1414,7 +1415,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     # Sanity check for lag range
     for i,coord in enumerate(coord_obj):
         dr, dr1 = coord.data_range(data_shape=d.shape)
-        if ((abs(corr_range[i][0]) > (int_high[0] - int_low[0])) or (abs(corr_range[i][1]) > (int_high[0] - int_low[0]))):
+        if ((abs(corr_range[i][0]) > (dr[1] - dr[0])) or (abs(corr_range[i][1]) > (dr[1] - dr[0]))):
             raise ValueError("Correlation lag calculation range is too large for coordinate '{:s}'.".format(coord.unit.name))
         if ((corr_range[i][1] - corr_range[i][0]) < coord.step[0]*3):
             raise ValueError("Correlation lag calculation range is too small for coordinate '{:s}'.".format(coord.unit.name))
@@ -1608,11 +1609,22 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         if (out_dtype is float):
             res = np.real(res)        
         corr = np.empty(res.shape,dtype=res.dtype)
-        corr[tuple(ind_out1)] = res[tuple(ind_in1)]
-        corr[tuple(ind_out2)] = res[tuple(ind_in2)]
+
+        if len(_coordinate) == 2:
+            corr[tuple([ind_out1[0],ind_out1[1]])] = res[tuple([ind_in1[0],ind_in1[1]])] 
+            corr[tuple([ind_out2[0],ind_out1[1]])] = res[tuple([ind_in2[0],ind_in1[1]])] 
+            corr[tuple([ind_out2[0],ind_out2[1]])] = res[tuple([ind_in2[0],ind_in2[1]])]
+            corr[tuple([ind_out1[0],ind_out2[1]])] = res[tuple([ind_in1[0],ind_in2[1]])]
+        else:
+            corr[tuple(ind_out1)] = res[tuple(ind_in1)]
+            corr[tuple(ind_out2)] = res[tuple(ind_in2)]
+            
         corr_sliced = corr[tuple(ind_slice)]
         corr_binned = np.zeros(tuple(out_shape),dtype=res.dtype)
-        np.add.at(corr_binned,tuple(ind_bin),corr_sliced)
+        if corr_binned.shape != corr_binned.shape:
+            np.add.at(corr_binned,tuple(ind_bin),corr_sliced)
+        else:
+            corr_binned=corr_sliced
         if (norm):
             zero_ind_out = [0] * len(correlation_dimensions)
             for i in range(len(correlation_dimensions)):
@@ -1650,11 +1662,22 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                 # we need to move the correlation axes to the end to be consistent with the CCF
                 res_acf, ax_map = flap.tools.move_axes_to_end(res_acf,correlation_dimensions)
                 corr_acf = np.empty(res_acf.shape,dtype=res.dtype)
-                corr_acf[tuple(ind_out1_acf)] = res_acf[tuple(ind_in1_acf)]
-                corr_acf[tuple(ind_out2_acf)] = res_acf[tuple(ind_in2_acf)]
+
+                if len(_coordinate) == 2:
+                    corr_acf[tuple([ind_out1_acf[0],ind_out1_acf[1]])] = res_acf[tuple([ind_in1_acf[0],ind_in1_acf[1]])] 
+                    corr_acf[tuple([ind_out2_acf[0],ind_out1_acf[1]])] = res_acf[tuple([ind_in2_acf[0],ind_in1_acf[1]])] 
+                    corr_acf[tuple([ind_out2_acf[0],ind_out2_acf[1]])] = res_acf[tuple([ind_in2_acf[0],ind_in2_acf[1]])]
+                    corr_acf[tuple([ind_out1_acf[0],ind_out2_acf[1]])] = res_acf[tuple([ind_in1_acf[0],ind_in2_acf[1]])]
+                else:
+                    corr_acf[tuple(ind_out1_acf)] = res_acf[tuple(ind_in1_acf)]
+                    corr_acf[tuple(ind_out2_acf)] = res_acf[tuple(ind_in2_acf)]
+                
                 corr_sliced_acf = corr_acf[tuple(ind_slice_acf)]
                 corr_binned_acf = np.zeros(tuple(out_shape_acf),dtype=res_acf.dtype)
-                np.add.at(corr_binned_acf,tuple(ind_bin_acf),corr_sliced_acf)
+                if not corr_binned_acf.shape == corr_sliced_acf.shape:
+                    np.add.at(corr_binned_acf,tuple(ind_bin_acf),corr_sliced_acf)
+                else:
+                    corr_binned_acf=corr_sliced_acf
                 # We need to take the zero lag elements from each correlation dimension
                 corr_dimension_start = len(out_shape_acf)-len(correlation_dimensions)
                 for i in range(len(correlation_dimensions)):
@@ -1662,16 +1685,31 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     corr_binned_acf = np.take(corr_binned_acf,zero_ind_out[i],axis=corr_dimension_start)
                 if (ref is not None):
                     res_acf_ref = np.fft.ifftn(fft_ref * np.conj(fft_ref),axes=correlation_dimensions_ref)
+                    
                     if (out_dtype is float):
                         res_acf_ref = np.real(res_acf_ref)
                     # we need to move the correlation axes to the start to be consistent with the CCF
-                    res_acf_ref,ax_map_ref = flap.tools.move_axes_to_start(res_acf_ref,correlation_dimensions_ref)
+                    if len(_coordinate) != 2:
+                        res_acf_ref,ax_map_ref = flap.tools.move_axes_to_start(res_acf_ref,correlation_dimensions_ref)
+                        
                     corr_acf_ref = np.empty(res_acf_ref.shape,dtype=res_acf.dtype)
-                    corr_acf_ref[tuple(ind_out1_acf_ref)] = res_acf_ref[tuple(ind_in1_acf_ref)]
-                    corr_acf_ref[tuple(ind_out2_acf_ref)] = res_acf_ref[tuple(ind_in2_acf_ref)]
+                    if len(_coordinate) == 2:
+                        corr_acf_ref[tuple([ind_out1_acf_ref[0],ind_out1_acf_ref[1]])] = res_acf_ref[tuple([ind_in1_acf_ref[0],ind_in1_acf_ref[1]])] 
+                        corr_acf_ref[tuple([ind_out2_acf_ref[0],ind_out1_acf_ref[1]])] = res_acf_ref[tuple([ind_in2_acf_ref[0],ind_in1_acf_ref[1]])] 
+                        corr_acf_ref[tuple([ind_out2_acf_ref[0],ind_out2_acf_ref[1]])] = res_acf_ref[tuple([ind_in2_acf_ref[0],ind_in2_acf_ref[1]])]
+                        corr_acf_ref[tuple([ind_out1_acf_ref[0],ind_out2_acf_ref[1]])] = res_acf_ref[tuple([ind_in1_acf_ref[0],ind_in2_acf_ref[1]])]
+                    else:
+                        corr_acf_ref[tuple(ind_out1_acf_ref)] = res_acf_ref[tuple(ind_in1_acf_ref)]
+                        corr_acf_ref[tuple(ind_out2_acf_ref)] = res_acf_ref[tuple(ind_in2_acf_ref)]
+                    
                     corr_sliced_acf_ref = corr_acf_ref[tuple(ind_slice_acf_ref)]
                     corr_binned_acf_ref = np.zeros(tuple(out_shape_acf_ref),dtype=res_acf_ref.dtype)
-                    np.add.at(corr_binned_acf_ref,tuple(ind_bin_acf_ref),corr_sliced_acf_ref)
+                    
+                    if not corr_binned_acf_ref.shape == corr_sliced_acf_ref.shape:
+                        np.add.at(corr_binned_acf_ref,tuple(ind_bin_acf_ref),corr_sliced_acf_ref)
+                    else:
+                        corr_binned_acf_ref=corr_sliced_acf_ref
+                        
                     # We need to take the zero lag elements from each correlation dimension
                     for i in range(len(correlation_dimensions)):
                         # Always the cor_dimension_start axis is taken as it is removed by take
@@ -1738,8 +1776,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                            start = range_sampout[i][0] * corr_res_sample[i] * c.step[0],
                                            step = [corr_res_sample[i] * c.step[0]],
                                            dimension_list=[len(d.data.shape) - len(correlation_dimensions) + i])
-    coord_list.append(c_new)
-
+        coord_list.append(c_new)
     if (norm):
         unit_name = 'Correlation'
     else:
