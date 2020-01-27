@@ -1595,7 +1595,7 @@ class DataObject:
                 start_index = int(round((regular_slice.start - range_coord[0]) / abs(slicing_coord.step[0])))
                 step_index = int(round(regular_slice.step / abs(slicing_coord.step[0])))
                 stop_index = int((regular_slice.stop - range_coord[0]) / abs(slicing_coord.step[0]))
-                return slice(start_index, stop_index, step_index)
+                return slice(start_index, stop_index+1, step_index)
             else:
                 # slice object could not be created for data array
                 # Creating flattened coordinate data array
