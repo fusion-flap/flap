@@ -209,6 +209,7 @@ class DataObject:
                     if (c.values is None):
                         raise ValueError("No values in non-equidistant coordinate '{:s}'.".format(c.unit.name))
                     if (not c.non_interpol(self.shape)):
+                        print(self.shape)
                         raise ValueError("Coordinate value and data shape is inconsistent in coordinate '{:s}'.".format(c.unit.name))
                                                                     
     def coordinate_names(self):
@@ -2335,13 +2336,14 @@ class DataObject:
                             n = err_flat_1.shape[summing_coords[i_sc].dimension_list[0]] #TYPO err_flat1 --> err_flat_1
                             err = np.maximum(err_flat_1,err_flat_2)
                             d_slice.error = np.sqrt(np.sum(err**2,
-                                                           axis=summing_coords[i_sc].dimension_list[0]) / n +\
+                                                           axis=summing_coords[i_sc].dimension_list[0]) / n**2 +\
                                             err_of_average**2)
                         else:
                             n = d_slice.error.shape[summing_coords[i_sc].dimension_list[0]]
                             d_slice.error = np.sqrt(np.sum(d_slice.error**2,
-                                                           axis=summing_coords[i_sc].dimension_list[0]) / n +\
+                                                           axis=summing_coords[i_sc].dimension_list[0]) / n**2 +\
                                             err_of_average**2)
+                            print(d_slice.error)
                 elif ((summing_description[i_sc] == 'Min') or (summing_description[i_sc] == 'Max')):
                     # Finding the appropriate indices
                     if (summing_description[i_sc] == 'Min'):
