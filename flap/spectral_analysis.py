@@ -15,88 +15,97 @@ from scipy import signal
 import copy
 #import matplotlib.pyplot as plt
 
-def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
+def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interval_n):
     """ Helper function for spectral and correlation calculation.
-        Determines the processing intervals and returns in a
-        flap.Intervals object. The intervals will have identical length.
+        First checks whether calc_coordinates are present, change along one dimension
+        and equidistant. If ref is set then the calculation coordinates should 
+        also have identical values. 
+        Determines the processing intervals so as calculation is limited
+        to some portion of the data along one or more processing dimensions. 
+        For error calculation a certain number of processing intervals
+        is desired, this is set in interval_n.
 
         INPUT:
             d, ref: flap.DataObjects
-            If ref is set it is assumed that the selection coordinate step size is identical in d and ref.
-            coordinate: Coordinate name (string)
-            intervals: Information of processing intervals.
-                       If dictionary with a single key: {selection coordinate: description})
-                           Key is a coordinate name which can be different from the calculation
-                           coordinate.
+            
+            calc_coordinates: The name of the calculation coordinates (string or list of strings). 
+            intervals: Information of allowed processing intervals.
+                       If dictionary: {selection coordinate: description}
+                           Keys are coordinate names which should be one of the calculation
+                           coordinates.
                            Description can be flap.Intervals, flap.DataObject or
                            a list of two numbers. If it is a data object with data name identical to
                            the coordinate the error ranges of the data object will be used for
                            interval. If the data name is not the same as coordinate a coordinate with the
                            same name will be searched for in the data object and the value_ranges
                            will be used fromm it to set the intervals.
-                       If not a dictionary and not None is is interpreted as the interval
-                           description, the selection coordinate is taken the same as
-                           coordinate.
-                       If None, the whole data interval will be used as a single interval.
+                       If not a dictionary and not None it is interpreted as the interval
+                           description, the selection coordinate is taken from the (first)
+                           calc_coordinates.
+                       If None, the whole data will be used as a single interval.
             interval_n: Minimum number of intervals to use for the processing. These are identical
-                        length intervals inserted into the input interval list.
+                        length intervals inserted into the input interval list. In case of multiple calc_coordinates
+                        the intervals are multi dimensional rectangles. 
         Returns:
             intervals, index_intervals
-                intervals: The intervals in the coordinate unit (Intervals object)
-                index_intervals: The index intervals in the data array (Intervals object)
+                intervals: The intervals in the calc_coordinate units ([Intervals object])
+                index_intervals: The index intervals in the data array ([Intervals object])
+                None, None
     """
-
-    if (type(intervals) is dict):
-        sel_coordinate = list(intervals.keys())[0]
-    else:
-        sel_coordinate = coordinate
-    if (sel_coordinate != coordinate):
-        raise ("At present for spectral calculation the interval selection coordinate should be the same as the calculation coordinate.")
-
-    try:
-        coord = d.get_coordinate_object(coordinate)
-    except Exception as e:
-        raise e
     
+    if (type(calc_coordinates) is not list):
+        _calc_coordinates = [calc_coordinates]
+    _calc_coordinates = calc_coordinates
+    
+    for c in _calc_coordinates:
+        c_obj = d.get_coordinate_object(c)
+        if (len(c_obj.dimension_list) != 1):
+            raise ValueError("Calculation coordinates should change only along one dimension.")
+        if (not c_obj.mode.equidistant):
+            raise ValueError("For spectral and correlation calculation coordinates should be equidistant.")
+        if (ref is not None):
+            cr_obj = d.get_coordinate_object(c)
+            if (len(cr_obj.dimension_list) != 1):
+                raise ValueError("Calculation coordinates should change only along one dimension.")
+            if (not cr_obj.mode.equidistant):
+                raise ValueError("For spectral and correlation calculation coordinates should be equidistant.")
+            if (abs(c_obj.step[0] - cr_obj.step[0]) * d.shape[c_obj.dimension_list[0]] > abs(c_obj.step[0] / 2)):
+                raise ValueError("Data and reference object should have same step size in calculation coordinate.")
+            if (abs(c_obj.start - cr_obj.start) > c_obj.step / 10):
+                raise ValueError("Data and reference object should have same start value calculation coordinate.")
+                
+    # If the interval description has a coordinate use it, otherwise use the 
+    # first calculation coordinate
+    if (type(intervals) is dict):
+        _intervals = intervals
+    else:
+        _intervals = {_calc_coordinates[0]: intervals}
+    
+    # Check that the selection coordinates are among the calc_coordinates
+    for c in _intervals.keys():
+        try:
+            _calc_coordinates.index(c)
+        except ValueError:
+            raise ValueError("Selection coordinates should be among calculation coordinates.")
+    
+        
     try:    
-        calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(coordinate, intervals=intervals)
+        calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(sel_coordinate, intervals=intervals)
     except Exception as e:
         raise e
     intervals_low = sel_int[0]
-    intervals_high = sel_int[1]    
-# This part is commented out as we assume identiacl coordinate for d and ref
-
-#    d_intervals_low = sel_int[0]
-#    d_intervals_high = sel_int[1]
-
-#
-#    if (ref is not None):
-#        try:    
-#            calc_int, calc_int_ind, sel_int, sel_int_ind = ref.proc_interval_limits(coordinate, intervals=intervals)
-#        except Exception as e:
-#            raise e
-#        ref_intervals_low = sel_int[0]
-#        ref_intervals_high = sel_int[1]
-#        intervals_low = []
-#        intervals_high = []
-#        d_int_low_min = np.amin(d_intervals_low)
-#        d_int_low_max = np.amax(d_intervals_low)
-#        for i in range(len(ref_intervals_low)):
-#            if ((ref_intervals_low[i] >= d_int_low_min) and
-#                  (ref_intervals_low <= d_int_low_max)):
-#                intervals_low.append(ref_intervals_low[i])
-#                intervals_high.append(ref_intervals_high[i])
-#        ref_coord = ref.get_coordinate_object(coordinate)
-#        if ((math.fabs(ref_coord.start - coord.start) > math.fabs(ref_coord.step[0] ) / 10)
-#            or (math.fabs(ref_coord.step[0] - coord.step[0]) / math.fabs(ref_coord.step[0]) > 1e-4) 
-#            ):
-#            raise ValueError("The start and step of the calculating coordinates in the two data objects should be identical.")
-#    else:
-#        intervals_low = d_intervals_low 
-#        intervals_high = d_intervals_high
-
+    intervals_high = sel_int[1]   
+    intervals_index_low = sel_int_ind[0]
+    intervals_index_high = sel_int_ind[1]
+    
+    # If only one internal is requested and there is no common dimension between
+    # the selection and calculation coordinate return the input intervals
+    if ((interval_n == 1) and not sel_calc_common):
+        return flap.coordinate.Intervals(intervals_low, intervals_high),  \
+               flap.coordinate.Intervals(intervals_index_low, intervals_index_high)
+        
     if (len(intervals_low) > 1):
-        # Ensuring that the intervals are in asceding order
+        # Ensuring that the intervals are in ascending order
         sort_ind = np.argsort(intervals_low)
         intervals_low = intervals_low[sort_ind]
         intervals_high = intervals_high[sort_ind]
@@ -1286,11 +1295,6 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     interval_n = _options['Interval_n']
     norm = _options['Normalize']
     error_calc = _options['Error calculation']
-    if (len(_coordinate) != 1 and (intervals is not None)):
-        raise NotImplementedError("Interval selection for multi-dimensional correlation is not implemented.")
-    if (len(_coordinate) != 1):
-        error_calc = False
-        interval_n = 1
         
     # Getting coordinate objects and checking properties    
     coord_obj = []
@@ -1320,7 +1324,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
                                                                            None, 
-                                                                           _coordinate[0],
+                                                                           _coordinate,
                                                                            intervals,
                                                                            interval_n)
         except Exception as e:
@@ -1355,19 +1359,22 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
                                                                            _ref, 
-                                                                           _coordinate[0],
+                                                                           _coordinate,
                                                                            intervals,
                                                                            interval_n)
         except Exception as e:
             raise e
-                        
-    interval_n, start_ind = intervals.interval_number()
-    int_low, int_high = intervals.interval_limits()
-    index_int_low, index_int_high = index_intervals.interval_limits()
-    # Number of processing intervals
-    n_proc_int = len(int_low)
-    # Numper of points in the selection coordinate
-    n_sample_sel = index_int_high[0] - index_int_low[0]
+     
+    if (intervals is None):  
+        interval_n = 1
+    else:                 
+        interval_n, start_ind = intervals.interval_number()
+        int_low, int_high = intervals.interval_limits()
+        index_int_low, index_int_high = index_intervals.interval_limits()
+        # Number of processing intervals
+        n_proc_int = len(int_low)
+        # Numper of points in the selection coordinate
+        n_sample_sel = index_int_high[0] - index_int_low[0]
     
     # Creating indices to take out data for each processing interval and place it into the processing arrays
     interval_slice_1 = [slice(0,dim) for dim in list(d.data.shape)]

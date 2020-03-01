@@ -49,23 +49,32 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                       options=None, coordinates=None, data_source=None):
     """ Data read function for flap test data source
         Channel names: TEST-col-row: Signals on a 15x5 spatial matrix
-                       VIDEO: A test image with timescale as for the signals.
+                       VIDEO: A test video with timescale as for the signals. 
+                              The mean peak amplitude is 2000.
                        
         options:
-            'Scaling': 'Volt', 'Digit'
-            'Signal' : 'Sin'  Sine signals
-                      'Const.' : Constant values with row*COLUMN_NUMBER+column
-                      'Complex-Sin': Same as Sine but an imaginary cosine is added
-                      'Random': Random (normal dist.) signal in all channels
-            'Image' : 'Gauss' Gaussian spot
-                      'Random'  Random int16 values between 0 and 4095
-            'Spotsize': Full width at half maximum of spot in pixels
-            'Width'   : Image width in pixels (x size)
-            'Height'  : Image height in pixels (y size)
-            'Frequency' : <number> Fixed frequency of signals
-                        : [f2,f2]: Changes from channel-to-channel between these frequencies
-            'Length': Length in second. The sample rate is 1 MHz
+            'Length': Length in second.
             'Samplerate': Sample rate [Hz]
+            For signals:
+              'Frequency' : <number> Fixed frequency of signals or video
+                        : [f2,f2]: Changes from channel-to-channel between these frequencies
+              'Scaling': 'Volt', 'Digit'
+              'Signal' : 'Sin'  Sine signals
+                         'Const.' : Constant values with row*COLUMN_NUMBER+column
+                         'Complex-Sin': Same as Sine but an imaginary cosine is added
+                         'Random': Random (normal dist.) signal in all channels
+            For video:             
+                'Image' : 'Gauss' Gaussian spot circulating around the center and oscillating
+                                  in amplitude.
+                          'Random'  Random int16 values between 0 and 4095
+                'Spotsize': Full width at half maximum of Gaussian spot in pixels
+                'Width'   : Image width in pixels (x size)
+                'Height'  : Image height in pixels (y size)
+                'Frequency': The circulation frequency for Gauss image
+                'Circle': The circulation circle radius in pixels for Gauss image. 
+                          This is radius at the end, it starts from 20% of this 
+                'Modulation': The modulation depth for the oscillation for Gauss image
+                              [0-1]
     """
     if (data_source is None ):
         data_source = 'TESTDATA'
@@ -93,15 +102,15 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             raise ValueError("VIDEO data cannot be read together with test signals.")
 
     if (test_image):
-        default_options = {'Signal': 'Sin',
-                           'Scaling': 'Volt',
-                           'Frequency': 30,
-                           'Length': 0.1,
+        default_options = {'Length': 0.1,
                            'Samplerate':1e3,
                            'Image':'Gauss',
                            'Width': 1280,
                            'Height': 1024,
-                           'Spotsize': 100
+                           'Spotsize': 100,
+                           'Frequency': 30,
+                           'Circle': 1280/4 ,
+                           'Modulation': 0.5
                            }
     else:
         default_options = {'Signal': 'Sin',
@@ -164,17 +173,17 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
         read_range = read_samplerange*meas_sampletime+meas_timerange[0]
     ndata = int(read_samplerange[1]-read_samplerange[0]+1 )
 
-    # Checking whether scaling to Volt is requested
-    if (_options['Scaling'] == 'Volt'):
-        scale_to_volts = True
-        #dtype = float                                                          #UNUSED
-        data_unit = flap.Unit(name='Signal', unit='Volt')
-    else:
-        scale_to_volts = False
-        #dtype = np.int16                                                       #UNUSED
-        data_unit = flap.Unit(name='Signal', unit='Digit')
-
     if (not test_image):
+        # Checking whether scaling to Volt is requested
+        if (_options['Scaling'] == 'Volt'):
+            scale_to_volts = True
+            #dtype = float                                                          #UNUSED
+            data_unit = flap.Unit(name='Signal', unit='Volt')
+        else:
+            scale_to_volts = False        
+            #dtype = np.int16                                                       #UNUSED
+            data_unit = flap.Unit(name='Signal', unit='Digit')
+
         # Arranging the signals in 2D
         # These will collect the row and column coordinatees for all signals
         row_list = []
@@ -400,17 +409,19 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
         if (no_data == False):
             if (_options['Image'] == 'Gauss'):
                 f = float(_options['Frequency'])
+                circle = float(_options['Circle'])
+                mod = float(_options['Modulation'])
                 t = np.arange(ndata,dtype=float) * meas_sampletime
-                amp = np.sin(t * 4.5 * math.pi * f) ** 2 * 3000 + 1000
-                center_x = image_xsize/2 + (np.sin(t*2*math.pi*f) * image_xsize / 4) * (t / t[-1] + 0.2)
-                center_y = image_ysize/2 + (np.cos(t*2*math.pi*f) * image_ysize / 4) * (t / t[-1] + 0.2)
+                amp = np.sin(t * 2 * math.pi * f) * mod * 2000 + 2000
+                center_x = image_xsize/2 + (np.sin(t*2*math.pi*f) * circle) * (t / t[-1] * 0.8 + 0.2)
+                center_y = image_ysize/2 + (np.cos(t*2*math.pi*f) * circle) * (t / t[-1] * 0.8 + 0.2)
                 x,y = np.meshgrid(range(0,image_xsize), range(0,image_ysize))
                 data_arr = np.empty((x.shape[0], x.shape[1], t.size),dtype=np.int16)
                 for it in range(len(t)):
                     data_arr[:,:,it] = (np.exp(-((x - center_x[it]) ** 2 + (y - center_y[it]) ** 2)
                                        /2/(spotwidth ** 2 + spotwidth  ** 2)) * amp[it]).astype(np.int16)
             elif(_options['Image'] == 'Random'):
-                data_arr = np.random.randint(0,high=4095,size=(image_xsize,image_ysize,ndata),dtype=np.int16)                
+                data_arr = np.random.randint(0,high=4095,size=(image_ysize,image_xsize,ndata),dtype=np.int16)                
         coord = [None]*4
         coord[0] = copy.deepcopy(flap.Coordinate(name='Time',
                                                  unit='Second',

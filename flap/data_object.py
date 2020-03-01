@@ -3421,12 +3421,12 @@ class DataObject:
             if ((self.data.dtype.kind == 's') or (type(d1) is str)):
                 raise ValueError("Cannot multiply strings.")
             d_out = copy.deepcopy(self)
-            d_out.data *= d1
+            d_out.data =d_out.data * d1
             if (d_out.error is not None):
                 if (type(d_out.error) is list):
                     d_out.error = [d_out.error[0] * d1, d_out.error[1] * d1]
                 else:
-                    d_out.error *= d1
+                    d_out.error = d_out.error * d1
         else:
             raise TypeError("Invalid data type for multiplication with flap.DataObject")
         return d_out
