@@ -803,7 +803,7 @@ if (False or test_all):
     test_cpsd()
     show_plot()
     wait_for_key()
-if (False or test_all):
+if (True or test_all):
     test_ccf()
 if (False or test_all):
     test_image()

@@ -20,10 +20,13 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
         First checks whether calc_coordinates are present, change along one dimension
         and equidistant. If ref is set then the calculation coordinates should 
         also have identical values. 
-        Determines the processing intervals so as calculation is limited
-        to some portion of the data along one or more processing dimensions. 
+        Determines the identical long processing intervals within the input intervals which are
+        defined for some of the calc coordinates (called selection coordinates) using hte intervals argument.
         For error calculation a certain number of processing intervals
-        is desired, this is set in interval_n.
+        is desired, this is set in interval_n. For multiple selection coordinates multi-dimensional
+        rectangles are selected. In each selection coordinate at least int(interval_n**(1/n_sel))+1 processing intervals 
+        will be selected so at total number of rectangles is at least interval_n. (n_sel is the number
+        of selection coordinates, that is the number of keys in intervals.)
 
         INPUT:
             d, ref: flap.DataObjects
@@ -48,9 +51,9 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
                         the intervals are multi dimensional rectangles. 
         Returns:
             intervals, index_intervals
-                intervals: The intervals in the calc_coordinate units ([Intervals object])
-                index_intervals: The index intervals in the data array ([Intervals object])
-                None, None
+                intervals: The intervals in the calc_coordinate units, dictionary {sel_coordinate: Intervals object}
+                index_intervals: The index intervals in the data array,dictionary {sel_coordinate: Intervals object}
+            If no selection interval is given will return None, None
     """
     
     if (type(calc_coordinates) is not list):
@@ -73,114 +76,121 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
                 raise ValueError("Data and reference object should have same step size in calculation coordinate.")
             if (abs(c_obj.start - cr_obj.start) > c_obj.step / 10):
                 raise ValueError("Data and reference object should have same start value calculation coordinate.")
-                
+          
     # If the interval description has a coordinate use it, otherwise use the 
     # first calculation coordinate
     if (type(intervals) is dict):
         _intervals = intervals
     else:
         _intervals = {_calc_coordinates[0]: intervals}
-    
+
+    n_sel = len(_intervals.keys())
+    if (n_sel == 0):
+        return None, None
+    if (n_sel > 1):
+        interval_n_1dim = int(interval_n ** (1 / n_sel)) + 1
+    else:
+        interval_n_1dim = interval_n
+   
     # Check that the selection coordinates are among the calc_coordinates
+    # and find the processing intervals for ech selection coordinate
+    # These will contain the processing intervals for each selection coordinate
+    proc_interval = {}
+    proc_interval_index = {}
+ 
     for c in _intervals.keys():
         try:
             _calc_coordinates.index(c)
         except ValueError:
             raise ValueError("Selection coordinates should be among calculation coordinates.")
-    
-        
-    try:    
-        calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(sel_coordinate, intervals=intervals)
-    except Exception as e:
-        raise e
-    intervals_low = sel_int[0]
-    intervals_high = sel_int[1]   
-    intervals_index_low = sel_int_ind[0]
-    intervals_index_high = sel_int_ind[1]
-    
-    # If only one internal is requested and there is no common dimension between
-    # the selection and calculation coordinate return the input intervals
-    if ((interval_n == 1) and not sel_calc_common):
-        return flap.coordinate.Intervals(intervals_low, intervals_high),  \
-               flap.coordinate.Intervals(intervals_index_low, intervals_index_high)
-        
-    if (len(intervals_low) > 1):
-        # Ensuring that the intervals are in ascending order
-        sort_ind = np.argsort(intervals_low)
-        intervals_low = intervals_low[sort_ind]
-        intervals_high = intervals_high[sort_ind]
-        ind_overlap = np.nonzero(intervals_high[0:-2] > intervals_low[1:-1])[0]
-        if (len(ind_overlap) != 0):
-            raise ValueError("Intervals overlap, not suitable for calculation.")
-        intervals_length = intervals_high - intervals_low
-        # Determining how many different intervals are available
-        int_lens = np.ndarray(0,dtype=intervals_low.dtype)
-        int_num = np.ndarray(0,dtype=np.int32)
-        margin = abs(coord.step[0])
-        i = 0
-        while (True):
-            ind_new = np.nonzero(intervals_length > 0)[0]
-            if (len(ind_new) == 0):
-                break
-            ind = np.nonzero(np.abs(intervals_length - intervals_length[ind_new[0]]) < margin)[0]
-            int_lens = np.append(int_lens, intervals_length[ind_new[0]])
-            int_num = np.append(int_num, len(ind))
-            intervals_length[ind] = -1
-
-        # Sorting in reverse order according to interval length
-        sort_ind = np.argsort(int_lens)
-        int_num = np.flip(int_num[sort_ind])
-        int_lens = np.flip(int_lens[sort_ind])
-        # Dropping too small intervals
-        ind_small = np.nonzero(int_lens < int_lens[0] / 2)[0]
-        if (len(ind_small) != 0):
-            int_lens = int_lens[0:ind_small[0]]
-            int_num = int_num[0:ind_small[0]]
-        # Trying to use the shortest interval as processing length
-        proc_len = int_lens[-1]
-        ind = np.nonzero(int_lens >= proc_len)[0]
-        proc_n = np.sum(int_num[ind])
-        if (proc_n < interval_n):
-            # If this is not successful splitting the intervals smaller and smaller
-            proc_len_start = proc_len
-            for n_split in range(2,interval_n):
-                proc_len = proc_len_start / n_split
-                proc_n = 0
-                for j in range(len(int_lens)):
-                    proc_n += (int_lens[j] // proc_len) * int_num[j]
-                if (proc_n >= interval_n):
+       
+        coord = d.get_coordinate_object(c)
+        try:    
+            calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(c, intervals=_intervals[c])
+        except Exception as e:
+            raise e
+        intervals_low = sel_int[0]
+        intervals_high = sel_int[1]   
+        intervals_index_low = sel_int_ind[0]
+        intervals_index_high = sel_int_ind[1]
+        if (len(intervals_low) > 1):
+            # Ensuring that the intervals are in ascending order
+            sort_ind = np.argsort(intervals_low)
+            intervals_low = intervals_low[sort_ind]
+            intervals_high = intervals_high[sort_ind]
+            ind_overlap = np.nonzero(intervals_high[0:-2] > intervals_low[1:-1])[0]
+            if (len(ind_overlap) != 0):
+                raise ValueError("Intervals overlap, not suitable for calculation.")
+            intervals_length = intervals_high - intervals_low
+            # Determining how many different intervals are available
+            int_lens = np.ndarray(0,dtype=intervals_low.dtype)
+            int_num = np.ndarray(0,dtype=np.int32)
+            margin = abs(coord.step[0])
+            i = 0
+            while (True):
+                ind_new = np.nonzero(intervals_length > 0)[0]
+                if (len(ind_new) == 0):
                     break
-            else:
-                raise ValueError("Could not find "+str(interval_n)+" processing intervals.")
-
-        proc_interval_start = np.ndarray(0,dtype=intervals_low.dtype)
-        proc_interval_end = np.ndarray(0,dtype=intervals_high.dtype)
-        for i in range(len(intervals_low)):
-            st = intervals_low[i]
-            while (st + proc_len <= intervals_high[i] + margin):
-                proc_interval_start = np.append(proc_interval_start, st)
-                proc_interval_end = np.append(proc_interval_end, st + proc_len)
-                st += proc_len
-        if (proc_interval_start.size < interval_n):
-            raise RuntimeError("Internal error in finding processing intervals.")
-        proc_interval_len = proc_len
-    else:
-        proc_interval_len = (intervals_high[0] - intervals_low[0]) / interval_n
-        proc_interval_start = np.arange(interval_n) * proc_interval_len + intervals_low[0]
-        proc_interval_end = proc_interval_start + proc_interval_len
-
-    if (coord.step[0] > 0):
-        proc_interval_index_start = np.round((proc_interval_start - coord.start) / coord.step[0]).astype(np.int32) + 1
-        proc_interval_index_len = int(np.round(proc_interval_len / coord.step[0])) - 2
-        proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
-    else:
-        step = -coord.step[0]
-        #npoint = d.shape[coord.dimension_list[0]]                              #UNUSED VARIABLE
-        proc_interval_index_len = int(round(proc_interval_len / step)) - 2
-        proc_interval_index_start = np.round((proc_interval_end - coord.start) / coord.step[0]).astype(np.int32) + 1
-        proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
-    return flap.coordinate.Intervals(proc_interval_start, proc_interval_end),  \
-           flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end),
+                ind = np.nonzero(np.abs(intervals_length - intervals_length[ind_new[0]]) < margin)[0]
+                int_lens = np.append(int_lens, intervals_length[ind_new[0]])
+                int_num = np.append(int_num, len(ind))
+                intervals_length[ind] = -1
+    
+            # Sorting in reverse order according to interval length
+            sort_ind = np.argsort(int_lens)
+            int_num = np.flip(int_num[sort_ind])
+            int_lens = np.flip(int_lens[sort_ind])
+            # Dropping too small intervals
+            ind_small = np.nonzero(int_lens < int_lens[0] / 2)[0]
+            if (len(ind_small) != 0):
+                int_lens = int_lens[0:ind_small[0]]
+                int_num = int_num[0:ind_small[0]]
+            # Trying to use the shortest interval as processing length
+            proc_len = int_lens[-1]
+            ind = np.nonzero(int_lens >= proc_len)[0]
+            proc_n = np.sum(int_num[ind])
+            if (proc_n < interval_n):
+                # If this is not successful splitting the intervals smaller and smaller
+                proc_len_start = proc_len
+                for n_split in range(2,interval_n):
+                    proc_len = proc_len_start / n_split
+                    proc_n = 0
+                    for j in range(len(int_lens)):
+                        proc_n += (int_lens[j] // proc_len) * int_num[j]
+                    if (proc_n >= interval_n):
+                        break
+                else:
+                    raise ValueError("Could not find "+str(interval_n)+" processing intervals.")
+    
+            proc_interval_start = np.ndarray(0,dtype=intervals_low.dtype)
+            proc_interval_end = np.ndarray(0,dtype=intervals_high.dtype)
+            for i in range(len(intervals_low)):
+                st = intervals_low[i]
+                while (st + proc_len <= intervals_high[i] + margin):
+                    proc_interval_start = np.append(proc_interval_start, st)
+                    proc_interval_end = np.append(proc_interval_end, st + proc_len)
+                    st += proc_len
+            if (proc_interval_start.size < interval_n):
+                raise RuntimeError("Internal error in finding processing intervals.")
+            proc_interval_len = proc_len
+        else:
+            proc_interval_len = (intervals_high[0] - intervals_low[0]) / interval_n
+            proc_interval_start = np.arange(interval_n) * proc_interval_len + intervals_low[0]
+            proc_interval_end = proc_interval_start + proc_interval_len
+    
+        if (coord.step[0] > 0):
+            proc_interval_index_start = np.round((proc_interval_start - coord.start) / coord.step[0]).astype(np.int32) + 1
+            proc_interval_index_len = int(np.round(proc_interval_len / coord.step[0])) - 2
+            proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
+        else:
+            step = -coord.step[0]
+            #npoint = d.shape[coord.dimension_list[0]]                              #UNUSED VARIABLE
+            proc_interval_index_len = int(round(proc_interval_len / step)) - 2
+            proc_interval_index_start = np.round((proc_interval_end - coord.start) / coord.step[0]).astype(np.int32) + 1
+            proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
+        proc_interval[c] = flap.coordinate.Intervals(proc_interval_start, proc_interval_end)
+        proc_interval_index[c] = flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end)
+    return proc_interval,proc_interval_index
 
 def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=False):
     """ This function makes the _trend_removal internal function public
@@ -1365,12 +1375,31 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         except Exception as e:
             raise e
      
-    if (intervals is None):  
-        interval_n = 1
-    else:                 
-        interval_n, start_ind = intervals.interval_number()
-        int_low, int_high = intervals.interval_limits()
-        index_int_low, index_int_high = index_intervals.interval_limits()
+    # n_proc_in will contain the total number of processing intervals (data blocks) 
+    n_proc_int = 1
+    # Number of samples selected in each dimension (Needed for resolution)
+    n_sample_sel = d.data.shape
+    for c in intervals.keys(): 
+        if (intervals[c] is not None):
+            interval_n_1, start_ind = intervals[c].interval_number()
+            n_proc_int *= interval_n_1
+            index_int_low_1, index_int_high_ = intervals[c].interval_limits()
+            sel_coord_obj = d.get_coordinate_object(c)
+            n_sample_sel[sel_coord_obj.dimension_list[0]] = index_int_high[0] - index_int_low[0]
+
+
+    # list of 
+    index_int_low = [0] * 
+     if (intervals is not None):  
+        # Looping through the selection coordinates
+        for c in intervals.keys(): 
+            sel_coord_obj = d.get_coordinate_object(c)
+            if (intervals[c] is None):
+                n_sample_sel[coord.dimension_list[0]] = 
+            interval_n_1, start_ind = intervals[c].interval_number()
+            int_low, int_high = intervals[c].interval_limits()
+            index_int_low, index_int_high = index_intervals[c].interval_limits()
+            n_proc_int *= interval_n_1
         # Number of processing intervals
         n_proc_int = len(int_low)
         # Numper of points in the selection coordinate

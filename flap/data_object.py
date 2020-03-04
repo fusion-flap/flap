@@ -3359,7 +3359,7 @@ class DataObject:
     def __rsub__(self, d1):
          try:
              d = self.__sub__(d1)
-             d.data = -d.data
+             d.data = -1 * d.data
              return d
          except Exception as e:
              raise e
