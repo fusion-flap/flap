@@ -15,13 +15,40 @@ from scipy import signal
 import copy
 #import matplotlib.pyplot as plt
 
+def _add_proc_int_list(d,sel_coords,proc_interval_index):
+    """ Recursive helper function to create the full list of processing intervals.
+        d: data objects for the calculation
+        sel_coords: The list of selection coordinates to process from the processing intervals dictionary.
+        
+        This function will be called recursively by decreasing the list with one element.
+        Returns a list of intervals for all the sel_coords
+    """ 
+    if (len(sel_coords) == 0):
+        return [[0] * d.ndim], [d.shape]
+    sel_coord_obj = d.get_coordinate_object(sel_coords[0])
+    ind_low, ind_high = _add_proc_int_list(d,ref,sel_coords[1:],proc_interval_index)
+    # Interval limits for the intervals in this coordinate
+    ind_low_1, ind_high_1 = proc_interval_index[select_coords[0]].interval_limits()
+        # adding as many elements as the number of intervals in this coordinate
+    ind_low_out = []
+    ind_high_out = []
+    for i in range(len(ind_low_1)):
+        for j in range(len(ind_low)):
+            ind_low[j][sel_coord_obj.dimension_list[0]] = ind_low_1[i]
+        ind_low_out.extend(ind_low)
+        for j in range(len(ind_high)):
+            ind_high[j][sel_coord_obj.dimension_list[0]] = ind_high_1[i]
+        ind_high_out.extend(ind_high)
+    return ind_low_out, ind_high_out
+
+
 def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interval_n):
     """ Helper function for spectral and correlation calculation.
         First checks whether calc_coordinates are present, change along one dimension
         and equidistant. If ref is set then the calculation coordinates should 
         also have identical values. 
         Determines the identical long processing intervals within the input intervals which are
-        defined for some of the calc coordinates (called selection coordinates) using hte intervals argument.
+        defined for some of the calc coordinates (called selection coordinates) using the "intervals" argument.
         For error calculation a certain number of processing intervals
         is desired, this is set in interval_n. For multiple selection coordinates multi-dimensional
         rectangles are selected. In each selection coordinate at least int(interval_n**(1/n_sel))+1 processing intervals 
@@ -30,7 +57,6 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
 
         INPUT:
             d, ref: flap.DataObjects
-            
             calc_coordinates: The name of the calculation coordinates (string or list of strings). 
             intervals: Information of allowed processing intervals.
                        If dictionary: {selection coordinate: description}
@@ -50,10 +76,16 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
                         length intervals inserted into the input interval list. In case of multiple calc_coordinates
                         the intervals are multi dimensional rectangles. 
         Returns:
-            intervals, index_intervals
+            intervals, index_intervals, ind_low,ind_high,ind_low_ref, ind_high_ref
                 intervals: The intervals in the calc_coordinate units, dictionary {sel_coordinate: Intervals object}
                 index_intervals: The index intervals in the data array,dictionary {sel_coordinate: Intervals object}
-            If no selection interval is given will return None, None
+                ind_low,ind_high,ind_low_ref, ind_high_ref:
+                    Each return value is a list, the length is the number of processing intervals.
+                    Each element of the list contains a list with the index start (stop) for all 
+                    the coordinates of d.data (ref.data). This can be used for addressing the data arrays to 
+                    read the elements for the procesing intervals.    
+            If no selection interval is given will return 
+                     None, None, ind_low,ind_high,ind_low_ref, ind_high_ref
     """
     
     if (type(calc_coordinates) is not list):
@@ -61,22 +93,38 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
     _calc_coordinates = calc_coordinates
     
     for c in _calc_coordinates:
+        if (_calc_coordintes.count(c) > 1):
+            raise ValueError("Calculation coordinate can be named only once.")
         c_obj = d.get_coordinate_object(c)
         if (len(c_obj.dimension_list) != 1):
             raise ValueError("Calculation coordinates should change only along one dimension.")
         if (not c_obj.mode.equidistant):
             raise ValueError("For spectral and correlation calculation coordinates should be equidistant.")
+        for c1 in _calc_coordinates:
+            if (c != c1):
+                try:
+                    d.get_coordinate_object(c1).dimension_list.index(c_obj.dimension_list[0])
+                    raise ValueError("Calculation coordinates cannot have common dimensions.")
+                except ValueError:
+                    pass
         if (ref is not None):
-            cr_obj = d.get_coordinate_object(c)
+            cr_obj = ref.get_coordinate_object(c)
             if (len(cr_obj.dimension_list) != 1):
                 raise ValueError("Calculation coordinates should change only along one dimension.")
             if (not cr_obj.mode.equidistant):
                 raise ValueError("For spectral and correlation calculation coordinates should be equidistant.")
+            for c1 in _calc_coordinates:
+                if (c != c1):
+                    try:
+                        ref.get_coordinate_object(c1).dimension_list.index(cr_obj.dimension_list[0])
+                        raise ValueError("Calculation coordinates cannot have common dimensions.")
+                    except ValueError:
+                        pass
             if (abs(c_obj.step[0] - cr_obj.step[0]) * d.shape[c_obj.dimension_list[0]] > abs(c_obj.step[0] / 2)):
                 raise ValueError("Data and reference object should have same step size in calculation coordinate.")
             if (abs(c_obj.start - cr_obj.start) > c_obj.step / 10):
                 raise ValueError("Data and reference object should have same start value calculation coordinate.")
-          
+        
     # If the interval description has a coordinate use it, otherwise use the 
     # first calculation coordinate
     if (type(intervals) is dict):
@@ -190,7 +238,14 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
             proc_interval_index_end = proc_interval_index_start + proc_interval_index_len
         proc_interval[c] = flap.coordinate.Intervals(proc_interval_start, proc_interval_end)
         proc_interval_index[c] = flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end)
-    return proc_interval,proc_interval_index
+    
+    ind_low, ind_high = _add_proc_int_list(d,sel_coords,proc_interval_index)
+    if (ref is not None):
+        ind_low_ref, ind_high_ref = _add_proc_int_list(ref,sel_coords,proc_interval_index)
+    else:
+        ind_low_ref = None
+        ind_high_ref = None
+    return proc_interval,proc_interval_index,ind_low,ind_high,ind_low_ref, ind_high_ref
 
 def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=False):
     """ This function makes the _trend_removal internal function public
@@ -1302,97 +1357,69 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     trend = _options['Trend removal']
     if (len(_coordinate) != 1 and (trend is not None)):
         raise NotImplementedError("Trend removal for multi-dimensional correlation is not implemented.")
+    
     interval_n = _options['Interval_n']
     norm = _options['Normalize']
     error_calc = _options['Error calculation']
-        
+
+    intervals, 
+    index_intervals,
+    ind_low,
+    ind_high,
+    ind_low_ref, 
+    ind_high_ref = _spectral_calc_interval_selection(d,
+                                                     ref, 
+                                                     _coordinate,
+                                                     intervals,
+                                                     interval_n
+                                                    )
+
     # Getting coordinate objects and checking properties    
     coord_obj = []
     # This will contain the dimension list in d.data and the output of the correlations
     correlation_dimensions = []
     for c_name in _coordinate:
-        try:
-            c = d.get_coordinate_object(c_name)
-        except Exception as e:
-            raise e      
+        c = d.get_coordinate_object(c_name)
         coord_obj.append(c)
-        if (len(c.dimension_list) != 1):
-            raise ValueError("Correlation calculation is possible only along coordinates changing in one dimension.")
-        if (not c.mode.equidistant):
-            raise ValueError("Correlation calculation is possible only along equidistant coordinates.")
-        try:
-            correlation_dimensions.index(c.dimension_list[0])
-            raise ValueError("Cannot calculate multi dimensional correlation with common dimensions.")
-        except ValueError:
-            pass
         correlation_dimensions.append(c.dimension_list[0])
         
     if (ref is None):
         _ref = d
-        coord_obj_ref = coord_obj
-        correlation_dimensions_ref = correlation_dimensions
-        try:
-            intervals, index_intervals = _spectral_calc_interval_selection(d,
-                                                                           None, 
-                                                                           _coordinate,
-                                                                           intervals,
-                                                                           interval_n)
-        except Exception as e:
-            raise e
-    else:
+     else:
         _ref = ref
         coord_obj_ref = []
         correlation_dimensions_ref = []
         for i,c_name in enumerate(_coordinate):
-            try:
-                c = _ref.get_coordinate_object(c_name)
-            except Exception as e:
-                raise e      
+            c = _ref.get_coordinate_object(c_name)
             coord_obj_ref.append(c)
-            if (len(c.dimension_list) != 1):
-                raise ValueError("Correlation calculation is possible only along coordinates changing in one dimension.")
-            if (not c.mode.equidistant):
-                raise ValueError("Correlation calculation is possible only along equidistant coordinates.")
-            try:
-                correlation_dimensions_ref.index(c.dimension_list[0])
-                raise ValueError("Cannot calculate multi dimensional correlation with common dimensions.")
-            except ValueError:
-                pass
             correlation_dimensions_ref.append(c.dimension_list[0])
-            if (math.fabs(c.step[0] - coord_obj[i].step[0]) / math.fabs(c.step[0]) > 1e-4):
-                   raise ValueError("Incompatible coordinate step sizes." )
-            if (math.fabs(c.start - coord_obj[i].start) > math.fabs(c.step[0])):
-                   raise ValueError("Incompatible coordinate start values." )
-            if (list(_ref.data.shape)[correlation_dimensions_ref[i]] 
-                           != list(d.data.shape)[correlation_dimensions[i]]):
-                   raise ValueError("Incompatible data dimensions." )
-        try:
-            intervals, index_intervals = _spectral_calc_interval_selection(d,
-                                                                           _ref, 
-                                                                           _coordinate,
-                                                                           intervals,
-                                                                           interval_n)
-        except Exception as e:
-            raise e
      
     # n_proc_in will contain the total number of processing intervals (data blocks) 
-    n_proc_int = 1
+    n_proc_int = len(ind_low)
     # Number of samples selected in each dimension (Needed for resolution)
     n_sample_sel = d.data.shape
-    for c in intervals.keys(): 
-        if (intervals[c] is not None):
-            interval_n_1, start_ind = intervals[c].interval_number()
-            n_proc_int *= interval_n_1
-            index_int_low_1, index_int_high_ = intervals[c].interval_limits()
-            sel_coord_obj = d.get_coordinate_object(c)
-            n_sample_sel[sel_coord_obj.dimension_list[0]] = index_int_high[0] - index_int_low[0]
+    if (intervals is not None):
+        for c in intervals.keys(): 
+            if (intervals[c] is not None):
+                interval_n_1, start_ind = intervals[c].interval_number()
+                n_proc_int *= interval_n_1
+                index_int_low_1, index_int_high_ = intervals[c].interval_limits()
+                sel_coord_obj = d.get_coordinate_object(c)
+                n_sample_sel[sel_coord_obj.dimension_list[0]] = index_int_high[0] - index_int_low[0]
 
 
-    # list of 
-    index_int_low = [0] * 
-     if (intervals is not None):  
+    # creating a list of interval index start stop values for the processing intervals
+    # Each element of the list contains a list with the index start for all the coordinates
+    index_int_low = []
+    index_int_high = []
+    sel_coords = intervals.keys()
+    if (intervals is not None):  
+        # This function is called recursively so as a full list of all procesing intervals is prepared
+        ind_int_low,index_int_high = _add_proc_int_list(d,sel_coords,intervals,index_int_low,index_int_high)
+
         # Looping through the selection coordinates
         for c in intervals.keys(): 
+ 
             sel_coord_obj = d.get_coordinate_object(c)
             if (intervals[c] is None):
                 n_sample_sel[coord.dimension_list[0]] = 
@@ -1400,10 +1427,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             int_low, int_high = intervals[c].interval_limits()
             index_int_low, index_int_high = index_intervals[c].interval_limits()
             n_proc_int *= interval_n_1
-        # Number of processing intervals
-        n_proc_int = len(int_low)
-        # Numper of points in the selection coordinate
-        n_sample_sel = index_int_high[0] - index_int_low[0]
+    else:
+        ind_int_low = [[0] * d.ndim]
+        ind_int_high = [d.shape]
     
     # Creating indices to take out data for each processing interval and place it into the processing arrays
     interval_slice_1 = [slice(0,dim) for dim in list(d.data.shape)]

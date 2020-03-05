@@ -635,8 +635,9 @@ def test_ccf():
     plt.figure()
     print("**** Plotting an original and a filtered signal.")
     flap.plot('TESTDATA',slicing={'Row':1,'Column':1},axes='Time')
+    plt.figure()
     flap.plot('TESTDATA_filt',slicing={'Row':1,'Column':1})
-    print('**** Calculating the 10x15x10x15 CCFs, each 5000 samples.')
+    print('**** Calculating the 10x15x10x15 temporal CCFs, each 5000 samples.')
     print('**** CCF START')
     start = time.time()    
     flap.ccf('TESTDATA_filt',coordinate='Time',
