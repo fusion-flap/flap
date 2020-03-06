@@ -6,9 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# FLAP modules
-flap_*
-
 note*
 
 # Distribution / packaging
