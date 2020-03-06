@@ -24,21 +24,23 @@ def _add_proc_int_list(d,sel_coords,proc_interval_index):
         Returns a list of intervals for all the sel_coords
     """ 
     if (len(sel_coords) == 0):
-        return [[0] * d.ndim], [d.shape]
+        return [[0] * len(d.shape)], [list(d.shape)]
     sel_coord_obj = d.get_coordinate_object(sel_coords[0])
-    ind_low, ind_high = _add_proc_int_list(d,ref,sel_coords[1:],proc_interval_index)
+    ind_low, ind_high = _add_proc_int_list(d,sel_coords[1:],proc_interval_index)
     # Interval limits for the intervals in this coordinate
-    ind_low_1, ind_high_1 = proc_interval_index[select_coords[0]].interval_limits()
+    ind_low_1, ind_high_1 = proc_interval_index[sel_coords[0]].interval_limits()
         # adding as many elements as the number of intervals in this coordinate
     ind_low_out = []
     ind_high_out = []
     for i in range(len(ind_low_1)):
+        ind_low_tmp = copy.deepcopy(ind_low)
         for j in range(len(ind_low)):
-            ind_low[j][sel_coord_obj.dimension_list[0]] = ind_low_1[i]
-        ind_low_out.extend(ind_low)
+            ind_low_tmp[j][sel_coord_obj.dimension_list[0]] = ind_low_1[i]
+        ind_low_out.extend(ind_low_tmp)
+        ind_high_tmp = copy.deepcopy(ind_high)
         for j in range(len(ind_high)):
-            ind_high[j][sel_coord_obj.dimension_list[0]] = ind_high_1[i]
-        ind_high_out.extend(ind_high)
+            ind_high_tmp[j][sel_coord_obj.dimension_list[0]] = ind_high_1[i]
+        ind_high_out.extend(ind_high_tmp)
     return ind_low_out, ind_high_out
 
 
@@ -73,8 +75,10 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
                            calc_coordinates.
                        If None, the whole data will be used as a single interval.
             interval_n: Minimum number of intervals to use for the processing. These are identical
-                        length intervals inserted into the input interval list. In case of multiple calc_coordinates
-                        the intervals are multi dimensional rectangles. 
+                        length intervals inserted into the "intervals". In case of multiple calc_coordinates
+                        the intervals are multi dimensional rectangles. For multiple coordinates interval_n can be
+                        a dictionary which sets the number of intervals in each selection coordinate. If it is scalar 
+                        the number of intervals will be equially distributed for each selection coordinate.
         Returns:
             intervals, index_intervals, ind_low,ind_high,ind_low_ref, ind_high_ref
                 intervals: The intervals in the calc_coordinate units, dictionary {sel_coordinate: Intervals object}
@@ -91,9 +95,9 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
     if (type(calc_coordinates) is not list):
         _calc_coordinates = [calc_coordinates]
     _calc_coordinates = calc_coordinates
-    
+
     for c in _calc_coordinates:
-        if (_calc_coordintes.count(c) > 1):
+        if (_calc_coordinates.count(c) > 1):
             raise ValueError("Calculation coordinate can be named only once.")
         c_obj = d.get_coordinate_object(c)
         if (len(c_obj.dimension_list) != 1):
@@ -132,29 +136,42 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
     else:
         _intervals = {_calc_coordinates[0]: intervals}
 
-    n_sel = len(_intervals.keys())
-    if (n_sel == 0):
-        return None, None
-    if (n_sel > 1):
-        interval_n_1dim = int(interval_n ** (1 / n_sel)) + 1
-    else:
-        interval_n_1dim = interval_n
-   
-    # Check that the selection coordinates are among the calc_coordinates
-    # and find the processing intervals for ech selection coordinate
-    # These will contain the processing intervals for each selection coordinate
-    proc_interval = {}
-    proc_interval_index = {}
- 
+     # Check that the selection coordinates are among the calc_coordinates   
     for c in _intervals.keys():
         try:
             _calc_coordinates.index(c)
         except ValueError:
             raise ValueError("Selection coordinates should be among calculation coordinates.")
-       
+
+    n_sel = len(_intervals.keys())
+    n_calc = len(_calc_coordinates)
+    if (n_sel == 0):
+        return None, None
+    if (len(_calc_coordinates) > 1):
+        if (type(interval_n) is list):
+            if (len(interval_n != n_calc)):
+                raise ValueError('If interval_n is list it should have identical length as the coordinate list.')
+            interval_n_1dim = interval_n
+        else:
+            interval_n_1dim = int(interval_n ** (1 / n_calc)) + 1
+    else:
+        if (type(interval_n) is list):
+            interval_n_1dim = interval_n[0]
+        else:
+            interval_n_1dim = interval_n
+   
+    # Find the processing intervals for each calculation coordinate
+    proc_interval = {}
+    proc_interval_index = {}
+    
+    for c in _calc_coordinates:
         coord = d.get_coordinate_object(c)
+        try:
+            calc_interval = _intervals[c]
+        except KeyError:
+            calc_interval = None
         try:    
-            calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(c, intervals=_intervals[c])
+            calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(c, intervals=calc_interval)
         except Exception as e:
             raise e
         intervals_low = sel_int[0]
@@ -239,9 +256,9 @@ def _spectral_calc_interval_selection(d, ref, calc_coordinates,intervals,interva
         proc_interval[c] = flap.coordinate.Intervals(proc_interval_start, proc_interval_end)
         proc_interval_index[c] = flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end)
     
-    ind_low, ind_high = _add_proc_int_list(d,sel_coords,proc_interval_index)
+    ind_low, ind_high = _add_proc_int_list(d,_calc_coordinates,proc_interval_index)
     if (ref is not None):
-        ind_low_ref, ind_high_ref = _add_proc_int_list(ref,sel_coords,proc_interval_index)
+        ind_low_ref, ind_high_ref = _add_proc_int_list(ref,_calc_coordinates,proc_interval_index)
     else:
         ind_low_ref = None
         ind_high_ref = None
@@ -747,7 +764,7 @@ def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, r
         # A full box start is this number of apsd spectrum pints before apsd_slice.start
         start_shift = 0
         if (apsd_slice.start < 0):
-            start_shift = - apsd_slice.start
+            start_shift = -1 * apsd_slice.start
             apsd_slice = slice(0, apsd_slice.stop)
         if (apsd_slice.stop > n_apsd):
             apsd_slice = slice(apsd_slice.start, n_apsd)
@@ -1292,7 +1309,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         INPUT:
             d: A flap.DataObject.
             ref: Another flap.DataObject
-            coordinate: The name of the coordinate (string) along which to calculate CCF or a list of names.
+            coordinate: The name of the coordinate(s) (string or string list) along which to calculate CCF.
                         Each coordinate should change only along one data dimension and should be equidistant.
                         This and all other cordinates changing along the data dimension of
                         these coordinates will be removed. New coordinates with name+' lag' will be added. 
@@ -1313,8 +1330,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             options: Dictionary. (Keys can be abbreviated)
                 'Resolution': Output resolution for each coordinate. (list of values or single value)
                 'Range': Output ranges for each coordinate. (List or list of lists)
-                'Interval_n': Minimum number of intervals to use for the processing. These are identical
-                              length intervals inserted into the input interval list. Default is 8.
+                'Interval_n': Minimum number of intervals to use for the processing. Default is 8. 
+                              Can also be a list "coordinates" is a list.
                 'Error calculation' : True/False. Calculate or not error. Omitting error calculation
                                       increases speed. If Interval_n is 1 no error calculation is done.
                 'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
@@ -1341,6 +1358,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                        'Verbose':True
                        }
     _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='Correlation')
+    
+    # Set default coordinate to Time is it exists
     if (coordinate is None):
         c_names = d.coordinate_names()
         try:
@@ -1362,19 +1381,16 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     norm = _options['Normalize']
     error_calc = _options['Error calculation']
 
-    intervals, 
-    index_intervals,
-    ind_low,
-    ind_high,
-    ind_low_ref, 
-    ind_high_ref = _spectral_calc_interval_selection(d,
-                                                     ref, 
-                                                     _coordinate,
-                                                     intervals,
-                                                     interval_n
-                                                    )
+    # Check coordinates and determine processing intervals
+    intervals, index_intervals, ind_low, ind_high, ind_low_ref, ind_high_ref =\
+                          _spectral_calc_interval_selection(d,
+                                                            ref, 
+                                                            _coordinate,
+                                                             intervals,
+                                                             interval_n
+                                                            )
 
-    # Getting coordinate objects and checking properties    
+    # Getting coordinate objects    
     coord_obj = []
     # This will contain the dimension list in d.data and the output of the correlations
     correlation_dimensions = []
@@ -1385,7 +1401,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         
     if (ref is None):
         _ref = d
-     else:
+    else:
         _ref = ref
         coord_obj_ref = []
         correlation_dimensions_ref = []
@@ -1398,6 +1414,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     n_proc_int = len(ind_low)
     # Number of samples selected in each dimension (Needed for resolution)
     n_sample_sel = d.data.shape
+    #FIXME  rewrite from here **********************************************
     if (intervals is not None):
         for c in intervals.keys(): 
             if (intervals[c] is not None):
@@ -1406,30 +1423,6 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                 index_int_low_1, index_int_high_ = intervals[c].interval_limits()
                 sel_coord_obj = d.get_coordinate_object(c)
                 n_sample_sel[sel_coord_obj.dimension_list[0]] = index_int_high[0] - index_int_low[0]
-
-
-    # creating a list of interval index start stop values for the processing intervals
-    # Each element of the list contains a list with the index start for all the coordinates
-    index_int_low = []
-    index_int_high = []
-    sel_coords = intervals.keys()
-    if (intervals is not None):  
-        # This function is called recursively so as a full list of all procesing intervals is prepared
-        ind_int_low,index_int_high = _add_proc_int_list(d,sel_coords,intervals,index_int_low,index_int_high)
-
-        # Looping through the selection coordinates
-        for c in intervals.keys(): 
- 
-            sel_coord_obj = d.get_coordinate_object(c)
-            if (intervals[c] is None):
-                n_sample_sel[coord.dimension_list[0]] = 
-            interval_n_1, start_ind = intervals[c].interval_number()
-            int_low, int_high = intervals[c].interval_limits()
-            index_int_low, index_int_high = index_intervals[c].interval_limits()
-            n_proc_int *= interval_n_1
-    else:
-        ind_int_low = [[0] * d.ndim]
-        ind_int_high = [d.shape]
     
     # Creating indices to take out data for each processing interval and place it into the processing arrays
     interval_slice_1 = [slice(0,dim) for dim in list(d.data.shape)]

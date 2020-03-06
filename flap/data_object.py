@@ -315,7 +315,7 @@ class DataObject:
                 break
         else:
             raise ValueError("Coordinate '" + name + "' is not present in data object.")
-        index = [0]*len(self.data_shape)
+        index = [0]*len(self.shape)
         for i in c.dimension_list:
             index[i] = ...
 
