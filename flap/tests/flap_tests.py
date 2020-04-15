@@ -736,14 +736,14 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = False
+test_all = True
 
 # Running tests
 plt.close('all')
 
 root = Tk()
 dpi = plt.rcParams["figure.dpi"]
-plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.7/dpi, root.winfo_screenheight()*0.7/dpi]
+plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.3/dpi, root.winfo_screenheight()*0.3/dpi]
 
 if (False or test_all):
     test_storage()
@@ -753,7 +753,8 @@ if (False or test_all):
     input("Press Enter to continue...")
 if (False or test_all):
     test_coordinates()
-    input("Press Enter to continue...")
+    show_plot()
+    wait_for_key()
 if (False or test_all):    
     test_arithmetic()
     input("Press Enter to continue...")
@@ -805,6 +806,8 @@ if (False or test_all):
     wait_for_key()
 if (False or test_all):
     test_ccf()
+    show_plot()
+    wait_for_key()
 if (False or test_all):
     test_image()
     show_plot()
