@@ -699,7 +699,7 @@ def test_image():
     flap.add_data_object(d,"TEST_VIDEO_noneq")
     flap.list_data_objects()
     plt.figure()
-    print("**** Showing this video and test_video_noneq.avi")
+    print("**** Showing this video and saving to  test_video_noneq.avi")
     flap.plot('TEST_VIDEO_noneq',plot_type='anim-image',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_noneq.avi','Colorbar':True,'Aspect ratio':'equal'})
  
@@ -784,7 +784,7 @@ if (False or test_all):
     test_select_multislice()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_binning()
     show_plot()
     wait_for_key()    
