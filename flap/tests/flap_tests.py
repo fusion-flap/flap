@@ -784,7 +784,7 @@ if (False or test_all):
     test_select_multislice()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_binning()
     show_plot()
     wait_for_key()    

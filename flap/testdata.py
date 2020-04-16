@@ -116,7 +116,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
 
     meas_timerange = [0, _options['Length']]
     meas_sampletime = 1./_options['Samplerate']
-    meas_sample = np.rint(float((meas_timerange[1]-meas_timerange[0])/meas_sampletime))+1
+    meas_sample = int(np.rint(float((meas_timerange[1]-meas_timerange[0])/meas_sampletime))+1)
     
     read_range = None
     read_samplerange = None
