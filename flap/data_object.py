@@ -3507,7 +3507,7 @@ class FlapStorage:
             raise ValueError("Object name should be a string.")
         _name = name + '_exp_id:' + str(exp_id)
         try:
-            d = self.__data_objects[_name]
+            d = copy.deepcopy(self.__data_objects[_name])
             return d
         except KeyError:
             nlist = []

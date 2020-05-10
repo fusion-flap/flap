@@ -83,11 +83,6 @@ def test_saveload():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test save/load <<<<<<<<<<<<<<<<<<<<<<<<")
     flap.delete_data_object('*')
-    d=flap.get_data('TESTDATA',name='TEST-*',
-                    options={'Scaling':'Volt'},
-                    object_name='TESTDATA',
-                    coordinates={'Time':[0,0.001]})
-    flap.slice_data('TESTDATA',slicing={'Signal name': 'TEST-1-*'},output_name='TESTDATA_slice')
     print("**** Storage contents before save.")
     flap.list_data_objects()
     print("**** Saving all storage and deleting storage contents.")
