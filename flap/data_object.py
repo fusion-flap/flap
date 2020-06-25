@@ -2328,7 +2328,7 @@ class DataObject:
                             d_slice.error = np.sqrt(np.sum(d_slice.error**2,axis=summing_coords[i_sc].dimension_list[0]))
                 elif (summing_description[i_sc] == 'Mean'):
                     d_slice.data = np.mean(d_flat,axis=summing_coords[i_sc].dimension_list[0])
-                    slice_data_orig_shape = np.mean(d_flat,axis=summing_coords[i_sc].dimension_list[0], keepdims=True)
+                    slice_data_orig_shape = np.mean(d_flat, axis=summing_coords[i_sc].dimension_list[0], keepdims=True)
                     err_of_average = np.sqrt(np.mean((slice_data_orig_shape-d_flat)**2,
                                                      axis=summing_coords[i_sc].dimension_list[0]))
                     if (d_slice.error is not None):
@@ -2343,7 +2343,6 @@ class DataObject:
                             d_slice.error = np.sqrt(np.sum(d_slice.error**2,
                                                            axis=summing_coords[i_sc].dimension_list[0]) / n**2 +\
                                             err_of_average**2)
-                            print(d_slice.error)
                 elif ((summing_description[i_sc] == 'Min') or (summing_description[i_sc] == 'Max')):
                     # Finding the appropriate indices
                     if (summing_description[i_sc] == 'Min'):
@@ -4297,6 +4296,7 @@ def load(filename,options=None):
     except:
         raise IOError("Cannot open file: "+filename)
     try:
+        print(filename)
         save_data = pickle.load(f)
     except Exception as e:
         raise e
