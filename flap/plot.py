@@ -1929,13 +1929,19 @@ def _plot(data_object,
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
 #        ax=plt.plot()
         _plot_id.plt_axis_list = []
-        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+#        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        _plot_id.plt_axis_list.append(_plot_id.base_subplot)
 #        plt.subplot(_plot_id.base_subplot)
 #        plt.plot()
 #        plt.cla()
 #        ax=plt.gca()
         for it in range(len(tdata)):
-            plt.subplot(_plot_id.base_subplot)
+            # This is a hack here. The problem is, that the colorbar() call reduces the axes size
+            del gs
+            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+            plt.subplot(gs[0,0])
+#            plt.subplot(_plot_id.base_subplot)
+#            ax_act = _plot_id.base_subplot
             ax_act = plt.subplot(gs[0,0])
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it

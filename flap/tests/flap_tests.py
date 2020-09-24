@@ -297,7 +297,7 @@ def test_plot_xy():
     print("**** Plotting measurement points in device corodinates.")
     plt.figure()
     flap.plot('TESTDATA',axes=['Device x','Device z'],plot_type ='scatter')
-    print("**** Plotting Device x as a funciton of Row.")
+    print("**** Plotting Device x as a function of Row.")
     plt.figure()
     flap.plot('TESTDATA',axes=['Row','Device x'],plot_type ='scatter',)
 
@@ -715,16 +715,22 @@ def key_pressed():
     global keypressed
     if (keypressed is not None):
         return True
+    
+def wait_press(flag=False):
+    if (flag):
+        input("Press Enter to continue...")
 
-def wait_for_key():
-    print("Press any key ON A PLOT to continue...")
-    fig = plt.gcf()
-    kbd_press = fig.canvas.mpl_connect('key_press_event', keypress_event)
-    keypress_start()
-    while not key_pressed():
-        time.sleep(0.01)
-        plt.pause(0.01)
-    fig.canvas.mpl_disconnect(kbd_press)
+def wait_for_key(flag=False):
+    if (flag):
+        print("Press any key ON A PLOT to continue...")
+        fig = plt.gcf()
+        kbd_press = fig.canvas.mpl_connect('key_press_event', keypress_event)
+        keypress_start()
+        while not key_pressed():
+            time.sleep(0.01)
+            plt.pause(0.01)
+        fig.canvas.mpl_disconnect(kbd_press)
+    
     
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
@@ -742,31 +748,28 @@ plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.3/dpi, root.winfo_s
 
 if (False or test_all):
     test_storage()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_saveload()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_coordinates()
     show_plot()
     wait_for_key()
 if (False or test_all):    
     test_arithmetic()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_plot_xy()
     show_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_plot_multi_xy()
     show_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_simple_slice()
     show_plot()
