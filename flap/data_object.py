@@ -3437,6 +3437,91 @@ class DataObject:
          except Exception as e:
              raise e
              
+    def pdf(self, coordinate=None, intervals=None, options=None):
+        """
+            Amplitude distribution (PDF) function of data. Flattens the data array in the dimensions where the 
+            coordinates change and calculates PDF on this data for each case of the other dimensions.
+            INPUT:
+                self: A flap.DataObject.
+                coordinate: The name of the coordinate(s) (string, or list of strings) along which to calculate. 
+                            If not set first coordinate in data object will be used.
+                            These coordinates will be removed and replaced by a new coordinate with the name of the data.
+                intervals: Information of processing intervals.
+                           If dictionary with a single key: {selection coordinate: description})
+                               Key is a coordinate name which can be different from the calculation
+                               coordinate.
+                               Description can be flap.Intervals, flap.DataObject or
+                               a list of two numbers. If it is a data object with data name identical to
+                               the coordinate the error ranges of the data object will be used for
+                               interval. If the data name is not the same as coordinate a coordinate with the
+                               same name will be searched for in the data object and the value_ranges
+                               will be used fromm it to set the intervals.
+                           If not a dictionary and not None is is interpreted as the interval
+                               description, the selection coordinate is taken the same as
+                               coordinate.
+                           If None, the whole data interval will be used as a single interval.
+                options: Dictionary. (Keys can be abbreviated)
+                    'Range': The data value range. If not set the data minimum-maximum will be used.
+                    'Resolution': The resolution of the PDF
+                    'Number': The number of intervals in Range. This is an alternative to Resolution.
+        """
+        if (self.data is None):
+            raise ValueError("Cannot process without data.")
+        default_options = {'Range':None, 'Resolution': None, 'Number':None}
+
+        try:
+            _options = flap.config.merge_options(default_options, options,
+                                             data_source=self.data_source,
+                                             section='PDF')
+        except ValueError as e:
+            raise e
+        if (coordinate is None):
+            c_names = self.coordinate_names()
+            try:
+                _coordinate = c_names[0]
+            except ValueError:
+                raise ValueError("No coordinate is given for filter and no Time coordinate found.")
+        else:
+            _coordinate = coordinate
+        if ((type(_coordinate) is not list) and (type(coordinate) is not string)):
+            raise ValueError("Coordinate should be string or list of strings.")
+        if (type(_coordinate) is not list):
+            _coordinate = [_coordinate]
+        dim_list = []
+        # Create dimension list of all the listed coordinates
+        for c in _coordinate:
+            if (type(c) is not list):
+                raise ValueError("Coordinate list elements should be strings.")
+            for d in self.get_coordinate_object(c).dimension_list:
+                try:
+                    dim_list.index(d)
+                except ValueError:
+                    dim_list.append(d)
+        data_proc_mx = flatten_multidim(self.data, dim_list):
+        if (_options['Range'] is None):
+            _options['Range'] = [np.amin(data_proc_mx,dim_list[0]), np.amax(data_proc_mx,dim_list[0])]
+        else:
+            if ((type(_options['Range']) is not list) or (len(_options['Range]']) != 2)):
+                raise ValueError("Range should be a list with two elments.")
+        if ((_options['Number'] is None) and (_options['Resolution'] is None)):
+            _options['Number'] = 10
+        if ((_options['Number'] is not None) and (_options['Resolution'] is not None)):
+            raise ValueError("Resolution and Number cannot be set at the same time.")
+        if (_options['Number'] is not None):
+            diff = (_options['Range'][1] - _options['Range'][0]) / _options['Number']
+            limits = np.arange(_options['Number'] + 1) * diff + _options['Range'][0]
+        else:
+            n = ((_options['Range'][1] - _options['Range'][0]) / _options['Resolution'])
+            if (n != int(n)):
+                n = int(n) + 1
+            else:
+                n = int(n)
+            limits = np.arange(n + 1) * _options['Resolution'] + _options['Range'][0]
+        
+            
+            
+        
+        
 ########## END of class DataObject            
             
 class FlapStorage:
@@ -4413,3 +4498,4 @@ def error_value(object_name,exp_id='*',output_name=None, options=None):
         except Exception as e:
             raise e
     return d_out
+
