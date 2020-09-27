@@ -747,7 +747,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = False
+test_all = True
 
 # Running tests
 plt.close('all')
@@ -820,7 +820,7 @@ if (False or test_all):
     test_image()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_pdf()
     wait_press()
 
