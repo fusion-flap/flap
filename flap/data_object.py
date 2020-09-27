@@ -3503,7 +3503,7 @@ class DataObject:
         if (_options['Range'] is None):
             _options['Range'] = [np.amin(self.data), np.amax(self.data)]
         else:
-            if ((type(_options['Range']) is not list) or (len(_options['Range]']) != 2)):
+            if ((type(_options['Range']) is not list) or (len(_options['Range']) != 2)):
                 raise ValueError("Range should be a list with two elments.")
             try:
                 if (_options['Range'][1] <= _options['Range'][0]):
@@ -3539,21 +3539,22 @@ class DataObject:
             else:
                 sel_coordinate = _coordinate[0]
                 sel_coord_obj = self.get_coordinate_object(_coordinate[0])
-            ind = [slice(0,dim) for dim in d.shape]
-            ind_sel = np.array([])    
+            ind = [slice(0,dim) for dim in self.shape]
+            ind_sel = np.array([],dtype='int32')    
             for i_int in range(len(int_start_ind)):            
                 ind_sel = np.concatenate((ind_sel,np.arange(int_end_ind[i_int] - int_start_ind[i_int] + 1) + int_start_ind[i_int]))
-            ind[sel_coord_obj[0]] = ind_sel
+            ind[sel_coord_obj.dimension_list[0]] = ind_sel
             ind = tuple(ind)
             data_proc_mx = self.data[ind]
         else:
             data_proc_mx = self.data
         data_proc_mx,dim_mapping = flap.tools.flatten_multidim(data_proc_mx, dim_list)
+        # In the output putting the signal value to the last dimension
         output_shape = list(data_proc_mx.shape)
-        output_shape[dim_list[0]] = len(limits) - 1
+        output_shape.append(len(limits) - 1)
+        del output_shape[dim_list[0]]
         output_mx = np.zeros(tuple(output_shape),dtype=data_proc_mx.dtype)
         ind = [0] * data_proc_mx.ndim
-        ind[dim_list[0]] = slice(0,len(limits) - 1)
         _pdf_recursive(data_proc_mx,output_mx,limits,dim_list[0],0,ind)
         
         # Fixing coordinates
@@ -3565,7 +3566,7 @@ class DataObject:
         data_out.data_title='PDF of ' + self.data_title
         new_coord = flap.coordinate.Coordinate(name=self.data_unit.name,
                                                unit=self.data_unit.unit,
-                                               dimension_list=[dim_list[0]],
+                                               dimension_list=[output_mx.ndim - 1],
                                                mode=flap.coordinate.CoordinateMode(equidistant=True),
                                                start = (limits[1] + limits[0]) / 2,
                                                step = limits[1] - limits[0]
@@ -3593,7 +3594,8 @@ class DataObject:
         for c in del_list:
             data_out.del_coordinate(c)
         # Adding the new coordinate
-        data_out.coordinates.append(new_coord)       
+        data_out.coordinates.append(new_coord)  
+        data_out.check()
         return data_out
             
 def _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,dim_i,ind):
@@ -3606,11 +3608,14 @@ def _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,dim_i,ind):
     i = dim_i
     if (i == flattened_dim):
         i += 1
-    if (i >= data_proc_mx.ndim - 1):
+    if (i >= data_proc_mx.ndim):
         ind_read = copy.deepcopy(ind)
         ind_read[flattened_dim] = slice(0,data_proc_mx.shape[flattened_dim])
+        ind_write = copy.deepcopy(ind)
+        del ind_write[flattened_dim]
+        ind_write.append(slice(0,len(limits) - 1))
         h,bin_edges = np.histogram(data_proc_mx[tuple(ind_read)],bins=limits)
-        output_mx[tuple(ind)] = h
+        output_mx[tuple(ind_write)] = h
         return
     for j in range(data_proc_mx.shape[i]):
         ind[i] = j
