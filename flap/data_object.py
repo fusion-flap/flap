@@ -3458,7 +3458,7 @@ class DataObject:
                                will be used fromm it to set the intervals.
                            If not a dictionary and not None is is interpreted as the interval
                                description, the selection coordinate is taken the same as
-                               coordinate.
+                               coordinate[0].
                            If None, the whole data interval will be used as a single interval.
                 options: Dictionary. (Keys can be abbreviated)
                     'Range': The data value range. If not set the data minimum-maximum will be used.
@@ -3483,23 +3483,22 @@ class DataObject:
                 raise ValueError("No coordinate is given for filter and no Time coordinate found.")
         else:
             _coordinate = coordinate
-        if ((type(_coordinate) is not list) and (type(coordinate) is not string)):
+        if ((type(_coordinate) is not list) and (type(coordinate) is not str)):
             raise ValueError("Coordinate should be string or list of strings.")
         if (type(_coordinate) is not list):
             _coordinate = [_coordinate]
         dim_list = []
         # Create dimension list of all the listed coordinates
         for c in _coordinate:
-            if (type(c) is not list):
+            if (type(c) is not str):
                 raise ValueError("Coordinate list elements should be strings.")
             for d in self.get_coordinate_object(c).dimension_list:
                 try:
                     dim_list.index(d)
                 except ValueError:
                     dim_list.append(d)
-        data_proc_mx = flatten_multidim(self.data, dim_list):
         if (_options['Range'] is None):
-            _options['Range'] = [np.amin(data_proc_mx,dim_list[0]), np.amax(data_proc_mx,dim_list[0])]
+            _options['Range'] = [np.amin(self.data), np.amax(self.data)]
         else:
             if ((type(_options['Range']) is not list) or (len(_options['Range]']) != 2)):
                 raise ValueError("Range should be a list with two elments.")
@@ -3517,9 +3516,58 @@ class DataObject:
             else:
                 n = int(n)
             limits = np.arange(n + 1) * _options['Resolution'] + _options['Range'][0]
+        if (intervals is not None):
+            try:    
+                calc_int, calc_int_ind, sel_int, sel_int_ind = self.proc_interval_limits(_coordinate[0], intervals=intervals)
+            except Exception as e:
+                raise e
+            int_start_ind = sel_int_ind[0]
+            int_end_ind = sel_int_ind[1]
+            int_start = sel_int[0]
+            int_end = sel_int[1]  
+            if (type(intervals) is dict):
+                sel_coordinate = list(intervals.keys())[0]
+                sel_coord_obj = self.get_coordinate_object(sel_coordinate)
+            else:
+                sel_coordinate = _coordinate[0]
+                sel_coord_obj = self.get_coordinate_object(_coordinate[0])
+            ind = [slice(0,dim) for dim in d.shape]
+            ind_sel = np.array([])    
+            for i_int in range(len(int_start_ind)):            
+                ind_sel = np.concatenate((ind_sel,np.arange(int_end_ind[i_int] - int_start_ind[i_int] + 1) + int_start_ind[i_int]))
+            ind[sel_coord_obj[0]] = ind_sel
+            ind = tuple(ind)
+            data_proc_mx = self.data[ind]
+        else:
+            data_proc_mx = self.data
+        data_proc_mx,dims = flap.tools.flatten_multidim(data_proc_mx, dim_list)
+        output_shape = data_proc_mx.shape
+        output_shape[dim_list[0]] = len(limits) - 1
+        output_mx = np.zeros(output_shape,dtype=data_proc_mx.dtype)
+        ind = [0] * data_proc_mx.ndim
+        ind[dim_list[0]] = slice(0,len(len(limits)) - 1)
+        _pdf_recursive(data_proc_mx,output_mx,dim_list[0],0,ind)
+        
         
             
+def _pdf_recursive(data_proc_mx,output_mx,flattened_dim,dim_i,ind):
+    """ Helper function for pdf.
+        Recursicely goes through all dimensions and calculates PDF.
+        Going through all dimensions of the data_proc_mx. The actual result write index
+        is in ind. dim_i is the index of the dimension. When dim_i reaches to the end of the dimensions
+        the PDF is calculated and written to the elements pointed by index.
+    """
+    i = dim_i
+    if (i == flattened_dim):
+        i += 1
+    if (i >= len(data_proc_mx.ndim) - 1):
+    ind_read = ind
+    ind_read[flattened_dim] =     
+           
+    for j in range(data_proc_mx.shape[i]):
+        
             
+           
         
         
 ########## END of class DataObject            
@@ -4490,6 +4538,48 @@ def error_value(object_name,exp_id='*',output_name=None, options=None):
         raise e
     try:
         d_out = d.error_value(options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+
+def pdf(object_name,exp_id='*',coordinate=None, intervals=None, options=None, output_name=None):
+    """
+        Amplitude distribution (PDF) function of data. Flattens the data array in the dimensions where the 
+        coordinates change and calculates PDF on this data for each case of the other dimensions.
+        INPUT:
+            coordinate: The name of the coordinate(s) (string, or list of strings) along which to calculate. 
+                        If not set first coordinate in data object will be used.
+                        These coordinates will be removed and replaced by a new coordinate with the name of the data.
+            intervals: Information of processing intervals.
+                       If dictionary with a single key: {selection coordinate: description})
+                           Key is a coordinate name which can be different from the calculation
+                           coordinate.
+                           Description can be flap.Intervals, flap.DataObject or
+                           a list of two numbers. If it is a data object with data name identical to
+                           the coordinate the error ranges of the data object will be used for
+                           interval. If the data name is not the same as coordinate a coordinate with the
+                           same name will be searched for in the data object and the value_ranges
+                           will be used fromm it to set the intervals.
+                       If not a dictionary and not None is is interpreted as the interval
+                           description, the selection coordinate is taken the same as
+                           coordinate.
+                       If None, the whole data interval will be used as a single interval.
+            options: Dictionary. (Keys can be abbreviated)
+                'Range': The data value range. If not set the data minimum-maximum will be used.
+                'Resolution': The resolution of the PDF
+            
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.pdf(coordinate=coordinate, intervals=intervals, options=options)
     except Exception as e:
         raise e
     if (output_name is not None):

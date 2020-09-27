@@ -697,6 +697,14 @@ def test_image():
     print("**** Showing this video and saving to  test_video_noneq.avi")
     flap.plot('TEST_VIDEO_noneq',plot_type='anim-image',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_noneq.avi','Colorbar':True,'Aspect ratio':'equal'})
+def test_pdf():
+    print("**** Generating 10x15 random test signals, 5000 points each, 1 MHz sampling.")
+    flap.get_data('TESTDATA',
+                  name='TEST-*-*',
+                  options={'Length':0.005, 'Signal':'Random'},
+                  object_name='TESTDATA')
+    flap.pdf('TESTDATA',coordinate='Time',output_name='PDF')
+    flap.list_data_objects()
  
 def show_plot():
     plt.pause(0.05)
@@ -737,7 +745,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = True
+test_all = False
 
 # Running tests
 plt.close('all')
@@ -810,6 +818,9 @@ if (False or test_all):
     test_image()
     show_plot()
     wait_for_key()
+if (True or test_all):
+    test_pdf()
+    wait_press()
 
 print(">>>>>>>>>>>>>>>> All tests finished <<<<<<<<<<<<<<<<<<<<")
 
