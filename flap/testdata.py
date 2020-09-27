@@ -6,9 +6,6 @@ It is assumed that measurement channels collect temporal data on a 2D mesh in th
 The measurement channels are named as TEST-<row>-<colunn>
 <row>:  1....15
 <column>:  1...10
-Sample time is 1 MHz between 0,1 seconds. The signals are sine waves with 1 kHz frequency
-The amplitude has Gaussian distribution around the channel matrix center.
-Signal unit is Volt, signal amplititude max is 1V, ADC digit is 1 mV
 
 The row/column locations relative to the array corner are:
     xr = (<column>-1)*0.5 [cm]

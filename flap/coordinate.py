@@ -304,7 +304,7 @@ class Coordinate:
                  value_index=None,
                  value_ranges=None,
                  dimension_list=[]):
-        # This is a UnitClass describing the name and unit
+        # This is a Unit Class describing the name and unit
         self.unit = Unit(name=name,unit=unit)
         # mode is a collection of flags
         # flap.Coordinate.EQUIDISTANT: coordinate changes proportionally to samples number

@@ -701,10 +701,12 @@ def test_pdf():
     print("**** Generating 10x15 random test signals, 5000 points each, 1 MHz sampling.")
     flap.get_data('TESTDATA',
                   name='TEST-*-*',
-                  options={'Length':0.005, 'Signal':'Random'},
+                  options={'Length':0.005, 'Signal':'Sin'},
                   object_name='TESTDATA')
-    flap.pdf('TESTDATA',coordinate='Time',output_name='PDF')
+    flap.pdf('TESTDATA',coordinate='Time',options={'Number':30},output_name='PDF')
     flap.list_data_objects()
+    flap.plot('PDF',slicing={'Column':3},axes=['Signal'])
+    plt.title('PDF of sine waves')
  
 def show_plot():
     plt.pause(0.05)

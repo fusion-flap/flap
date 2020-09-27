@@ -3475,6 +3475,9 @@ class DataObject:
                                              section='PDF')
         except ValueError as e:
             raise e
+            
+        if (self.data.dtype.kind == 'c'):
+            raise ValueError("Cannot calculate PDF from complex data.")
         if (coordinate is None):
             c_names = self.coordinate_names()
             try:
@@ -3502,6 +3505,11 @@ class DataObject:
         else:
             if ((type(_options['Range']) is not list) or (len(_options['Range]']) != 2)):
                 raise ValueError("Range should be a list with two elments.")
+            try:
+                if (_options['Range'][1] <= _options['Range'][0]):
+                    raise ValueError("Invalid range for PDF.")
+            except Exception as e:
+                raise ValueError("Invalid range for PDF.")
         if ((_options['Number'] is None) and (_options['Resolution'] is None)):
             _options['Number'] = 10
         if ((_options['Number'] is not None) and (_options['Resolution'] is not None)):
@@ -3540,17 +3548,55 @@ class DataObject:
             data_proc_mx = self.data[ind]
         else:
             data_proc_mx = self.data
-        data_proc_mx,dims = flap.tools.flatten_multidim(data_proc_mx, dim_list)
-        output_shape = data_proc_mx.shape
+        data_proc_mx,dim_mapping = flap.tools.flatten_multidim(data_proc_mx, dim_list)
+        output_shape = list(data_proc_mx.shape)
         output_shape[dim_list[0]] = len(limits) - 1
-        output_mx = np.zeros(output_shape,dtype=data_proc_mx.dtype)
+        output_mx = np.zeros(tuple(output_shape),dtype=data_proc_mx.dtype)
         ind = [0] * data_proc_mx.ndim
-        ind[dim_list[0]] = slice(0,len(len(limits)) - 1)
-        _pdf_recursive(data_proc_mx,output_mx,dim_list[0],0,ind)
+        ind[dim_list[0]] = slice(0,len(limits) - 1)
+        _pdf_recursive(data_proc_mx,output_mx,limits,dim_list[0],0,ind)
         
-        
+        # Fixing coordinates
+        data_out = copy.deepcopy(self)
+        data_out.data = output_mx
+        data_out.shape = output_mx.shape
+        data_out.error = None
+        data_out.data_unit = flap.coordinate.Unit(name='Number',unit='')
+        data_out.data_title='PDF of ' + self.data_title
+        new_coord = flap.coordinate.Coordinate(name=self.data_unit.name,
+                                               unit=self.data_unit.unit,
+                                               dimension_list=[dim_list[0]],
+                                               mode=flap.coordinate.CoordinateMode(equidistant=True),
+                                               start = (limits[1] + limits[0]) / 2,
+                                               step = limits[1] - limits[0]
+                                               )
+        # Removing all coordinates which change on the removed dimensions
+        # Setting up a list of coordinates with have common dimension with the deleted ones
+        del_list = []
+        for c in data_out.coordinates:
+            del_coord = False
+            for d in dim_list:
+                try:
+                    c.dimension_list.index(d)
+                    del_list.append(c.unit.name)
+                    del_coord = True
+                    break
+                except ValueError:
+                    pass
+            if (not del_coord):
+                # This coordinate remains, mapping dimensions
+                for id in range(len(c.dimension_list)):
+                    if (dim_mapping[c.dimension_list[id]] is None):
+                        raise RuntimeError("Internal error: Null dimension after pdf.")
+                    c.dimension_list[id] = dim_mapping[c.dimension_list[id]]
+        # Deleting coordinates
+        for c in del_list:
+            data_out.del_coordinate(c)
+        # Adding the new coordinate
+        data_out.coordinates.append(new_coord)       
+        return data_out
             
-def _pdf_recursive(data_proc_mx,output_mx,flattened_dim,dim_i,ind):
+def _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,dim_i,ind):
     """ Helper function for pdf.
         Recursicely goes through all dimensions and calculates PDF.
         Going through all dimensions of the data_proc_mx. The actual result write index
@@ -3560,11 +3606,16 @@ def _pdf_recursive(data_proc_mx,output_mx,flattened_dim,dim_i,ind):
     i = dim_i
     if (i == flattened_dim):
         i += 1
-    if (i >= len(data_proc_mx.ndim) - 1):
-    ind_read = ind
-    ind_read[flattened_dim] =     
-           
+    if (i >= data_proc_mx.ndim - 1):
+        ind_read = copy.deepcopy(ind)
+        ind_read[flattened_dim] = slice(0,data_proc_mx.shape[flattened_dim])
+        h,bin_edges = np.histogram(data_proc_mx[tuple(ind_read)],bins=limits)
+        output_mx[tuple(ind)] = h
+        return
     for j in range(data_proc_mx.shape[i]):
+        ind[i] = j
+        _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,i + 1,ind)
+        
         
             
            
