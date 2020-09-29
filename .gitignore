@@ -6,9 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# FLAP modules
-flap_*
-
 note*
 
 # Distribution / packaging
@@ -109,3 +106,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# VSCOde
+.vs*
