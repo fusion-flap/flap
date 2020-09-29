@@ -1,0 +1,101 @@
+\indexentry{module@\spxentry{module}!flap.config@\spxentry{flap.config}|hyperpage}{11}
+\indexentry{flap.config@\spxentry{flap.config}!module@\spxentry{module}|hyperpage}{11}
+\indexentry{interpret\_config\_value() (in module flap.config)@\spxentry{interpret\_config\_value()}\spxextra{in module flap.config}|hyperpage}{11}
+\indexentry{merge\_options() (in module flap.config)@\spxentry{merge\_options()}\spxextra{in module flap.config}|hyperpage}{11}
+\indexentry{module@\spxentry{module}!flap.coordinate@\spxentry{flap.coordinate}|hyperpage}{11}
+\indexentry{flap.coordinate@\spxentry{flap.coordinate}!module@\spxentry{module}|hyperpage}{11}
+\indexentry{Coordinate (class in flap.coordinate)@\spxentry{Coordinate}\spxextra{class in flap.coordinate}|hyperpage}{11}
+\indexentry{change\_dimensions() (flap.coordinate.Coordinate method)@\spxentry{change\_dimensions()}\spxextra{flap.coordinate.Coordinate method}|hyperpage}{12}
+\indexentry{data() (flap.coordinate.Coordinate method)@\spxentry{data()}\spxextra{flap.coordinate.Coordinate method}|hyperpage}{12}
+\indexentry{data\_range() (flap.coordinate.Coordinate method)@\spxentry{data\_range()}\spxextra{flap.coordinate.Coordinate method}|hyperpage}{12}
+\indexentry{dtype() (flap.coordinate.Coordinate method)@\spxentry{dtype()}\spxextra{flap.coordinate.Coordinate method}|hyperpage}{12}
+\indexentry{nochange\_dimensions() (flap.coordinate.Coordinate method)@\spxentry{nochange\_dimensions()}\spxextra{flap.coordinate.Coordinate method}|hyperpage}{12}
+\indexentry{non\_interpol() (flap.coordinate.Coordinate method)@\spxentry{non\_interpol()}\spxextra{flap.coordinate.Coordinate method}|hyperpage}{12}
+\indexentry{CoordinateMode (class in flap.coordinate)@\spxentry{CoordinateMode}\spxextra{class in flap.coordinate}|hyperpage}{12}
+\indexentry{Intervals (class in flap.coordinate)@\spxentry{Intervals}\spxextra{class in flap.coordinate}|hyperpage}{12}
+\indexentry{interval\_limits() (flap.coordinate.Intervals method)@\spxentry{interval\_limits()}\spxextra{flap.coordinate.Intervals method}|hyperpage}{12}
+\indexentry{interval\_number() (flap.coordinate.Intervals method)@\spxentry{interval\_number()}\spxextra{flap.coordinate.Intervals method}|hyperpage}{13}
+\indexentry{Unit (class in flap.coordinate)@\spxentry{Unit}\spxextra{class in flap.coordinate}|hyperpage}{13}
+\indexentry{title() (flap.coordinate.Unit method)@\spxentry{title()}\spxextra{flap.coordinate.Unit method}|hyperpage}{13}
+\indexentry{module@\spxentry{module}!flap.data\_object@\spxentry{flap.data\_object}|hyperpage}{13}
+\indexentry{flap.data\_object@\spxentry{flap.data\_object}!module@\spxentry{module}|hyperpage}{13}
+\indexentry{DataObject (class in flap.data\_object)@\spxentry{DataObject}\spxextra{class in flap.data\_object}|hyperpage}{13}
+\indexentry{add\_coordinate() (flap.data\_object.DataObject method)@\spxentry{add\_coordinate()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{13}
+\indexentry{add\_coordinate\_object() (flap.data\_object.DataObject method)@\spxentry{add\_coordinate\_object()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{13}
+\indexentry{apsd() (flap.data\_object.DataObject method)@\spxentry{apsd()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{13}
+\indexentry{ccf() (flap.data\_object.DataObject method)@\spxentry{ccf()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{14}
+\indexentry{check() (flap.data\_object.DataObject method)@\spxentry{check()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{15}
+\indexentry{coordinate() (flap.data\_object.DataObject method)@\spxentry{coordinate()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{15}
+\indexentry{coordinate\_change\_dimensions() (flap.data\_object.DataObject method)@\spxentry{coordinate\_change\_dimensions()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{15}
+\indexentry{coordinate\_change\_indices() (flap.data\_object.DataObject method)@\spxentry{coordinate\_change\_indices()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{15}
+\indexentry{coordinate\_names() (flap.data\_object.DataObject method)@\spxentry{coordinate\_names()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{16}
+\indexentry{coordinate\_nochange\_dimensions() (flap.data\_object.DataObject method)@\spxentry{coordinate\_nochange\_dimensions()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{16}
+\indexentry{coordinate\_range() (flap.data\_object.DataObject method)@\spxentry{coordinate\_range()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{16}
+\indexentry{cpsd() (flap.data\_object.DataObject method)@\spxentry{cpsd()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{16}
+\indexentry{detrend() (flap.data\_object.DataObject method)@\spxentry{detrend()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{17}
+\indexentry{error\_value() (flap.data\_object.DataObject method)@\spxentry{error\_value()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{17}
+\indexentry{filter\_data() (flap.data\_object.DataObject method)@\spxentry{filter\_data()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{17}
+\indexentry{get\_coordinate\_object() (flap.data\_object.DataObject method)@\spxentry{get\_coordinate\_object()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{18}
+\indexentry{index\_from\_coordinate() (flap.data\_object.DataObject method)@\spxentry{index\_from\_coordinate()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{18}
+\indexentry{plot() (flap.data\_object.DataObject method)@\spxentry{plot()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{18}
+\indexentry{proc\_interval\_limits() (flap.data\_object.DataObject method)@\spxentry{proc\_interval\_limits()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{19}
+\indexentry{save() (flap.data\_object.DataObject method)@\spxentry{save()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{19}
+\indexentry{slice\_data() (flap.data\_object.DataObject method)@\spxentry{slice\_data()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{19}
+\indexentry{slicing\_to\_intervals() (flap.data\_object.DataObject method)@\spxentry{slicing\_to\_intervals()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{21}
+\indexentry{to\_intervals() (flap.data\_object.DataObject method)@\spxentry{to\_intervals()}\spxextra{flap.data\_object.DataObject method}|hyperpage}{21}
+\indexentry{FlapStorage (class in flap.data\_object)@\spxentry{FlapStorage}\spxextra{class in flap.data\_object}|hyperpage}{21}
+\indexentry{find\_data\_objects() (flap.data\_object.FlapStorage method)@\spxentry{find\_data\_objects()}\spxextra{flap.data\_object.FlapStorage method}|hyperpage}{21}
+\indexentry{abs\_value() (in module flap.data\_object)@\spxentry{abs\_value()}\spxextra{in module flap.data\_object}|hyperpage}{21}
+\indexentry{add\_coordinate() (in module flap.data\_object)@\spxentry{add\_coordinate()}\spxextra{in module flap.data\_object}|hyperpage}{21}
+\indexentry{add\_data\_object() (in module flap.data\_object)@\spxentry{add\_data\_object()}\spxextra{in module flap.data\_object}|hyperpage}{21}
+\indexentry{apsd() (in module flap.data\_object)@\spxentry{apsd()}\spxextra{in module flap.data\_object}|hyperpage}{21}
+\indexentry{ccf() (in module flap.data\_object)@\spxentry{ccf()}\spxextra{in module flap.data\_object}|hyperpage}{21}
+\indexentry{cpsd() (in module flap.data\_object)@\spxentry{cpsd()}\spxextra{in module flap.data\_object}|hyperpage}{22}
+\indexentry{delete\_data\_object() (in module flap.data\_object)@\spxentry{delete\_data\_object()}\spxextra{in module flap.data\_object}|hyperpage}{22}
+\indexentry{detrend() (in module flap.data\_object)@\spxentry{detrend()}\spxextra{in module flap.data\_object}|hyperpage}{22}
+\indexentry{error\_value() (in module flap.data\_object)@\spxentry{error\_value()}\spxextra{in module flap.data\_object}|hyperpage}{22}
+\indexentry{filter\_data() (in module flap.data\_object)@\spxentry{filter\_data()}\spxextra{in module flap.data\_object}|hyperpage}{22}
+\indexentry{find\_data\_objects() (in module flap.data\_object)@\spxentry{find\_data\_objects()}\spxextra{in module flap.data\_object}|hyperpage}{23}
+\indexentry{get\_addcoord\_function() (in module flap.data\_object)@\spxentry{get\_addcoord\_function()}\spxextra{in module flap.data\_object}|hyperpage}{23}
+\indexentry{get\_data() (in module flap.data\_object)@\spxentry{get\_data()}\spxextra{in module flap.data\_object}|hyperpage}{23}
+\indexentry{get\_data\_function() (in module flap.data\_object)@\spxentry{get\_data\_function()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{get\_data\_object() (in module flap.data\_object)@\spxentry{get\_data\_object()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{get\_data\_object\_ref() (in module flap.data\_object)@\spxentry{get\_data\_object\_ref()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{imag() (in module flap.data\_object)@\spxentry{imag()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{list\_data\_objects() (in module flap.data\_object)@\spxentry{list\_data\_objects()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{list\_data\_sources() (in module flap.data\_object)@\spxentry{list\_data\_sources()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{load() (in module flap.data\_object)@\spxentry{load()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{phase() (in module flap.data\_object)@\spxentry{phase()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{plot() (in module flap.data\_object)@\spxentry{plot()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{real() (in module flap.data\_object)@\spxentry{real()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{register\_data\_source() (in module flap.data\_object)@\spxentry{register\_data\_source()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{save() (in module flap.data\_object)@\spxentry{save()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{slice\_data() (in module flap.data\_object)@\spxentry{slice\_data()}\spxextra{in module flap.data\_object}|hyperpage}{24}
+\indexentry{module@\spxentry{module}!flap.plot@\spxentry{flap.plot}|hyperpage}{25}
+\indexentry{flap.plot@\spxentry{flap.plot}!module@\spxentry{module}|hyperpage}{25}
+\indexentry{PddType (class in flap.plot)@\spxentry{PddType}\spxextra{class in flap.plot}|hyperpage}{25}
+\indexentry{PlotDataDescription (class in flap.plot)@\spxentry{PlotDataDescription}\spxextra{class in flap.plot}|hyperpage}{25}
+\indexentry{axes\_to\_pdd\_list() (in module flap.plot)@\spxentry{axes\_to\_pdd\_list()}\spxextra{in module flap.plot}|hyperpage}{25}
+\indexentry{get\_plot\_id() (in module flap.plot)@\spxentry{get\_plot\_id()}\spxextra{in module flap.plot}|hyperpage}{25}
+\indexentry{sample\_for\_plot() (in module flap.plot)@\spxentry{sample\_for\_plot()}\spxextra{in module flap.plot}|hyperpage}{25}
+\indexentry{set\_plot\_id() (in module flap.plot)@\spxentry{set\_plot\_id()}\spxextra{in module flap.plot}|hyperpage}{25}
+\indexentry{module@\spxentry{module}!flap.select@\spxentry{flap.select}|hyperpage}{26}
+\indexentry{flap.select@\spxentry{flap.select}!module@\spxentry{module}|hyperpage}{26}
+\indexentry{select\_intervals() (in module flap.select)@\spxentry{select\_intervals()}\spxextra{in module flap.select}|hyperpage}{26}
+\indexentry{module@\spxentry{module}!flap.spectral\_analysis@\spxentry{flap.spectral\_analysis}|hyperpage}{27}
+\indexentry{flap.spectral\_analysis@\spxentry{flap.spectral\_analysis}!module@\spxentry{module}|hyperpage}{27}
+\indexentry{trend\_removal\_func() (in module flap.spectral\_analysis)@\spxentry{trend\_removal\_func()}\spxextra{in module flap.spectral\_analysis}|hyperpage}{27}
+\indexentry{module@\spxentry{module}!flap.tools@\spxentry{flap.tools}|hyperpage}{27}
+\indexentry{flap.tools@\spxentry{flap.tools}!module@\spxentry{module}|hyperpage}{27}
+\indexentry{chlist() (in module flap.tools)@\spxentry{chlist()}\spxextra{in module flap.tools}|hyperpage}{27}
+\indexentry{del\_list\_elements() (in module flap.tools)@\spxentry{del\_list\_elements()}\spxextra{in module flap.tools}|hyperpage}{27}
+\indexentry{expand\_matrix() (in module flap.tools)@\spxentry{expand\_matrix()}\spxextra{in module flap.tools}|hyperpage}{27}
+\indexentry{find\_str\_match() (in module flap.tools)@\spxentry{find\_str\_match()}\spxextra{in module flap.tools}|hyperpage}{27}
+\indexentry{flatten\_multidim() (in module flap.tools)@\spxentry{flatten\_multidim()}\spxextra{in module flap.tools}|hyperpage}{27}
+\indexentry{grid\_to\_box() (in module flap.tools)@\spxentry{grid\_to\_box()}\spxextra{in module flap.tools}|hyperpage}{27}
+\indexentry{move\_axes\_to\_end() (in module flap.tools)@\spxentry{move\_axes\_to\_end()}\spxextra{in module flap.tools}|hyperpage}{28}
+\indexentry{move\_axes\_to\_start() (in module flap.tools)@\spxentry{move\_axes\_to\_start()}\spxextra{in module flap.tools}|hyperpage}{28}
+\indexentry{multiply\_along\_axes() (in module flap.tools)@\spxentry{multiply\_along\_axes()}\spxextra{in module flap.tools}|hyperpage}{28}
+\indexentry{select\_signals() (in module flap.tools)@\spxentry{select\_signals()}\spxextra{in module flap.tools}|hyperpage}{28}
+\indexentry{submatrix\_index() (in module flap.tools)@\spxentry{submatrix\_index()}\spxextra{in module flap.tools}|hyperpage}{28}
+\indexentry{unify\_list() (in module flap.tools)@\spxentry{unify\_list()}\spxextra{in module flap.tools}|hyperpage}{28}
