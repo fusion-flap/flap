@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Config &#8212; FLAP  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Coordinate" href="coordinate.html" />
@@ -36,9 +37,9 @@
 <span id="config"></span><h1>Config<a class="headerlink" href="#module-flap.config" title="Permalink to this headline">¶</a></h1>
 <p>Created on Wed Jan 23 21:45:43 2019</p>
 <p>&#64;author: Zoletnik</p>
-<dl class="function">
+<dl class="py function">
 <dt id="flap.config.interpret_config_value">
-<code class="sig-prename descclassname">flap.config.</code><code class="sig-name descname">interpret_config_value</code><span class="sig-paren">(</span><em class="sig-param">value_str</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/config.html#interpret_config_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.config.interpret_config_value" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.config.</code><code class="sig-name descname">interpret_config_value</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value_str</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/config.html#interpret_config_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.config.interpret_config_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine the data type from the input string and convert.
 Conversions:
 ‘True’, ‘Yes’ –&gt; True
@@ -49,9 +50,9 @@ Starting and ending with [] –&gt; list
 If all the above fails keep as string</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.config.merge_options">
-<code class="sig-prename descclassname">flap.config.</code><code class="sig-name descname">merge_options</code><span class="sig-paren">(</span><em class="sig-param">default_options</em>, <em class="sig-param">input_options</em>, <em class="sig-param">data_source=None</em>, <em class="sig-param">section=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/config.html#merge_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.config.merge_options" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.config.</code><code class="sig-name descname">merge_options</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">default_options</span></em>, <em class="sig-param"><span class="n">input_options</span></em>, <em class="sig-param"><span class="n">data_source</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">section</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/config.html#merge_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.config.merge_options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Merges options dictionaries. Uses default options of function, input options of function and
 options read from config file from &lt;section&gt; section. If exp_id is set will also look for options
 in section Module exp_id for options starting with {section}.
@@ -128,7 +129,7 @@ section: Name of the section in the config file related to the fnction. (May be 
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -145,7 +146,7 @@ section: Name of the section in the config file related to the fnction. (May be 
       &copy;2019, S. Zoletnik et al..
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

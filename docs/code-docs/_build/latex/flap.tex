@@ -58,12 +58,14 @@
 \fvset{fontsize=\small}
 \usepackage{geometry}
 
+
 % Include hyperref last.
 \usepackage{hyperref}
 % Fix anchor placement for figures with captions.
 \usepackage{hypcap}% it must be loaded after hyperref.
 % Set up styles of URL: it should be placed after hyperref.
 \urlstyle{same}
+
 \addto\captionsenglish{\renewcommand{\contentsname}{Contents:}}
 
 \usepackage{sphinxmessages}
@@ -72,7 +74,7 @@
 
 
 \title{FLAP}
-\date{Dec 01, 2019}
+\date{Sep 29, 2020}
 \release{}
 \author{S.\@{} Zoletnik et al.\@{}}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -101,7 +103,7 @@ written by Gabor Csehlast modified: 1st December 2019
 
 The purpose of this document is to give an overview of the coding style requirements for developing the main components of the Fusion Library of Analysis Programs (FLAP) package. (It is not a requirement for developing your own user programs, however, it is still suggested to use this coding style, even when just using FLAP. Or always.).
 
-The coding style in FLAP package follows the \sphinxhref{https://www.python.org/dev/peps/pep-0008/}{PEP 8} style guide (see examples later), so if you are already know it’s rules, you are good to go. Otherwise here are some useful tips about installing and using a style- and code-checking extension (\sphinxhref{http://flake8.pycqa.org/en/latest/}{flake8}) in Visual Studio Code and Spyder.
+The coding style in FLAP package follows the \sphinxhref{https://www.python.org/dev/peps/pep-0008/}{PEP 8} style guide (see examples later), so if you are already know it’s rules, you are good to go. Otherwise here are some useful tips about installing and using a style\sphinxhyphen{} and code\sphinxhyphen{}checking extension (\sphinxhref{http://flake8.pycqa.org/en/latest/}{flake8}) in Visual Studio Code and Spyder.
 
 
 \section{Extensions/packages for style checking}
@@ -111,7 +113,7 @@ Before getting to the actual code style guide, here is the list of packages/exte
 
 \subsection{Python extension for Visual Studio Code}
 \label{\detokenize{styleguide:python-extension-for-visual-studio-code}}
-\sphinxhref{https://code.visualstudio.com/}{Visual Studio Code} is an open source, cross-platform code editor, which is widely used in many environments, e.g. it is available from the Anaconda Python distribution.
+\sphinxhref{https://code.visualstudio.com/}{Visual Studio Code} is an open source, cross\sphinxhyphen{}platform code editor, which is widely used in many environments, e.g. it is available from the Anaconda Python distribution.
 
 To install flake8 code analyzer, you have to install first the \sphinxhref{https://github.com/Microsoft/vscode-python}{Python extension} for VSCode:
 \begin{enumerate}
@@ -130,11 +132,11 @@ That’s it!
 
 \end{enumerate}
 
-After installing the Python extension, a text will appear on the bottom sidebar of the VSCode window, which says Python a version number and 32/64 bit in the form of “Python 3.7.2 64-bit”. By clicking on this text, you can select the Python version, you want to use for code analysis, and running your Python programs. This list contains (in principle) all the available Python installations on your machine, not just the ones, which are in the PATH variable.
+After installing the Python extension, a text will appear on the bottom sidebar of the VSCode window, which says Python a version number and 32/64 bit in the form of “Python 3.7.2 64\sphinxhyphen{}bit”. By clicking on this text, you can select the Python version, you want to use for code analysis, and running your Python programs. This list contains (in principle) all the available Python installations on your machine, not just the ones, which are in the PATH variable.
 
 To have your code checked, you need to install a linting module to your Python installation. The recommended module for this is flake8 (as mentioned before), which not only checks your code, but also analyze your programs and notices you about uninitialized/unused variables etc.
 
-To install flake8, you just have to set VSCode settings accordingly. This means, that go to File \textendash{}\textgreater{} Preferences \textendash{}\textgreater{} Settings (Ctrl+,). Then type “python.” in the search bar, and click on the “edit in settings.json” option (it appears multiple times, it does not matter, which one you click on). Then you have to insert the following lines or - if they are present - check, that the settings are the same as below.
+To install flake8, you just have to set VSCode settings accordingly. This means, that go to File \textendash{}\textgreater{} Preferences \textendash{}\textgreater{} Settings (Ctrl+,). Then type “python.” in the search bar, and click on the “edit in settings.json” option (it appears multiple times, it does not matter, which one you click on). Then you have to insert the following lines or \sphinxhyphen{} if they are present \sphinxhyphen{} check, that the settings are the same as below.
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{p}{\PYGZob{}}
@@ -170,13 +172,13 @@ Real\PYGZhy{}time code style analysis
 checkbox, and you are good to go. After checking this checkmark and applying the settings, the warning/error messages will appear next to the line numbering with a yellow warning sign. Hovering the mouse over these warning signs will give you the exact message.
 
 
-\section{Style guide - a short summary}
+\section{Style guide \sphinxhyphen{} a short summary}
 \label{\detokenize{styleguide:style-guide-a-short-summary}}
 Since we follow the guidelines articulated in \sphinxhref{https://www.python.org/dev/peps/pep-0008/\#}{Python Enchancment Proposal 8 (PEP 8)}, if something is not clear and/or not written in this document, this is a good web page to start. Otherwise I try to give a short, but comprehensive summary about the ideas described there.
 \begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
-Use 4 spaces for indentation - no tabs!! (It can be easily set in modern code editors, even VI(m) has this possibility. It is called either “indent using spaces” or “soft tab”.)
+Use 4 spaces for indentation \sphinxhyphen{} no tabs!! (It can be easily set in modern code editors, even VI(m) has this possibility. It is called either “indent using spaces” or “soft tab”.)
 
 \item {} 
 No trailing spaces at the end of the line.
@@ -214,7 +216,7 @@ Line continuation:
 Line length: \sphinxstylestrong{79 characters} for code, \sphinxstylestrong{72 characters} for docstrings/comments. The original argument for this decision is:
 \begin{quote}
 
-Limiting the required editor window width makes it possible to have several files open side-by-side, and works well when using code review tools that present the two versions in adjacent columns.
+Limiting the required editor window width makes it possible to have several files open side\sphinxhyphen{}by\sphinxhyphen{}side, and works well when using code review tools that present the two versions in adjacent columns.
 \end{quote}
 
 However, if this is not the case at your coding style (means you use one ), it is allowed (as a local rule) to use \sphinxstylestrong{120 characters} for code and/or docstrings/comments.
@@ -224,7 +226,7 @@ Wrapping long lines:
 \begin{quote}
 
 The preferred way of wrapping long lines is by using Python’s implied line continuation inside parentheses, brackets and braces. Long lines can be broken over multiple lines by wrapping expressions in parentheses. These should be used in preference to using a backslash for line continuation.
-Backslashes may still be appropriate at times. For example, long, multiple with-statements cannot use implicit continuation, so backslashes are acceptable:
+Backslashes may still be appropriate at times. For example, long, multiple with\sphinxhyphen{}statements cannot use implicit continuation, so backslashes are acceptable:
 \end{quote}
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
@@ -249,7 +251,7 @@ Line breaks with binary operators (short: operator should be \sphinxstyleemphasi
 Blank lines.
 \begin{itemize}
 \item {} 
-Surround \sphinxstyleemphasis{\sphinxstylestrong{top-level functions}} and \sphinxstyleemphasis{\sphinxstylestrong{class definitions}} with \sphinxstyleemphasis{\sphinxstylestrong{two}} blank lines.
+Surround \sphinxstyleemphasis{\sphinxstylestrong{top\sphinxhyphen{}level functions}} and \sphinxstyleemphasis{\sphinxstylestrong{class definitions}} with \sphinxstyleemphasis{\sphinxstylestrong{two}} blank lines.
 
 \item {} 
 \sphinxstyleemphasis{\sphinxstylestrong{Method definitions}} inside a class are surrounded by a \sphinxstyleemphasis{\sphinxstylestrong{single}} blank line.
@@ -260,16 +262,16 @@ Use blank lines in functions, sparingly, to indicate logical sections.
 \end{itemize}
 
 \item {} 
-Source file encoding: \sphinxhref{https://en.wikipedia.org/wiki/UTF-8}{UTF-8}. Set this every time. However, you should use English words and ASCII \sphinxstyleemphasis{characters} in those files. Except explicit test cases for non-ASCII characters and author names.
+Source file encoding: \sphinxhref{https://en.wikipedia.org/wiki/UTF-8}{UTF\sphinxhyphen{}8}. Set this every time. However, you should use English words and ASCII \sphinxstyleemphasis{characters} in those files. Except explicit test cases for non\sphinxhyphen{}ASCII characters and author names.
 
 \item {} 
 Naming conventions
 \begin{itemize}
 \item {} 
-Names to avoid: ‘l’ (lowercase letter L), ‘o’ (lowercase letter ‘oh’), ‘I’ (uppercase letter ‘eye’) as single-letter variable names. Reason: confusing.
+Names to avoid: ‘l’ (lowercase letter L), ‘o’ (lowercase letter ‘oh’), ‘I’ (uppercase letter ‘eye’) as single\sphinxhyphen{}letter variable names. Reason: confusing.
 
 \item {} 
-All the names should be ASCII compatibility (however, the character-encoding is UTF-8).
+All the names should be ASCII compatibility (however, the character\sphinxhyphen{}encoding is UTF\sphinxhyphen{}8).
 
 \item {} 
 \sphinxstyleemphasis{\sphinxstylestrong{Module}} names should be \sphinxstyleemphasis{\sphinxstylestrong{short, lowercase}} letters (like flap).
@@ -296,7 +298,7 @@ At name collision (e.g. with a reserved keyword) use a trailing underscore. E.g.
 
 \section{Logging}
 \label{\detokenize{styleguide:logging}}
-Instead of using print messages and verbose keywords etc. throughout the whole code, it it strongly advised to use \sphinxhref{https://docs.python.org/3.7/library/logging.html}{Python’s built-in logging system}. It is capable of save the log messages in a stream, on the console or in a file (actually, the latter two are also kinds of streams) based on predefined criterions, e.g. severity. The logging system is easy-to-use and easy-to-config. Some examples are below.
+Instead of using print messages and verbose keywords etc. throughout the whole code, it it strongly advised to use \sphinxhref{https://docs.python.org/3.7/library/logging.html}{Python’s built\sphinxhyphen{}in logging system}. It is capable of save the log messages in a stream, on the console or in a file (actually, the latter two are also kinds of streams) based on predefined criterions, e.g. severity. The logging system is easy\sphinxhyphen{}to\sphinxhyphen{}use and easy\sphinxhyphen{}to\sphinxhyphen{}config. Some examples are below.
 \begin{itemize}
 \item {} 
 A logging.conf file for the logger setup.
@@ -371,7 +373,7 @@ Usage of the logger after setting up a logging.conf file.
 \label{\detokenize{styleguide:documentation-strings}}
 The \sphinxhref{http://www.sphinx-doc.org/en/master/index.html}{Sphinx Python Documentation Generation} system uses \sphinxhref{http://docutils.sourceforge.net/rst.html}{reStructuredText (RST)} (for quick editing purposes, use \sphinxhref{https://github.com/ralsina/rst-cheatsheet/blob/master/rst-cheatsheet.rst}{this cheat sheet}) to generate documentation for various formats include HTML, PDF, DOCX and various ebook formats.
 
-It is capable of creating a whole documentation with separate documents (e.g. tutorials, detailed explanations, intentions etc.), but from the user point of view, the most important parts are the so-called docstrings. These are comment-like sections in the source code, where the user can on-the-fly describe the purpose and usage of the given part of the code. There are a few examples below.
+It is capable of creating a whole documentation with separate documents (e.g. tutorials, detailed explanations, intentions etc.), but from the user point of view, the most important parts are the so\sphinxhyphen{}called docstrings. These are comment\sphinxhyphen{}like sections in the source code, where the user can on\sphinxhyphen{}the\sphinxhyphen{}fly describe the purpose and usage of the given part of the code. There are a few examples below.
 
 A full code example (grabbed from the \sphinxhref{https://pythonhosted.org/an\_example\_pypi\_project/sphinx.html}{following link}) is below:
 
@@ -403,11 +405,11 @@ A full code example (grabbed from the \sphinxhref{https://pythonhosted.org/an\_e
 \PYG{k}{class} \PYG{n+nc}{MyPublicClass}\PYG{p}{(}\PYG{n+nb}{object}\PYG{p}{)}\PYG{p}{:}
     \PYG{l+s+sd}{\PYGZdq{}\PYGZdq{}\PYGZdq{}We use this as a public class example class.}
 
-\PYG{l+s+sd}{    You never call this class before calling :func:{}`public\PYGZus{}fn\PYGZus{}with\PYGZus{}sphinxy\PYGZus{}docstring{}`.}
+\PYG{l+s+sd}{    You never call this class before calling :func:`public\PYGZus{}fn\PYGZus{}with\PYGZus{}sphinxy\PYGZus{}docstring`.}
 
 \PYG{l+s+sd}{    .. note::}
 
-\PYG{l+s+sd}{       An example of intersphinx is this: you **cannot** use :mod:{}`pickle{}` on this class.}
+\PYG{l+s+sd}{       An example of intersphinx is this: you **cannot** use :mod:`pickle` on this class.}
 
 \PYG{l+s+sd}{    \PYGZdq{}\PYGZdq{}\PYGZdq{}}
 
@@ -436,7 +438,7 @@ Install \sphinxhref{http://www.sphinx-doc.org/en/master/}{Sphinx}:
 \end{enumerate}
 \begin{quote}
 
-pip install -U Sphinx
+pip install \sphinxhyphen{}U Sphinx
 \end{quote}
 \begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
@@ -446,7 +448,7 @@ Navigate into your \sphinxstyleemphasis{\sphinxstylestrong{documentation}} (not 
 \end{enumerate}
 \begin{quote}
 
-sphinx-quickstart
+sphinx\sphinxhyphen{}quickstart
 \end{quote}
 \begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
@@ -493,14 +495,14 @@ Contents
 
 
 \section{Config}
-\label{\detokenize{config:module-flap.config}}\label{\detokenize{config:config}}\label{\detokenize{config::doc}}\index{flap.config (module)@\spxentry{flap.config}\spxextra{module}}
+\label{\detokenize{config:module-flap.config}}\label{\detokenize{config:config}}\label{\detokenize{config::doc}}\index{module@\spxentry{module}!flap.config@\spxentry{flap.config}}\index{flap.config@\spxentry{flap.config}!module@\spxentry{module}}
 Created on Wed Jan 23 21:45:43 2019
 
 @author: Zoletnik
 \index{interpret\_config\_value() (in module flap.config)@\spxentry{interpret\_config\_value()}\spxextra{in module flap.config}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{config:flap.config.interpret_config_value}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.config.}}\sphinxbfcode{\sphinxupquote{interpret\_config\_value}}}{\emph{value\_str}}{}
+\phantomsection\label{\detokenize{config:flap.config.interpret_config_value}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.config.}}\sphinxbfcode{\sphinxupquote{interpret\_config\_value}}}{\emph{\DUrole{n}{value\_str}}}{}
 Determine the data type from the input string and convert.
 Conversions:
 ‘True’, ‘Yes’ \textendash{}\textgreater{} True
@@ -515,7 +517,7 @@ If all the above fails keep as string
 \index{merge\_options() (in module flap.config)@\spxentry{merge\_options()}\spxextra{in module flap.config}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{config:flap.config.merge_options}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.config.}}\sphinxbfcode{\sphinxupquote{merge\_options}}}{\emph{default\_options}, \emph{input\_options}, \emph{data\_source=None}, \emph{section=None}}{}
+\phantomsection\label{\detokenize{config:flap.config.merge_options}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.config.}}\sphinxbfcode{\sphinxupquote{merge\_options}}}{\emph{\DUrole{n}{default\_options}}, \emph{\DUrole{n}{input\_options}}, \emph{\DUrole{n}{data\_source}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{section}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Merges options dictionaries. Uses default options of function, input options of function and
 options read from config file from \textless{}section\textgreater{} section. If exp\_id is set will also look for options
 in section Module exp\_id for options starting with \{section\}.
@@ -543,7 +545,7 @@ The merged options dictionary. Abbreviated keys are expanded to full name.
 
 
 \section{Coordinate}
-\label{\detokenize{coordinate:module-flap.coordinate}}\label{\detokenize{coordinate:coordinate}}\label{\detokenize{coordinate::doc}}\index{flap.coordinate (module)@\spxentry{flap.coordinate}\spxextra{module}}
+\label{\detokenize{coordinate:module-flap.coordinate}}\label{\detokenize{coordinate:coordinate}}\label{\detokenize{coordinate::doc}}\index{module@\spxentry{module}!flap.coordinate@\spxentry{flap.coordinate}}\index{flap.coordinate@\spxentry{flap.coordinate}!module@\spxentry{module}}
 Created on Wed Jan 23 09:44:50 2019
 
 @author: Zoletnik
@@ -553,12 +555,12 @@ This is the coordinate description for FLAP
 
 \begin{fulllineitems}
 \phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.coordinate.}}\sphinxbfcode{\sphinxupquote{Coordinate}}}{\emph{name=None}, \emph{unit=None}, \emph{mode=\textless{}flap.coordinate.CoordinateMode object\textgreater{}}, \emph{shape={[}{]}}, \emph{start=None}, \emph{step=None}, \emph{c\_range=None}, \emph{values=None}, \emph{value\_index=None}, \emph{value\_ranges=None}, \emph{dimension\_list={[}{]}}}{}
-Class for the description of a mapping of coordinate values from an n-dimensional coordinate
-sample space to coordinates of an m-dimensional data matrix.
+Class for the description of a mapping of coordinate values from an n\sphinxhyphen{}dimensional coordinate
+sample space to coordinates of an m\sphinxhyphen{}dimensional data matrix.
 Coordinate sample space is a rectangular equidistant point matrix, with equal steps in each dimension.
-For dimension i sample index is from 0…n-1 if shape{[}i{]} == n
+For dimension i sample index is from 0…n\sphinxhyphen{}1 if shape{[}i{]} == n
 The sample space in this coordinate description does not necessarily match the shape of
-any sub-matrix of the data object. If the shape is different then interpolation is done assuming
+any sub\sphinxhyphen{}matrix of the data object. If the shape is different then interpolation is done assuming
 the coordinate of the first(last) point of the coordinate matrix is the coordinate of the first(last)
 data point.
 
@@ -570,7 +572,7 @@ Flux\_r, Flux\_theta, Flux\_phi, Frequency, Time lag
 \end{quote}
 
 See the description of variables in the \_\_init\_\_ function.
-The ranges and start-step pair of inputs are alternatives.
+The ranges and start\sphinxhyphen{}step pair of inputs are alternatives.
 \index{change\_dimensions() (flap.coordinate.Coordinate method)@\spxentry{change\_dimensions()}\spxextra{flap.coordinate.Coordinate method}}
 
 \begin{fulllineitems}
@@ -583,8 +585,8 @@ changes
 \index{data() (flap.coordinate.Coordinate method)@\spxentry{data()}\spxextra{flap.coordinate.Coordinate method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.data}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{data}}}{\emph{data\_shape=None}, \emph{index=None}, \emph{options=None}}{}
-Returns the coordinates, low and high limits for a sub-array of the data array in a DataObject.
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.data}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{data}}}{\emph{\DUrole{n}{data\_shape}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{index}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
+Returns the coordinates, low and high limits for a sub\sphinxhyphen{}array of the data array in a DataObject.
 \begin{description}
 \item[{index:}] \leavevmode
 list, tuple describing the elements in DataObject.data for which the coordinates are
@@ -602,7 +604,7 @@ Examples for 3D array:
 The shape of the data array (without slicing) for which coordinates are requested.
 
 \item[{options: Dictionary with options for processing:}] \leavevmode\begin{description}
-\item[{‘Interpolation’: ‘Linear’ (default, for non-equidistant axis when values shape is}] \leavevmode
+\item[{‘Interpolation’: ‘Linear’ (default, for non\sphinxhyphen{}equidistant axis when values shape is}] \leavevmode
 different from data shape)
 
 \item[{‘Change only’: Return only the data for those dimensions where this coordinate changes.}] \leavevmode
@@ -622,7 +624,7 @@ The low and high values are the absolute values not the difference from values
 \index{data\_range() (flap.coordinate.Coordinate method)@\spxentry{data\_range()}\spxextra{flap.coordinate.Coordinate method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.data_range}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{data\_range}}}{\emph{data\_shape=None}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.data_range}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{data\_range}}}{\emph{\DUrole{n}{data\_shape}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Returns the data range and the data range with errors for the coordinate. Both are lists.
 
 \end{fulllineitems}
@@ -639,7 +641,7 @@ Returns standard Python types: str, int, float, complex, boolean, object
 \index{nochange\_dimensions() (flap.coordinate.Coordinate method)@\spxentry{nochange\_dimensions()}\spxextra{flap.coordinate.Coordinate method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.nochange_dimensions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nochange\_dimensions}}}{\emph{data\_shape}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.nochange_dimensions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{nochange\_dimensions}}}{\emph{\DUrole{n}{data\_shape}}}{}
 Return the list of dimensions of the data array along which this coordinate
 changes
 
@@ -648,12 +650,12 @@ changes
 \index{non\_interpol() (flap.coordinate.Coordinate method)@\spxentry{non\_interpol()}\spxextra{flap.coordinate.Coordinate method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.non_interpol}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{non\_interpol}}}{\emph{data\_shape}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Coordinate.non_interpol}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{non\_interpol}}}{\emph{\DUrole{n}{data\_shape}}}{}
 Return True if the shape of the coordinate description
-is the same as the sub-data-array for which it applies and self.value\_index is None.
+is the same as the sub\sphinxhyphen{}data\sphinxhyphen{}array for which it applies and self.value\_index is None.
 In this case there is no need for interpolation, just copy coordinate values
 
-Applicable only for non-equidistant case.
+Applicable only for non\sphinxhyphen{}equidistant case.
 
 \end{fulllineitems}
 
@@ -663,7 +665,7 @@ Applicable only for non-equidistant case.
 \index{CoordinateMode (class in flap.coordinate)@\spxentry{CoordinateMode}\spxextra{class in flap.coordinate}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.CoordinateMode}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.coordinate.}}\sphinxbfcode{\sphinxupquote{CoordinateMode}}}{\emph{equidistant=True}, \emph{range\_symmetric=True}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.CoordinateMode}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.coordinate.}}\sphinxbfcode{\sphinxupquote{CoordinateMode}}}{\emph{\DUrole{n}{equidistant}\DUrole{o}{=}\DUrole{default_value}{True}}, \emph{\DUrole{n}{range\_symmetric}\DUrole{o}{=}\DUrole{default_value}{True}}}{}
 Class for storing mode flags of the coordinate description
 
 \end{fulllineitems}
@@ -671,16 +673,16 @@ Class for storing mode flags of the coordinate description
 \index{Intervals (class in flap.coordinate)@\spxentry{Intervals}\spxextra{class in flap.coordinate}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Intervals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.coordinate.}}\sphinxbfcode{\sphinxupquote{Intervals}}}{\emph{start}, \emph{stop}, \emph{step=None}, \emph{number=None}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Intervals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.coordinate.}}\sphinxbfcode{\sphinxupquote{Intervals}}}{\emph{\DUrole{n}{start}}, \emph{\DUrole{n}{stop}}, \emph{\DUrole{n}{step}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{number}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 A class to describe a series of intervals.
 Regular intevals are identical length ones repeating with a fixed step.
-Irregulars are just a list of start-stop values.
+Irregulars are just a list of start\sphinxhyphen{}stop values.
 For integer type values both the start and stop value is included.
 The optional number gives the number of ranges for the regular intervals.
 \index{interval\_limits() (flap.coordinate.Intervals method)@\spxentry{interval\_limits()}\spxextra{flap.coordinate.Intervals method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Intervals.interval_limits}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{interval\_limits}}}{\emph{limits=None}, \emph{partial\_intervals=False}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Intervals.interval_limits}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{interval\_limits}}}{\emph{\DUrole{n}{limits}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{partial\_intervals}\DUrole{o}{=}\DUrole{default_value}{False}}}{}
 Return the range lower and upper limits as two numpy arrays.
 Limit the ranges within argument limits. (limits{[}0{]} \textless{} limits{[}1{]})
 limits: 2 elements list with lower and upper limit
@@ -697,7 +699,7 @@ Raises a ValueError if there are no intervals within  limit or other problem.
 \index{interval\_number() (flap.coordinate.Intervals method)@\spxentry{interval\_number()}\spxextra{flap.coordinate.Intervals method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Intervals.interval_number}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{interval\_number}}}{\emph{limits=None}, \emph{partial\_intervals=False}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Intervals.interval_number}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{interval\_number}}}{\emph{\DUrole{n}{limits}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{partial\_intervals}\DUrole{o}{=}\DUrole{default_value}{False}}}{}
 Return the number of intervals and the index of the start interval.
 Limit the ranges within argument limits.
 limits: 2 elements list with lower and upper limit
@@ -714,12 +716,12 @@ Raises a ValueError in case of problem.
 \index{Unit (class in flap.coordinate)@\spxentry{Unit}\spxextra{class in flap.coordinate}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Unit}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.coordinate.}}\sphinxbfcode{\sphinxupquote{Unit}}}{\emph{name=''}, \emph{unit=''}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Unit}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.coordinate.}}\sphinxbfcode{\sphinxupquote{Unit}}}{\emph{\DUrole{n}{name}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}, \emph{\DUrole{n}{unit}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}}{}
 Class for the unit of the data
 \index{title() (flap.coordinate.Unit method)@\spxentry{title()}\spxextra{flap.coordinate.Unit method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{coordinate:flap.coordinate.Unit.title}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{title}}}{\emph{language='EN'}, \emph{complex\_txt=None}, \emph{new\_unit=None}}{}
+\phantomsection\label{\detokenize{coordinate:flap.coordinate.Unit.title}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{title}}}{\emph{\DUrole{n}{language}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}EN\textquotesingle{}}}, \emph{\DUrole{n}{complex\_txt}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{new\_unit}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Returns a title string which will be used in plotting.
 complex\_txt: List of 2 numbers:
 \begin{quote}
@@ -738,19 +740,19 @@ complex\_txt: List of 2 numbers:
 
 
 \section{Data object}
-\label{\detokenize{data_object:module-flap.data_object}}\label{\detokenize{data_object:data-object}}\label{\detokenize{data_object::doc}}\index{flap.data\_object (module)@\spxentry{flap.data\_object}\spxextra{module}}
+\label{\detokenize{data_object:module-flap.data_object}}\label{\detokenize{data_object:data-object}}\label{\detokenize{data_object::doc}}\index{module@\spxentry{module}!flap.data\_object@\spxentry{flap.data\_object}}\index{flap.data\_object@\spxentry{flap.data\_object}!module@\spxentry{module}}
 Created on Tue Jan 22 17:37:32 2019
 
 @author: Zoletnik
 \index{DataObject (class in flap.data\_object)@\spxentry{DataObject}\spxextra{class in flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{DataObject}}}{\emph{data\_array=None}, \emph{error=None}, \emph{data\_unit=None}, \emph{coordinates=None}, \emph{exp\_id=None}, \emph{data\_title=None}, \emph{info=None}, \emph{data\_shape=None}, \emph{data\_source=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{DataObject}}}{\emph{\DUrole{n}{data\_array}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{error}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{data\_unit}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinates}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{data\_title}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{info}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{data\_shape}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{data\_source}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 This is the data object
 \index{add\_coordinate() (flap.data\_object.DataObject method)@\spxentry{add\_coordinate()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.add_coordinate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{add\_coordinate}}}{\emph{coordinates=None}, \emph{data\_source=None}, \emph{exp\_id=None}, \emph{options=None}}{}~\begin{description}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.add_coordinate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{add\_coordinate}}}{\emph{\DUrole{n}{coordinates}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{data\_source}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}~\begin{description}
 \item[{This is a general coordinate conversion interface.}] \leavevmode
 Adds the requested coordinate(s) to the data\_object.
 
@@ -769,7 +771,7 @@ Returns the modified data object. Note that the input data object remanins the s
 \index{add\_coordinate\_object() (flap.data\_object.DataObject method)@\spxentry{add\_coordinate\_object()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.add_coordinate_object}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{add\_coordinate\_object}}}{\emph{coordinate}, \emph{index=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.add_coordinate_object}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{add\_coordinate\_object}}}{\emph{\DUrole{n}{coordinate}}, \emph{\DUrole{n}{index}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Adds a flap.Coordinate instance to the list of coordinates
 If index is not set adds to the end of the list. Otherwise adds to the position
 shown by index. (0 is beginning of list.)
@@ -779,7 +781,7 @@ shown by index. (0 is beginning of list.)
 \index{apsd() (flap.data\_object.DataObject method)@\spxentry{apsd()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.apsd}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{apsd}}}{\emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.apsd}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{apsd}}}{\emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Auto power Spectral Density caclculation for the data object d.
 Returns a data object with the coordinate replaced by frequency or wavenumber.
 The power spectrum is calculated in multiple intervals (described by slicing)
@@ -794,7 +796,7 @@ This coordinate should change only along one data dimension and should be equidi
 This and all other cordinates changing along the data dimension of
 this coordinate will be removed. A new coordinate with name
 Frequency/Wavenumber will be added. The unit will be
-derived from the unit of the coordinate (e.g., Hz cm-1, m-1)
+derived from the unit of the coordinate (e.g., Hz cm\sphinxhyphen{}1, m\sphinxhyphen{}1)
 \end{quote}
 \begin{description}
 \item[{intervals: Information of processing intervals.}] \leavevmode\begin{description}
@@ -870,13 +872,13 @@ This method is implemented by the \_apsd function in spectcral\_analysis.py
 \index{ccf() (flap.data\_object.DataObject method)@\spxentry{ccf()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.ccf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{ccf}}}{\emph{ref=None}, \emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.ccf}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{ccf}}}{\emph{\DUrole{n}{ref}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 N dimensional Cross Correlation Function or covariance calculation for the data object self taking d\_ref
 as reference. If ref is not set self is used as reference, that is all CCFs are calculated
 within self. Calculates all CCF between all signals in ref and sel, but not inside self and ref.
 Correlation is calculated along the coordinate(s) listed in coordinate which should be
 identical for the to input data objects.
-Returns a data object with dimension number self.dim+ref.dim-len(coordinate).
+Returns a data object with dimension number self.dim+ref.dim\sphinxhyphen{}len(coordinate).
 The coordinates are replaced by coordinate+’ lag’.
 The CCF is calculated in multiple intervals (described by intervals)
 and the mean and variance will be returned.
@@ -963,7 +965,7 @@ Does a consistency check for the data object and raises errors if problems found
 \index{coordinate() (flap.data\_object.DataObject method)@\spxentry{coordinate()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate}}}{\emph{name}, \emph{index=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate}}}{\emph{\DUrole{n}{name}}, \emph{\DUrole{n}{index}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Returns the coordinates of a subarray of the data array.
 name: Coordinate name (string)
 index: The indexes into the data array (tuple with various elements, see Coordinate.data())
@@ -985,7 +987,7 @@ data\_high: high ranges, same shape as data. None if no range data is present
 \index{coordinate\_change\_dimensions() (flap.data\_object.DataObject method)@\spxentry{coordinate\_change\_dimensions()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_change_dimensions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_change\_dimensions}}}{\emph{name}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_change_dimensions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_change\_dimensions}}}{\emph{\DUrole{n}{name}}}{}
 Return the list of dimensions of the data array along which
 the named coordinate changes
 
@@ -994,7 +996,7 @@ the named coordinate changes
 \index{coordinate\_change\_indices() (flap.data\_object.DataObject method)@\spxentry{coordinate\_change\_indices()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_change_indices}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_change\_indices}}}{\emph{name}}{}~\begin{description}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_change_indices}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_change\_indices}}}{\emph{\DUrole{n}{name}}}{}~\begin{description}
 \item[{Returns the indices to the data array for which the coordinate changes.}] \leavevmode
 The returned value is a tuple of indices, the number of elements equals the
 dimension of the data. This can be directly used to get the coordinate values
@@ -1017,7 +1019,7 @@ Returns a list with the coordinate names.
 \index{coordinate\_nochange\_dimensions() (flap.data\_object.DataObject method)@\spxentry{coordinate\_nochange\_dimensions()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_nochange_dimensions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_nochange\_dimensions}}}{\emph{name}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_nochange_dimensions}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_nochange\_dimensions}}}{\emph{\DUrole{n}{name}}}{}
 Return the list of dimensions of the data array along which
 the named coordinate changes
 
@@ -1026,7 +1028,7 @@ the named coordinate changes
 \index{coordinate\_range() (flap.data\_object.DataObject method)@\spxentry{coordinate\_range()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_range}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_range}}}{\emph{name}, \emph{index=Ellipsis}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.coordinate_range}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{coordinate\_range}}}{\emph{\DUrole{n}{name}}, \emph{\DUrole{n}{index}\DUrole{o}{=}\DUrole{default_value}{Ellipsis}}}{}
 Returns the ranges of a coordinate.
 name: Coordinate name (string)
 
@@ -1037,12 +1039,12 @@ Returns the data range and the data range with errors for the coordinate. Both a
 \index{cpsd() (flap.data\_object.DataObject method)@\spxentry{cpsd()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.cpsd}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{cpsd}}}{\emph{ref=None}, \emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.cpsd}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{cpsd}}}{\emph{\DUrole{n}{ref}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Complex Cross Power Spectrum calculation for the data object self taking d\_ref as reference.
 If self is not set d is used as reference, that is all spectra are calculated within self.
 Calculates all spectra between all signals in ref and self, but not inside self and ref.
 self and ref both should have the same equidistant coordinate with equal sampling points.
-Returns a data object with dimension number self.dim+ref.dim-1. The coordinate is replaced
+Returns a data object with dimension number self.dim+ref.dim\sphinxhyphen{}1. The coordinate is replaced
 by frequency or wavenumber.
 The spectrum is calculated in multiple intervals (described by intervals)
 and the mean and variance will be returned.
@@ -1057,7 +1059,7 @@ This coordinate should change only along one data dimension and should be equidi
 This and all other cordinates changing along the data dimension of
 this coordinate will be removed. A new coordinate with name
 Frequency/Wavenumber will be added. The unit will be
-derived from the unit of the coordinate (e.g., Hz cm-1, m-1)
+derived from the unit of the coordinate (e.g., Hz cm\sphinxhyphen{}1, m\sphinxhyphen{}1)
 \end{quote}
 \begin{description}
 \item[{intervals: Information of processing intervals.}] \leavevmode\begin{description}
@@ -1128,7 +1130,7 @@ Trend removal will be applied to each interval separately.
 \index{detrend() (flap.data\_object.DataObject method)@\spxentry{detrend()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.detrend}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detrend}}}{\emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.detrend}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{detrend}}}{\emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Trend removal.
 INPUT:
 \begin{quote}
@@ -1186,7 +1188,7 @@ Return value: The data object with the trend removed data.
 \index{error\_value() (flap.data\_object.DataObject method)@\spxentry{error\_value()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.error_value}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{error\_value}}}{\emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.error_value}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{error\_value}}}{\emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Returns a data object with the error of self in it.
 options: ‘High’: Use high error if error is asymmetric
 \begin{quote}
@@ -1199,7 +1201,7 @@ options: ‘High’: Use high error if error is asymmetric
 \index{filter\_data() (flap.data\_object.DataObject method)@\spxentry{filter\_data()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.filter_data}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{filter\_data}}}{\emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.filter_data}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{filter\_data}}}{\emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 1D Data filter.
 INPUT:
 \begin{quote}
@@ -1239,9 +1241,9 @@ None: Do nothing.
 The filter type is in ‘Design’
 \end{quote}
 
-Bandpass: f\_low - f\_high
-Lowpass: - f\_high
-Highpass: - f\_low
+Bandpass: f\_low \sphinxhyphen{} f\_high
+Lowpass: \sphinxhyphen{} f\_high
+Highpass: \sphinxhyphen{} f\_low
 \end{quote}
 
 \item[{‘Design’: The design type of the bandpass, lowpass or highpass filter.}] \leavevmode
@@ -1278,7 +1280,7 @@ Return value: The data object with the filtered data.
 \index{get\_coordinate\_object() (flap.data\_object.DataObject method)@\spxentry{get\_coordinate\_object()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.get_coordinate_object}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_coordinate\_object}}}{\emph{name}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.get_coordinate_object}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{get\_coordinate\_object}}}{\emph{\DUrole{n}{name}}}{}
 Returns the Coordinate class having the given name. The returned object is a link not a copy.
 
 \end{fulllineitems}
@@ -1286,7 +1288,7 @@ Returns the Coordinate class having the given name. The returned object is a lin
 \index{index\_from\_coordinate() (flap.data\_object.DataObject method)@\spxentry{index\_from\_coordinate()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.index_from_coordinate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{index\_from\_coordinate}}}{\emph{name}, \emph{coord\_values}}{}~\begin{description}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.index_from_coordinate}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{index\_from\_coordinate}}}{\emph{\DUrole{n}{name}}, \emph{\DUrole{n}{coord\_values}}}{}~\begin{description}
 \item[{Returns the closest data indices of the coordinate values.}] \leavevmode
 Coordinates should change only along one dimension.
 It is assumed that coordinates change monotonically.
@@ -1309,7 +1311,7 @@ Returns the indices in the same format as the input coordinates.
 \index{plot() (flap.data\_object.DataObject method)@\spxentry{plot()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.plot}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot}}}{\emph{axes=None}, \emph{slicing=None}, \emph{slicing\_options=None}, \emph{summing=None}, \emph{options=None}, \emph{plot\_type=None}, \emph{plot\_options=None}, \emph{plot\_id=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.plot}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{plot}}}{\emph{\DUrole{n}{axes}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{slicing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{slicing\_options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{summing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{plot\_type}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{plot\_options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{plot\_id}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Plot a data object.
 axes: A list of coordinate names (strings). They should be one of the coordinate
 \begin{quote}
@@ -1318,7 +1320,7 @@ names in the data object or ‘Data’
 They describes the axes of the plot.
 If the number of axes is less than the number required for the plot, ‘Data’ will be added.
 If no axes are given default will be used depending on the plot type. E.g. for
-x-y plot the default first axis is the firs coordinate, the second axis is ‘Data’
+x\sphinxhyphen{}y plot the default first axis is the firs coordinate, the second axis is ‘Data’
 \end{quote}
 \begin{description}
 \item[{plot\_type: The plot type (string)}] \leavevmode
@@ -1366,7 +1368,7 @@ multiplied by this.
 \index{proc\_interval\_limits() (flap.data\_object.DataObject method)@\spxentry{proc\_interval\_limits()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.proc_interval_limits}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{proc\_interval\_limits}}}{\emph{coordinate}, \emph{intervals=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.proc_interval_limits}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{proc\_interval\_limits}}}{\emph{\DUrole{n}{coordinate}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Determine processing interval limits, both in coordinates and data indices.
 This is a helper routine for all functions which do some calculation as a function
 of one coordinate and allow processing only a set of intervals instead of the whole dataset.
@@ -1413,7 +1415,7 @@ The index start indices will be always smaller than the end indices.
 \index{save() (flap.data\_object.DataObject method)@\spxentry{save()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.save}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{save}}}{\emph{filename}, \emph{protocol=3}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.save}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{save}}}{\emph{\DUrole{n}{filename}}, \emph{\DUrole{n}{protocol}\DUrole{o}{=}\DUrole{default_value}{3}}}{}
 Save the data object to a binary file using pickle.
 Use load to read the object.
 Filename: The name of the output file
@@ -1424,7 +1426,7 @@ protocol: The pickle protocol to use
 \index{slice\_data() (flap.data\_object.DataObject method)@\spxentry{slice\_data()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.slice_data}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{slice\_data}}}{\emph{slicing=None}, \emph{summing=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.slice_data}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{slice\_data}}}{\emph{\DUrole{n}{slicing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{summing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Slice (select areas) from the data object along one or more coordinates.
 Return the sliced object.
 \begin{quote}
@@ -1532,8 +1534,8 @@ coordinate \textless{}coord\textgreater{} is regenerated and these are removed.
 \index{slicing\_to\_intervals() (flap.data\_object.DataObject method)@\spxentry{slicing\_to\_intervals()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.slicing_to_intervals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{slicing\_to\_intervals}}}{\emph{slicing}}{}
-Convert a multi-slicing description to an Intervals object.
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.slicing_to_intervals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{slicing\_to\_intervals}}}{\emph{\DUrole{n}{slicing}}}{}
+Convert a multi\sphinxhyphen{}slicing description to an Intervals object.
 For possibilities see DataObject.slice\_data().
 
 \end{fulllineitems}
@@ -1541,7 +1543,7 @@ For possibilities see DataObject.slice\_data().
 \index{to\_intervals() (flap.data\_object.DataObject method)@\spxentry{to\_intervals()}\spxextra{flap.data\_object.DataObject method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.to_intervals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{to\_intervals}}}{\emph{coordinate}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.DataObject.to_intervals}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{to\_intervals}}}{\emph{\DUrole{n}{coordinate}}}{}
 Create an Intervals class object from either the data error ranges or
 the coordinate value ranges.
 
@@ -1558,7 +1560,7 @@ This class is for data and data source information storage
 \index{find\_data\_objects() (flap.data\_object.FlapStorage method)@\spxentry{find\_data\_objects()}\spxextra{flap.data\_object.FlapStorage method}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.FlapStorage.find_data_objects}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{find\_data\_objects}}}{\emph{name}, \emph{exp\_id='*'}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.FlapStorage.find_data_objects}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{find\_data\_objects}}}{\emph{\DUrole{n}{name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}}{}
 ”
 Find data objects in flap storage.
 
@@ -1572,7 +1574,7 @@ Returns name list, exp\_ID list
 \index{abs\_value() (in module flap.data\_object)@\spxentry{abs\_value()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.abs_value}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{abs\_value}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.abs_value}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{abs\_value}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Absolute value
 
 \end{fulllineitems}
@@ -1580,7 +1582,7 @@ Absolute value
 \index{add\_coordinate() (in module flap.data\_object)@\spxentry{add\_coordinate()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.add_coordinate}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{add\_coordinate}}}{\emph{object\_name}, \emph{coordinates=None}, \emph{exp\_id='*'}, \emph{options=None}, \emph{output\_name=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.add_coordinate}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{add\_coordinate}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{coordinates}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 This is the function to add coordinates to a data object in flap storage.
 This function is an interface to the add\_coordinate method of flap.DataObject
 \begin{description}
@@ -1613,7 +1615,7 @@ Other elements of options are passed over to flap.add\_coordinate()
 \index{add\_data\_object() (in module flap.data\_object)@\spxentry{add\_data\_object()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.add_data_object}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{add\_data\_object}}}{\emph{d}, \emph{object\_name}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.add_data_object}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{add\_data\_object}}}{\emph{\DUrole{n}{d}}, \emph{\DUrole{n}{object\_name}}}{}
 Add a data object to the flap storage
 
 \end{fulllineitems}
@@ -1621,7 +1623,7 @@ Add a data object to the flap storage
 \index{apsd() (in module flap.data\_object)@\spxentry{apsd()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.apsd}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{apsd}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}, \emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.apsd}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{apsd}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Auto Power Spetctrum for an object in flap storage. This is a wrapper for DataObject.apsd()
 If output name is set the APSD object will be written back to the flap storage under this name.
 If not set the APSD object will be written back with its original name.
@@ -1631,7 +1633,7 @@ If not set the APSD object will be written back with its original name.
 \index{ccf() (in module flap.data\_object)@\spxentry{ccf()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.ccf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{ccf}}}{\emph{object\_name}, \emph{ref=None}, \emph{exp\_id='*'}, \emph{ref\_exp\_id='*'}, \emph{output\_name=None}, \emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.ccf}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{ccf}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{ref}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{ref\_exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Cross Corrrelation Function or covariance calculation between two objects in flap storage.
 This is a wrapper for DataObject.ccf()
 If output name is set the CPSD object will be written back to the flap storage under this name.
@@ -1641,7 +1643,7 @@ If output name is set the CPSD object will be written back to the flap storage u
 \index{cpsd() (in module flap.data\_object)@\spxentry{cpsd()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.cpsd}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{cpsd}}}{\emph{object\_name}, \emph{ref=None}, \emph{exp\_id='*'}, \emph{output\_name=None}, \emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.cpsd}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{cpsd}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{ref}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Cross Power Spectrum between two objects in flap storage. (ref can also be a data object.)
 This is a wrapper for DataObject.cpsd()
 If output name is set the CPSD object will be written back to the flap storage under this name.
@@ -1651,7 +1653,7 @@ If output name is set the CPSD object will be written back to the flap storage u
 \index{delete\_data\_object() (in module flap.data\_object)@\spxentry{delete\_data\_object()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.delete_data_object}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{delete\_data\_object}}}{\emph{object\_name}, \emph{exp\_id='*'}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.delete_data_object}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{delete\_data\_object}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}}{}
 Delete data object(s) from the flap storage
 
 \end{fulllineitems}
@@ -1659,7 +1661,7 @@ Delete data object(s) from the flap storage
 \index{detrend() (in module flap.data\_object)@\spxentry{detrend()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.detrend}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{detrend}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}, \emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.detrend}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{detrend}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 DETREND signal(s)
 INPUT:
 \begin{quote}
@@ -1725,7 +1727,7 @@ The resulting data object.
 \index{error\_value() (in module flap.data\_object)@\spxentry{error\_value()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.error_value}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{error\_value}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.error_value}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{error\_value}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Returns a data object with the error of self in it.
 options: ‘High’: Use high error if error is asymmetric
 \begin{quote}
@@ -1738,7 +1740,7 @@ options: ‘High’: Use high error if error is asymmetric
 \index{filter\_data() (in module flap.data\_object)@\spxentry{filter\_data()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.filter_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{filter\_data}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}, \emph{coordinate=None}, \emph{intervals=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.filter_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{filter\_data}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 1D Data filter.
 INPUT:
 \begin{quote}
@@ -1782,9 +1784,9 @@ None: Do nothing.
 The filter type is in ‘Design’
 \end{quote}
 
-Bandpass: f\_low - f\_high
-Lowpass: - f\_high
-Highpass: - f\_low
+Bandpass: f\_low \sphinxhyphen{} f\_high
+Lowpass: \sphinxhyphen{} f\_high
+Highpass: \sphinxhyphen{} f\_low
 \end{quote}
 
 \item[{‘Design’: The design type of the bandpass, lowpass or highpass filter.}] \leavevmode
@@ -1820,7 +1822,7 @@ of the middle frequency.
 \index{find\_data\_objects() (in module flap.data\_object)@\spxentry{find\_data\_objects()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.find_data_objects}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{find\_data\_objects}}}{\emph{name}, \emph{exp\_id='*'}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.find_data_objects}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{find\_data\_objects}}}{\emph{\DUrole{n}{name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}}{}
 Find data objects in flap storage.
 
 Returns list of names, list of expID.s
@@ -1830,7 +1832,7 @@ Returns list of names, list of expID.s
 \index{get\_addcoord\_function() (in module flap.data\_object)@\spxentry{get\_addcoord\_function()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.get_addcoord_function}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_addcoord\_function}}}{\emph{data\_source}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.get_addcoord_function}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_addcoord\_function}}}{\emph{\DUrole{n}{data\_source}}}{}
 Return the add\_coord function object for a given data source
 
 \end{fulllineitems}
@@ -1838,7 +1840,7 @@ Return the add\_coord function object for a given data source
 \index{get\_data() (in module flap.data\_object)@\spxentry{get\_data()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.get_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data}}}{\emph{data\_source}, \emph{exp\_id=None}, \emph{name=None}, \emph{no\_data=False}, \emph{options=None}, \emph{coordinates=None}, \emph{object\_name=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.get_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data}}}{\emph{\DUrole{n}{data\_source}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{no\_data}\DUrole{o}{=}\DUrole{default_value}{False}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{coordinates}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{object\_name}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 This is a general data read interface. It will call the specific data read interface
 for the registered data sources.
 data\_source: The name of the data source (string)
@@ -1878,7 +1880,7 @@ Return value is the data object.
 \index{get\_data\_function() (in module flap.data\_object)@\spxentry{get\_data\_function()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.get_data_function}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data\_function}}}{\emph{data\_source}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.get_data_function}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data\_function}}}{\emph{\DUrole{n}{data\_source}}}{}
 Return the get data function object for a given data source
 
 \end{fulllineitems}
@@ -1886,7 +1888,7 @@ Return the get data function object for a given data source
 \index{get\_data\_object() (in module flap.data\_object)@\spxentry{get\_data\_object()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.get_data_object}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data\_object}}}{\emph{object\_name}, \emph{exp\_id='*'}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.get_data_object}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data\_object}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}}{}
 Return a data object from the flap storage
 A coppy is returned not the object in the storage.
 
@@ -1895,7 +1897,7 @@ A coppy is returned not the object in the storage.
 \index{get\_data\_object\_ref() (in module flap.data\_object)@\spxentry{get\_data\_object\_ref()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.get_data_object_ref}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data\_object\_ref}}}{\emph{object\_name}, \emph{exp\_id='*'}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.get_data_object_ref}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{get\_data\_object\_ref}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}}{}
 Return a data object reference from the flap storage.
 
 \end{fulllineitems}
@@ -1903,7 +1905,7 @@ Return a data object reference from the flap storage.
 \index{imag() (in module flap.data\_object)@\spxentry{imag()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.imag}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{imag}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.imag}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{imag}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Real value. (Does nothing for real data)
 
 \end{fulllineitems}
@@ -1911,7 +1913,7 @@ Real value. (Does nothing for real data)
 \index{list\_data\_objects() (in module flap.data\_object)@\spxentry{list\_data\_objects()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.list_data_objects}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{list\_data\_objects}}}{\emph{name='*'}, \emph{exp\_id='*'}, \emph{screen=True}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.list_data_objects}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{list\_data\_objects}}}{\emph{\DUrole{n}{name}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{screen}\DUrole{o}{=}\DUrole{default_value}{True}}}{}
 Prepare a printout of data objects is flap storage or the listed data objects.
 name: name (with wildcards) or list of data objects
 exp\_id: exp id for name
@@ -1932,7 +1934,7 @@ Return a list of registered data source names as a list.
 \index{load() (in module flap.data\_object)@\spxentry{load()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.load}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{load}}}{\emph{filename}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.load}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{load}}}{\emph{\DUrole{n}{filename}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Loads data saved with flap.save()
 If the data in the file were written from the flap storage it will also be
 loaded there, unless  no\_storage is set to True.
@@ -1952,7 +1954,7 @@ If it was written out from flap storage a list of the read objects will be retur
 \index{phase() (in module flap.data\_object)@\spxentry{phase()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.phase}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{phase}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.phase}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{phase}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Phase
 
 \end{fulllineitems}
@@ -1960,7 +1962,7 @@ Phase
 \index{plot() (in module flap.data\_object)@\spxentry{plot()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.plot}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{plot}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{axes=None}, \emph{slicing=None}, \emph{summing=None}, \emph{options=None}, \emph{plot\_type=None}, \emph{plot\_options=None}, \emph{plot\_id=None}, \emph{slicing\_options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.plot}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{plot}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{axes}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{slicing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{summing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{plot\_type}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{plot\_options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{plot\_id}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{slicing\_options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 plot function for an object in flap storage. This is a wrapper for DataObject.plot()
 
 \end{fulllineitems}
@@ -1968,7 +1970,7 @@ plot function for an object in flap storage. This is a wrapper for DataObject.pl
 \index{real() (in module flap.data\_object)@\spxentry{real()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.real}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{real}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.real}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{real}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Real value. (Does nothing for real data)
 
 \end{fulllineitems}
@@ -1976,7 +1978,7 @@ Real value. (Does nothing for real data)
 \index{register\_data\_source() (in module flap.data\_object)@\spxentry{register\_data\_source()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.register_data_source}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{register\_data\_source}}}{\emph{name}, \emph{get\_data\_func=None}, \emph{add\_coord\_func=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.register_data_source}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{register\_data\_source}}}{\emph{\DUrole{n}{name}}, \emph{\DUrole{n}{get\_data\_func}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{add\_coord\_func}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Register a new data source name and the associated functions.
 
 \end{fulllineitems}
@@ -1984,8 +1986,8 @@ Register a new data source name and the associated functions.
 \index{save() (in module flap.data\_object)@\spxentry{save()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.save}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{save}}}{\emph{data}, \emph{filename}, \emph{exp\_id='*'}, \emph{options=None}, \emph{protocol=3}}{}
-Save one or more flap.DataObject-s using pickle.
+\phantomsection\label{\detokenize{data_object:flap.data_object.save}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{save}}}{\emph{\DUrole{n}{data}}, \emph{\DUrole{n}{filename}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{protocol}\DUrole{o}{=}\DUrole{default_value}{3}}}{}
+Save one or more flap.DataObject\sphinxhyphen{}s using pickle.
 \begin{description}
 \item[{INPUT:}] \leavevmode\begin{description}
 \item[{data: If flap.DataObject than save this.}] \leavevmode
@@ -2008,7 +2010,7 @@ filename: Name of the file to save to.
 \index{slice\_data() (in module flap.data\_object)@\spxentry{slice\_data()}\spxextra{in module flap.data\_object}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{data_object:flap.data_object.slice_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{slice\_data}}}{\emph{object\_name}, \emph{exp\_id='*'}, \emph{output\_name=None}, \emph{slicing=None}, \emph{summing=None}, \emph{options=None}}{}
+\phantomsection\label{\detokenize{data_object:flap.data_object.slice_data}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.data\_object.}}\sphinxbfcode{\sphinxupquote{slice\_data}}}{\emph{\DUrole{n}{object\_name}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{slicing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{summing}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 slice function for an object in flap storage. This is a wrapper for DataObject.slicec\_data()
 If output name is set the sliced object will be written back to the flap storage under this name.
 
@@ -2016,15 +2018,8 @@ If output name is set the sliced object will be written back to the flap storage
 
 
 
-\section{FLAP XML}
-\label{\detokenize{flap_xml:module-flap.flap_xml}}\label{\detokenize{flap_xml:flap-xml}}\label{\detokenize{flap_xml::doc}}\index{flap.flap\_xml (module)@\spxentry{flap.flap\_xml}\spxextra{module}}
-Created on Mon Jul 30 15:13:45 2018
-
-@author: Sandor Zoletnik
-
-
 \section{Plot}
-\label{\detokenize{plot:module-flap.plot}}\label{\detokenize{plot:plot}}\label{\detokenize{plot::doc}}\index{flap.plot (module)@\spxentry{flap.plot}\spxextra{module}}
+\label{\detokenize{plot:module-flap.plot}}\label{\detokenize{plot:plot}}\label{\detokenize{plot::doc}}\index{module@\spxentry{module}!flap.plot@\spxentry{flap.plot}}\index{flap.plot@\spxentry{flap.plot}!module@\spxentry{module}}
 Created on Sat May 18 18:37:06 2019
 
 @author: Zoletnik
@@ -2032,7 +2027,7 @@ Created on Sat May 18 18:37:06 2019
 \index{PddType (class in flap.plot)@\spxentry{PddType}\spxextra{class in flap.plot}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{plot:flap.plot.PddType}}\pysigline{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{PddType}}}
+\phantomsection\label{\detokenize{plot:flap.plot.PddType}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{PddType}}}{\emph{\DUrole{n}{value}}}{}
 An enumeration.
 
 \end{fulllineitems}
@@ -2040,7 +2035,7 @@ An enumeration.
 \index{PlotDataDescription (class in flap.plot)@\spxentry{PlotDataDescription}\spxextra{class in flap.plot}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{plot:flap.plot.PlotDataDescription}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{PlotDataDescription}}}{\emph{data\_type=None}, \emph{data\_object=None}, \emph{value=None}}{}
+\phantomsection\label{\detokenize{plot:flap.plot.PlotDataDescription}}\pysiglinewithargsret{\sphinxbfcode{\sphinxupquote{class }}\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{PlotDataDescription}}}{\emph{\DUrole{n}{data\_type}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{data\_object}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{value}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Plot axis description for use in PlotID() and plot().
 data\_object: The data object from which the data for this coordinate originates. This may
 \begin{quote}
@@ -2066,7 +2061,7 @@ value: Value, see above
 \index{axes\_to\_pdd\_list() (in module flap.plot)@\spxentry{axes\_to\_pdd\_list()}\spxextra{in module flap.plot}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{plot:flap.plot.axes_to_pdd_list}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{axes\_to\_pdd\_list}}}{\emph{d}, \emph{axes}}{}
+\phantomsection\label{\detokenize{plot:flap.plot.axes_to_pdd_list}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{axes\_to\_pdd\_list}}}{\emph{\DUrole{n}{d}}, \emph{\DUrole{n}{axes}}}{}
 Convert a plot() axes parameter to a list of PlotAxisDescription and axes list for PlotID
 d: data object
 axes: axes parameter of plot()
@@ -2086,7 +2081,7 @@ Return the current PlotID or None if no act plot.
 \index{sample\_for\_plot() (in module flap.plot)@\spxentry{sample\_for\_plot()}\spxextra{in module flap.plot}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{plot:flap.plot.sample_for_plot}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{sample\_for\_plot}}}{\emph{x}, \emph{y}, \emph{x\_error}, \emph{y\_error}, \emph{n\_points}}{}
+\phantomsection\label{\detokenize{plot:flap.plot.sample_for_plot}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{sample\_for\_plot}}}{\emph{\DUrole{n}{x}}, \emph{\DUrole{n}{y}}, \emph{\DUrole{n}{x\_error}}, \emph{\DUrole{n}{y\_error}}, \emph{\DUrole{n}{n\_points}}}{}
 Resamples the y(x) function to np points for plotting.
 This is useful for plotting large arrays in a way that short outlier pulses
 are still indicated.
@@ -2114,7 +2109,7 @@ If the box length is less than 5 the original data will be returned.
 \index{set\_plot\_id() (in module flap.plot)@\spxentry{set\_plot\_id()}\spxextra{in module flap.plot}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{plot:flap.plot.set_plot_id}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{set\_plot\_id}}}{\emph{plot\_id}}{}
+\phantomsection\label{\detokenize{plot:flap.plot.set_plot_id}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.plot.}}\sphinxbfcode{\sphinxupquote{set\_plot\_id}}}{\emph{\DUrole{n}{plot\_id}}}{}
 Set the current plot.
 
 \end{fulllineitems}
@@ -2122,14 +2117,14 @@ Set the current plot.
 
 
 \section{Select}
-\label{\detokenize{select:module-flap.select}}\label{\detokenize{select:select}}\label{\detokenize{select::doc}}\index{flap.select (module)@\spxentry{flap.select}\spxextra{module}}
+\label{\detokenize{select:module-flap.select}}\label{\detokenize{select:select}}\label{\detokenize{select::doc}}\index{module@\spxentry{module}!flap.select@\spxentry{flap.select}}\index{flap.select@\spxentry{flap.select}!module@\spxentry{module}}
 Created on Fri Apr 12 19:23:25 2019
 
 @author: Zoletnik
 \index{select\_intervals() (in module flap.select)@\spxentry{select\_intervals()}\spxextra{in module flap.select}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{select:flap.select.select_intervals}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.select.}}\sphinxbfcode{\sphinxupquote{select\_intervals}}}{\emph{object\_descr}, \emph{coordinate=None}, \emph{exp\_id='*'}, \emph{intervals=None}, \emph{options=None}, \emph{plot\_options=None}, \emph{output\_name=None}}{}
+\phantomsection\label{\detokenize{select:flap.select.select_intervals}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.select.}}\sphinxbfcode{\sphinxupquote{select\_intervals}}}{\emph{\DUrole{n}{object\_descr}}, \emph{\DUrole{n}{coordinate}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{exp\_id}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}*\textquotesingle{}}}, \emph{\DUrole{n}{intervals}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{plot\_options}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{output\_name}\DUrole{o}{=}\DUrole{default_value}{None}}}{}
 Select intervals from data interactively.
 INPUT:
 \begin{quote}
@@ -2191,7 +2186,7 @@ Will look for signal pieces above/below threshold
 and calculate maximum place of signal in this piece.
 \end{quote}
 \begin{description}
-\item[{‘Max-weight’ or ‘Min-weight’:}] \leavevmode
+\item[{‘Max\sphinxhyphen{}weight’ or ‘Min\sphinxhyphen{}weight’:}] \leavevmode
 Same as Maximum and Minimum but selects center of gravity
 for signal piece.
 
@@ -2211,7 +2206,7 @@ in the coordinate units.
 \end{description}
 
 ‘Threshold’: The threshold for the event.
-‘Thr-type’ Threshold type:
+‘Thr\sphinxhyphen{}type’ Threshold type:
 \begin{quote}
 
 ‘Absolute’: Absolute signal value
@@ -2233,7 +2228,7 @@ A data object. Data name is the coordinate name. The error gives the intervals.
 
 
 \section{Spectral analysis}
-\label{\detokenize{spectral_analysis:module-flap.spectral_analysis}}\label{\detokenize{spectral_analysis:spectral-analysis}}\label{\detokenize{spectral_analysis::doc}}\index{flap.spectral\_analysis (module)@\spxentry{flap.spectral\_analysis}\spxextra{module}}
+\label{\detokenize{spectral_analysis:module-flap.spectral_analysis}}\label{\detokenize{spectral_analysis:spectral-analysis}}\label{\detokenize{spectral_analysis::doc}}\index{module@\spxentry{module}!flap.spectral\_analysis@\spxentry{flap.spectral\_analysis}}\index{flap.spectral\_analysis@\spxentry{flap.spectral\_analysis}!module@\spxentry{module}}
 Created on Thu Mar  7 10:34:49 2019
 
 @author: Zoletnik
@@ -2242,7 +2237,7 @@ Spectral analysis tools fro FLAP
 \index{trend\_removal\_func() (in module flap.spectral\_analysis)@\spxentry{trend\_removal\_func()}\spxextra{in module flap.spectral\_analysis}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{spectral_analysis:flap.spectral_analysis.trend_removal_func}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.spectral\_analysis.}}\sphinxbfcode{\sphinxupquote{trend\_removal\_func}}}{\emph{d}, \emph{ax}, \emph{trend}, \emph{x=None}, \emph{return\_trend=False}, \emph{return\_poly=False}}{}
+\phantomsection\label{\detokenize{spectral_analysis:flap.spectral_analysis.trend_removal_func}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.spectral\_analysis.}}\sphinxbfcode{\sphinxupquote{trend\_removal\_func}}}{\emph{\DUrole{n}{d}}, \emph{\DUrole{n}{ax}}, \emph{\DUrole{n}{trend}}, \emph{\DUrole{n}{x}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{return\_trend}\DUrole{o}{=}\DUrole{default_value}{False}}, \emph{\DUrole{n}{return\_poly}\DUrole{o}{=}\DUrole{default_value}{False}}}{}
 This function makes the \_trend\_removal internal function public
 
 \end{fulllineitems}
@@ -2253,7 +2248,7 @@ This function makes the \_trend\_removal internal function public
 \label{\detokenize{test_data:test-data}}\label{\detokenize{test_data::doc}}
 
 \section{Tools}
-\label{\detokenize{tools:module-flap.tools}}\label{\detokenize{tools:tools}}\label{\detokenize{tools::doc}}\index{flap.tools (module)@\spxentry{flap.tools}\spxextra{module}}
+\label{\detokenize{tools:module-flap.tools}}\label{\detokenize{tools:tools}}\label{\detokenize{tools::doc}}\index{module@\spxentry{module}!flap.tools@\spxentry{flap.tools}}\index{flap.tools@\spxentry{flap.tools}!module@\spxentry{module}}
 Created on Wed Jan 23 13:18:25 2019
 
 @author: Zoletnik
@@ -2262,7 +2257,7 @@ Tools for the FLAP module
 \index{chlist() (in module flap.tools)@\spxentry{chlist()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.chlist}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{chlist}}}{\emph{chlist=None}, \emph{chrange=None}, \emph{prefix=''}, \emph{postfix=''}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.chlist}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{chlist}}}{\emph{\DUrole{n}{chlist}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{chrange}\DUrole{o}{=}\DUrole{default_value}{None}}, \emph{\DUrole{n}{prefix}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}, \emph{\DUrole{n}{postfix}\DUrole{o}{=}\DUrole{default_value}{\textquotesingle{}\textquotesingle{}}}}{}
 Creates a channel (signal) list name from a prefix, postfix a channel list and a list of channel
 ranges
 
@@ -2271,7 +2266,7 @@ ranges
 \index{del\_list\_elements() (in module flap.tools)@\spxentry{del\_list\_elements()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.del_list_elements}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{del\_list\_elements}}}{\emph{input\_list}, \emph{indices}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.del_list_elements}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{del\_list\_elements}}}{\emph{\DUrole{n}{input\_list}}, \emph{\DUrole{n}{indices}}}{}
 delete elements from a list
 
 \end{fulllineitems}
@@ -2279,7 +2274,7 @@ delete elements from a list
 \index{expand\_matrix() (in module flap.tools)@\spxentry{expand\_matrix()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.expand_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{expand\_matrix}}}{\emph{mx}, \emph{new\_shape}, \emph{dim\_list}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.expand_matrix}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{expand\_matrix}}}{\emph{\DUrole{n}{mx}}, \emph{\DUrole{n}{new\_shape}}, \emph{\DUrole{n}{dim\_list}}}{}
 Insert new dimensions to a matrix so as it has \textless{}new shape\textgreater{} shape.
 The original dimensions are at dim\_list dimensions
 \begin{description}
@@ -2299,7 +2294,7 @@ matrix. len(dim\_list) == mx.ndim
 \index{find\_str\_match() (in module flap.tools)@\spxentry{find\_str\_match()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.find_str_match}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{find\_str\_match}}}{\emph{value}, \emph{options}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.find_str_match}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{find\_str\_match}}}{\emph{\DUrole{n}{value}}, \emph{\DUrole{n}{options}}}{}
 Given value string and a list of possibilities in the list of strings option
 find matches assuming value is an abbreviation. Return ValueError if no match
 or multiple match is found.
@@ -2310,7 +2305,7 @@ If one match is found return the matching string
 \index{flatten\_multidim() (in module flap.tools)@\spxentry{flatten\_multidim()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.flatten_multidim}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{flatten\_multidim}}}{\emph{mx}, \emph{dim\_list}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.flatten_multidim}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{flatten\_multidim}}}{\emph{\DUrole{n}{mx}}, \emph{\DUrole{n}{dim\_list}}}{}
 Flatten the dimensions in dim\_list to dim\_list{[}0{]}
 Returns the modified matrix and a mapping from the original to the new dimension list.
 The mapping will be None for the flattened dimension in dim\_list even if
@@ -2322,7 +2317,7 @@ the flattened dimensions are removed.
 \index{grid\_to\_box() (in module flap.tools)@\spxentry{grid\_to\_box()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.grid_to_box}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{grid\_to\_box}}}{\emph{xdata}, \emph{ydata}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.grid_to_box}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{grid\_to\_box}}}{\emph{\DUrole{n}{xdata}}, \emph{\DUrole{n}{ydata}}}{}
 Given 2D x and y coordinate matrices create box coordinates around the points as
 needed by matplotlib.pcolomesh.
 xdata: X coordinates.
@@ -2335,7 +2330,7 @@ Returns xbox, ybox.
 \index{move\_axes\_to\_end() (in module flap.tools)@\spxentry{move\_axes\_to\_end()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.move_axes_to_end}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{move\_axes\_to\_end}}}{\emph{mx\_orig}, \emph{axes}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.move_axes_to_end}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{move\_axes\_to\_end}}}{\emph{\DUrole{n}{mx\_orig}}, \emph{\DUrole{n}{axes}}}{}
 Moves the listed axes to the end.
 
 \end{fulllineitems}
@@ -2343,7 +2338,7 @@ Moves the listed axes to the end.
 \index{move\_axes\_to\_start() (in module flap.tools)@\spxentry{move\_axes\_to\_start()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.move_axes_to_start}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{move\_axes\_to\_start}}}{\emph{mx\_orig}, \emph{axes}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.move_axes_to_start}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{move\_axes\_to\_start}}}{\emph{\DUrole{n}{mx\_orig}}, \emph{\DUrole{n}{axes}}}{}
 Moves the listed axes to the start axes.
 
 \end{fulllineitems}
@@ -2351,7 +2346,7 @@ Moves the listed axes to the start axes.
 \index{multiply\_along\_axes() (in module flap.tools)@\spxentry{multiply\_along\_axes()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.multiply_along_axes}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{multiply\_along\_axes}}}{\emph{a1\_orig}, \emph{a2\_orig}, \emph{axes}, \emph{keep\_a1\_dims=True}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.multiply_along_axes}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{multiply\_along\_axes}}}{\emph{\DUrole{n}{a1\_orig}}, \emph{\DUrole{n}{a2\_orig}}, \emph{\DUrole{n}{axes}}, \emph{\DUrole{n}{keep\_a1\_dims}\DUrole{o}{=}\DUrole{default_value}{True}}}{}
 Multiplies two arrays along given axes.
 INPUT:
 \begin{quote}
@@ -2373,7 +2368,7 @@ followed by a2 with the common dims removed
 \begin{description}
 \item[{Return values:}] \leavevmode\begin{description}
 \item[{a, axis\_source, axis\_number}] \leavevmode
-a: An array with dimension number a1.dim+a2.dim-1.
+a: An array with dimension number a1.dim+a2.dim\sphinxhyphen{}1.
 axis\_source: List of integers telling the source array for each output axis ( 0 or 1)
 axis\_number: Axis numbers in the arrays listed in axes\_source
 
@@ -2386,14 +2381,14 @@ axis\_number: Axis numbers in the arrays listed in axes\_source
 \index{select\_signals() (in module flap.tools)@\spxentry{select\_signals()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.select_signals}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{select\_signals}}}{\emph{signal\_list}, \emph{signal\_spec}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.select_signals}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{select\_signals}}}{\emph{\DUrole{n}{signal\_list}}, \emph{\DUrole{n}{signal\_spec}}}{}
 Selects signals from a signal list following signal specifications.
 
 signal\_list: List of strings of possible signal names
 \begin{description}
 \item[{signal\_spec: List of strings with signal specifications including wildcards}] \leavevmode
 Normal Unix file name wildcards are accepted and extended with
-{[}\textless{}num\textgreater{}-\textless{}num\textgreater{}{]} type expressions so as e.g. a channel range can be selected.
+{[}\textless{}num\textgreater{}\sphinxhyphen{}\textless{}num\textgreater{}{]} type expressions so as e.g. a channel range can be selected.
 
 \item[{Returs select\_list, select\_index}] \leavevmode
 select\_list: List of strings with selected signal names
@@ -2408,7 +2403,7 @@ Raises ValueError if there is no match for one specification
 \index{submatrix\_index() (in module flap.tools)@\spxentry{submatrix\_index()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.submatrix_index}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{submatrix\_index}}}{\emph{mx\_shape}, \emph{index}}{}~\begin{description}
+\phantomsection\label{\detokenize{tools:flap.tools.submatrix_index}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{submatrix\_index}}}{\emph{\DUrole{n}{mx\_shape}}, \emph{\DUrole{n}{index}}}{}~\begin{description}
 \item[{Given an arbitrary dimension matrix with shape mx\_shape the tuple to}] \leavevmode
 extract a submatrix is created and returned.
 The elements in each dimension are selected by index.
@@ -2434,7 +2429,7 @@ of the matrix. This tuple can be directly used for indexing the matrix.
 \index{unify\_list() (in module flap.tools)@\spxentry{unify\_list()}\spxextra{in module flap.tools}}
 
 \begin{fulllineitems}
-\phantomsection\label{\detokenize{tools:flap.tools.unify_list}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{unify\_list}}}{\emph{list1}, \emph{list2}}{}
+\phantomsection\label{\detokenize{tools:flap.tools.unify_list}}\pysiglinewithargsret{\sphinxcode{\sphinxupquote{flap.tools.}}\sphinxbfcode{\sphinxupquote{unify\_list}}}{\emph{\DUrole{n}{list1}}, \emph{\DUrole{n}{list2}}}{}
 Returns list with elements present in any of the two lists.
 Output list is sorted.
 
@@ -2471,7 +2466,6 @@ Contents
 \item\relax\sphinxstyleindexentry{flap.config}\sphinxstyleindexpageref{config:\detokenize{module-flap.config}}
 \item\relax\sphinxstyleindexentry{flap.coordinate}\sphinxstyleindexpageref{coordinate:\detokenize{module-flap.coordinate}}
 \item\relax\sphinxstyleindexentry{flap.data\_object}\sphinxstyleindexpageref{data_object:\detokenize{module-flap.data_object}}
-\item\relax\sphinxstyleindexentry{flap.flap\_xml}\sphinxstyleindexpageref{flap_xml:\detokenize{module-flap.flap_xml}}
 \item\relax\sphinxstyleindexentry{flap.plot}\sphinxstyleindexpageref{plot:\detokenize{module-flap.plot}}
 \item\relax\sphinxstyleindexentry{flap.select}\sphinxstyleindexpageref{select:\detokenize{module-flap.select}}
 \item\relax\sphinxstyleindexentry{flap.spectral\_analysis}\sphinxstyleindexpageref{spectral_analysis:\detokenize{module-flap.spectral_analysis}}

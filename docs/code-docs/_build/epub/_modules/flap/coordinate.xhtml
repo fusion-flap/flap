@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>flap.coordinate</title>
     <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> 
@@ -410,6 +411,7 @@
             <span class="k">if</span> <span class="p">((</span><span class="n">kind</span> <span class="o">!=</span> <span class="s1">&#39;u&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">kind</span> <span class="o">!=</span> <span class="s1">&#39;i&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">kind</span> <span class="o">!=</span> <span class="s1">&#39;f&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">kind</span> <span class="o">!=</span> <span class="s1">&#39;c&#39;</span><span class="p">)):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Invalid coordinate step value.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__step</span> <span class="o">=</span> <span class="n">_step</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dimension_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dimension_list</span>
@@ -873,6 +875,7 @@
 
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
       </div>
       <div class="clearer"></div>

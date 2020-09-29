@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plot &#8212; FLAP  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Select" href="select.html" />
@@ -37,15 +38,15 @@
 <p>Created on Sat May 18 18:37:06 2019</p>
 <p>&#64;author: Zoletnik
 &#64;coauthor: Lampert</p>
-<dl class="class">
+<dl class="py class">
 <dt id="flap.plot.PddType">
-<em class="property">class </em><code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">PddType</code><a class="reference internal" href="_modules/flap/plot.html#PddType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.PddType" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">PddType</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#PddType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.PddType" title="Permalink to this definition">¶</a></dt>
 <dd><p>An enumeration.</p>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="flap.plot.PlotDataDescription">
-<em class="property">class </em><code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">PlotDataDescription</code><span class="sig-paren">(</span><em class="sig-param">data_type=None</em>, <em class="sig-param">data_object=None</em>, <em class="sig-param">value=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#PlotDataDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.PlotDataDescription" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">PlotDataDescription</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_type</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data_object</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">value</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#PlotDataDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.PlotDataDescription" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot axis description for use in PlotID() and plot().
 data_object: The data object from which the data for this coordinate originates. This may</p>
 <blockquote>
@@ -63,24 +64,24 @@ PddType.Data: The data in self.data_object.</p>
 <p>value: Value, see above</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.plot.axes_to_pdd_list">
-<code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">axes_to_pdd_list</code><span class="sig-paren">(</span><em class="sig-param">d</em>, <em class="sig-param">axes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#axes_to_pdd_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.axes_to_pdd_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">axes_to_pdd_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">d</span></em>, <em class="sig-param"><span class="n">axes</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#axes_to_pdd_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.axes_to_pdd_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a plot() axes parameter to a list of PlotAxisDescription and axes list for PlotID
 d: data object
 axes: axes parameter of plot()</p>
 <p>return pdd_list, ax_list</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.plot.get_plot_id">
 <code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">get_plot_id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#get_plot_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.get_plot_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the current PlotID or None if no act plot.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.plot.sample_for_plot">
-<code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">sample_for_plot</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">x_error</em>, <em class="sig-param">y_error</em>, <em class="sig-param">n_points</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#sample_for_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.sample_for_plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">sample_for_plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">x_error</span></em>, <em class="sig-param"><span class="n">y_error</span></em>, <em class="sig-param"><span class="n">n_points</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#sample_for_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.sample_for_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resamples the y(x) function to np points for plotting.
 This is useful for plotting large arrays in a way that short outlier pulses
 are still indicated.
@@ -101,9 +102,9 @@ If the box length is less than 5 the original data will be returned.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.plot.set_plot_id">
-<code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">set_plot_id</code><span class="sig-paren">(</span><em class="sig-param">plot_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#set_plot_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.set_plot_id" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.plot.</code><code class="sig-name descname">set_plot_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">plot_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/plot.html#set_plot_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.plot.set_plot_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the current plot.</p>
 </dd></dl>
 
@@ -163,7 +164,7 @@ If the box length is less than 5 the original data will be returned.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -180,7 +181,7 @@ If the box length is less than 5 the original data will be returned.</p>
       &copy;2019, S. Zoletnik et al..
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>flap.data_object</title>
     <link rel="stylesheet" href="../../_static/epub.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" /> 
@@ -3522,7 +3523,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Object name should be a string.&quot;</span><span class="p">)</span>
         <span class="n">_name</span> <span class="o">=</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_exp_id:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">exp_id</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data_objects</span><span class="p">[</span><span class="n">_name</span><span class="p">]</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data_objects</span><span class="p">[</span><span class="n">_name</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">d</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="n">nlist</span> <span class="o">=</span> <span class="p">[]</span>
@@ -3899,9 +3900,9 @@
         <span class="n">d</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">exp_id</span><span class="p">,</span> <span class="n">data_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">no_data</span><span class="o">=</span><span class="n">no_data</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">,</span> 
               <span class="n">coordinates</span><span class="o">=</span><span class="n">_coordinates</span><span class="p">,</span> <span class="n">data_source</span><span class="o">=</span><span class="n">data_source_local</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># Checking whethet the error os due to unknown data_source argument</span>
+        <span class="c1"># Checking whethet the error is due to unknown data_source argument</span>
         <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;unexpected keyword argument &#39;data_source&#39;&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
-            <span class="c1"># If nat raise the error</span>
+            <span class="c1"># If not raise the error</span>
             <span class="k">raise</span> <span class="n">e</span>
         <span class="c1"># Trying without data_source as this was not part of earlier version</span>
         <span class="k">try</span><span class="p">:</span>
@@ -4430,6 +4431,7 @@
     <span class="k">return</span> <span class="n">d_out</span></div>
 </pre></div>
 
+            <div class="clearer"></div>
           </div>
       </div>
       <div class="clearer"></div>

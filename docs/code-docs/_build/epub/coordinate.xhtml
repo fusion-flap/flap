@@ -3,6 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Coordinate</title>
     <link rel="stylesheet" href="_static/epub.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" /> 
@@ -17,7 +18,7 @@
 <p>Created on Wed Jan 23 09:44:50 2019</p>
 <p>&#64;author: Zoletnik</p>
 <p>This is the coordinate description for FLAP</p>
-<dl class="class">
+<dl class="py class">
 <dt id="flap.coordinate.Coordinate">
 <em class="property">class </em><code class="sig-prename descclassname">flap.coordinate.</code><code class="sig-name descname">Coordinate</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">unit=None</em>, <em class="sig-param">mode=&lt;flap.coordinate.CoordinateMode object&gt;</em>, <em class="sig-param">shape=[]</em>, <em class="sig-param">start=None</em>, <em class="sig-param">step=None</em>, <em class="sig-param">c_range=None</em>, <em class="sig-param">values=None</em>, <em class="sig-param">value_index=None</em>, <em class="sig-param">value_ranges=None</em>, <em class="sig-param">dimension_list=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Class for the description of a mapping of coordinate values from an n-dimensional coordinate
@@ -35,16 +36,16 @@ Standard coordinates: Time, Channel, Channel number, Device_x, Device_y, Device_
 </div></blockquote>
 <p>See the description of variables in the __init__ function.
 The ranges and start-step pair of inputs are alternatives.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Coordinate.change_dimensions">
 <code class="sig-name descname">change_dimensions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.change_dimensions"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Return the list of dimensions of the data array along which this coordinate
 changes</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Coordinate.data">
-<code class="sig-name descname">data</code><span class="sig-paren">(</span><em class="sig-param">data_shape=None</em>, <em class="sig-param">index=None</em>, <em class="sig-param">options=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.data"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_shape</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">index</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">options</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.data"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Returns the coordinates, low and high limits for a sub-array of the data array in a DataObject.</p>
 <dl>
 <dt>index:</dt><dd><p>list, tuple describing the elements in DataObject.data for which the coordinates are
@@ -73,29 +74,29 @@ The low and high values are the absolute values not the difference from values</
 </dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Coordinate.data_range">
-<code class="sig-name descname">data_range</code><span class="sig-paren">(</span><em class="sig-param">data_shape=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.data_range"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">data_range</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_shape</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.data_range"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Returns the data range and the data range with errors for the coordinate. Both are lists.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Coordinate.dtype">
 <code class="sig-name descname">dtype</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.dtype"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Return the data type of the coordinate.
 Returns standard Python types: str, int, float, complex, boolean, object</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Coordinate.nochange_dimensions">
-<code class="sig-name descname">nochange_dimensions</code><span class="sig-paren">(</span><em class="sig-param">data_shape</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.nochange_dimensions"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">nochange_dimensions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.nochange_dimensions"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Return the list of dimensions of the data array along which this coordinate
 changes</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Coordinate.non_interpol">
-<code class="sig-name descname">non_interpol</code><span class="sig-paren">(</span><em class="sig-param">data_shape</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.non_interpol"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">non_interpol</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data_shape</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Coordinate.non_interpol"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Return True if the shape of the coordinate description
 is the same as the sub-data-array for which it applies and self.value_index is None.
 In this case there is no need for interpolation, just copy coordinate values</p>
@@ -104,23 +105,23 @@ In this case there is no need for interpolation, just copy coordinate values</p>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="flap.coordinate.CoordinateMode">
-<em class="property">class </em><code class="sig-prename descclassname">flap.coordinate.</code><code class="sig-name descname">CoordinateMode</code><span class="sig-paren">(</span><em class="sig-param">equidistant=True</em>, <em class="sig-param">range_symmetric=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#CoordinateMode"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">flap.coordinate.</code><code class="sig-name descname">CoordinateMode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">equidistant</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">range_symmetric</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#CoordinateMode"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Class for storing mode flags of the coordinate description</p>
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="flap.coordinate.Intervals">
-<em class="property">class </em><code class="sig-prename descclassname">flap.coordinate.</code><code class="sig-name descname">Intervals</code><span class="sig-paren">(</span><em class="sig-param">start</em>, <em class="sig-param">stop</em>, <em class="sig-param">step=None</em>, <em class="sig-param">number=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Intervals"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">flap.coordinate.</code><code class="sig-name descname">Intervals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">stop</span></em>, <em class="sig-param"><span class="n">step</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">number</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Intervals"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>A class to describe a series of intervals.
 Regular intevals are identical length ones repeating with a fixed step.
 Irregulars are just a list of start-stop values.
 For integer type values both the start and stop value is included.
 The optional number gives the number of ranges for the regular intervals.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Intervals.interval_limits">
-<code class="sig-name descname">interval_limits</code><span class="sig-paren">(</span><em class="sig-param">limits=None</em>, <em class="sig-param">partial_intervals=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Intervals.interval_limits"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">interval_limits</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">partial_intervals</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Intervals.interval_limits"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Return the range lower and upper limits as two numpy arrays.
 Limit the ranges within argument limits. (limits[0] &lt; limits[1])
 limits: 2 elements list with lower and upper limit</p>
@@ -131,9 +132,9 @@ limits: 2 elements list with lower and upper limit</p>
 <p>Raises a ValueError if there are no intervals within  limit or other problem.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Intervals.interval_number">
-<code class="sig-name descname">interval_number</code><span class="sig-paren">(</span><em class="sig-param">limits=None</em>, <em class="sig-param">partial_intervals=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Intervals.interval_number"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">interval_number</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">limits</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">partial_intervals</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Intervals.interval_number"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Return the number of intervals and the index of the start interval.
 Limit the ranges within argument limits.
 limits: 2 elements list with lower and upper limit</p>
@@ -143,13 +144,13 @@ limits: 2 elements list with lower and upper limit</p>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="flap.coordinate.Unit">
-<em class="property">class </em><code class="sig-prename descclassname">flap.coordinate.</code><code class="sig-name descname">Unit</code><span class="sig-paren">(</span><em class="sig-param">name=''</em>, <em class="sig-param">unit=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Unit"><span class="viewcode-link">[source]</span></a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">flap.coordinate.</code><code class="sig-name descname">Unit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Unit"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Class for the unit of the data</p>
-<dl class="method">
+<dl class="py method">
 <dt id="flap.coordinate.Unit.title">
-<code class="sig-name descname">title</code><span class="sig-paren">(</span><em class="sig-param">language='EN'</em>, <em class="sig-param">complex_txt=None</em>, <em class="sig-param">new_unit=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Unit.title"><span class="viewcode-link">[source]</span></a></dt>
+<code class="sig-name descname">title</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">language</span><span class="o">=</span><span class="default_value">'EN'</span></em>, <em class="sig-param"><span class="n">complex_txt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">new_unit</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/coordinate.xhtml#Unit.title"><span class="viewcode-link">[source]</span></a></dt>
 <dd><p>Returns a title string which will be used in plotting.
 complex_txt: List of 2 numbers:</p>
 <blockquote>
@@ -165,6 +166,7 @@ complex_txt: List of 2 numbers:</p>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
       </div>
       <div class="clearer"></div>

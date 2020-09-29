@@ -1,17 +1,18 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tools &#8212; FLAP  documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Usage of FLAP (tips/tricks/faq)" href="usage.html" />
@@ -37,22 +38,22 @@
 <p>Created on Wed Jan 23 13:18:25 2019</p>
 <p>&#64;author: Zoletnik</p>
 <p>Tools for the FLAP module</p>
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.chlist">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">chlist</code><span class="sig-paren">(</span><em class="sig-param">chlist=None</em>, <em class="sig-param">chrange=None</em>, <em class="sig-param">prefix=''</em>, <em class="sig-param">postfix=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#chlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.chlist" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">chlist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">chlist</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chrange</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">prefix</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">postfix</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#chlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.chlist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a channel (signal) list name from a prefix, postfix a channel list and a list of channel
 ranges</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.del_list_elements">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">del_list_elements</code><span class="sig-paren">(</span><em class="sig-param">input_list</em>, <em class="sig-param">indices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#del_list_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.del_list_elements" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">del_list_elements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">input_list</span></em>, <em class="sig-param"><span class="n">indices</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#del_list_elements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.del_list_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>delete elements from a list</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.expand_matrix">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">expand_matrix</code><span class="sig-paren">(</span><em class="sig-param">mx</em>, <em class="sig-param">new_shape</em>, <em class="sig-param">dim_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#expand_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.expand_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">expand_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mx</span></em>, <em class="sig-param"><span class="n">new_shape</span></em>, <em class="sig-param"><span class="n">dim_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#expand_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.expand_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert new dimensions to a matrix so as it has &lt;new shape&gt; shape.
 The original dimensions are at dim_list dimensions</p>
 <dl>
@@ -66,18 +67,18 @@ dim_list: This is a list of dimensions where mx is in the output</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.find_str_match">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">find_str_match</code><span class="sig-paren">(</span><em class="sig-param">value</em>, <em class="sig-param">options</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#find_str_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.find_str_match" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">find_str_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">options</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#find_str_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.find_str_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given value string and a list of possibilities in the list of strings option
 find matches assuming value is an abbreviation. Return ValueError if no match
 or multiple match is found.
 If one match is found return the matching string</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.flatten_multidim">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">flatten_multidim</code><span class="sig-paren">(</span><em class="sig-param">mx</em>, <em class="sig-param">dim_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#flatten_multidim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.flatten_multidim" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">flatten_multidim</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mx</span></em>, <em class="sig-param"><span class="n">dim_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#flatten_multidim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.flatten_multidim" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flatten the dimensions in dim_list to dim_list[0]
 Returns the modified matrix and a mapping from the original to the new dimension list.
 The mapping will be None for the flattened dimension in dim_list even if
@@ -85,9 +86,9 @@ flattening was not done. The dimension numbers in the dimension list assume that
 the flattened dimensions are removed.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.grid_to_box">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">grid_to_box</code><span class="sig-paren">(</span><em class="sig-param">xdata</em>, <em class="sig-param">ydata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#grid_to_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.grid_to_box" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">grid_to_box</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xdata</span></em>, <em class="sig-param"><span class="n">ydata</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#grid_to_box"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.grid_to_box" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given 2D x and y coordinate matrices create box coordinates around the points as
 needed by matplotlib.pcolomesh.
 xdata: X coordinates.
@@ -96,21 +97,21 @@ In both arrays x direction is along first dimension, y direction along second di
 Returns xbox, ybox.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.move_axes_to_end">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">move_axes_to_end</code><span class="sig-paren">(</span><em class="sig-param">mx_orig</em>, <em class="sig-param">axes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#move_axes_to_end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.move_axes_to_end" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">move_axes_to_end</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mx_orig</span></em>, <em class="sig-param"><span class="n">axes</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#move_axes_to_end"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.move_axes_to_end" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves the listed axes to the end.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.move_axes_to_start">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">move_axes_to_start</code><span class="sig-paren">(</span><em class="sig-param">mx_orig</em>, <em class="sig-param">axes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#move_axes_to_start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.move_axes_to_start" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">move_axes_to_start</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mx_orig</span></em>, <em class="sig-param"><span class="n">axes</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#move_axes_to_start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.move_axes_to_start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Moves the listed axes to the start axes.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.multiply_along_axes">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">multiply_along_axes</code><span class="sig-paren">(</span><em class="sig-param">a1_orig</em>, <em class="sig-param">a2_orig</em>, <em class="sig-param">axes</em>, <em class="sig-param">keep_a1_dims=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#multiply_along_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.multiply_along_axes" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">multiply_along_axes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a1_orig</span></em>, <em class="sig-param"><span class="n">a2_orig</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">keep_a1_dims</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#multiply_along_axes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.multiply_along_axes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multiplies two arrays along given axes.
 INPUT:</p>
 <blockquote>
@@ -137,9 +138,9 @@ axis_number: Axis numbers in the arrays listed in axes_source</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.select_signals">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">select_signals</code><span class="sig-paren">(</span><em class="sig-param">signal_list</em>, <em class="sig-param">signal_spec</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#select_signals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.select_signals" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">select_signals</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">signal_list</span></em>, <em class="sig-param"><span class="n">signal_spec</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#select_signals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.select_signals" title="Permalink to this definition">¶</a></dt>
 <dd><p>Selects signals from a signal list following signal specifications.</p>
 <p>signal_list: List of strings of possible signal names</p>
 <dl class="simple">
@@ -153,9 +154,9 @@ select_index: List of indices to signal list of the selected signals</p>
 <p>Raises ValueError if there is no match for one specification</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.submatrix_index">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">submatrix_index</code><span class="sig-paren">(</span><em class="sig-param">mx_shape</em>, <em class="sig-param">index</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#submatrix_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.submatrix_index" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">submatrix_index</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mx_shape</span></em>, <em class="sig-param"><span class="n">index</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#submatrix_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.submatrix_index" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Given an arbitrary dimension matrix with shape mx_shape the tuple to</dt><dd><p>extract a submatrix is created and returned.
 The elements in each dimension are selected by index.</p>
@@ -174,9 +175,9 @@ of the matrix. This tuple can be directly used for indexing the matrix.</p>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flap.tools.unify_list">
-<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">unify_list</code><span class="sig-paren">(</span><em class="sig-param">list1</em>, <em class="sig-param">list2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#unify_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.unify_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">flap.tools.</code><code class="sig-name descname">unify_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">list1</span></em>, <em class="sig-param"><span class="n">list2</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flap/tools.html#unify_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flap.tools.unify_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns list with elements present in any of the two lists.
 Output list is sorted.</p>
 </dd></dl>
@@ -237,7 +238,7 @@ Output list is sorted.</p>
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
 
 
 
@@ -254,7 +255,7 @@ Output list is sorted.</p>
       &copy;2019, S. Zoletnik et al..
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.3.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
