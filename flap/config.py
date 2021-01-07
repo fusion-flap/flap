@@ -23,7 +23,7 @@ def read(file_name=None):
     if (read_ok == []):
         raise OSError("Error reading configuration file "+__flap_config.file_name)
 
-def get(section, element, datatype=str, default=None):
+def get(section, element, datatype=str, default=None, evaluate=False):
     if (__flap_config.file_name is None):
         raise ValueError("Configuration has not been read.")
     try:
@@ -36,7 +36,10 @@ def get(section, element, datatype=str, default=None):
         return default
 
     try:
-        return(datatype(txt))
+        if evaluate is False:
+            return(datatype(txt))
+        else:
+            return(eval(txt))
     except (ValueError, TypeError):
         raise ValueError("Invalid value (" + txt + ") for " + element
                              + " entry in section [" + section+"] in config file:"
