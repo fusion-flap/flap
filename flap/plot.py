@@ -1830,7 +1830,7 @@ def _plot(data_object,
             raise TypeError("Animated image plot is applicable only to real data.")
         # Checking for numeric type
         try:
-            d.data[0,0] += 1
+            d.data[0,0] + 1
         except TypeError:
             raise TypeError("Animated image plot is applicable only to numeric data.")
         
