@@ -1255,6 +1255,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                             At present trend removal can be applied to 1D CCF only.
                 'Normalize': Normalize with autocorrelations, that is to calculate correlation instead of 
                              covariance.
+                'Correct ACF peak': Switch to correct the photon peak of the ACF during normalization. 
+                                    Default: False
+                'Correct ACF range': Indices for the ACF peak correction around the peak.
+                                     Default: [-2,-1,1,2]
                 'Verbose': Print progress messages
     """
     if (d.data is None):
