@@ -41,36 +41,6 @@ import matplotlib.lines as mlines
 from matplotlib.widgets import Button, Slider
 from matplotlib import ticker
 
-#styled=True
-#if styled:
-#    plt.rc('font', family='serif', serif='Helvetica')
-#    labelsize=9
-#    linewidth=1
-#    major_ticksize=2
-#    plt.rc('text', usetex=False)
-#    plt.rcParams['pdf.fonttype'] = 42
-#    plt.rcParams['ps.fonttype'] = 42
-#    plt.rcParams['lines.linewidth'] = linewidth
-#    plt.rcParams['axes.linewidth'] = linewidth
-#    plt.rcParams['axes.labelsize'] = labelsize
-#    plt.rcParams['axes.titlesize'] = labelsize
-#    
-#    plt.rcParams['xtick.labelsize'] = labelsize
-#    plt.rcParams['xtick.major.size'] = major_ticksize
-#    plt.rcParams['xtick.major.width'] = linewidth
-#    plt.rcParams['xtick.minor.width'] = linewidth/2
-#    plt.rcParams['xtick.minor.size'] = major_ticksize/2
-#    
-#    plt.rcParams['ytick.labelsize'] = labelsize
-#    plt.rcParams['ytick.major.width'] = linewidth
-#    plt.rcParams['ytick.major.size'] = major_ticksize
-#    plt.rcParams['ytick.minor.width'] = linewidth/2
-#    plt.rcParams['ytick.minor.size'] = major_ticksize/2
-#    plt.rcParams['legend.fontsize'] = labelsize
-#else:
-#    import matplotlib.style as pltstyle
-#    pltstyle.use('default')
-
 import numpy as np
 
 try:
