@@ -184,7 +184,7 @@ def submatrix_index(mx_shape, index):
 #        index_arrays.append(ind)
 
     for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
-        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT
+        index_arrays.append(slice(min(index[i]),max(index[i])+1))
         
     return tuple(index_arrays)
 
@@ -572,3 +572,112 @@ def unit_conversion(original_unit=None,
             new_unit_translation=1.
         
     return original_unit_translation/new_unit_translation
+
+def polyfit_2D(x=None,
+               y=None,
+               values=None,
+               sigma=None,
+               order=None,
+               irregular=False,
+               return_covariance=False,
+               return_fit=False):
+    
+    if sigma is None:
+        sigma=np.zeros(values.shape)
+        sigma[:]=1.
+    else:
+        if sigma.shape != sigma.shape:
+            raise ValueError('The shape of the errors do not match the shape of the values!')
+    
+    if not irregular:
+        if len(values.shape) != 2:
+            raise ValueError('Values are not 2D')
+        if x is not None and y is not None:
+            if x.shape != values.shape or y.shape != values.shape:
+                raise ValueError('There should be as many points as values and their shape should match.')
+        if order is None:
+            raise ValueError('The order is not set.')
+        if (x is None and y is not None) or (x is not None and y is None):
+            raise ValueError('Either both or neither x and y need to be set.')
+        if x is None and y is None:
+            polynom=np.asarray([[i**k * j**l / sigma[i,j] for k in range(order+1) for l in range(order-k+1)] for i in range(values.shape[0]) for j in range(values.shape[1])]) #The actual polynomial calculation
+        else:
+            polynom=np.asarray([[x[i,j]**k * y[i,j]**l / sigma[i,j] for k in range(order+1) for l in range(order-k+1)] for i in range(values.shape[0]) for j in range(values.shape[1])]) #The actual polynomial calculation
+            
+        original_shape=values.shape
+        values_reshape=np.reshape(values/sigma, values.shape[0]*values.shape[1])
+        
+        covariance_matrix=np.linalg.inv(np.dot(polynom.T,polynom))
+        
+        coefficients=np.dot(np.dot(covariance_matrix,polynom.T),values_reshape) #This performs the linear regression
+        
+        if not return_fit:
+            if return_covariance:
+                return (coefficients, covariance_matrix)
+            else:
+                return coefficients 
+        else:
+            return np.reshape(np.dot(polynom,coefficients),original_shape)
+    else:
+        if x.shape != y.shape or x.shape != values.shape:
+            raise ValueError('The points should be an [n,2] vector.')
+        if len(x.shape) != 1 or len(y.shape) != 1 or len(values_reshape.shape) != 1:
+            raise ValueError('x,y,values should be a 1D vector when irregular is set.')
+        if order is None:
+            raise ValueError('The order is not set.')
+        polynom=np.asarray([[x[i]**k * y[i]**l for k in range(order+1) for l in range(order-k+1)] for i in range(values.shape[0])]) #The actual polynomial calculation
+        if not return_fit:
+            return np.dot(np.dot(np.linalg.inv(np.dot(polynom.T,polynom)),polynom.T),values) #This performs the linear regression
+        else:
+            return np.dot(polynom,np.dot(np.dot(np.linalg.inv(np.dot(polynom.T,polynom)),polynom.T),values))
+        
+def reorder_2d_ccf_indices(res,             #Original result of the ccf calculation from the fft
+                           cd,              #Correlation dimensions
+                           ind_in1,         #Input indices 1 from 1D
+                           ind_in2,         #Input indices 2 from 1D
+                           ind_out1,        #Output indices 1 from 1D
+                           ind_out2):       #Output indices 2 from 1D
+
+    """
+    This helper function reorganizes the 2D cross-correlation or auto-correlation
+    functions in order to have the maximum in the middle of the matrix and
+    not somewhere around the corner. Used in _ccf in spectral_analysis.py
+    """
+    
+    
+    corr = np.empty(res.shape,dtype=res.dtype)
+    
+    ind_out_1=ind_out1[:]
+    ind_out_2=ind_out1[:]
+    ind_out_3=ind_out1[:]
+    ind_out_4=ind_out1[:]
+    
+    ind_out_1[cd[0]]=ind_out1[cd[0]]
+    ind_out_1[cd[1]]=ind_out1[cd[1]]
+    ind_out_2[cd[0]]=ind_out2[cd[0]]
+    ind_out_2[cd[1]]=ind_out1[cd[1]]
+    ind_out_3[cd[0]]=ind_out2[cd[0]]
+    ind_out_3[cd[1]]=ind_out2[cd[1]]
+    ind_out_4[cd[0]]=ind_out1[cd[0]]
+    ind_out_4[cd[1]]=ind_out2[cd[1]]
+    
+    ind_in_1=ind_in1[:]
+    ind_in_2=ind_in1[:]
+    ind_in_3=ind_in1[:]
+    ind_in_4=ind_in1[:]
+    
+    ind_in_1[cd[0]]=ind_in1[cd[0]]
+    ind_in_1[cd[1]]=ind_in1[cd[1]]
+    ind_in_2[cd[0]]=ind_in2[cd[0]]
+    ind_in_2[cd[1]]=ind_in1[cd[1]]
+    ind_in_3[cd[0]]=ind_in2[cd[0]]
+    ind_in_3[cd[1]]=ind_in2[cd[1]]
+    ind_in_4[cd[0]]=ind_in1[cd[0]]
+    ind_in_4[cd[1]]=ind_in2[cd[1]]
+    
+    corr[tuple(ind_out_1)] = res[tuple(ind_in_1)] 
+    corr[tuple(ind_out_2)] = res[tuple(ind_in_2)] 
+    corr[tuple(ind_out_3)] = res[tuple(ind_in_3)]
+    corr[tuple(ind_out_4)] = res[tuple(ind_in_4)]
+    
+    return corr

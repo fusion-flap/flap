@@ -3535,7 +3535,7 @@ class FlapStorage:
                     nlist.append(n)
             if len(nlist) == 0:
                 raise KeyError("Data object " + name
-                               + "(exp_id:" + str(exp_id) + ") does not exists.")
+                               + "(exp_id:" + str(exp_id) + ") does not exist.")
             if (len(nlist) > 1):
                 raise KeyError("Multiple data objects found for name "
                                + name + "(exp_id:" + str(exp_id) + ").")

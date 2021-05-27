@@ -1266,6 +1266,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                        'Trend removal': ['Poly', 2],
                        'Error calculation': True,
                        'Normalize': False,
+                       'Correct ACF peak': False,
                        'Verbose':True
                        }
     _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='Correlation')
@@ -1285,8 +1286,13 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     trend = _options['Trend removal']
     if (len(_coordinate) != 1 and (trend is not None)):
         raise NotImplementedError("Trend removal for multi-dimensional correlation is not implemented.")
+        
     interval_n = _options['Interval_n']
+    
     norm = _options['Normalize']
+    
+    correct_acf_peak=_options['Correct ACF peak']
+    
     error_calc = _options['Error calculation']
     if (len(_coordinate) != 1 and (intervals is not None)):
         raise NotImplementedError("Interval selection for multi-dimensional correlation is not implemented.")
@@ -1465,6 +1471,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     correlation_dimensions_out = []
     out_shape_acf = []
     out_shape_acf_ref = []
+    
     for i in range(len(d.data.shape)):
         try:
             correlation_dimensions.index(i)
@@ -1534,11 +1541,14 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         nfft = corr_point_n_nat[i] + pad_length[i]
         ind_in1[cd] = slice(0,int(nfft / 2))
         ind_out1[cd] = slice(nfft-int(nfft / 2), nfft)
+        
         zero_ind[i] = nfft - int(nfft / 2)
         ind_in2[cd] = slice(int(nfft / 2),nfft)
         ind_out2[cd] = slice(0, nfft - int(nfft / 2))
+        
         ind_slice[cd] = slice(shift_range[i][0] + zero_ind[i], shift_range[i][1] + zero_ind[i]+1)
         ind_bin[cd] = np.arange(ind_slice[cd].stop - ind_slice[cd].start,dtype=np.int32) // corr_res_sample[i]
+        
         if (calc_acf):
             ind_in1_acf[cd] = ind_in1[cd]
             ind_out1_acf[cd] = ind_out1[cd]
@@ -1608,14 +1618,21 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         res = np.fft.ifftn(res,axes=cps_corr_dims)
         if (out_dtype is float):
             res = np.real(res)        
-        corr = np.empty(res.shape,dtype=res.dtype)
 
-        if len(_coordinate) == 2:
-            corr[tuple([ind_out1[0],ind_out1[1]])] = res[tuple([ind_in1[0],ind_in1[1]])] 
-            corr[tuple([ind_out2[0],ind_out1[1]])] = res[tuple([ind_in2[0],ind_in1[1]])] 
-            corr[tuple([ind_out2[0],ind_out2[1]])] = res[tuple([ind_in2[0],ind_in2[1]])]
-            corr[tuple([ind_out1[0],ind_out2[1]])] = res[tuple([ind_in1[0],ind_in2[1]])]
+        if len(correlation_dimensions) == 2:
+            # This part of the code rearranges the corners of the 2D CCF function
+            # so the maximum is going to be in the middle. It does this in a generalized way
+            # where the non-correlating dimensions are left alone.
+            
+            corr=flap.tools.reorder_2d_ccf_indices(res,
+                                                   cd, 
+                                                   ind_in1, 
+                                                   ind_in2,
+                                                   ind_out1,
+                                                   ind_out2)
+
         else:
+            corr = np.empty(res.shape,dtype=res.dtype)
             corr[tuple(ind_out1)] = res[tuple(ind_in1)]
             corr[tuple(ind_out2)] = res[tuple(ind_in2)]
             
@@ -1657,21 +1674,28 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             else:
                 # We do not have the autocorrelations, calculating
                 res_acf = np.fft.ifftn(fft * np.conj(fft),axes=correlation_dimensions)
+                
                 if (out_dtype is float):
                     res_acf = np.real(res_acf)
                 # we need to move the correlation axes to the end to be consistent with the CCF
                 res_acf, ax_map = flap.tools.move_axes_to_end(res_acf,correlation_dimensions)
-                corr_acf = np.empty(res_acf.shape,dtype=res.dtype)
 
-                if len(_coordinate) == 2:
-                    corr_acf[tuple([ind_out1_acf[0],ind_out1_acf[1]])] = res_acf[tuple([ind_in1_acf[0],ind_in1_acf[1]])] 
-                    corr_acf[tuple([ind_out2_acf[0],ind_out1_acf[1]])] = res_acf[tuple([ind_in2_acf[0],ind_in1_acf[1]])] 
-                    corr_acf[tuple([ind_out2_acf[0],ind_out2_acf[1]])] = res_acf[tuple([ind_in2_acf[0],ind_in2_acf[1]])]
-                    corr_acf[tuple([ind_out1_acf[0],ind_out2_acf[1]])] = res_acf[tuple([ind_in1_acf[0],ind_in2_acf[1]])]
+                if len(correlation_dimensions) == 2:
+                    # This part of the code rearranges the corners of the 2D CCF function
+                    # so the maximum is going to be in the middle. It does this in a generalized way
+                    # where the non-correlating dimensions are left alone.
+                    
+                    corr_acf=flap.tools.reorder_2d_ccf_indices(res_acf,
+                                                               cd, 
+                                                               ind_in1_acf, 
+                                                               ind_in2_acf,
+                                                               ind_out1_acf,
+                                                               ind_out2_acf)
                 else:
+                    corr_acf = np.empty(res_acf.shape,dtype=res.dtype)
                     corr_acf[tuple(ind_out1_acf)] = res_acf[tuple(ind_in1_acf)]
                     corr_acf[tuple(ind_out2_acf)] = res_acf[tuple(ind_in2_acf)]
-                
+
                 corr_sliced_acf = corr_acf[tuple(ind_slice_acf)]
                 corr_binned_acf = np.zeros(tuple(out_shape_acf),dtype=res_acf.dtype)
                 if not corr_binned_acf.shape == corr_sliced_acf.shape:
@@ -1680,25 +1704,127 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     corr_binned_acf=corr_sliced_acf
                 # We need to take the zero lag elements from each correlation dimension
                 corr_dimension_start = len(out_shape_acf)-len(correlation_dimensions)
+                if correct_acf_peak:
+                #if False:
+                    
+                    if corr_dimension_start == 0: #Every dimension is correlation with a lag dimension
+                        array_2b_corrected=copy.deepcopy(corr_binned_acf)
+                        peak_value=0.
+                        for i in range(len(correlation_dimensions)):
+                            if zero_ind_out[i]-2 < 0:
+                                raise ValueError("Not enough datapoints for ACF correction.")
+                            ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                            array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=corr_dimension_start+i)
+                            
+                        for i in range(len(correlation_dimensions)):
+                            coeff = np.polyfit([-2,-1,1,2],
+                                               np.take(array_2b_corrected, 2, axis=corr_dimension_start+i)[np.asarray([0,1,3,4])],
+                                               2)
+                            
+                            peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
+                        peak_value /= (i+1)
+                        corr_binned_acf[zero_ind_out]=peak_value
+                        
+                    elif corr_dimension_start == 1: #The first dimension is not correlation, but the rest is.
+                        for i_non_corr in range(corr_binned_acf.shape[0]):
+                            array_2b_corrected=np.take(corr_binned_acf,i_non_corr,axis=0)
+                            peak_value=0.
+                            for i in range(len(correlation_dimensions)):
+                                if zero_ind_out[i]-2 < 0:
+                                    raise ValueError("Not enough datapoints for ACF correction.")
+                                ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
+                            if len(correlation_dimensions) == 1:
+                                for i in range(len(correlation_dimensions)):
+                                    coeff = np.polyfit([-2,-1,1,2],
+                                                       array_2b_corrected[np.asarray([0,1,3,4])],
+                                                       2)
+                                    
+                                    peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
+                                peak_value /= (i+1)
+                                corr_binned_acf[i_non_corr,zero_ind_out]=peak_value
+                            elif len(correlation_dimensions) == 2:
+                                for i in range(len(correlation_dimensions)):
+                                    coeff = np.polyfit([-2,-1,1,2],
+                                                       np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                                       2)
+                                    
+                                    peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
+                                peak_value /= (i+1)
+                                corr_binned_acf[i_non_corr,zero_ind_out]=peak_value
+                            elif len(correlation_dimensions) == 3:
+                                
+                                raise NotImplementedError('3D correlation dimensions has not been implemented yet.')
+                                
+                    elif corr_dimension_start == 2:
+                        for i_non_corr_1 in range(corr_binned_acf.shape[0]):
+                            for i_non_corr_2 in range(corr_binned_acf.shape[1]):
+                                array_2b_corrected=np.take(corr_binned_acf,i_non_corr_1,axis=0)
+                                array_2b_corrected=np.take(array_2b_corrected,i_non_corr_2,axis=0)
+                                peak_value=0.
+                                for i in range(len(correlation_dimensions)):
+                                    if zero_ind_out[i]-2 < 0:
+                                        raise ValueError("Not enough datapoints for ACF correction.")
+                                    ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                    array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
+                                    
+                                for i in range(len(correlation_dimensions)):
+                                    coeff = np.polyfit([-2,-1,1,2],
+                                                       np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                                       2)
+                                    
+                                    peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
+                                peak_value /= (i+1)
+                                corr_binned_acf[i_non_corr_1,i_non_corr_2,zero_ind_out]=peak_value
+                        
+                    elif corr_dimension_start == 3:
+                        for i_non_corr_1 in range(corr_binned_acf.shape[0]):
+                            for i_non_corr_2 in range(corr_binned_acf.shape[1]):
+                                for i_non_corr_3 in range(corr_binned_acf.shape[2]):
+                            
+                                    array_2b_corrected=np.take(corr_binned_acf,i_non_corr_1,axis=0)
+                                    array_2b_corrected=np.take(array_2b_corrected,i_non_corr_2,axis=0)
+                                    array_2b_corrected=np.take(array_2b_corrected,i_non_corr_3,axis=0)
+                                    peak_value=0.
+                                    for i in range(len(correlation_dimensions)):
+                                        if zero_ind_out[i]-2 < 0:
+                                            raise ValueError("Not enough datapoints for ACF correction.")
+                                        ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                        array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
+                                        
+                                    for i in range(len(correlation_dimensions)):
+                                        coeff = np.polyfit([-2,-1,1,2],
+                                                           np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                                           2)
+                                        
+                                        peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
+                                    peak_value /= (i+1)
+                                    corr_binned_acf[i_non_corr_1,i_non_corr_2,i_non_corr_3,zero_ind_out]=peak_value
+
+                    
+                # We need to take the zero lag elements from each correlation dimension
                 for i in range(len(correlation_dimensions)):
-                    # Always the cor_dimension_start axis is taken as it is removed by take
+                     # Always the cor_dimension_start axis is taken as it is removed by take
                     corr_binned_acf = np.take(corr_binned_acf,zero_ind_out[i],axis=corr_dimension_start)
+                    
                 if (ref is not None):
                     res_acf_ref = np.fft.ifftn(fft_ref * np.conj(fft_ref),axes=correlation_dimensions_ref)
-                    
                     if (out_dtype is float):
                         res_acf_ref = np.real(res_acf_ref)
                     # we need to move the correlation axes to the start to be consistent with the CCF
                     if len(_coordinate) != 2:
-                        res_acf_ref,ax_map_ref = flap.tools.move_axes_to_start(res_acf_ref,correlation_dimensions_ref)
+                        res_acf_ref,ax_map_ref = flap.tools.move_axes_to_end(res_acf_ref,correlation_dimensions_ref)
                         
-                    corr_acf_ref = np.empty(res_acf_ref.shape,dtype=res_acf.dtype)
-                    if len(_coordinate) == 2:
-                        corr_acf_ref[tuple([ind_out1_acf_ref[0],ind_out1_acf_ref[1]])] = res_acf_ref[tuple([ind_in1_acf_ref[0],ind_in1_acf_ref[1]])] 
-                        corr_acf_ref[tuple([ind_out2_acf_ref[0],ind_out1_acf_ref[1]])] = res_acf_ref[tuple([ind_in2_acf_ref[0],ind_in1_acf_ref[1]])] 
-                        corr_acf_ref[tuple([ind_out2_acf_ref[0],ind_out2_acf_ref[1]])] = res_acf_ref[tuple([ind_in2_acf_ref[0],ind_in2_acf_ref[1]])]
-                        corr_acf_ref[tuple([ind_out1_acf_ref[0],ind_out2_acf_ref[1]])] = res_acf_ref[tuple([ind_in1_acf_ref[0],ind_in2_acf_ref[1]])]
+                    
+                    if len(correlation_dimensions) == 2:
+                        corr_acf_ref=flap.tools.reorder_2d_ccf_indices(res_acf_ref,
+                                                                       cd, 
+                                                                       ind_in1_acf_ref, 
+                                                                       ind_in2_acf_ref,
+                                                                       ind_out1_acf_ref,
+                                                                       ind_out2_acf_ref)
                     else:
+                        corr_acf_ref = np.empty(res_acf_ref.shape,dtype=res_acf.dtype)
                         corr_acf_ref[tuple(ind_out1_acf_ref)] = res_acf_ref[tuple(ind_in1_acf_ref)]
                         corr_acf_ref[tuple(ind_out2_acf_ref)] = res_acf_ref[tuple(ind_in2_acf_ref)]
                     
@@ -1709,13 +1835,49 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                         np.add.at(corr_binned_acf_ref,tuple(ind_bin_acf_ref),corr_sliced_acf_ref)
                     else:
                         corr_binned_acf_ref=corr_sliced_acf_ref
-                        
+
+                    if correct_acf_peak:
+
+                        array_2b_corrected=copy.deepcopy(corr_binned_acf_ref)
+
+                        peak_value=0.
+                        for i in range(len(correlation_dimensions_ref)):
+                            if zero_ind_out[i]-2 < 0:
+                                raise ValueError("Not enough datapoints for ACF correction.")
+                            ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                            array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
+                        if len(correlation_dimensions) == 1:
+                            for i in range(len(correlation_dimensions)):
+                                coeff = np.polyfit([-2,-1,1,2],
+                                                   array_2b_corrected[np.asarray([0,1,3,4])],
+                                                   2)
+                                
+                                peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
+                            peak_value /= (i+1)
+                            corr_binned_acf_ref[zero_ind_out]=peak_value
+                        elif len(correlation_dimensions) == 2:
+                            for i in range(len(correlation_dimensions)):
+                                coeff = np.polyfit([-2,-1,1,2],
+                                                   np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                                   2)
+                                
+                                peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
+                            peak_value /= (i+1)
+                            corr_binned_acf_ref[zero_ind_out]=peak_value
+                        elif len(correlation_dimensions) == 3:
+                            
+                            raise NotImplementedError('3D correlation dimensions has not been implemented yet.')
+                            
+                    # Always the cor_dimension_start axis is taken as it is removed by take
                     # We need to take the zero lag elements from each correlation dimension
                     for i in range(len(correlation_dimensions)):
-                        # Always the cor_dimension_start axis is taken as it is removed by take
                         corr_binned_acf_ref = np.take(corr_binned_acf_ref,zero_ind_out[i],axis=0)
+                            
+                    # for i in range(len(correlation_dimensions)):
+                    #     corr_binned_acf_ref = np.take(corr_binned_acf_ref,zero_ind_out[i],axis=0)
                 else:
                     corr_binned_acf_ref = corr_binned_acf
+
                 extend_shape = [1] * (len(out_corr.shape) - len(corr_binned_acf.shape))
                 corr_binned /= np.sqrt(np.reshape(corr_binned_acf,tuple(list(corr_binned_acf.shape) + extend_shape)))
                 extend_shape = [1] * (len(out_corr.shape) - len(corr_binned_acf_ref.shape))

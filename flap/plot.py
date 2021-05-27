@@ -28,6 +28,11 @@ Created on Sat May 18 18:37:06 2019
     
 """    
 import os
+import copy
+from enum import Enum
+import math
+import time
+
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
@@ -36,11 +41,37 @@ import matplotlib.lines as mlines
 from matplotlib.widgets import Button, Slider
 from matplotlib import ticker
 
+#styled=True
+#if styled:
+#    plt.rc('font', family='serif', serif='Helvetica')
+#    labelsize=9
+#    linewidth=1
+#    major_ticksize=2
+#    plt.rc('text', usetex=False)
+#    plt.rcParams['pdf.fonttype'] = 42
+#    plt.rcParams['ps.fonttype'] = 42
+#    plt.rcParams['lines.linewidth'] = linewidth
+#    plt.rcParams['axes.linewidth'] = linewidth
+#    plt.rcParams['axes.labelsize'] = labelsize
+#    plt.rcParams['axes.titlesize'] = labelsize
+#    
+#    plt.rcParams['xtick.labelsize'] = labelsize
+#    plt.rcParams['xtick.major.size'] = major_ticksize
+#    plt.rcParams['xtick.major.width'] = linewidth
+#    plt.rcParams['xtick.minor.width'] = linewidth/2
+#    plt.rcParams['xtick.minor.size'] = major_ticksize/2
+#    
+#    plt.rcParams['ytick.labelsize'] = labelsize
+#    plt.rcParams['ytick.major.width'] = linewidth
+#    plt.rcParams['ytick.major.size'] = major_ticksize
+#    plt.rcParams['ytick.minor.width'] = linewidth/2
+#    plt.rcParams['ytick.minor.size'] = major_ticksize/2
+#    plt.rcParams['legend.fontsize'] = labelsize
+#else:
+#    import matplotlib.style as pltstyle
+#    pltstyle.use('default')
+
 import numpy as np
-import copy
-from enum import Enum
-import math
-import time
 
 try:
     import cv2
@@ -213,8 +244,9 @@ class PlotAnimation:
                                   valmax=self.tdata[-1]*self.axes_unit_conversion[2],
                                   valinit=self.tdata[0]*self.axes_unit_conversion[2])
         self.time_slider.on_changed(self._set_animation)
-
-        plt.subplot(self.plot_id.base_subplot)
+        
+        #The following line needed to be removed for matplotlib 3.4.1
+        #plt.subplot(self.plot_id.base_subplot)
         
         self.ax_act = plt.subplot(self.gs[0,0])
         if (len(self.coord_x.dimension_list) == 3 or
@@ -233,7 +265,7 @@ class PlotAnimation:
                 for j_check in range(i_check+1,len(self.axes)):
                     if (self.d.coordinates[axes_coordinate_decrypt[i_check]].unit.unit ==
                         self.d.coordinates[axes_coordinate_decrypt[j_check]].unit.unit):
-                        self.ax_act.axis('equal')
+                        self.ax_act.set_aspect(1.0)
                     
         time_index = [slice(0,dim) for dim in self.d.data.shape]
         time_index[self.coord_t.dimension_list[0]] = 0
@@ -1009,7 +1041,9 @@ def _plot(data_object,
         video_codec_decrypt={'avi':'XVID',
                              'mkv':'X264',
                              'mp4':'mp4v'}
-        video_codec_code=video_codec_decrypt[_options['Video format']]                   
+        video_codec_code=video_codec_decrypt[_options['Video format']]
+        print('Forcing waittime to be 0s for video saving.')
+        _options['Waittime']=0.
             
     #These lines do the coordinate unit conversion
     axes_unit_conversion=[1.,1.,1.]
@@ -1179,16 +1213,18 @@ def _plot(data_object,
                     #Interpolate the path data to the time vector of the original data
                     try:
                         x_object_interp=flap.slice_data(x_object_name,
-                                                         slicing={axes[2]:tdata},
-                                                         options={'Interpolation':'Linear'},
-                                                         output_name='X OBJ INTERP')                    
+                                                        exp_id=d.exp_id,
+                                                        slicing={axes[2]:tdata},
+                                                        options={'Interpolation':'Linear'},
+                                                        output_name='X OBJ INTERP')                    
                     except:
                         raise ValueError('Interpolation cannot be done for the \'Data object X\' along axis '+axes[2]+'.')    
                     try:
                         y_object_interp=flap.slice_data(y_object_name,
-                                                         slicing={axes[2]:tdata},
-                                                         options={'Interpolation':'Linear'},
-                                                         output_name='Y OBJ INTERP')
+                                                        exp_id=d.exp_id,
+                                                        slicing={axes[2]:tdata},
+                                                        options={'Interpolation':'Linear'},
+                                                        output_name='Y OBJ INTERP')
                     except:
                         raise ValueError('Interpolation cannot be done for the \'Data object Y\' along axis '+axes[2]+'.')
                     
@@ -1238,9 +1274,10 @@ def _plot(data_object,
                                                                                                    new_unit=d.coordinates[index_data_coordinate].unit.unit)
                                     
                     xy_object_interp=flap.slice_data(xy_object_name,
-                                                   slicing={axes[2]:tdata},
-                                                   options={'Interpolation':'Linear'},
-                                                   output_name='XY OBJ INTERP')
+                                                     exp_id=d.exp_id,
+                                                     slicing={axes[2]:tdata},
+                                                     options={'Interpolation':'Linear'},
+                                                     output_name='XY OBJ INTERP')
                     overplot_options['contour'][contour_obj_keys]['data']={}
                     overplot_options['contour'][contour_obj_keys]['data']['Data resampled']=xy_object_interp.data
                     overplot_options['contour'][contour_obj_keys]['data']['X coord resampled']=xy_object_interp.coordinate(axes[0])[0]*unit_conversion_coeff[0]
@@ -1610,26 +1647,26 @@ def _plot(data_object,
                     
                 if (yrange is not None):
                     ax.set_ylim(yrange[i_comp][0],yrange[i_comp][1])        
-                    
-                if overplot_options['line'] is not None:
-                    for line_obj_keys in overplot_options['line']:
-                        xmin, xmax = ax.get_xbound()
-                        ymin, ymax = ax.get_ybound()
-                        
-                        if overplot_options['line'][line_obj_keys]['Plot']:
-                            if 'Horizontal' in overplot_options['line'][line_obj_keys]:
-                                h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
-                                for segments in h_coords:
-                                    if segments[0] > ymin and segments[0] < ymax:
-                                        l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
-                                        ax.add_line(l) 
-                                        
-                            if 'Vertical' in overplot_options['line'][line_obj_keys]:
-                                v_coords=overplot_options['line'][line_obj_keys]['Vertical']
-                                for segments in v_coords:
-                                    if segments[0] > xmin and segments[0] < xmax:
-                                        l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
-                                        ax.add_line(l)
+                if (overplot_options is not None):
+                    if overplot_options['line'] is not None:
+                        for line_obj_keys in overplot_options['line']:
+                            xmin, xmax = ax.get_xbound()
+                            ymin, ymax = ax.get_ybound()
+                            
+                            if overplot_options['line'][line_obj_keys]['Plot']:
+                                if 'Horizontal' in overplot_options['line'][line_obj_keys]:
+                                    h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                                    for segments in h_coords:
+                                        if segments[0] > ymin and segments[0] < ymax:
+                                            l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                            ax.add_line(l) 
+                                            
+                                if 'Vertical' in overplot_options['line'][line_obj_keys]:
+                                    v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                                    for segments in v_coords:
+                                        if segments[0] > xmin and segments[0] < xmax:
+                                            l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                            ax.add_line(l)
                     
                 # Setting axis labels    
                 if axes_unit_conversion[0] == 1.:
@@ -1857,24 +1894,24 @@ def _plot(data_object,
             
         if (yrange is not None):
             ax.set_ylim(yrange[0],yrange[1])
-            
-        if overplot_options['line'] is not None:
-            for line_obj_keys in overplot_options['line']:
-                xmin, xmax = ax.get_xbound()
-                ymin, ymax = ax.get_ybound()
-                if overplot_options['line'][line_obj_keys]['Plot']:
-                    if 'Horizontal' in overplot_options['line'][line_obj_keys]:
-                        h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
-                        for segments in h_coords:
-                            if segments[0] > ymin and segments[0] < ymax:
-                                l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
-                                ax.add_line(l) 
-                    if 'Vertical' in overplot_options['line'][line_obj_keys]:
-                        v_coords=overplot_options['line'][line_obj_keys]['Vertical']
-                        for segments in v_coords:
-                            if segments[0] > xmin and segments[0] < xmax:
-                                l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
-                                ax.add_line(l)
+        if (overplot_options is not None):
+            if overplot_options['line'] is not None:
+                for line_obj_keys in overplot_options['line']:
+                    xmin, xmax = ax.get_xbound()
+                    ymin, ymax = ax.get_ybound()
+                    if overplot_options['line'][line_obj_keys]['Plot']:
+                        if 'Horizontal' in overplot_options['line'][line_obj_keys]:
+                            h_coords=overplot_options['line'][line_obj_keys]['Horizontal']
+                            for segments in h_coords:
+                                if segments[0] > ymin and segments[0] < ymax:
+                                    l = mlines.Line2D([xmin,xmax], [segments[0],segments[0]], color=segments[1])
+                                    ax.add_line(l) 
+                        if 'Vertical' in overplot_options['line'][line_obj_keys]:
+                            v_coords=overplot_options['line'][line_obj_keys]['Vertical']
+                            for segments in v_coords:
+                                if segments[0] > xmin and segments[0] < xmax:
+                                    l = mlines.Line2D([segments[0],segments[0]], [ymin,ymax], color=segments[1])
+                                    ax.add_line(l)
             
         if axes_unit_conversion[0] == 1.:
             ax.set_xlabel(ax_list[0].title(language=language))
@@ -1959,7 +1996,8 @@ def _plot(data_object,
         coord_y = pdd_list[1].value
         if _options['Equal axes']:
             if (coord_x.unit.unit == coord_y.unit.unit):
-                ax.axis('equal')
+                #ax.axis('equal')
+                ax.set_aspect(1.0)
             else:
                 print('Equal axis is not possible. The axes units are not equal.')
         if (_plot_type == 'image'):
@@ -2214,6 +2252,8 @@ def _plot(data_object,
             (coord_y.mode.equidistant) and (len(coord_y.dimension_list) == 1)):
             # This data is image-like with data points on a rectangular array
             image_like = True
+            xdata=coord_x.data(data_shape=d.data.shape)[0]
+            ydata=coord_y.data(data_shape=d.data.shape)[0]
         elif ((len(coord_x.dimension_list) == 1) and (len(coord_y.dimension_list) == 1)):
             if (not coord_x.isnumeric()):
                 raise ValueError('Coordinate '+coord_x.unit.name+' is not numeric.')
@@ -2271,10 +2311,12 @@ def _plot(data_object,
             yrange=[np.min(ydata),np.max(ydata)]
 
         for it in range(len(tdata)):
-            plt.subplot(_plot_id.base_subplot)
+            #The following line was removed for matplotlib 3.4.1
+            #plt.subplot(_plot_id.base_subplot)
             ax_act = plt.subplot(gs[0,0])
             if _options['Equal axes'] and coord_x.unit.unit == coord_y.unit.unit:
-                ax_act.axis('equal')
+                #ax_act.axis('equal')
+                ax_act.set_aspect(1.0)
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
             time_index = tuple(time_index)
