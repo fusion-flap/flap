@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Jan 23 09:44:50 2019
 
@@ -304,7 +303,7 @@ class Coordinate:
                  value_index=None,
                  value_ranges=None,
                  dimension_list=[]):
-        # This is a UnitClass describing the name and unit
+        # This is a Unit Class describing the name and unit
         self.unit = Unit(name=name,unit=unit)
         # mode is a collection of flags
         # flap.Coordinate.EQUIDISTANT: coordinate changes proportionally to samples number
@@ -395,6 +394,7 @@ class Coordinate:
             if ((kind != 'u') and (kind != 'i') and (kind != 'f') and (kind != 'c')):
                 raise TypeError("Invalid coordinate step value.")
         self.__step = _step
+
     @property
     def dimension_list(self):
         return self.__dimension_list
@@ -783,7 +783,7 @@ class Coordinate:
             else:
                 # Interpolation is necesary
                 raise NotImplementedError(
-                       "Interpolating for coordinate determination is not implemented yet.")
+                       "Interpolating for coordinate determination is not implemented yet. {:s}".format(self.unit.name))
 
         # Extending value_mx and like to the output shape
         # First creating a dimension list where this coordinate does not change

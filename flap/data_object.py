@@ -1519,6 +1519,10 @@ class DataObject:
                         regular_slice = slice(slicing.start[0], slicing.stop[0], slicing_coord.step[0])
                     else:
                         regular_slice = slice(slicing.stop[0], slicing.start[0], slicing_coord.step[0])
+            else:
+                if ((type(slicing) is DataObject) and
+                    (slicing.data_unit.name != slicing_coord.unit.name)):
+                    coord_obj = slicing.get_coordinate_object(slicing_coord.unit.name)
             try:
                 # If regular_slice exists
                 regular_slice
@@ -2072,7 +2076,7 @@ class DataObject:
                                                                            number=slicing_description[i].shape[coord_obj.dimension_list[0]]))
                             else:
                                 try:
-                                    c, c_low, c_high = coord_obj.data(data_shape=slicing_description[i].shape,index='...')
+                                    c, c_low, c_high = coord_obj.data(data_shape=slicing_description[i].shape,index=Ellipsis)
                                 except Exception as e:
                                     raise e
                                 intervals.append(flap.coordinate.Intervals(c_low, c_high))
@@ -2186,8 +2190,8 @@ class DataObject:
                                     raise ValueError("Number of samples in interval is too small.")
                             # If the interval length are very much different too much space is needed, we don't
                             # do slicing
-                            if (n_in_int*n_int > d_slice.data.shape[joint_dimension_list[0]] * 3):
-                                raise ValueError("Interval length too much different cannot do multi-slicing.")
+                            # if (n_in_int*n_int > d_slice.data.shape[joint_dimension_list[0]] * 3):
+                            #     raise ValueError("Interval length too much different cannot do multi-slicing.")
                             # Creating the new data matrix
                         new_shape = list(copy.deepcopy(d_slice.data.shape))
                         # Removing the flattened dimension
@@ -2331,12 +2335,12 @@ class DataObject:
                             n = err_flat_1.shape[summing_coords[i_sc].dimension_list[0]] #TYPO err_flat1 --> err_flat_1
                             err = np.maximum(err_flat_1,err_flat_2)
                             d_slice.error = np.sqrt(np.sum(err**2,
-                                                           axis=summing_coords[i_sc].dimension_list[0]) / n +\
+                                                           axis=summing_coords[i_sc].dimension_list[0]) / n**2 +\
                                             err_of_average**2)
                         else:
                             n = d_slice.error.shape[summing_coords[i_sc].dimension_list[0]]
                             d_slice.error = np.sqrt(np.sum(d_slice.error**2,
-                                                           axis=summing_coords[i_sc].dimension_list[0]) / n +\
+                                                           axis=summing_coords[i_sc].dimension_list[0]) / n**2 +\
                                             err_of_average**2)
                 elif ((summing_description[i_sc] == 'Min') or (summing_description[i_sc] == 'Max')):
                     # Finding the appropriate indices
@@ -3437,6 +3441,195 @@ class DataObject:
          except Exception as e:
              raise e
              
+    def pdf(self, coordinate=None, intervals=None, options=None):
+        """
+            Amplitude distribution (PDF) function of data. Flattens the data array in the dimensions where the 
+            coordinates change and calculates PDF on this data for each case of the other dimensions.
+            INPUT:
+                self: A flap.DataObject.
+                coordinate: The name of the coordinate(s) (string, or list of strings) along which to calculate. 
+                            If not set first coordinate in data object will be used.
+                            These coordinates will be removed and replaced by a new coordinate with the name of the data.
+                intervals: Information of processing intervals.
+                           If dictionary with a single key: {selection coordinate: description})
+                               Key is a coordinate name which can be different from the calculation
+                               coordinate.
+                               Description can be flap.Intervals, flap.DataObject or
+                               a list of two numbers. If it is a data object with data name identical to
+                               the coordinate the error ranges of the data object will be used for
+                               interval. If the data name is not the same as coordinate a coordinate with the
+                               same name will be searched for in the data object and the value_ranges
+                               will be used fromm it to set the intervals.
+                           If not a dictionary and not None is is interpreted as the interval
+                               description, the selection coordinate is taken the same as
+                               coordinate[0].
+                           If None, the whole data interval will be used as a single interval.
+                options: Dictionary. (Keys can be abbreviated)
+                    'Range': The data value range. If not set the data minimum-maximum will be used.
+                    'Resolution': The resolution of the PDF
+                    'Number': The number of intervals in Range. This is an alternative to Resolution.
+        """
+        if (self.data is None):
+            raise ValueError("Cannot process without data.")
+        default_options = {'Range':None, 'Resolution': None, 'Number':None}
+
+        try:
+            _options = flap.config.merge_options(default_options, options,
+                                             data_source=self.data_source,
+                                             section='PDF')
+        except ValueError as e:
+            raise e
+            
+        if (self.data.dtype.kind == 'c'):
+            raise ValueError("Cannot calculate PDF from complex data.")
+        if (coordinate is None):
+            c_names = self.coordinate_names()
+            try:
+                _coordinate = c_names[0]
+            except ValueError:
+                raise ValueError("No coordinate is given for filter and no Time coordinate found.")
+        else:
+            _coordinate = coordinate
+        if ((type(_coordinate) is not list) and (type(coordinate) is not str)):
+            raise ValueError("Coordinate should be string or list of strings.")
+        if (type(_coordinate) is not list):
+            _coordinate = [_coordinate]
+        dim_list = []
+        # Create dimension list of all the listed coordinates
+        for c in _coordinate:
+            if (type(c) is not str):
+                raise ValueError("Coordinate list elements should be strings.")
+            for d in self.get_coordinate_object(c).dimension_list:
+                try:
+                    dim_list.index(d)
+                except ValueError:
+                    dim_list.append(d)
+        if (_options['Range'] is None):
+            _options['Range'] = [np.amin(self.data), np.amax(self.data)]
+        else:
+            if ((type(_options['Range']) is not list) or (len(_options['Range']) != 2)):
+                raise ValueError("Range should be a list with two elments.")
+            try:
+                if (_options['Range'][1] <= _options['Range'][0]):
+                    raise ValueError("Invalid range for PDF.")
+            except Exception as e:
+                raise ValueError("Invalid range for PDF.")
+        if ((_options['Number'] is None) and (_options['Resolution'] is None)):
+            _options['Number'] = 10
+        if ((_options['Number'] is not None) and (_options['Resolution'] is not None)):
+            raise ValueError("Resolution and Number cannot be set at the same time.")
+        if (_options['Number'] is not None):
+            diff = (_options['Range'][1] - _options['Range'][0]) / _options['Number']
+            limits = np.arange(_options['Number'] + 1) * diff + _options['Range'][0]
+        else:
+            n = ((_options['Range'][1] - _options['Range'][0]) / _options['Resolution'])
+            if (n != int(n)):
+                n = int(n) + 1
+            else:
+                n = int(n)
+            limits = np.arange(n + 1) * _options['Resolution'] + _options['Range'][0]
+        if (intervals is not None):
+            try:    
+                calc_int, calc_int_ind, sel_int, sel_int_ind = self.proc_interval_limits(_coordinate[0], intervals=intervals)
+            except Exception as e:
+                raise e
+            int_start_ind = sel_int_ind[0]
+            int_end_ind = sel_int_ind[1]
+            int_start = sel_int[0]
+            int_end = sel_int[1]  
+            if (type(intervals) is dict):
+                sel_coordinate = list(intervals.keys())[0]
+                sel_coord_obj = self.get_coordinate_object(sel_coordinate)
+            else:
+                sel_coordinate = _coordinate[0]
+                sel_coord_obj = self.get_coordinate_object(_coordinate[0])
+            ind = [slice(0,dim) for dim in self.shape]
+            ind_sel = np.array([],dtype='int32')    
+            for i_int in range(len(int_start_ind)):            
+                ind_sel = np.concatenate((ind_sel,np.arange(int_end_ind[i_int] - int_start_ind[i_int] + 1) + int_start_ind[i_int]))
+            ind[sel_coord_obj.dimension_list[0]] = ind_sel
+            ind = tuple(ind)
+            data_proc_mx = self.data[ind]
+        else:
+            data_proc_mx = self.data
+        data_proc_mx,dim_mapping = flap.tools.flatten_multidim(data_proc_mx, dim_list)
+        # In the output putting the signal value to the last dimension
+        output_shape = list(data_proc_mx.shape)
+        output_shape.append(len(limits) - 1)
+        del output_shape[dim_list[0]]
+        output_mx = np.zeros(tuple(output_shape),dtype=data_proc_mx.dtype)
+        ind = [0] * data_proc_mx.ndim
+        _pdf_recursive(data_proc_mx,output_mx,limits,dim_list[0],0,ind)
+        
+        # Fixing coordinates
+        data_out = copy.deepcopy(self)
+        data_out.data = output_mx
+        data_out.shape = output_mx.shape
+        data_out.error = None
+        data_out.data_unit = flap.coordinate.Unit(name='Number',unit='')
+        data_out.data_title='PDF of ' + self.data_title
+        new_coord = flap.coordinate.Coordinate(name=self.data_unit.name,
+                                               unit=self.data_unit.unit,
+                                               dimension_list=[output_mx.ndim - 1],
+                                               mode=flap.coordinate.CoordinateMode(equidistant=True),
+                                               start = (limits[1] + limits[0]) / 2,
+                                               step = limits[1] - limits[0]
+                                               )
+        # Removing all coordinates which change on the removed dimensions
+        # Setting up a list of coordinates with have common dimension with the deleted ones
+        del_list = []
+        for c in data_out.coordinates:
+            del_coord = False
+            for d in dim_list:
+                try:
+                    c.dimension_list.index(d)
+                    del_list.append(c.unit.name)
+                    del_coord = True
+                    break
+                except ValueError:
+                    pass
+            if (not del_coord):
+                # This coordinate remains, mapping dimensions
+                for id in range(len(c.dimension_list)):
+                    if (dim_mapping[c.dimension_list[id]] is None):
+                        raise RuntimeError("Internal error: Null dimension after pdf.")
+                    c.dimension_list[id] = dim_mapping[c.dimension_list[id]]
+        # Deleting coordinates
+        for c in del_list:
+            data_out.del_coordinate(c)
+        # Adding the new coordinate
+        data_out.coordinates.append(new_coord)  
+        data_out.check()
+        return data_out
+            
+def _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,dim_i,ind):
+    """ Helper function for pdf.
+        Recursicely goes through all dimensions and calculates PDF.
+        Going through all dimensions of the data_proc_mx. The actual result write index
+        is in ind. dim_i is the index of the dimension. When dim_i reaches to the end of the dimensions
+        the PDF is calculated and written to the elements pointed by index.
+    """
+    i = dim_i
+    if (i == flattened_dim):
+        i += 1
+    if (i >= data_proc_mx.ndim):
+        ind_read = copy.deepcopy(ind)
+        ind_read[flattened_dim] = slice(0,data_proc_mx.shape[flattened_dim])
+        ind_write = copy.deepcopy(ind)
+        del ind_write[flattened_dim]
+        ind_write.append(slice(0,len(limits) - 1))
+        h,bin_edges = np.histogram(data_proc_mx[tuple(ind_read)],bins=limits)
+        output_mx[tuple(ind_write)] = h
+        return
+    for j in range(data_proc_mx.shape[i]):
+        ind[i] = j
+        _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,i + 1,ind)
+        
+        
+            
+           
+        
+        
 ########## END of class DataObject            
             
 class FlapStorage:
@@ -3507,7 +3700,7 @@ class FlapStorage:
             raise ValueError("Object name should be a string.")
         _name = name + '_exp_id:' + str(exp_id)
         try:
-            d = self.__data_objects[_name]
+            d = copy.deepcopy(self.__data_objects[_name])
             return d
         except KeyError:
             nlist = []
@@ -3884,9 +4077,9 @@ def get_data(data_source,
         d = f(exp_id, data_name=name, no_data=no_data, options=options, 
               coordinates=_coordinates, data_source=data_source_local)
     except TypeError as e:
-        # Checking whethet the error os due to unknown data_source argument
+        # Checking whethet the error is due to unknown data_source argument
         if (str(e).find("unexpected keyword argument 'data_source'") < 0):
-            # If nat raise the error
+            # If not raise the error
             raise e
         # Trying without data_source as this was not part of earlier version
         try:
@@ -4413,3 +4606,46 @@ def error_value(object_name,exp_id='*',output_name=None, options=None):
         except Exception as e:
             raise e
     return d_out
+
+def pdf(object_name,exp_id='*',coordinate=None, intervals=None, options=None, output_name=None):
+    """
+        Amplitude distribution (PDF) function of data. Flattens the data array in the dimensions where the 
+        coordinates change and calculates PDF on this data for each case of the other dimensions.
+        INPUT:
+            coordinate: The name of the coordinate(s) (string, or list of strings) along which to calculate. 
+                        If not set first coordinate in data object will be used.
+                        These coordinates will be removed and replaced by a new coordinate with the name of the data.
+            intervals: Information of processing intervals.
+                       If dictionary with a single key: {selection coordinate: description})
+                           Key is a coordinate name which can be different from the calculation
+                           coordinate.
+                           Description can be flap.Intervals, flap.DataObject or
+                           a list of two numbers. If it is a data object with data name identical to
+                           the coordinate the error ranges of the data object will be used for
+                           interval. If the data name is not the same as coordinate a coordinate with the
+                           same name will be searched for in the data object and the value_ranges
+                           will be used fromm it to set the intervals.
+                       If not a dictionary and not None is is interpreted as the interval
+                           description, the selection coordinate is taken the same as
+                           coordinate.
+                       If None, the whole data interval will be used as a single interval.
+            options: Dictionary. (Keys can be abbreviated)
+                'Range': The data value range. If not set the data minimum-maximum will be used.
+                'Resolution': The resolution of the PDF
+            
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.pdf(coordinate=coordinate, intervals=intervals, options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+

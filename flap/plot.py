@@ -2177,7 +2177,7 @@ def _plot(data_object,
             raise TypeError("Animated image plot is applicable only to real data.")
         # Checking for numeric type
         try:
-            d.data[0,0]+1                                                       #THERE WAS A BUG HERE +=1 assigns the value to the element and messes up the data.
+            d.data[0,0] + 1
         except TypeError:
             raise TypeError("Animated image plot is applicable only to numeric data.")
         
@@ -2270,19 +2270,28 @@ def _plot(data_object,
 
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
         _plot_id.plt_axis_list = []
-        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
-        
-        if _options['Equal axes'] and not coord_x.unit.unit == coord_y.unit.unit:
-            print('Equal axis is not possible. The axes units are not equal.')
-            
+#        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        _plot_id.plt_axis_list.append(_plot_id.base_subplot)
+#        plt.subplot(_plot_id.base_subplot)
+#        plt.plot()
+#        plt.cla()
+#        ax=plt.gca()
+
         if (xrange is None):
             xrange=[np.min(xdata),np.max(xdata)]
         if (yrange is None):
             yrange=[np.min(ydata),np.max(ydata)]
+            
+        if _options['Equal axes'] and not coord_x.unit.unit == coord_y.unit.unit:
+            print('Equal axis is not possible. The axes units are not equal.')            
 
         for it in range(len(tdata)):
-            #The following line was removed for matplotlib 3.4.1
-            #plt.subplot(_plot_id.base_subplot)
+            # This is a hack here. The problem is, that the colorbar() call reduces the axes size
+            del gs
+            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+            plt.subplot(gs[0,0])
+#            plt.subplot(_plot_id.base_subplot)
+#            ax_act = _plot_id.base_subplot
             ax_act = plt.subplot(gs[0,0])
             if _options['Equal axes'] and coord_x.unit.unit == coord_y.unit.unit:
                 #ax_act.axis('equal')

@@ -83,11 +83,6 @@ def test_saveload():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test save/load <<<<<<<<<<<<<<<<<<<<<<<<")
     flap.delete_data_object('*')
-    d=flap.get_data('TESTDATA',name='TEST-*',
-                    options={'Scaling':'Volt'},
-                    object_name='TESTDATA',
-                    coordinates={'Time':[0,0.001]})
-    flap.slice_data('TESTDATA',slicing={'Signal name': 'TEST-1-*'},output_name='TESTDATA_slice')
     print("**** Storage contents before save.")
     flap.list_data_objects()
     print("**** Saving all storage and deleting storage contents.")
@@ -302,7 +297,7 @@ def test_plot_xy():
     print("**** Plotting measurement points in device corodinates.")
     plt.figure()
     flap.plot('TESTDATA',axes=['Device x','Device z'],plot_type ='scatter')
-    print("**** Plotting Device x as a funciton of Row.")
+    print("**** Plotting Device x as a function of Row.")
     plt.figure()
     flap.plot('TESTDATA',axes=['Row','Device x'],plot_type ='scatter',)
 
@@ -699,9 +694,19 @@ def test_image():
     flap.add_data_object(d,"TEST_VIDEO_noneq")
     flap.list_data_objects()
     plt.figure()
-    print("**** Showing this video and test_video_noneq.avi")
+    print("**** Showing this video and saving to  test_video_noneq.avi")
     flap.plot('TEST_VIDEO_noneq',plot_type='anim-image',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_noneq.avi','Colorbar':True,'Aspect ratio':'equal'})
+def test_pdf():
+    print("**** Generating 10x15 random test signals, 5000 points each, 1 MHz sampling.")
+    flap.get_data('TESTDATA',
+                  name='TEST-*-*',
+                  options={'Length':0.005, 'Signal':'Sin'},
+                  object_name='TESTDATA')
+    flap.pdf('TESTDATA',coordinate='Time',options={'Number':30},output_name='PDF')
+    flap.list_data_objects()
+    flap.plot('PDF',slicing={'Column':3},axes=['Signal'])
+    plt.title('PDF of sine waves')
  
 def show_plot():
     plt.pause(0.05)
@@ -720,57 +725,61 @@ def key_pressed():
     global keypressed
     if (keypressed is not None):
         return True
+    
+def wait_press(flag=False):
+    if (flag):
+        input("Press Enter to continue...")
 
-def wait_for_key():
-    print("Press any key ON A PLOT to continue...")
-    fig = plt.gcf()
-    kbd_press = fig.canvas.mpl_connect('key_press_event', keypress_event)
-    keypress_start()
-    while not key_pressed():
-        time.sleep(0.01)
-        plt.pause(0.01)
-    fig.canvas.mpl_disconnect(kbd_press)
+def wait_for_key(flag=False):
+    if (flag):
+        print("Press any key ON A PLOT to continue...")
+        fig = plt.gcf()
+        kbd_press = fig.canvas.mpl_connect('key_press_event', keypress_event)
+        keypress_start()
+        while not key_pressed():
+            time.sleep(0.01)
+            plt.pause(0.01)
+        fig.canvas.mpl_disconnect(kbd_press)
+    
     
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = False
+test_all = True
 
 # Running tests
 plt.close('all')
 
 root = Tk()
 dpi = plt.rcParams["figure.dpi"]
-plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.7/dpi, root.winfo_screenheight()*0.7/dpi]
+plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.3/dpi, root.winfo_screenheight()*0.3/dpi]
 
 if (False or test_all):
     test_storage()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_saveload()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_coordinates()
-    input("Press Enter to continue...")
+    show_plot()
+    wait_for_key()
 if (False or test_all):    
     test_arithmetic()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_plot_xy()
     show_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_plot_multi_xy()
     show_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_simple_slice()
     show_plot()
@@ -783,7 +792,7 @@ if (False or test_all):
     test_select_multislice()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_binning()
     show_plot()
     wait_for_key()    
@@ -805,10 +814,15 @@ if (False or test_all):
     wait_for_key()
 if (False or test_all):
     test_ccf()
+    show_plot()
+    wait_for_key()
 if (False or test_all):
     test_image()
     show_plot()
     wait_for_key()
+if (False or test_all):
+    test_pdf()
+    wait_press()
 
 print(">>>>>>>>>>>>>>>> All tests finished <<<<<<<<<<<<<<<<<<<<")
 
