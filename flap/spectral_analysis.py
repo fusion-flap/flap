@@ -1625,7 +1625,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             # where the non-correlating dimensions are left alone.
             
             corr=flap.tools.reorder_2d_ccf_indices(res,
-                                                   cd, 
+                                                   correlation_dimensions, 
                                                    ind_in1, 
                                                    ind_in2,
                                                    ind_out1,
@@ -1686,7 +1686,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     # where the non-correlating dimensions are left alone.
                     
                     corr_acf=flap.tools.reorder_2d_ccf_indices(res_acf,
-                                                               cd, 
+                                                               correlation_dimensions, 
                                                                ind_in1_acf, 
                                                                ind_in2_acf,
                                                                ind_out1_acf,
@@ -1818,7 +1818,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     
                     if len(correlation_dimensions) == 2:
                         corr_acf_ref=flap.tools.reorder_2d_ccf_indices(res_acf_ref,
-                                                                       cd, 
+                                                                       correlation_dimensions, 
                                                                        ind_in1_acf_ref, 
                                                                        ind_in2_acf_ref,
                                                                        ind_out1_acf_ref,

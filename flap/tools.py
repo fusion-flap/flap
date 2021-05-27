@@ -651,7 +651,7 @@ def reorder_2d_ccf_indices(res,             #Original result of the ccf calculat
     ind_out_2=ind_out1[:]
     ind_out_3=ind_out1[:]
     ind_out_4=ind_out1[:]
-    
+
     ind_out_1[cd[0]]=ind_out1[cd[0]]
     ind_out_1[cd[1]]=ind_out1[cd[1]]
     ind_out_2[cd[0]]=ind_out2[cd[0]]
