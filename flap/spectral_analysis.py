@@ -1267,6 +1267,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                        'Error calculation': True,
                        'Normalize': False,
                        'Correct ACF peak': False,
+                       'Correct ACF range':[-2,-1,1,2],
                        'Verbose':True
                        }
     _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='Correlation')
@@ -1292,7 +1293,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     norm = _options['Normalize']
     
     correct_acf_peak=_options['Correct ACF peak']
-    
+    correct_acf_range=np.asarray(_options['Correct ACF range'])
+    if correct_acf_range.shape[0] < 4:
+        raise ValueError("The range of the correlation peak subtraction should have at least 4 elements, e.g., [-2,-1,1,2]")
+        
     error_calc = _options['Error calculation']
     if (len(_coordinate) != 1 and (intervals is not None)):
         raise NotImplementedError("Interval selection for multi-dimensional correlation is not implemented.")
@@ -1713,13 +1717,17 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                         for i in range(len(correlation_dimensions)):
                             if zero_ind_out[i]-2 < 0:
                                 raise ValueError("Not enough datapoints for ACF correction.")
-                            ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                            # ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                            ind_correction=correct_acf_range+zero_ind_out[i]
                             array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=corr_dimension_start+i)
                             
                         for i in range(len(correlation_dimensions)):
-                            coeff = np.polyfit([-2,-1,1,2],
-                                               np.take(array_2b_corrected, 2, axis=corr_dimension_start+i)[np.asarray([0,1,3,4])],
-                                               2)
+                            # coeff = np.polyfit([-2,-1,1,2],
+                            #                    np.take(array_2b_corrected, 2, axis=corr_dimension_start+i)[np.asarray([0,1,3,4])],
+                            #                    2)
+                            coeff = np.polyfit(correct_acf_range,
+                                                np.take(array_2b_corrected, 2, axis=corr_dimension_start+i),
+                                                2)                            
                             
                             peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
                         peak_value /= (i+1)
@@ -1732,21 +1740,28 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                             for i in range(len(correlation_dimensions)):
                                 if zero_ind_out[i]-2 < 0:
                                     raise ValueError("Not enough datapoints for ACF correction.")
-                                ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                # ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                ind_correction=correct_acf_range+zero_ind_out[i]
                                 array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
                             if len(correlation_dimensions) == 1:
                                 for i in range(len(correlation_dimensions)):
-                                    coeff = np.polyfit([-2,-1,1,2],
-                                                       array_2b_corrected[np.asarray([0,1,3,4])],
-                                                       2)
+                                    # coeff = np.polyfit([-2,-1,1,2],
+                                    #                    array_2b_corrected[np.asarray([0,1,3,4])],
+                                    #                    2)
+                                    coeff = np.polyfit(correct_acf_range,
+                                                        array_2b_corrected,
+                                                        2)   
                                     
                                     peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
                                 peak_value /= (i+1)
                                 corr_binned_acf[i_non_corr,zero_ind_out]=peak_value
                             elif len(correlation_dimensions) == 2:
                                 for i in range(len(correlation_dimensions)):
-                                    coeff = np.polyfit([-2,-1,1,2],
-                                                       np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                    # coeff = np.polyfit([-2,-1,1,2],
+                                    #                    np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                    #                    2)
+                                    coeff = np.polyfit(correct_acf_range,
+                                                       np.take(array_2b_corrected, 2, axis=i),
                                                        2)
                                     
                                     peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
@@ -1765,12 +1780,16 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                 for i in range(len(correlation_dimensions)):
                                     if zero_ind_out[i]-2 < 0:
                                         raise ValueError("Not enough datapoints for ACF correction.")
-                                    ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                    #ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                    ind_correction=correct_acf_range+zero_ind_out[i]
                                     array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
                                     
                                 for i in range(len(correlation_dimensions)):
-                                    coeff = np.polyfit([-2,-1,1,2],
-                                                       np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                    # coeff = np.polyfit([-2,-1,1,2],
+                                    #                    np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                    #                    2)
+                                    coeff = np.polyfit(correct_acf_range,
+                                                       np.take(array_2b_corrected, 2, axis=i),
                                                        2)
                                     
                                     peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
@@ -1789,12 +1808,16 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                     for i in range(len(correlation_dimensions)):
                                         if zero_ind_out[i]-2 < 0:
                                             raise ValueError("Not enough datapoints for ACF correction.")
-                                        ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                        #ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                                        ind_correction=correct_acf_range+zero_ind_out[i]
                                         array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
                                         
                                     for i in range(len(correlation_dimensions)):
-                                        coeff = np.polyfit([-2,-1,1,2],
-                                                           np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                        # coeff = np.polyfit([-2,-1,1,2],
+                                        #                    np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                        #                    2)
+                                        coeff = np.polyfit(correct_acf_range,
+                                                           np.take(array_2b_corrected, 2, axis=i),
                                                            2)
                                         
                                         peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
@@ -1844,12 +1867,16 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                         for i in range(len(correlation_dimensions_ref)):
                             if zero_ind_out[i]-2 < 0:
                                 raise ValueError("Not enough datapoints for ACF correction.")
-                            ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                            #ind_correction = np.arange(zero_ind_out[i]-2,zero_ind_out[i]+3)
+                            ind_correction=correct_acf_range+zero_ind_out[i]
                             array_2b_corrected = np.take(array_2b_corrected,ind_correction,axis=i)
                         if len(correlation_dimensions) == 1:
                             for i in range(len(correlation_dimensions)):
-                                coeff = np.polyfit([-2,-1,1,2],
-                                                   array_2b_corrected[np.asarray([0,1,3,4])],
+                                # coeff = np.polyfit([-2,-1,1,2],
+                                #                    array_2b_corrected[np.asarray([0,1,3,4])],
+                                #                    2)
+                                coeff = np.polyfit(correct_acf_range,
+                                                   array_2b_corrected,
                                                    2)
                                 
                                 peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
@@ -1857,8 +1884,11 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                             corr_binned_acf_ref[zero_ind_out]=peak_value
                         elif len(correlation_dimensions) == 2:
                             for i in range(len(correlation_dimensions)):
-                                coeff = np.polyfit([-2,-1,1,2],
-                                                   np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                # coeff = np.polyfit([-2,-1,1,2],
+                                #                    np.take(array_2b_corrected, 2, axis=i)[np.asarray([0,1,3,4])],
+                                #                    2)
+                                coeff = np.polyfit(correct_acf_range,
+                                                   np.take(array_2b_corrected, 2, axis=i),
                                                    2)
                                 
                                 peak_value += coeff[2]-coeff[1]**2/(4*coeff[0])
