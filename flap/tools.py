@@ -3,6 +3,7 @@
 Created on Wed Jan 23 13:18:25 2019
 
 @author: Zoletnik
+@coauthor: Lampert
 
 Tools for the FLAP module
 
@@ -163,26 +164,28 @@ def submatrix_index(mx_shape, index):
     """
 
     index_arrays = []
-    mx_dim = len(mx_shape)
-    for i in range(mx_dim):
-        # Creating a matrix with 1 element in each direction and the
-        # number of elements in index[i] in the i-th dimension
-        shape = [1] * mx_dim
-        shape[i] = index[i].size
-        # Creating this matrix
-        ind = np.zeros(tuple(shape),dtype=int)
-        # Creating a list of indices with 0 at all places except at i where '...'
-        ind_ind = [0] * mx_dim
-        ind_ind[i] = ...
-        ind[tuple(ind_ind)] = index[i]
-        # Expanding this matrix in all other dimensions
-        for j in range(mx_dim):
-            if (j != i):
-                ind = np.repeat(ind,index[j].size,j)
-        index_arrays.append(ind)
+    
+#    mx_dim = len(mx_shape)
+#    for i in range(mx_dim):
+#        # Creating a matrix with 1 element in each direction and the
+#        # number of elements in index[i] in the i-th dimension
+#        shape = [1] * mx_dim
+#        shape[i] = index[i].size
+#        # Creating this matrix
+#        ind = np.zeros(tuple(shape),dtype=int)
+#        # Creating a list of indices with 0 at all places except at i where '...'
+#        ind_ind = [0] * mx_dim
+#        ind_ind[i] = ...
+#        ind[tuple(ind_ind)] = index[i]
+#        # Expanding this matrix in all other dimensions
+#        for j in range(mx_dim):
+#            if (j != i):
+#                ind = np.repeat(ind,index[j].size,j)
+#        index_arrays.append(ind)
 
-#    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
-#        index_arrays.append(slice(min(index[i]),max(index[i])+1))  #DUE TO BEING UNTESTED. NEEDS TO BE UNCOMMENTED IF ONE WANTS TO USE IT
+    for i in range(len(mx_shape)):                                 #THIS IS A SOLUTION FOR LARGE MATRICES, BUT NOT COMMITED
+        index_arrays.append(slice(min(index[i]),max(index[i])+1))
+        
     return tuple(index_arrays)
 
 
@@ -430,6 +433,16 @@ def grid_to_box(xdata,ydata):
     return xbox,ybox
 
 def time_unit_translation(time_unit=None,max_value=None):
+    
+    """
+    This tool returns the numerical pre-fix of the time_unit. It is almost
+    obsolate due to the existance of the methos named unit_conversion, but
+    this script can provide backwards conversion (used by flap_mdsplus.py)
+    time_unit: can be a string e.g. ms or a number e.g. 1e-3
+    max_value: returns a suspected time unit based on this input
+                e.g.: max_value=1000. 
+    """
+    
     if (str(type(time_unit)) == 'str' or 
        str(type(time_unit)) == "<class 'numpy.str_'>"):
         _time_unit=time_unit.lower()
@@ -440,7 +453,7 @@ def time_unit_translation(time_unit=None,max_value=None):
         if VERBOSE:
             print('Time unit: \''+str(_time_unit)+'\'')
             print('Time unit translation based on values only works for shots under 1000s.')
-        value_translation=[[1,1e3,1e6,1e9,1e12],
+        value_translation=[[0.,1e3,1e6,1e9,1e12],
                            ['s','ms','us','ns','ps']]
         for i in range(len(value_translation[0])-1):
             if (max_value > value_translation[0][i] and max_value < value_translation[0][i+1]):
@@ -475,30 +488,6 @@ def time_unit_translation(time_unit=None,max_value=None):
         else:
             print(_time_unit+' was not found in the translation. Returning 1.')
             return 1
-    
-def spatial_unit_translation(spatial_unit=None):
-    _spatial_unit=spatial_unit.lower()
-    translation={'meters':1,
-                 'meter':1,
-                 'm':1,
-                 'millimeters':1e-3,
-                 'millimeter':1e-3,
-                 'mm':1e-3,
-                 'micrometers':1e-6,
-                 'micrometer':1e-6,
-                 'um':1e-6,
-                 'nanometers':1e-9,
-                 'nanometer':1e-9,
-                 'nm':1e-9,
-                 'picometers':1e-12,
-                 'picometer':1e-12,
-                 'pm':1e-12,
-                 }
-    if (_spatial_unit in translation.keys()):
-        return translation[_spatial_unit]
-    else:
-        print(_spatial_unit+' was not found in the translation. Returning 1.')
-        return 1
     
 def unit_conversion(original_unit=None,
                     new_unit=None
@@ -541,7 +530,7 @@ def unit_conversion(original_unit=None,
             new_unit_translation=known_conversions_full[keys_full]
             
     if original_unit_translation is None:
-        if len(original_unit) == 1 or len(original_unit) > 3 : # SI units are longer than 3 if using the full name
+        if ((len(original_unit) == 1) or (len(original_unit) > 3)): # SI units are longer than 3 if using the full name
             original_unit_translation=1.
         else:
             for keys_short in known_conversions_short:
@@ -549,7 +538,7 @@ def unit_conversion(original_unit=None,
                     original_unit_translation=known_conversions_short[keys_short]
                     
     if new_unit_translation is None:                    
-        if len(new_unit) == 1 or len(new_unit) > 3:
+        if ((len(new_unit) == 1) or (len(new_unit) > 3)):
             new_unit_translation=1.
         else:
             for keys_short in known_conversions_short:
@@ -557,44 +546,138 @@ def unit_conversion(original_unit=None,
                     new_unit_translation=known_conversions_short[keys_short]
                     
     if original_unit_translation is None: 
-        print('Unit translation cannot be done for the original unit. Returning 1.')
+        print('Unit translation cannot be done for the original unit, '+original_unit+'. Returning 1.')
         if VERBOSE:
             if len(original_unit) > 3:
                 print('Known conversion units are:')
                 print(known_conversions_full)
+                print('\n')
             else:
                 print('Known conversion units are:')
                 print(known_conversions_short)
+                print('\n')
         original_unit_translation=1.
         
     if new_unit_translation is None:
-        print('Unit translation cannot be done for the new unit. Returning 1.')
+        print('Unit translation cannot be done for the new unit, '+new_unit+'. Returning 1.')
         if VERBOSE:
             if len(original_unit) > 3:
                 print('Known conversion units are:')
                 print(known_conversions_full)
+                print('\n')
             else:
                 print('Known conversion units are:')
                 print(known_conversions_short)
+                print('\n')
             new_unit_translation=1.
         
     return original_unit_translation/new_unit_translation
+
+def polyfit_2D(x=None,
+               y=None,
+               values=None,
+               sigma=None,
+               order=None,
+               irregular=False,
+               return_covariance=False,
+               return_fit=False):
+    
+    if sigma is None:
+        sigma=np.zeros(values.shape)
+        sigma[:]=1.
+    else:
+        if sigma.shape != sigma.shape:
+            raise ValueError('The shape of the errors do not match the shape of the values!')
+    
+    if not irregular:
+        if len(values.shape) != 2:
+            raise ValueError('Values are not 2D')
+        if x is not None and y is not None:
+            if x.shape != values.shape or y.shape != values.shape:
+                raise ValueError('There should be as many points as values and their shape should match.')
+        if order is None:
+            raise ValueError('The order is not set.')
+        if (x is None and y is not None) or (x is not None and y is None):
+            raise ValueError('Either both or neither x and y need to be set.')
+        if x is None and y is None:
+            polynom=np.asarray([[i**k * j**l / sigma[i,j] for k in range(order+1) for l in range(order-k+1)] for i in range(values.shape[0]) for j in range(values.shape[1])]) #The actual polynomial calculation
+        else:
+            polynom=np.asarray([[x[i,j]**k * y[i,j]**l / sigma[i,j] for k in range(order+1) for l in range(order-k+1)] for i in range(values.shape[0]) for j in range(values.shape[1])]) #The actual polynomial calculation
             
-    
+        original_shape=values.shape
+        values_reshape=np.reshape(values/sigma, values.shape[0]*values.shape[1])
         
+        covariance_matrix=np.linalg.inv(np.dot(polynom.T,polynom))
         
+        coefficients=np.dot(np.dot(covariance_matrix,polynom.T),values_reshape) #This performs the linear regression
+        
+        if not return_fit:
+            if return_covariance:
+                return (coefficients, covariance_matrix)
+            else:
+                return coefficients 
+        else:
+            return np.reshape(np.dot(polynom,coefficients),original_shape)
+    else:
+        if x.shape != y.shape or x.shape != values.shape:
+            raise ValueError('The points should be an [n,2] vector.')
+        if len(x.shape) != 1 or len(y.shape) != 1 or len(values_reshape.shape) != 1:
+            raise ValueError('x,y,values should be a 1D vector when irregular is set.')
+        if order is None:
+            raise ValueError('The order is not set.')
+        polynom=np.asarray([[x[i]**k * y[i]**l for k in range(order+1) for l in range(order-k+1)] for i in range(values.shape[0])]) #The actual polynomial calculation
+        if not return_fit:
+            return np.dot(np.dot(np.linalg.inv(np.dot(polynom.T,polynom)),polynom.T),values) #This performs the linear regression
+        else:
+            return np.dot(polynom,np.dot(np.dot(np.linalg.inv(np.dot(polynom.T,polynom)),polynom.T),values))
+        
+def reorder_2d_ccf_indices(res,             #Original result of the ccf calculation from the fft
+                           cd,              #Correlation dimensions
+                           ind_in1,         #Input indices 1 from 1D
+                           ind_in2,         #Input indices 2 from 1D
+                           ind_out1,        #Output indices 1 from 1D
+                           ind_out2):       #Output indices 2 from 1D
+
+    """
+    This helper function reorganizes the 2D cross-correlation or auto-correlation
+    functions in order to have the maximum in the middle of the matrix and
+    not somewhere around the corner. Used in _ccf in spectral_analysis.py
+    """
     
+    
+    corr = np.empty(res.shape,dtype=res.dtype)
+    
+    ind_out_1=ind_out1[:]
+    ind_out_2=ind_out1[:]
+    ind_out_3=ind_out1[:]
+    ind_out_4=ind_out1[:]
 
-#import matplotlib.pyplot as plt
-
-#plt.clf()
-#ydata, xdata = np.meshgrid(np.arange(10),np.arange(20))
-#xdata = xdata.astype(float)
-#ydata = ydata.astype(float)
-#xdata += ydata*0.1
-#ydata += xdata*0.2
-#xbox, ybox = grid_to_box(xdata,ydata)
-#data =  (xdata + ydata)
-#plt.pcolormesh(xbox,ybox,np.transpose(data),cmap='Greys')
-#plt.scatter(xdata.flatten(), ydata.flatten())
-
+    ind_out_1[cd[0]]=ind_out1[cd[0]]
+    ind_out_1[cd[1]]=ind_out1[cd[1]]
+    ind_out_2[cd[0]]=ind_out2[cd[0]]
+    ind_out_2[cd[1]]=ind_out1[cd[1]]
+    ind_out_3[cd[0]]=ind_out2[cd[0]]
+    ind_out_3[cd[1]]=ind_out2[cd[1]]
+    ind_out_4[cd[0]]=ind_out1[cd[0]]
+    ind_out_4[cd[1]]=ind_out2[cd[1]]
+    
+    ind_in_1=ind_in1[:]
+    ind_in_2=ind_in1[:]
+    ind_in_3=ind_in1[:]
+    ind_in_4=ind_in1[:]
+    
+    ind_in_1[cd[0]]=ind_in1[cd[0]]
+    ind_in_1[cd[1]]=ind_in1[cd[1]]
+    ind_in_2[cd[0]]=ind_in2[cd[0]]
+    ind_in_2[cd[1]]=ind_in1[cd[1]]
+    ind_in_3[cd[0]]=ind_in2[cd[0]]
+    ind_in_3[cd[1]]=ind_in2[cd[1]]
+    ind_in_4[cd[0]]=ind_in1[cd[0]]
+    ind_in_4[cd[1]]=ind_in2[cd[1]]
+    
+    corr[tuple(ind_out_1)] = res[tuple(ind_in_1)] 
+    corr[tuple(ind_out_2)] = res[tuple(ind_in_2)] 
+    corr[tuple(ind_out_3)] = res[tuple(ind_in_3)]
+    corr[tuple(ind_out_4)] = res[tuple(ind_in_4)]
+    
+    return corr

@@ -677,7 +677,7 @@ class DataObject:
         else:
             return self.error[_index].flatten()
 
-    def _plot_coord_ranges(self,coord, c_data, c_low, c_high):
+    def _plot_coord_ranges(self, coord, c_data, c_low, c_high):
         """ Helper function to return error low and high limits from coordiniate data
             in the format needed by matplotlib
         """
@@ -1401,7 +1401,7 @@ class DataObject:
               Dictionary with keys referring to coordinates and values as processing strings. If
               the processed coordinate changes along multiple dimensions those dimensions will be flattened.
 
-              For mean and avereage data errors are calculated as error of independent variables, that is taking the square
+              For mean and average data errors are calculated as error of independent variables, that is taking the square
               root of the squared sum of errors. For coordinates the mean of the ranges is taken.
 
               Processing strings are the following:
@@ -1478,7 +1478,7 @@ class DataObject:
                     return False
                 else:
                     return True
-            raise TypeError("Invalid slicing description.")
+            raise TypeError("Invalid slicing description, its type is: "+str(type(slicing)))
 
         def simple_slice_index(slicing, slicing_coord, data_shape, _options):
             """ Returns index array which can be used for indexing the selected elements in the
@@ -1513,8 +1513,8 @@ class DataObject:
                                               coord_obj.step[0])
                 if ((type(slicing) is flap.coordinate.Intervals) 
                     # Regular slice is possible only with a single interval
-                    and ((slicing.step is None) and (len(slicing.start) == 1) or
-                        (slicing.step is not None) and (slicing.number == 1))):
+                and ((slicing.step is None) and (len(slicing.start) == 1) or
+                     (slicing.step is not None) and (slicing.number == 1))):
                     if (slicing_coord.step[0] > 0):
                         regular_slice = slice(slicing.start[0], slicing.stop[0], slicing_coord.step[0])
                     else:
@@ -1599,7 +1599,7 @@ class DataObject:
                 start_index = int(round((regular_slice.start - range_coord[0]) / abs(slicing_coord.step[0])))
                 step_index = int(round(regular_slice.step / abs(slicing_coord.step[0])))
                 stop_index = int((regular_slice.stop - range_coord[0]) / abs(slicing_coord.step[0]))
-                return slice(start_index, stop_index, step_index)
+                return slice(start_index, stop_index+1, step_index)
             else:
                 # slice object could not be created for data array
                 # Creating flattened coordinate data array
@@ -3709,7 +3709,7 @@ class FlapStorage:
                     nlist.append(n)
             if len(nlist) == 0:
                 raise KeyError("Data object " + name
-                               + "(exp_id:" + str(exp_id) + ") does not exists.")
+                               + "(exp_id:" + str(exp_id) + ") does not exist.")
             if (len(nlist) > 1):
                 raise KeyError("Multiple data objects found for name "
                                + name + "(exp_id:" + str(exp_id) + ").")
@@ -3728,7 +3728,7 @@ class FlapStorage:
                     nlist.append(n)
             if len(nlist) == 0:
                 raise KeyError("Data object " + name
-                               + "(exp_id:" + str(exp_id) + ") does not exists.")
+                               + "(exp_id:" + str(exp_id) + ") does not exist.")
             if (len(nlist) > 1):
                 raise KeyError("Multiple data objects found for name "
                                + name + "(exp_id:" + str(exp_id) + ").")
