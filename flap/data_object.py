@@ -1478,7 +1478,7 @@ class DataObject:
                     return False
                 else:
                     return True
-            raise TypeError("Invalid slicing description.")
+            raise TypeError("Invalid slicing description, its type is: "+str(type(slicing)))
 
         def simple_slice_index(slicing, slicing_coord, data_shape, _options):
             """ Returns index array which can be used for indexing the selected elements in the

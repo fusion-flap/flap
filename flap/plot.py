@@ -417,6 +417,29 @@ class PlotAnimation:
                                      self.overplot_options['contour'][contour_obj_keys]['data']['Data resampled'][it,:,:],
                                      levels=self.overplot_options['contour'][contour_obj_keys]['nlevel'],
                                      cmap=self.overplot_options['contour'][contour_obj_keys]['Colormap'])
+                    
+            for contour_obj_keys in self.overplot_options['arrow']:
+                if self.overplot_options['arrow'][contour_obj_keys]['Plot']:
+                    
+                    time_index = [slice(0,dim) for dim in self.overplot_options['arrow'][contour_obj_keys]['data']['Data X'].shape]
+                    time_index[self.overplot_options['arrow'][contour_obj_keys]['data']['Time dimension']] = it
+                    time_index = tuple(time_index)
+                    
+                    x_coords=self.overplot_options['arrow'][contour_obj_keys]['data']['X coord'][time_index].flatten()*self.axes_unit_conversion[0]
+                    y_coords=self.overplot_options['arrow'][contour_obj_keys]['data']['Y coord'][time_index].flatten()*self.axes_unit_conversion[1]
+                    data_x=self.overplot_options['arrow'][contour_obj_keys]['data']['Data X'][time_index].flatten()*self.axes_unit_conversion[0]
+                    data_y=self.overplot_options['arrow'][contour_obj_keys]['data']['Data Y'][time_index].flatten()*self.axes_unit_conversion[1]
+                    
+                    for i_coord in range(len(x_coords)):
+                        im = plt.arrow(x_coords[i_coord],
+                                       y_coords[i_coord], 
+                                       data_x[i_coord], 
+                                       data_y[i_coord],
+                                       width=self.overplot_options['arrow'][contour_obj_keys]['width'],
+                                       color=self.overplot_options['arrow'][contour_obj_keys]['color'],
+                                       length_includes_head=True,
+                                       )              
+                    
             for line_obj_keys in self.overplot_options['line']:
                 xmin, xmax = self.ax_act.get_xbound()
                 ymin, ymax = self.ax_act.get_ybound()
@@ -811,7 +834,7 @@ def _plot(data_object,
         'Interpolation': Interpolation method for image plot.
         'Language': Language of certain standard elements in the plot. ('EN', 'HU')
         'Overplot options': Dictionary of overplotting options:
-            Path, contour or line overplotting for the different plot-types:
+            Path, contour, arrow or line overplotting for the different plot-types:
             Dictionary with keys of 'contour', 'path' or 'line':
             
             Example options['Overplot options']['contour']:
@@ -851,6 +874,33 @@ def _plot(data_object,
                 keyword is present, a line is vertical plotted at X_coord.
                 If 'Horizontal' keyword is present, a line is plottad at Y_coord.
                 Works in all plot types.
+                
+            Example options['Overplot options']['arrow']:                  
+                
+                options['Overplot options']['arrow']=\
+                    {'ANAME':{'Data object X':'X_OBJ',
+                              'Data object Y':'Y_OBJ',
+                              'Plot':True,
+                              'Slicing':{'Time':flap.Intervals(t1,t2)}
+                              'width':0.0001,
+                              'color':'red',
+                              }}
+                Can contain multiple ANAME keywords. X_OBJ and Y_OBJ should contain
+                the same coordinates for the start of the arrow. The length of the
+                arrow is determined by the data in the two objects and the unit
+                conversion factors. The head of the arrow is 3 times the width. 
+                Generally this feature is useful for velocimetry plotting.
+                    
+                
+                options['Overplot options']['path']=\
+                {'ANAME':{'Vertical':[X_coord,'red'], #[X coordinate in the unit of the plot, plot color]
+                          'Horizontal':[Y_coord,'blue'], #[Y coordinate in the unit of the plot, plot color]
+                          'Plot':False,
+                          }}
+                Can contain multiple LNAME (line name) keywords. If 'Vertical'
+                keyword is present, a line is vertical plotted at X_coord.
+                If 'Horizontal' keyword is present, a line is plottad at Y_coord.
+                Works in all plot types.            
                 
         'Prevent saturation': Prevents saturation of the video signal when it exceeds zrange[1]
             It uses data modulo zrange[1] to overcome the saturation. (works for animation)
@@ -1007,7 +1057,7 @@ def _plot(data_object,
             (options['Video format'] not in ['avi','mkv', 'mp4'])):
             raise ValueError("The chosen video format is not cupported on macOS.")
         if os.sys.platform == 'win32' and _options['Video format'] != 'avi':
-            raise ValueError("The chosen video format is not cupported on Windowd.")
+            raise ValueError("The chosen video format is not cupported on Windows.")
         video_codec_decrypt={'avi':'XVID',
                              'mkv':'X264',
                              'mp4':'mp4v'}
@@ -1056,6 +1106,7 @@ def _plot(data_object,
                                                      'Colormap':None,
                                                      'nlevel':51,
                                                      'Slicing':None,
+                                                     'Arrow':False,
                                                      }},
     
                                   'path':{'NAME':{'Data object X':None,
@@ -1068,13 +1119,22 @@ def _plot(data_object,
                                   'line':{'NAME':{'Vertical':[0,'red'],
                                                   'Horizontal':[1,'blue'],
                                                   'Plot':False,
-                                                  }}
+                                                  }},
+                                  
+                                  'arrow':{'NAME':{'Data object X':None,
+                                                   'Data object Y':None,
+                                                   'Plot':False,
+                                                   'Slicing':None,
+                                                   'width':0.5,
+                                                   'color':'red',
+                                                   }},
                                   }
         
         overplot_options=flap.config.merge_options(default_overplot_options,_options['Overplot options'],data_source=data_object.data_source)
              
         #TIME (AXES(2)) INDEPENDENT OVERPLOTTING OBJECT CREATION
         if plot_type in ['image', 'contour']:
+            
             for path_obj_keys in overplot_options['path']:
                 try:
                     x_object_name=overplot_options['path'][path_obj_keys]['Data object X']
@@ -1098,6 +1158,7 @@ def _plot(data_object,
                 if (len(x_object.data.shape) != 1 or len(y_object.data.shape) != 1):
                     raise ValueError("The "+overplot_options['path'][path_obj_keys]['Data object X']+' or '
                                      "the "+overplot_options['path'][path_obj_keys]['Data object Y']+" data is not 1D. Use slicing.")
+                    
                 unit_conversion_coeff=[1]*2
                 original_units=[x_object.data_unit.unit,y_object.data_unit.unit]
                 for index_coordinate in range(len(d.coordinates)):
@@ -1117,9 +1178,9 @@ def _plot(data_object,
                         xy_object=flap.get_data_object(xy_object_name,exp_id=d.exp_id)
                     except:
                         raise ValueError(xy_object_name+'data is not available. The data object needs to be read first.')  
-                    if 'Slicing' in overplot_options['path'][path_obj_keys]:
+                    if 'Slicing' in overplot_options['contour'][path_obj_keys]:
                         try:
-                            xy_object.slice_data(slicing=overplot_options['path'][path_obj_keys]['Slicing'])
+                            xy_object.slice_data(slicing=overplot_options['contour'][path_obj_keys]['Slicing'])
                         except:
                             raise ValueError('Slicing did not succeed. Try it outside the plotting!')
                         
@@ -1139,6 +1200,46 @@ def _plot(data_object,
                     overplot_options['contour'][contour_obj_keys]['data']['Data']=xy_object.data
                     overplot_options['contour'][contour_obj_keys]['data']['X coord']=xy_object.coordinate(axes[0])[0]*unit_conversion_coeff[0]
                     overplot_options['contour'][contour_obj_keys]['data']['Y coord']=xy_object.coordinate(axes[1])[0]*unit_conversion_coeff[1]
+            
+            for contour_obj_keys in overplot_options['arrow']:
+                if (overplot_options['arrow'][contour_obj_keys]['Plot']):   
+                    try:
+                        x_object_name=overplot_options['arrow'][contour_obj_keys]['Data object X']
+                        x_object=flap.get_data_object(x_object_name,exp_id=d.exp_id)
+                        
+                        y_object_name=overplot_options['arrow'][contour_obj_keys]['Data object Y']
+                        y_object=flap.get_data_object(y_object_name,exp_id=d.exp_id)
+                    except:
+                        raise ValueError(x_object_name+' or '+y_object_name+' data is not available. The data object needs to be read first.')  
+                        
+                    if 'Slicing' in overplot_options['arrow'][path_obj_keys]:
+                        try:
+                            x_object.slice_data(slicing=overplot_options['arrow'][path_obj_keys]['Slicing'])
+                            y_object.slice_data(slicing=overplot_options['arrow'][path_obj_keys]['Slicing'])
+                        except:
+                            raise ValueError('Slicing did not succeed. Try it outside the plotting!')
+                        
+                    if len(x_object.data.shape) != 2 or len(y_object.data.shape):
+                        raise ValueError('Arrow object\'s, ('+x_object_name+','+y_object_name+') data need to be a 2D matrix.')
+                    if (x_object.coordinate(axes[0])[0] !=  y_object.coordinate(axes[0])[0] or
+                        x_object.coordinate(axes[1])[0] !=  y_object.coordinate(axes[1])[0]):
+                         raise ValueError('The x or y coordinates of the x and y arrow objects do not match.')
+                         
+                    unit_conversion_coeff=[1.] * 2
+                    for index_data_coordinate in range(len(d.coordinates)):
+                        for index_oplot_coordinate in range(len(x_object.coordinates)):
+                            for index_axes in range(2):
+                                if ((d.coordinates[index_data_coordinate].unit.name == axes[index_axes]) and
+                                   (x_object.coordinates[index_oplot_coordinate].unit.name) == axes[index_axes]):                
+                                    unit_conversion_coeff[index_axes] = flap.tools.unit_conversion(original_unit=x_object.coordinates[index_oplot_coordinate].unit.unit,
+                                                                                                   new_unit=d.coordinates[index_data_coordinate].unit.unit)
+
+                    overplot_options['arrow'][contour_obj_keys]['data']={}
+                    overplot_options['arrow'][contour_obj_keys]['data']['Data X']=x_object.data*unit_conversion_coeff[0]
+                    overplot_options['arrow'][contour_obj_keys]['data']['Data Y']=y_object.data*unit_conversion_coeff[1]
+                    overplot_options['arrow'][contour_obj_keys]['data']['X coord']=x_object.coordinate(axes[0])[0]*unit_conversion_coeff[0]
+                    overplot_options['arrow'][contour_obj_keys]['data']['Y coord']=y_object.coordinate(axes[1])[0]*unit_conversion_coeff[1]
+            
         #TIME (AXES(2)) DEPENDENT OVERPLOTTING OBJECT CREATION
         if plot_type in ['anim-image','anim-contour','animation'] :
             for index_time in range(len(d.coordinates)):
@@ -1224,7 +1325,7 @@ def _plot(data_object,
                     except:
                         raise ValueError(xy_object_name+'data is not available. The data object needs to be read first.')  
                     if len(xy_object.data.shape) != 3:
-                        raise ValueError('Contour object\'s, ('+xy_object_name+') data needs to be a 3D matrix (x,y,temporal), not necessarily in this order.')
+                        raise ValueError('Contour object\'s, ('+xy_object_name+') data needs to be a 3D matrix (x,y,t), not necessarily in this order.')
                         
                     for index_coordinate in range(len(xy_object.coordinates)):
                         if (xy_object.coordinates[index_coordinate].unit.name == axes[2]):
@@ -1248,18 +1349,73 @@ def _plot(data_object,
                                                      slicing={axes[2]:tdata},
                                                      options={'Interpolation':'Linear'},
                                                      output_name='XY OBJ INTERP')
+                    
                     overplot_options['contour'][contour_obj_keys]['data']={}
                     overplot_options['contour'][contour_obj_keys]['data']['Data resampled']=xy_object_interp.data
                     overplot_options['contour'][contour_obj_keys]['data']['X coord resampled']=xy_object_interp.coordinate(axes[0])[0]*unit_conversion_coeff[0]
                     overplot_options['contour'][contour_obj_keys]['data']['Y coord resampled']=xy_object_interp.coordinate(axes[1])[0]*unit_conversion_coeff[1]
                     overplot_options['contour'][contour_obj_keys]['data'][axes[2]]=tdata
                     overplot_options['contour'][contour_obj_keys]['data']['Time dimension']=time_dimension_index
+                    
+            for contour_obj_keys in overplot_options['arrow']:
+                if (overplot_options['arrow'][contour_obj_keys]['Plot']):   
+                    #try:
+                    if True:
+                        x_object_name=overplot_options['arrow'][contour_obj_keys]['Data object X']
+                        x_object=flap.get_data_object(x_object_name,exp_id=d.exp_id)
+                        y_object_name=overplot_options['arrow'][contour_obj_keys]['Data object Y']
+                        y_object=flap.get_data_object(y_object_name,exp_id=d.exp_id)
+                    #except:
+                    #    raise ValueError(x_object_name+' or '+y_object_name+' data is not available. The data object needs to be read first.')  
+                    if len(x_object.data.shape) != 3 or len(y_object.data.shape) != 3:
+                        raise ValueError('Arrow object\'s, ('+x_object_name+','+y_object_name+') data needs to be a 3D matrix (x,y,t), not necessarily in this order.')
+                        
+                    for index_coordinate in range(len(x_object.coordinates)):
+                        if (x_object.coordinates[index_coordinate].unit.name == axes[2]):
+                            time_dimension_index=x_object.coordinates[index_coordinate].dimension_list[0]
+                            oplot_time_index_coordinate=index_coordinate
+                            
+                    if (d.coordinates[data_time_index_coordinate].unit.unit != x_object.coordinates[oplot_time_index_coordinate].unit.unit or
+                        d.coordinates[data_time_index_coordinate].unit.unit != y_object.coordinates[oplot_time_index_coordinate].unit.unit):
+                        raise TypeError('The '+axes[2]+' unit of the overplotted contour object differs from the data\'s. Interpolation cannot be done.')
+                    
+                    if (np.sum(x_object.coordinate(axes[0])[0] -  y_object.coordinate(axes[0])[0]) != 0 or
+                        np.sum(x_object.coordinate(axes[1])[0] -  y_object.coordinate(axes[1])[0]) != 0):
+                         raise ValueError('The x or y coordinates of the x and y arrow objects do not match.')
+                    
+                    unit_conversion_coeff=[1.] * 3
+                    for index_data_coordinate in range(len(d.coordinates)):
+                        for index_oplot_coordinate in range(len(x_object.coordinates)):
+                            for index_axes in range(3):
+                                if ((d.coordinates[index_data_coordinate].unit.name == axes[index_axes]) and
+                                   (x_object.coordinates[index_oplot_coordinate].unit.name) == axes[index_axes]):                
+                                    unit_conversion_coeff[index_axes] = flap.tools.unit_conversion(original_unit=x_object.coordinates[index_oplot_coordinate].unit.unit,
+                                                                                                   new_unit=d.coordinates[index_data_coordinate].unit.unit)
+                    x_object_interp=flap.slice_data(x_object_name,
+                                             exp_id=d.exp_id,
+                                             slicing={axes[2]:tdata},
+                                             options={'Interpolation':'Linear'})
+                    y_object_interp=flap.slice_data(y_object_name,
+                                             exp_id=d.exp_id,
+                                             slicing={axes[2]:tdata},
+                                             options={'Interpolation':'Linear'})
+                                             
+                    overplot_options['arrow'][contour_obj_keys]['data']={}
+                    overplot_options['arrow'][contour_obj_keys]['data']['Data X']=x_object_interp.data*unit_conversion_coeff[0]
+                    overplot_options['arrow'][contour_obj_keys]['data']['Data Y']=y_object_interp.data*unit_conversion_coeff[1]
+                    
+                    overplot_options['arrow'][contour_obj_keys]['data']['X coord']=x_object_interp.coordinate(axes[0])[0]*unit_conversion_coeff[0]
+                    overplot_options['arrow'][contour_obj_keys]['data']['Y coord']=y_object_interp.coordinate(axes[1])[0]*unit_conversion_coeff[1]
+                    
+                    overplot_options['arrow'][contour_obj_keys]['data'][axes[2]]=tdata
+                    overplot_options['arrow'][contour_obj_keys]['data']['Time dimension']=time_dimension_index
 
     # X range and Z range is processed here, but Y range not as it might have multiple entries for some plots
     xrange = _options['X range']
     if (xrange is not None):
         if ((type(xrange) is not list) or (len(xrange) != 2)):
             raise ValueError("Invalid X range setting.")
+            
     zrange = _options['Z range']
     if (zrange is not None):
         if ((type(zrange) is not list) or (len(zrange) != 2)):
@@ -2093,6 +2249,35 @@ def _plot(data_object,
                                overplot_options['contour'][contour_obj_keys]['data']['Data'],
                                levels=overplot_options['contour'][contour_obj_keys]['nlevel'],
                                cmap=overplot_options['contour'][contour_obj_keys]['Colormap'])
+            
+            for contour_obj_keys in overplot_options['arrow']:
+                if overplot_options['arrow'][contour_obj_keys]['Plot']:
+                    
+                    x_coords=overplot_options['arrow'][contour_obj_keys]['data']['X coord'].flatten()
+                    y_coords=overplot_options['arrow'][contour_obj_keys]['data']['Y coord'].flatten()
+                    data_x=overplot_options['arrow'][contour_obj_keys]['data']['Data X'].flatten()
+                    data_y=overplot_options['arrow'][contour_obj_keys]['data']['Data Y'].flatten()
+                    if 'width' in overplot_options['arrow'][contour_obj_keys].keys():
+                        arrow_width=overplot_options['arrow'][contour_obj_keys]['width']
+                    else:
+                        arrow_width=0.001
+                    if 'color' in overplot_options['arrow'][contour_obj_keys].keys():
+                        arrow_color=overplot_options['arrow'][contour_obj_keys]['color']
+                    else:
+                        arrow_color='black'
+                        
+                    for i_coord in range(len(x_coords)):
+                        ax.arrow(x_coords[i_coord],
+                                 y_coords[i_coord], 
+                                 data_x[i_coord], 
+                                 data_y[i_coord],
+                                 width=arrow_width,
+                                 color=arrow_color,
+                                 length_includes_head=True,
+                                 head_width=arrow_width*3,
+                                 head_length=arrow_width*3,
+                                 )
+                    
             for line_obj_keys in overplot_options['line']:
                 xmin, xmax = ax.get_xbound()
                 ymin, ymax = ax.get_ybound()
@@ -2401,6 +2586,29 @@ def _plot(data_object,
                                          overplot_options['contour'][contour_obj_keys]['data']['Data resampled'][time_index],
                                          levels=overplot_options['contour'][contour_obj_keys]['nlevel'],
                                          cmap=overplot_options['contour'][contour_obj_keys]['Colormap'])
+                        
+            
+                for contour_obj_keys in overplot_options['arrow']:
+                    if overplot_options['arrow'][contour_obj_keys]['Plot']:
+                        
+                        time_index = [slice(0,dim) for dim in overplot_options['arrow'][contour_obj_keys]['data']['Data X'].shape]
+                        time_index[overplot_options['arrow'][contour_obj_keys]['data']['Time dimension']] = it
+                        time_index = tuple(time_index)
+                        
+                        x_coords=overplot_options['arrow'][contour_obj_keys]['data']['X coord'][time_index].flatten()*axes_unit_conversion[0]
+                        y_coords=overplot_options['arrow'][contour_obj_keys]['data']['Y coord'][time_index].flatten()*axes_unit_conversion[1]
+                        data_x=overplot_options['arrow'][contour_obj_keys]['data']['Data X'][time_index].flatten()*axes_unit_conversion[0]
+                        data_y=overplot_options['arrow'][contour_obj_keys]['data']['Data Y'][time_index].flatten()*axes_unit_conversion[1]
+                        
+                        for i_coord in range(len(x_coords)):
+                            plt.arrow(x_coords[i_coord],
+                                     y_coords[i_coord], 
+                                     data_x[i_coord], 
+                                     data_y[i_coord],
+                                     width=overplot_options['arrow'][contour_obj_keys]['width'],
+                                     color=overplot_options['arrow'][contour_obj_keys]['color'],
+                                     length_includes_head=True,
+                                     )                        
             
                 for line_obj_keys in overplot_options['line']:
                     xmin, xmax = ax_act.get_xbound()
