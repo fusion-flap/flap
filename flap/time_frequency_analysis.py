@@ -79,17 +79,17 @@ def stft(d, coordinate=None, window='hann', nperseg=256, noverlap=None, nfft=Non
                                      mode=flap.coordinate.CoordinateMode(equidistant=True),
                                      shape=[],
                                      start=f_ax[0],
-                                     step=f_ax[1] - f_ax[0],
-                                     dimension_list=[len(stft.shape)-1])
+                                     step=(f_ax[-1] - f_ax[0])/len(f_ax),
+                                     dimension_list=[proc_dim])
 
     c_t = flap.coordinate.Coordinate(name='Time',
                                      unit='s',
                                      mode=flap.coordinate.CoordinateMode(equidistant=True),
                                      shape=[],
                                      start=t_ax[0]+coord_obj.start,
-                                     step=(t_ax[1] - t_ax[0])*np.prod(d.data.shape)/d.data.shape[proc_dim],
+                                     step=(t_ax[-1] - t_ax[0])/len(t_ax),#*np.prod(stft.shape[:-2]),
                                      # has to increase step if non-1d data (due to scipy's interpretation of fs)
-                                     dimension_list=[proc_dim])
+                                     dimension_list=[len(stft.shape)-1])
 
     d_out.add_coordinate_object(c_t, index=0)
     d_out.add_coordinate_object(c_f, index=0)
