@@ -4,8 +4,7 @@ import flap.config
 import flap.coordinate
 
 
-def stft(d, coordinate=None, window='hann', nperseg=256, noverlap=None, nfft=None,
-         detrend=False, return_onesided=True, boundary='zeros', padded=True):
+def _stft(d, coordinate=None, options=None):
     """
     calculates the STFT of the data in a dataobject using scipy's stft method
 
@@ -13,13 +12,33 @@ def stft(d, coordinate=None, window='hann', nperseg=256, noverlap=None, nfft=Non
             d: A flap.DataObject.
             coordinate: The name of the coordinate (string) along which to calculate STFT.
                         This coordinate should change only along one data dimension and should be equidistant.
-                        This and all other cordinates changing along the data dimension of
+                        This and all other coordinates changing along the data dimension of
                         this coordinate will be removed. A new coordinate with name
-                        Frequency will be added. The unit will be
-                        derived from the unit of the coordinate (e.g., Hz cm-1, m-1)
-            all other options:    Options of STFT, each will be given to scipy.signal.stft
+                        Frequency (unit HZ) will be added.
+            options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
 
     """
+    default_options = {'window': 'hann',
+                       'nperseg': 256,
+                       'noverlap': None,
+                       'nfft': None,
+                       'detrend': False,
+                       'return_onesided': True,
+                       'boundary': 'zeros',
+                       'padded': True
+                       }
+
+    _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='STFT')
+
+    window=_options['window']
+    nperseg=_options['nperseg']
+    noverlap=_options['noverlap']
+    nfft=_options['nfft']
+    detrend=_options['detrend']
+    return_onesided=_options['return_onesided']
+    boundary=_options['boundary']
+    padded=_options['padded']
+
     if (noverlap is None):
         noverlap = nperseg // 4 * 3  # the default setting for stft - it should contain 4x the information
 
@@ -47,7 +66,7 @@ def stft(d, coordinate=None, window='hann', nperseg=256, noverlap=None, nfft=Non
     proc_dim = coord_obj.dimension_list[0]
     # the dimension to transform along is the only element in this ccordinate's dimension list
 
-    fs = 1/coord_obj.step[0]  # sampling frequency is the step of time axis
+    fs = 1 / coord_obj.step[0]  # sampling frequency is the step of time axis
 
     f_ax, t_ax, stft = signal.stft(d.data, fs=fs, window=window, nperseg=nperseg, noverlap=noverlap,
                                    nfft=nfft, detrend=detrend, return_onesided=return_onesided,
@@ -79,17 +98,17 @@ def stft(d, coordinate=None, window='hann', nperseg=256, noverlap=None, nfft=Non
                                      mode=flap.coordinate.CoordinateMode(equidistant=True),
                                      shape=[],
                                      start=f_ax[0],
-                                     step=(f_ax[-1] - f_ax[0])/len(f_ax),
+                                     step=(f_ax[-1] - f_ax[0]) / len(f_ax),
                                      dimension_list=[proc_dim])
 
     c_t = flap.coordinate.Coordinate(name='Time',
                                      unit='s',
                                      mode=flap.coordinate.CoordinateMode(equidistant=True),
                                      shape=[],
-                                     start=t_ax[0]+coord_obj.start,
-                                     step=(t_ax[-1] - t_ax[0])/len(t_ax),#*np.prod(stft.shape[:-2]),
+                                     start=t_ax[0] + coord_obj.start,
+                                     step=(t_ax[-1] - t_ax[0]) / len(t_ax),  # *np.prod(stft.shape[:-2]),
                                      # has to increase step if non-1d data (due to scipy's interpretation of fs)
-                                     dimension_list=[len(stft.shape)-1])
+                                     dimension_list=[len(stft.shape) - 1])
 
     d_out.add_coordinate_object(c_t, index=0)
     d_out.add_coordinate_object(c_f, index=0)
