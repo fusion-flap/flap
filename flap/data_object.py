@@ -22,6 +22,7 @@ import flap.coordinate
 import flap.config
 from .spectral_analysis import _apsd, _cpsd, _trend_removal, _ccf
 from .plot import _plot
+from .time_frequency_analysis import _stft
 
 PICKLE_PROTOCOL = 3
 
@@ -2695,6 +2696,24 @@ class DataObject:
             else:
                 d_out.data = self.error[1]
         return d_out
+
+    def stft(self, coordinate=None, options=None):
+        """
+        calculates the STFT of the data in a dataobject using scipy's stft method
+
+        INPUT:
+                d: A flap.DataObject.
+                coordinate: The name of the coordinate (string) along which to calculate STFT.
+                            This coordinate should change only along one data dimension and should be equidistant.
+                            This and all other coordinates changing along the data dimension of
+                            this coordinate will be removed. A new coordinate with name
+                            Frequency (unit HZ) will be added.
+                options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
+                """
+        try:
+            return _stft(self, coordinate=coordinate, options=options)
+        except Exception as e:
+            raise e
 
     def apsd(self, coordinate=None, intervals=None, options=None):
         """
