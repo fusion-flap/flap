@@ -79,6 +79,52 @@ def test_storage(signals='TEST-*',timerange=[0,0.001]):
     print("**** Storage contents")
     flap.list_data_objects()
 
+def test_testdata():
+    print()
+    print("\n>>>>>>>>>>>>>>>>>>> Test TESTDATA data source <<<<<<<<<<<<<<<<<<<<<<<<")
+    flap.delete_data_object('*',exp_id='*')
+    print("**** Generating 0.01 s long test data signals on [4,5] matrix with fixed frequency changing from channel to channel")
+    d=flap.get_data('TESTDATA',
+                    name='TEST-*-*',
+                    options={'Scaling':'Volt',
+                              'Frequency':[1e3,1e4],
+                              'Length':1e-2,
+                              'Row number':4,
+                              'Column number':5
+                              },
+                    object_name='TESTDATA'
+                    )
+    plt.figure()
+    print("**** Plotting row 2")
+    d.plot(slicing={'Row':2},axes=['Time'])
+    
+
+    print("**** Generating 0.01 s long test data signal with linearly changing frequency: 10-100kHz")   
+    f = np.linspace(1e4,1e5,num=11)
+    coord = flap.Coordinate(name='Time',
+                            start=0.0,
+                            step=0.001,
+                            mode=flap.CoordinateMode(equidistant=True),
+                            dimension_list=[0]
+                            )
+    f_obj = flap.DataObject(data_array=f,
+                            coordinates=[coord],
+                            data_unit=flap.Unit(name='Frequency',unit='Hz')
+                            )
+    flap.list_data_objects(f_obj)
+    d=flap.get_data('TESTDATA',
+                    name='TEST-1-1',
+                    options={'Scaling':'Volt',
+                             'Frequency':f_obj,
+                             'Length':0.01,
+                             'Row number':1,
+                             'Column number':1
+                             },
+                    object_name='TESTDATA'
+                    )
+    plt.figure()
+    d.plot(axes='Time',options={'All':True})  
+    
 def test_saveload():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test save/load <<<<<<<<<<<<<<<<<<<<<<<<")
@@ -747,7 +793,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = True
+test_all = False
 
 # Running tests
 plt.close('all')
@@ -758,6 +804,9 @@ plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.3/dpi, root.winfo_s
 
 if (False or test_all):
     test_storage()
+    wait_press()
+if (True or test_all):
+    test_testdata()
     wait_press()
 if (False or test_all):
     test_saveload()

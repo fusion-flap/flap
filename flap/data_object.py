@@ -8,7 +8,6 @@ Created on Tue Jan 22 17:37:32 2019
 import numpy as np
 from scipy import signal
 import fnmatch
-from decimal import Decimal
 import copy
 import math
 import io
@@ -4023,7 +4022,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
                                 s += c_data
                             else:
                                 s += c_data.flatten()[j]
-                        elif ((dt is Decimal) or (dt is float)):
+                        elif (dt is float):
                             s += "{:10.3E}".format(c_data.flatten()[j])
                         else:
                             s += str(c_data.flatten()[j])
