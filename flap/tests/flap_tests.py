@@ -805,7 +805,7 @@ plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.3/dpi, root.winfo_s
 if (False or test_all):
     test_storage()
     wait_press()
-if (True or test_all):
+if (False or test_all):
     test_testdata()
     wait_press()
 if (False or test_all):
