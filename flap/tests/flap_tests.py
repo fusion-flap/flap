@@ -744,6 +744,7 @@ def test_image():
     flap.plot('TEST_VIDEO_noneq',plot_type='anim-image',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_noneq.avi','Colorbar':True,'Aspect ratio':'equal'})
 def test_pdf():
+    print('>>>>>>>>>>>>>>>>>>> Test Probability Distribution Function (PDF) <<<<<<<<<<<<<<<<<<<<<<<<')
     print("**** Generating 10x15 random test signals, 5000 points each, 1 MHz sampling.")
     flap.get_data('TESTDATA',
                   name='TEST-*-*',
@@ -753,6 +754,36 @@ def test_pdf():
     flap.list_data_objects()
     flap.plot('PDF',slicing={'Column':3},axes=['Signal'])
     plt.title('PDF of sine waves')
+    
+def test_stft():
+    print('>>>>>>>>>>>>>>>>>>> Test Short Time Fuurier Transform (STFT) <<<<<<<<<<<<<<<<<<<<<<<<')
+    print("**** Generating 0.1 s long test data signal with linearly changing frequency: 10-100kHz")   
+    f = np.linspace(1e4,1e5,num=11)
+    coord = flap.Coordinate(name='Time',
+                            start=0.0,
+                            step=0.01,
+                            mode=flap.CoordinateMode(equidistant=True),
+                            dimension_list=[0]
+                            )
+    f_obj = flap.DataObject(data_array=f,
+                            coordinates=[coord],
+                            data_unit=flap.Unit(name='Frequency',unit='Hz')
+                            )
+    d=flap.get_data('TESTDATA',
+                    name='TEST-1-1',
+                    options={'Scaling':'Volt',
+                             'Frequency':f_obj,
+                             'Length':0.1,
+                             'Row number':1,
+                             'Column number':1
+                             },
+                    object_name='TESTDATA'
+                    )
+    flap.stft('TESTDATA',output_name='TEST_STFT')
+    flap.abs_value('TEST_STFT',output_name='TEST_STFT')
+    flap.list_data_objects()
+    flap.plot('TEST_STFT',axes=['Time','Frequency'],plot_type='image')
+    
  
 def show_plot():
     plt.pause(0.05)
@@ -863,6 +894,10 @@ if (False or test_all):
     wait_for_key()
 if (False or test_all):
     test_ccf()
+    show_plot()
+    wait_for_key()
+if (True or test_all):
+    test_stft()
     show_plot()
     wait_for_key()
 if (False or test_all):

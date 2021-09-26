@@ -4300,6 +4300,34 @@ def ccf(object_name, ref=None, exp_id='*', ref_exp_id='*', output_name=None, coo
             raise e
     return ds
 
+def stft(object_name,exp_id='*',output_name=None, coordinate=None, options=None):
+    """
+        Calculates the STFT of the data using scipy's stft method
+
+        INPUT:
+                object_name: Name of a data object in the flap storage
+                coordinate: The name of the coordinate (string) along which to calculate STFT.
+                            This coordinate should change only along one data dimension and should be equidistant.
+                            This and all other coordinates changing along the data dimension of
+                            this coordinate will be removed. A new coordinate with name
+                            Frequency (unit HZ) will be added.
+                options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        ds=d.stft(coordinate=coordinate, options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(ds,output_name)
+        except Exception as e:
+            raise e
+    return ds
+
 def detrend(object_name,exp_id='*',output_name=None, coordinate=None, intervals=None, options=None):
     """ DETREND signal(s)
         INPUT:
