@@ -781,9 +781,9 @@ class Coordinate:
                     value_mx_high = None
 
             else:
-                # Interpolation is necesary
+                # Interpolation is necessary
                 raise NotImplementedError(
-                       "Interpolating for coordinate determination is not implemented yet. {:s}".format(self.unit.name))
+                       "Interpolating for coordinate determination is not implemented yet. Coordinate:{:s}".format(self.unit.name))
 
         # Extending value_mx and like to the output shape
         # First creating a dimension list where this coordinate does not change

@@ -1058,7 +1058,8 @@ def _plot(data_object,
         else:
             _plot_id.figure = plt.gcf().number
         if (_plot_id.base_subplot is not None):
-            plt.subplot(_plot_id.base_subplot)
+            plt.sca(_plot_id.base_subplot)
+#            plt.subplot(_plot_id.base_subplot)  Changed on 6 March, 2022
         else:
             _plot_id.base_subplot = plt.gca()          
         plt.cla()
@@ -1674,7 +1675,8 @@ def _plot(data_object,
 
         # No overplotting is possible for this type of plot, erasing and restarting a Plot_ID
         if (not _options['Clear']):
-            plt.subplot(_plot_id.base_subplot)
+            plt.sca(_plot_id.base_subplot)
+#            plt.subplot(_plot_id.base_subplot)  Changed 6 March, 2022
             plt.cla()
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
         _plot_id.plt_axis_list = []

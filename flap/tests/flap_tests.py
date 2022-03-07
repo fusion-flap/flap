@@ -462,7 +462,7 @@ def test_binning():
     flap.get_data('TESTDATA',
                   name='VIDEO',
                   object_name='TEST_VIDEO',
-                  options={'Length':0.05,'Width':500,'Height':800,'Image':'Gauss','Spotsize':10})
+                  options={'Length':0.05,'Samplerate':1e3,'Width':500,'Height':800,'Image':'Gauss','Spotsize':10})
     print("***** Showing one image")
     plt.figure()
     flap.plot('TEST_VIDEO',
@@ -708,7 +708,7 @@ def test_image():
     print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
     print("**** Generating a sequence of test images")
-    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1})
+    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1,'Samplerate':1e3})
     flap.list_data_objects()
     print("***** Showing one image")
     plt.figure()
@@ -756,7 +756,7 @@ def test_pdf():
     plt.title('PDF of sine waves')
     
 def test_stft():
-    print('>>>>>>>>>>>>>>>>>>> Test Short Time Fuurier Transform (STFT) <<<<<<<<<<<<<<<<<<<<<<<<')
+    print('>>>>>>>>>>>>>>>>>>> Test Short Time Fourier Transform (STFT) <<<<<<<<<<<<<<<<<<<<<<<<')
     print("**** Generating 0.1 s long test data signal with linearly changing frequency: 10-100kHz")   
     f = np.linspace(1e4,1e5,num=11)
     coord = flap.Coordinate(name='Time',
@@ -782,6 +782,7 @@ def test_stft():
     flap.stft('TESTDATA',output_name='TEST_STFT')
     flap.abs_value('TEST_STFT',output_name='TEST_STFT')
     flap.list_data_objects()
+    plt.figure()
     flap.plot('TEST_STFT',axes=['Time','Frequency'],plot_type='image')
     
  
@@ -824,7 +825,7 @@ thisdir = os.path.dirname(os.path.realpath(__file__))
 fn = os.path.join(thisdir,"flap_tests.cfg")
 flap.config.read(file_name=fn)
 
-test_all = False
+test_all = True
 
 # Running tests
 plt.close('all')
@@ -896,7 +897,7 @@ if (False or test_all):
     test_ccf()
     show_plot()
     wait_for_key()
-if (True or test_all):
+if (False or test_all):
     test_stft()
     show_plot()
     wait_for_key()
