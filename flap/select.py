@@ -381,14 +381,15 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                         all_found_event.append(int(round((endtime[j]+starttime[j])/2)))
 
                 H = len(all_found_event)
+                H2 = 0
                 if(len(all_found_event) > 0):
                     for i in range(H):
                         if(t[all_found_event[i]]-length > t0 and max(t) > t[all_found_event[i]]+length):
                             start_coord.append(t0+res*(all_found_event[i])-length/2)
                             end_coord.append(t0+res*(all_found_event[i])+length/2)
-                H = len(start_coord)
-                selected_n += H
-                y_coord += [ev_thr*np.sqrt(d_f.data.var())]*H
+                            H2 += 1
+                selected_n += H2
+                y_coord += [ev_thr*np.sqrt(d_f.data.var())]*H2
             else:
                 # Getting the data and the coordinate for this interval
                 ind = [0]*len(d.shape)
