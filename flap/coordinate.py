@@ -8,7 +8,7 @@ This is the coordinate description for FLAP
 
 import math
 import numpy as np
-import flap.tools
+from .tools import *
 import flap.config
 import copy
 from decimal import Decimal
