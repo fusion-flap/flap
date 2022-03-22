@@ -501,7 +501,7 @@ def test_detrend():
 def test_apsd():
     plt.close('all')
     print()
-    print('>>>>>>>>>>>>>>>>>>> Test apds (Auto Power Spectral Density) <<<<<<<<<<<<<<<<<<<<<<<<')
+    print('>>>>>>>>>>>>>>>>>>> Test apsd (Auto Power Spectral Density) <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
     #plt.close('all')
     print('**** Generating test signals with frequency changing from channel to channel.')
