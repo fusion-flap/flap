@@ -8,7 +8,7 @@ This is the coordinate description for FLAP
 
 import math
 import numpy as np
-import flap.tools
+from .tools import *
 import flap.config
 import copy
 from decimal import Decimal
@@ -316,7 +316,7 @@ class Coordinate:
         # Actually in the equidistant case only the dimension of shape is used.
         self.shape = shape
         # start and step describes the coordinate mapping if EQUIDISTANT flag is set.
-        # Start is scalar and step is a 1Dd list with the same number of elements as dimension_list.
+        # Start is scalar and step is a 1D list with the same number of elements as dimension_list.
         # Would have been good to use decimal.Decimal types but operations between float and Decimal
         # are not allowed, therefore using float
         self.start = start
@@ -623,7 +623,7 @@ class Coordinate:
         if ((index is not None) and _options['Change only']):
             raise ValueError("index and 'Change only' option cannot be used at the same time in Coordinate.data().")
         if (_options['Change only']):
-            if (self.change_dimensions is []):
+            if (self.change_dimensions() is []):
                 index = ...
             else:    
                 index = [0] * len(data_shape)
@@ -781,9 +781,9 @@ class Coordinate:
                     value_mx_high = None
 
             else:
-                # Interpolation is necesary
+                # Interpolation is necessary
                 raise NotImplementedError(
-                       "Interpolating for coordinate determination is not implemented yet. {:s}".format(self.unit.name))
+                       "Interpolating for coordinate determination is not implemented yet. Coordinate:{:s}".format(self.unit.name))
 
         # Extending value_mx and like to the output shape
         # First creating a dimension list where this coordinate does not change

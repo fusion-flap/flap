@@ -8,3 +8,4 @@ from .flap_xml import *
 from .spectral_analysis import *
 import flap.config
 from .select import *
+from .time_frequency_analysis import *

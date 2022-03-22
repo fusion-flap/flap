@@ -8,7 +8,6 @@ Created on Tue Jan 22 17:37:32 2019
 import numpy as np
 from scipy import signal
 import fnmatch
-from decimal import Decimal
 import copy
 import math
 import io
@@ -22,6 +21,7 @@ import flap.coordinate
 import flap.config
 from .spectral_analysis import _apsd, _cpsd, _trend_removal, _ccf
 from .plot import _plot
+from .time_frequency_analysis import _stft
 
 PICKLE_PROTOCOL = 3
 
@@ -2696,6 +2696,24 @@ class DataObject:
                 d_out.data = self.error[1]
         return d_out
 
+    def stft(self, coordinate=None, options=None):
+        """
+        calculates the STFT of the data in a dataobject using scipy's stft method
+
+        INPUT:
+                d: A flap.DataObject.
+                coordinate: The name of the coordinate (string) along which to calculate STFT.
+                            This coordinate should change only along one data dimension and should be equidistant.
+                            This and all other coordinates changing along the data dimension of
+                            this coordinate will be removed. A new coordinate with name
+                            Frequency (unit HZ) will be added.
+                options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
+                """
+        try:
+            return _stft(self, coordinate=coordinate, options=options)
+        except Exception as e:
+            raise e
+
     def apsd(self, coordinate=None, intervals=None, options=None):
         """
         Auto power Spectral Density caclculation for the data object d.
@@ -4004,7 +4022,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
                                 s += c_data
                             else:
                                 s += c_data.flatten()[j]
-                        elif ((dt is Decimal) or (dt is float)):
+                        elif (dt is float):
                             s += "{:10.3E}".format(c_data.flatten()[j])
                         else:
                             s += str(c_data.flatten()[j])
@@ -4273,6 +4291,34 @@ def ccf(object_name, ref=None, exp_id='*', ref_exp_id='*', output_name=None, coo
         d_ref = None
     try:
         ds=d.ccf(ref=d_ref, coordinate=coordinate, intervals=intervals, options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(ds,output_name)
+        except Exception as e:
+            raise e
+    return ds
+
+def stft(object_name,exp_id='*',output_name=None, coordinate=None, options=None):
+    """
+        Calculates the STFT of the data using scipy's stft method
+
+        INPUT:
+                object_name: Name of a data object in the flap storage
+                coordinate: The name of the coordinate (string) along which to calculate STFT.
+                            This coordinate should change only along one data dimension and should be equidistant.
+                            This and all other coordinates changing along the data dimension of
+                            this coordinate will be removed. A new coordinate with name
+                            Frequency (unit HZ) will be added.
+                options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        ds=d.stft(coordinate=coordinate, options=options)
     except Exception as e:
         raise e
     if (output_name is not None):
