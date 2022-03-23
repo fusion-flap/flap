@@ -106,4 +106,10 @@ venv.bak/
 .mypy_cache/
 
 # VSCOde
-.vs*
+*.vs*
+
+# videos
+*.avi
+
+#test save
+flap_save_test.dat
