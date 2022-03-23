@@ -1,0 +1,21 @@
+# This file may be used to create an environment using:
+# $ conda create --file <this file>
+# platform: windows 10,ubuntu 18.04
+# tested with, spyder = 3.3.2 and VS Code = 1.29.1
+name: flap_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - h5py = 3.6.0
+  - ipykernel = 6.9.2
+  - lxml = 4.8.0
+  - matplotlib = 3.5.1
+  - numpy = 1.22.3
+  - opencv = 4.5.5
+  - pandas = 1.4.1
+  - pickleshare = 0.7.5
+  - python = 3.9.10
+  - scipy = 1.8.0
+  - tornado = 6.1
+
