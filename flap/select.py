@@ -282,6 +282,18 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                 t = d.coordinate(coordinate)[0][:]
                 data_act = d.slice_data(slicing={coordinate: flap.Intervals(start=t[sel_int_ind[0][i_int]],
                                                                  stop=t[sel_int_ind[1][i_int]-1])})
+                c = data_act.get_coordinate_object(coordinate)
+                
+                if(c.mode.equidistant == False):
+                    print("Warning: non-equidistant coordinates.")
+                    print("The program will make them so, using the first two values.")
+                    timeres = t[1] - t[0]
+                    c.mode.equidistant = True
+                    c.shape = t.shape
+                    c.start = t[0]
+                    c.step = timeres
+                    c.dimension_list = [0]
+                    
                 dl = None
                 if(type(gaussian_sigma) == np.ndarray):
                     dl = max(gaussian_sigma)*10
