@@ -283,14 +283,14 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                 data_act = d.slice_data(slicing={coordinate: flap.Intervals(start=t[sel_int_ind[0][i_int]],
                                                                  stop=t[sel_int_ind[1][i_int]-1])})
                 c = data_act.get_coordinate_object(coordinate)
-                
                 if(c.mode.equidistant == False):
                     print("Warning: non-equidistant coordinates.")
-                    print("The program will make them so, using the first two values.")
-                    timeres = t[1] - t[0]
+                    print("The program will make them so, using the mean difference between each values.")
+                    timeres = np.mean(c.values[1:(len(c.values)-1)]-c.values[0:(len(c.values)-2)])
+                    t0 = c.values[0]
                     c.mode.equidistant = True
-                    c.shape = t.shape
-                    c.start = t[0]
+                    c.shape = data_act.data.shape
+                    c.start = t0
                     c.step = timeres
                     c.dimension_list = [0]
                     
@@ -363,6 +363,12 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                         if(condition[j] == True and condition[j+1] == False):
                             endtime.append(j)
                             
+                    if(starttime[0]>endtime[0]):
+                        endtime.remove(endtime[0])
+                        
+                    if(starttime[len(starttime)-1]>endtime[len(endtime)-1]):
+                        starttime.remove(starttime[len(starttime)-1])
+                            
                     if(len(starttime) != len(endtime)):
                         raise ValueError("Number of start and end times not coincide.")
                             
@@ -385,6 +391,12 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                             starttime.append(j+1)
                         if(condition[j] == True and condition[j+1] == False):
                             endtime.append(j)
+                            
+                    if(starttime[0]>endtime[0]):
+                        endtime.remove(endtime[0])
+                        
+                    if(starttime[len(starttime)-1]>endtime[len(endtime)-1]):
+                        starttime.remove(starttime[len(starttime)-1])
                             
                     if(len(starttime) != len(endtime)):
                         raise ValueError("Number of start and end times not coincide.")
