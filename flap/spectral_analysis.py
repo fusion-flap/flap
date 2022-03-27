@@ -2,9 +2,10 @@
 """
 Created on Thu Mar  7 10:34:49 2019
 
-@author: Zoletnik
+Spectral analysis tools for FLAP
 
-Spectral analysis tools fro FLAP
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 import math
 import numpy as np

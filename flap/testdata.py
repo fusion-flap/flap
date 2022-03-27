@@ -24,7 +24,8 @@ Z is z
 
 Created on Thu Jan 17 10:29:56 2019
 
-@author: Zoletnik
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 
 import math

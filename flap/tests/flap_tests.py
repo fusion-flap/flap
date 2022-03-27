@@ -2,7 +2,8 @@
 """
 Created on Thu Dec  6 22:11:28 2018
 
-@author: Sandor Zoletnik  (zoletnik.sandor@wigner.mta.hu)
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 
 Example/test programs for FLAP.
 Will run various tests and print/plot the result. 

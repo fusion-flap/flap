@@ -2,7 +2,10 @@
 """
 Created on Mon Jul 30 15:13:45 2018
 
-@author: Sandor Zoletnik
+XML file handling for FLAP.
+
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 
 import xml.etree.ElementTree as ET

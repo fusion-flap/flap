@@ -1,3 +1,11 @@
+"""
+
+Time-frequency analysis in FLAP.
+
+@author: Marton Vavrik (vavrik.marton@reak.bme.hu)
+
+"""
+
 from scipy import signal
 import numpy as np
 import flap.config

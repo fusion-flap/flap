@@ -2,7 +2,10 @@
 """
 Created on Wed Jan 23 21:45:43 2019
 
-@author: Zoletnik
+Configuration hangling for FLAP
+
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 import configparser
 import copy

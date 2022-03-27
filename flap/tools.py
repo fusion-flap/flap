@@ -2,9 +2,10 @@
 """
 Created on Wed Jan 23 13:18:25 2019
 
-@author: Zoletnik
-
 Tools for the FLAP module
+
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 
 """
 import copy

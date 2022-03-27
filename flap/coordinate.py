@@ -1,9 +1,10 @@
 """
 Created on Wed Jan 23 09:44:50 2019
 
-@author: Zoletnik
+This is the coordinate description and realted methods for FLAP
 
-This is the coordinate description for FLAP
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 
 import math

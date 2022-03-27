@@ -2,7 +2,10 @@
 """
 Created on Sat May 18 18:37:06 2019
 
-@author: Zoletnik
+Plotting in FLAP
+
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 @coauthor: Lampert
 """
 """ Notes on how to use subplots.
@@ -946,6 +949,7 @@ def _plot(data_object,
                       named in options['Signal name']
           'image': Plots a 2D data matrix as an image. Options: Colormap, Data range, ...
           'contour': Contour plot
+          'amin-image', 'anim-contour': Animated versions of image and contour for 3D data. 3rd axis is time.
     plot_options: Dictionary or list of dictionaries. Will be passed over to the plot call. For plots with multiple subplots this can be
                   a list of dictionaries, each for one subplot.
     plot_id: A PlotID object is the plot should go into an existing plot.

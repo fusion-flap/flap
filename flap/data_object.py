@@ -2,7 +2,10 @@
 """
 Created on Tue Jan 22 17:37:32 2019
 
-@author: Zoletnik
+The DataObject for FLAP and related methods, procedures
+
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 
 import numpy as np
