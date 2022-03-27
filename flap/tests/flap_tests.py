@@ -708,7 +708,7 @@ def test_image():
     print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
     print("**** Generating a sequence of test images")
-    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1,'Samplerate':1e3})
+    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1,'Samplerate':1e3, 'Frequency':10,'Spotsize':100})
     flap.list_data_objects()
     print("***** Showing one image")
     plt.figure()
@@ -752,6 +752,7 @@ def test_pdf():
                   object_name='TESTDATA')
     flap.pdf('TESTDATA',coordinate='Time',options={'Number':30},output_name='PDF')
     flap.list_data_objects()
+    plt.figure()
     flap.plot('PDF',slicing={'Column':3},axes=['Signal'])
     plt.title('PDF of sine waves')
     

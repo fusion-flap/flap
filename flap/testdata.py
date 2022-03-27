@@ -63,6 +63,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             'Width'   : Image width in pixels (x size)
             'Height'  : Image height in pixels (y size)
             'Frequency' : <number> Fixed frequency of signals [Hz]
+                                   For "Gauss" video data the rotation frequency of the spot
                         : [f2,f2]: Changes from channel-to-channel between these frequencies [Hz]
                         : data object: should be data object with Time coordinate and Frequency as data
                                        If has one channel describes frequency vs time for all channels
@@ -81,7 +82,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                        'Scaling': 'Volt',
                        'Signal': 'Sin',
                        'Image':'Gauss',
-                       'Spotsize':10,
+                       'Spotsize':100,
                        'Width': 640,
                        'Height': 480,
                        'Frequency': 1e3,
