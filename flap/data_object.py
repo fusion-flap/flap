@@ -2590,7 +2590,7 @@ class DataObject:
                 if (start_coord_obj.mode.equidistant):
                    start_coord_obj.start += rel_coord_obj.values
                 else:
-                   start_coord_obj.values += rel_coord_obj.values
+                   start_coord_obj.values += rel_coord_obj.values.astype(start_coord_obj.values.dtype)
                 start_coord_obj.unit.name = orig_coord
                 del_list.append(rel_coord_obj.unit.name)
                 del_list.append('Interval('+slice_coord+')')

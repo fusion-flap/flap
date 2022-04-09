@@ -2,10 +2,7 @@
 """
 Created on Sat May 18 18:37:06 2019
 
-Plotting in FLAP
-
-@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
-Centre for Energy Research
+@author: Zoletnik
 @coauthor: Lampert
 """
 """ Notes on how to use subplots.
@@ -317,7 +314,7 @@ class PlotAnimation:
 
         if (self.options['Colorbar']):
             cbar = plt.colorbar(img,ax=self.ax_act)
-            cbar.set_label(self.d.data_unit.name)
+            cbar.set_label(self.d.data_unit.name + ' ['+self.d.data_unit.unit+']')
 #EFIT overplot feature implementation:
             #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
             #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.
@@ -949,7 +946,6 @@ def _plot(data_object,
                       named in options['Signal name']
           'image': Plots a 2D data matrix as an image. Options: Colormap, Data range, ...
           'contour': Contour plot
-          'amin-image', 'anim-contour': Animated versions of image and contour for 3D data. 3rd axis is time.
     plot_options: Dictionary or list of dictionaries. Will be passed over to the plot call. For plots with multiple subplots this can be
                   a list of dictionaries, each for one subplot.
     plot_id: A PlotID object is the plot should go into an existing plot.
@@ -2014,7 +2010,7 @@ def _plot(data_object,
     
             if (_options['Colorbar']):
                 cbar = plt.colorbar(img,ax=ax_act)
-                cbar.set_label(d.data_unit.name)
+                cbar.set_label(d.data_unit.name + ' ['+d.data_unit.unit+']')
             
             if (xrange is not None):
                 plt.xlim(xrange[0],xrange[1])
@@ -2026,7 +2022,10 @@ def _plot(data_object,
                 plt.xscale('log')
             if (_options['Log y']):
                 plt.yscale('log')
-            title =  str(d.exp_id)+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
+            if (d.exp_id is not None):
+                title =  str(d.exp_id)+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
+            else:
+                title =  d.data_title+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
             plt.title(title)
             plt.show(block=False)
             time.sleep(_options['Waittime'])
