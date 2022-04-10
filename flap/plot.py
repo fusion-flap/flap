@@ -1527,7 +1527,7 @@ def _plot(data_object,
 
         # Creating the sublots if this is a new plot
         if (_plot_id.number_of_plots == 0):
-            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot)
+            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot,hspace=0.4,wspace=0.3)
             _plot_id.plt_axis_list = []
             sharex = None
             sharey = None
@@ -1538,6 +1538,7 @@ def _plot(data_object,
                         sharey = _plot_id.plt_axis_list[0]
                     if (sharex is None):
                         sharex = _plot_id.plt_axis_list[0]
+                    _plot_id.number_of_plots += 1
 
         # Getting row, columnm and x data        
         row_data, row_data_err = pdd_list[0].get_data(plot_error)
@@ -1577,22 +1578,36 @@ def _plot(data_object,
                         ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,fmt='o',**_plot_opt)
                     else:
                         ax.scatter(x,y,**_plot_opt)
+                ax.set_xlim(np.amin(x),np.amax(x))
                 if (i_row == plot_rows - 1):
                     ax.set_xlabel(pdd_list[2].axis_label())
-                else:
-                    ax.axes.xaxis.set_ticklabels([])
                 if (yrange is not None):
                     ax.set_ylim(*yrange)
                 ax.yaxis.set_major_locator(ticker.MaxNLocator(3))
-                ticks_loc = ax.get_yticks().tolist()
-                ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
-                ax.set_yticklabels(ticks_loc, rotation = 90) 
+                ticks_loc = ax.get_yticklabels()
+                for tick in ticks_loc:
+                    tick.set_rotation(90)
+                try:
+                    ind[plot_x_dimension] = 0
+                    title = d.coordinate('Signal name',index=ind)[0][0,0,0]
+                except ValueError:
+                    title = "{:s}:{:s}, {:s}:{:s}".format(pdd_list[0].value.unit.name,str(row_data[i_row]),
+                                                          pdd_list[1].value.unit.name,str(row_data[i_col])
+                                                          )
+                ax.set_title(title)
                 if (i_col == 0):
                     ax.set_ylabel(pdd_list[3].axis_label())
+                if (_options['Log x']):
+                    ax.set_xscale('log')
+                if (_options['Log y']):
+                    ax.set_yscale('log')
+                if (xrange is not None):
+                    ax.set_xlim(xrange[0],xrange[1])
+
                 # else:
                 #     if (yrange is not None):
                 #         ax.axes.yaxis.set_ticklabels([])
-        # plt.tight_layout()        This fails
+        #plt.tight_layout()  Fails
     
      
     elif (_plot_type == 'multi xy'):
