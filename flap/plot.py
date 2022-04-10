@@ -76,6 +76,59 @@ class PlotDataDescription:
         self.data_type = data_type
         self.data_object = data_object
         self.value = value
+    
+    def get_data(self,plot_error,data_index=None):
+        """ get data for plot
+            plot_error: boolean
+                If True error is also calculated
+            data_index: tuple or list
+                index into the data array if the data type is PddType.Data
+        """
+            
+        if (self.data_type == PddType.Data):
+            if (data_index is not None):
+                d = self.data_object.data[tuple(data_index)]
+            else:
+                d = self.data_object.data
+            if (len(d.shape) > 1):
+                raise ValueError("xy plot is applicable only to 1D data. Use slicing.")
+            plotdata = d.flatten()
+            if (plot_error):
+                ploterror = self.data_object._plot_error_ranges(index=data_index)
+            else:
+                ploterror = None
+        elif (self.data_type == PddType.Coordinate):
+            if (not self.value.isnumeric()):
+                raise ValueError("Coordinate is not of numeric type, cannot plot.")
+            pdata, pdata_low, pdata_high = \
+                                self.value.data(data_shape=self.data_object.shape,options={'Change only': True})
+            plotdata = pdata.flatten()
+            if (pdata_low is not None):
+                pdata_low = pdata_low.flatten()
+            if (pdata_high is not None):
+                pdata_high = pdata_high.flatten()
+            if (plot_error):
+                ploterror  = self.data_object._plot_coord_ranges(self.value,
+                                                                 pdata, 
+                                                                 pdata_low, 
+                                                                 pdata_high
+                                                                 )
+            else:
+                ploterror = None
+        elif (self.data_type == PddType.Constant):
+            plotdata = self.value
+            ploterror = None
+        else:
+            raise RuntimeError("Internal error, invalid PlotDataDescription.")
+        return plotdata,ploterror
+    
+    def axis_label(self):
+        if (self.data_type == PddType.Data):
+            return self.data_object.data_unit.name +' ['+self.data_object.data_unit.unit+']'
+        elif (self.data_type == PddType.Coordinate):
+            return self.value.unit.name +' ['+self.value.unit.unit+']'
+        elif (self.data_type == PddType.Constant):
+            return ""
         
 def axes_to_pdd_list(d,axes):
     """ Convert a plot() axes parameter to a list of PlotAxisDescription and axes list for PlotID
@@ -943,9 +996,13 @@ def _plot(data_object,
           'multi xy': In case of 2D data plots 1D curves with vertical shift
                       Default x axis is first coordinate, y axis is Data
                       The signals are named in the label with the 'Signal name' coordinate or the one
-                      named in options['Signal name']
+                      names in options['Signal name']
+          'grid xy':In case of 3D data plots xy plots on a 2D grid. 
+                    axes are: grid x, grid y, x, y
+                    All coordinates should change in one dimension.
           'image': Plots a 2D data matrix as an image. Options: Colormap, Data range, ...
           'contour': Contour plot
+          'anim-image', 'anim-contour': Like image and contour but third axis is time.
     plot_options: Dictionary or list of dictionaries. Will be passed over to the plot call. For plots with multiple subplots this can be
                   a list of dictionaries, each for one subplot.
     plot_id: A PlotID object is the plot should go into an existing plot.
@@ -1065,7 +1122,7 @@ def _plot(data_object,
         plt.cla()
             
     # Setting plot type
-    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contour','anim-contour','animation']
+    known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contour','anim-contour','animation','grid xy','grid scatter']
     if (plot_type is None):
         if (len(d.shape) == 1):
             _plot_type = 'xy'
@@ -1084,7 +1141,7 @@ def _plot(data_object,
             raise ValueError("Unknown plot type or too short abbreviation")    
 
     # Processing some options
-    if ((_plot_type == 'xy') or (_plot_type == 'multi xy')):
+    if ((_plot_type == 'xy') or (_plot_type == 'multi xy') or (_plot_type == 'xy grid') or (_plot_type == 'xy scatter')):
         all_points = _options['All points']
         if (type(all_points) is not bool):
             raise TypeError("Option 'All points' should be boolean.")
@@ -1172,37 +1229,7 @@ def _plot(data_object,
         plotdata_high = [0]*2                                                   #UNUSED
         ploterror = [0]*2
         for ax_ind in range(2):
-            if (pdd_list[ax_ind].data_type == PddType.Data):
-                if (len(pdd_list[ax_ind].data_object.shape) > 1):
-                    raise ValueError("xy plot is applicable only to 1D data. Use slicing.")
-                plotdata[ax_ind] = pdd_list[ax_ind].data_object.data.flatten()
-                if (plot_error):
-                    ploterror[ax_ind] = pdd_list[ax_ind].data_object._plot_error_ranges()
-                else:
-                    ploterror[ax_ind] = None
-            elif (pdd_list[ax_ind].data_type == PddType.Coordinate):
-                if (not pdd_list[ax_ind].value.isnumeric()):
-                    raise ValueError("Coordinate is not of numeric type, cannot plot.")
-                pdata, pdata_low, pdata_high = \
-                                    pdd_list[ax_ind].value.data(data_shape=pdd_list[ax_ind].data_object.shape)
-                plotdata[ax_ind] = pdata.flatten()
-                if (pdata_low is not None):
-                    pdata_low = pdata_low.flatten()
-                if (pdata_high is not None):
-                    pdata_high = pdata_high.flatten()
-                if (plot_error):
-                    ploterror[ax_ind]  = pdd_list[ax_ind].data_object._plot_coord_ranges(pdd_list[ax_ind].value,
-                                                                                         pdata, 
-                                                                                         pdata_low, 
-                                                                                         pdata_high
-                                                                                         )
-                else:
-                    ploterror[ax_ind] = None
-            elif (pdd_list[ax_ind].data_type == PddType.Constant):
-                plotdata[ax_ind] = pdd_list[ax_ind].value
-                ploterror[ax_ind] = None
-            else:
-                raise RuntimeError("Internal error, invalid PlotDataDescription.")
+            plotdata[ax_ind], ploterror[ax_ind] = pdd_list[ax_ind].get_data(plot_error)
         if (_plot_id.number_of_plots != 0):
             _options['Log x'] = _plot_id.options[-1]['Log x']
             _options['Log y'] = _plot_id.options[-1]['Log y']
@@ -1441,7 +1468,133 @@ def _plot(data_object,
 
             _plot_id.plot_subtype = 1
             # End of complex xy and scatter plot
+            
+    elif ((_plot_type == 'grid xy') or (_plot_type == 'grid scatter')):
+        if (not _options['Clear']):
+            if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'grid xy') and (_plot_id.plot_type != 'grid scatter')) 
+                ):
+                raise ValueError("Overplotting into different plot type. Use option={'Clear':True} to erase first.")
+                
+        # Processing axes
+        if (len(axes) < 3):
+            raise ValueError("grid xy plot has no default axes. Axes must be specified.")
+        if (len(axes) == 3):
+            default_axes = [None,None,None,'__Data__']
+        else:
+            default_axes = [None,None,None,None]
+        try:
+            pdd_list, ax_list = _plot_id.check_axes(d, 
+                                                    axes, 
+                                                    clear=_options['Clear'], 
+                                                    default_axes=default_axes, 
+                                                    force=_options['Force axes'])
+        except ValueError as e:
+            raise e
+     
+        # Determining grid
+        grid_dimensions = [0,0]
         
+        for i_grid in range(2):
+            if (pdd_list[i_grid].data_object != d):
+                raise ValueError("Grid coordinates for xy grid plot should be from the same data object.")
+            if ((pdd_list[i_grid].data_type != PddType.Coordinate)
+                or (len(pdd_list[i_grid].value.dimension_list) != 1)
+                ):
+                raise ValueError("First two axes in xy grid plot should be a coordinate changing along one data dimension.")
+            grid_dimensions[i_grid] = pdd_list[i_grid].value.dimension_list[0]
+        if (grid_dimensions[0] == grid_dimensions[1]):
+            raise ValueError("The two grid dimensions should be different.")
+        plot_rows = d.shape[grid_dimensions[0]] 
+        plot_columns = d.shape[grid_dimensions[1]] 
+        if ((plot_columns > 30) or (plot_rows > 30)):
+            raise ValueError("Too many plots in a row or column.")
+        
+        if ((_plot_id.plot_type is not None) 
+            and ((_plot_id.plot_subtype[0] != plot_rows) or (_plot_id.plot_subtype[1] != plot_columns))
+            ):
+            raise ValueError("Row/column number for grid plot is different from existiung plot. Can not overplot.")
+        _plot_id.plot_subtype = [plot_rows,plot_columns]
+       
+        if (pdd_list[2].data_object != d):
+            raise ValueError("X coordinate for xy grid plot should be from the same data object.")
+        if ((pdd_list[2].data_type != PddType.Coordinate)
+            or (len(pdd_list[i_grid].value.dimension_list) != 1)
+            ):
+            raise ValueError("X axis of  xy grid plot should be a coordinate changing along one data dimension.")
+        plot_x_dimension = pdd_list[2].value.dimension_list[0]
+        
+        yrange = _options['Y range']
+
+        # Creating the sublots if this is a new plot
+        if (_plot_id.number_of_plots == 0):
+            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot)
+            _plot_id.plt_axis_list = []
+            sharex = None
+            sharey = None
+            for i_row in range(plot_rows):
+                for i_col in range(plot_columns):
+                    _plot_id.plt_axis_list.append(plt.subplot(gs[i_row,i_col],sharex=sharex,sharey=sharey))
+                    if ((sharey is None) and (yrange is not None)):
+                        sharey = _plot_id.plt_axis_list[0]
+                    if (sharex is None):
+                        sharex = _plot_id.plt_axis_list[0]
+
+        # Getting row, columnm and x data        
+        row_data, row_data_err = pdd_list[0].get_data(plot_error)
+        column_data, column_data_err = pdd_list[1].get_data(plot_error)
+        plotdata_x, ploterror_x = pdd_list[2].get_data(plot_error)
+        
+        # Plotting data
+        _plot_opt = _plot_options[0]
+        for i_row in range(plot_rows):
+            for i_col in range(plot_columns):
+                ind = [0] * 3
+                ind[grid_dimensions[0]] = i_row
+                ind[grid_dimensions[1]] = i_col
+                ind[plot_x_dimension] = ...
+                plotdata_y, ploterror_y = pdd_list[3].get_data(plot_error,data_index=ind)
+                if (all_points is True):
+                    x = plotdata_x
+                    y = plotdata_y
+                    xerr = ploterror_x
+                    yerr = ploterror_y
+                else:
+                    x,y,xerr,yerr = sample_for_plot(plotdata_x,plotdata_y,ploterror_x,ploterror_y,maxpoints)
+                if (errorbars < 0):
+                    errorevery = 1
+                else:
+                    errorevery = int(round(len(x)/errorbars))
+                    if (errorevery == 0):
+                        errorevery = 1
+                ax = _plot_id.plt_axis_list[i_row * plot_columns + i_col]
+                if (plot_type == 'grid xy'):
+                    if (plot_error):
+                        ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,**_plot_opt)
+                    else:
+                        ax.plot(x,y,**_plot_opt)
+                else:
+                    if (plot_error):
+                        ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,fmt='o',**_plot_opt)
+                    else:
+                        ax.scatter(x,y,**_plot_opt)
+                if (i_row == plot_rows - 1):
+                    ax.set_xlabel(pdd_list[2].axis_label())
+                else:
+                    ax.axes.xaxis.set_ticklabels([])
+                if (yrange is not None):
+                    ax.set_ylim(*yrange)
+                ax.yaxis.set_major_locator(ticker.MaxNLocator(3))
+                ticks_loc = ax.get_yticks().tolist()
+                ax.yaxis.set_major_locator(ticker.FixedLocator(ticks_loc))
+                ax.set_yticklabels(ticks_loc, rotation = 90) 
+                if (i_col == 0):
+                    ax.set_ylabel(pdd_list[3].axis_label())
+                # else:
+                #     if (yrange is not None):
+                #         ax.axes.yaxis.set_ticklabels([])
+        # plt.tight_layout()        This fails
+    
+     
     elif (_plot_type == 'multi xy'):
         if (len(d.shape) > 2):
             raise TypeError("multi x-y plot is applicable to 2D data only. Use slicing.")

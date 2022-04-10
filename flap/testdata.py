@@ -56,7 +56,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                       'Complex-Sin': Same as Sine but an imaginary cosine is added
                       'Random': Random (normal dist.) signal in all channels
             'Row number': Number of rows for signal matrix
-            'Coumn number': Number of columns for signal matrix
+            'Column number': Number of columns for signal matrix
             'Matrix angle': The angle [deg] of the signal matrix
             'Image' : 'Gauss' Gaussian spot
                       'Random'  Random int16 values between 0 and 4095
