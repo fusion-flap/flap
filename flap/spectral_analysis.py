@@ -507,7 +507,8 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
                     error=out_err,
                     coordinates=d.coordinates,
                     exp_id=d.exp_id,
-                    data_unit=flap.coordinate.Unit("Spectral density"))
+                    data_unit=flap.coordinate.Unit("Spectral density"),
+                    data_title='Power spectrum')
 
     if (wavenumber):
         out_name = 'Wavenumber'
