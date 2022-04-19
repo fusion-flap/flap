@@ -982,6 +982,9 @@ def _plot(data_object,
           plot_id=None):
     """
     Plot a data object.
+    
+    Parameters
+    ----------
     axes: A list of coordinate names (strings). They should be one of the coordinate
           names in the data object or 'Data'
           They describe the axes of the plot.
@@ -1055,6 +1058,10 @@ def _plot(data_object,
         'Prevent saturation': Prevents saturation of the video signal when it exceeds zrange[1]
             It uses data modulo zrange[1] to overcome the saturation. (works for animation)
             
+      Return value
+      ------------
+      plotID: plotID
+          The plot ID of the current plot. This can be used later to overplot.
     """
 
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
@@ -1850,6 +1857,8 @@ def _plot(data_object,
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
         ax = _plot_id.plt_axis_list[0]
+        # Interestingly figure is set to None, we regenerate it.
+        _plot_id.base_subplot.figure = _plot_id.plt_axis_list[-1].figure
         
         pdd_list[2].data_type = PddType.Data
         pdd_list[2].data_object = d
