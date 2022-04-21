@@ -239,6 +239,11 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
     start_coord = []
     end_coord = []
     y_coord = []
+    
+    c = d.get_coordinate_object(coordinate)
+    if(c.mode.equidistant == False):
+        print("Warning: non-equidistant coordinates.")
+        print("The program will make them so, using the mean difference between each values.")
 
     for i_int in range(interval_n):
         if (_options['Select'] is not None):
@@ -284,8 +289,6 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                                                                  stop=t[sel_int_ind[1][i_int]-1])})
                 c = data_act.get_coordinate_object(coordinate)
                 if(c.mode.equidistant == False):
-                    print("Warning: non-equidistant coordinates.")
-                    print("The program will make them so, using the mean difference between each values.")
                     timeres = np.mean(c.values[1:(len(c.values)-1)]-c.values[0:(len(c.values)-2)])
                     t0 = c.values[0]
                     c.mode.equidistant = True
@@ -363,17 +366,18 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                         if(condition[j] == True and condition[j+1] == False):
                             endtime.append(j)
                             
-                    if(starttime[0]>endtime[0]):
-                        endtime.remove(endtime[0])
-                        
-                    if(starttime[len(starttime)-1]>endtime[len(endtime)-1]):
-                        starttime.remove(starttime[len(starttime)-1])
+                    if(len(starttime) > 0):
+                        if(starttime[0]>endtime[0]):
+                            endtime.remove(endtime[0])
                             
-                    if(len(starttime) != len(endtime)):
-                        raise ValueError("Number of start and end times not coincide.")
-                            
-                    for j in range(len(endtime)):
-                        all_found_event.append(int(round((endtime[j]+starttime[j])/2)))
+                        if(starttime[len(starttime)-1]>endtime[len(endtime)-1]):
+                            starttime.remove(starttime[len(starttime)-1])
+                                
+                        if(len(starttime) != len(endtime)):
+                            raise ValueError("Number of start and end times not coincide.")
+                                
+                        for j in range(len(endtime)):
+                            all_found_event.append(int(round((endtime[j]+starttime[j])/2)))
                         
                 elif(type(gaussian_sigma) == float or type(gaussian_sigma) == int):
                     corr = np.correlate(d_f.data,filtered_events, mode="same")
