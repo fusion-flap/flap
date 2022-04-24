@@ -367,7 +367,12 @@ class PlotAnimation:
 
         if (self.options['Colorbar']):
             cbar = plt.colorbar(img,ax=self.ax_act)
-            cbar.set_label(self.d.data_unit.name + ' ['+self.d.data_unit.unit+']')
+            if (self.data_unit.unit is not None) and (self.data_unit.unit != ''):
+                unit_name = '['+self.data_unit.unit+']'
+            else:
+                unit_name = ''
+            cbar.set_label(self.data_unit.name+' '+unit_name)
+
 #EFIT overplot feature implementation:
             #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
             #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.
@@ -1481,7 +1486,8 @@ def _plot(data_object,
             if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'grid xy') and (_plot_id.plot_type != 'grid scatter')) 
                 ):
                 raise ValueError("Overplotting into different plot type. Use option={'Clear':True} to erase first.")
-                
+        if (axes is None):
+            raise ValueError("Axes should be set for grid plots: grix x, grid y, x axis.")
         # Processing axes
         if (len(axes) < 3):
             raise ValueError("grid xy plot has no default axes. Axes must be specified.")
@@ -1969,7 +1975,7 @@ def _plot(data_object,
                 unit_name = '['+d.data_unit.unit+']'
             else:
                 unit_name = ''
-                cbar.set_label(d.data_unit.name+' '+unit_name)
+            cbar.set_label(d.data_unit.name+' '+unit_name)
         
         if (xrange is not None):
             ax.set_xlim(xrange[0],xrange[1])
@@ -2187,7 +2193,11 @@ def _plot(data_object,
     
             if (_options['Colorbar']):
                 cbar = plt.colorbar(img,ax=ax_act)
-                cbar.set_label(d.data_unit.name + ' ['+d.data_unit.unit+']')
+                if (d.data_unit.unit is not None) and (d.data_unit.unit != ''):
+                    unit_name = '['+d.data_unit.unit+']'
+                else:
+                    unit_name = ''
+                cbar.set_label(d.data_unit.name+' '+unit_name)
             
             if (xrange is not None):
                 plt.xlim(xrange[0],xrange[1])

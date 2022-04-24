@@ -4098,7 +4098,7 @@ def get_data(data_source,
         d = f(exp_id, data_name=name, no_data=no_data, options=options, 
               coordinates=_coordinates, data_source=data_source_local)
     except TypeError as e:
-        # Checking whethet the error is due to unknown data_source argument
+        # Checking whether the error is due to unknown data_source argument
         if (str(e).find("unexpected keyword argument 'data_source'") < 0):
             # If not raise the error
             raise e
@@ -4111,7 +4111,7 @@ def get_data(data_source,
     except Exception as e:
         raise e
     if (type(d) is not DataObject):
-        raise ValueError("No data receiveid.")
+        raise ValueError("No data received.")
     d.data_source = data_source
     try:
         d.check()
