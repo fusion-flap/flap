@@ -20,7 +20,7 @@ setup(
         'lxml >= 4.8.0',
         'matplotlib >= 3.5.1',
         'numpy >= 1.22.3',
-        'opencv >= 4.5.5',
+        'opencv-python >= 4.5.5',
         'pandas >= 1.4.1',
         'pickleshare >= 0.7.5',
         'scipy >= 1.8.0',
