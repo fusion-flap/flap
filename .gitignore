@@ -107,3 +107,5 @@ venv.bak/
 
 # VSCOde
 .vs*
+flap_mdsplus/
+flap_nstx/
