@@ -674,11 +674,11 @@ class DataObject:
             _index = index
         if (type(self.error) is list):
             err = np.ndarray((2,self.error[0].size), dtype=self.error[0].dtype)
-            err[0,:] = self.error[0][_index].flatten()
-            err[1,:] = self.error[1][_index].flatten()
+            err[0,:] = self.error[0][tuple(_index)].flatten()
+            err[1,:] = self.error[1][tuple(_index)].flatten()
             return err
         else:
-            return self.error[_index].flatten()
+            return self.error[tuple(_index)].flatten()
 
     def _plot_coord_ranges(self,coord, c_data, c_low, c_high):
         """ Helper function to return error low and high limits from coordiniate data
