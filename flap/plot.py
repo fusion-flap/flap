@@ -101,7 +101,7 @@ class PlotDataDescription:
             if (not self.value.isnumeric()):
                 raise ValueError("Coordinate is not of numeric type, cannot plot.")
             pdata, pdata_low, pdata_high = \
-                                self.value.data(data_shape=self.data_object.shape,options={'Change only': True})
+                                self.value.data(data_shape=self.data_object.shape,options={'Change only': False})
             plotdata = pdata.flatten()
             if (pdata_low is not None):
                 pdata_low = pdata_low.flatten()
