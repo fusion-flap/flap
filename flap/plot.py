@@ -101,7 +101,7 @@ class PlotDataDescription:
             if (not self.value.isnumeric()):
                 raise ValueError("Coordinate is not of numeric type, cannot plot.")
             pdata, pdata_low, pdata_high = \
-                                self.value.data(data_shape=self.data_object.shape,options={'Change only': False})
+                                self.value.data(data_shape=self.data_object.shape,index=data_index,options={'Change only': False})
             plotdata = pdata.flatten()
             if (pdata_low is not None):
                 pdata_low = pdata_low.flatten()
@@ -991,11 +991,11 @@ def _plot(data_object,
     Parameters
     ----------
     axes: A list of coordinate names (strings). They should be one of the coordinate
-          names in the data object or 'Data'
+          names in the data object or '__Data__'
           They describe the axes of the plot.
           If the number of axes is less than the number required for the plot, '__Data__' will be added.
           If no axes are given default will be used depending on the plot type. E.g. for
-          x-y plot the default first axis is the firs coordinate, the second axis is '__Data__'
+          x-y plot the default first axis is the first coordinate, the second axis is '__Data__'
     slicing, summing: arguments for slice_data. Slicing will be applied before plotting.
     slicing_options: options for slicing. See slice_data()
     plot_type: The plot type (string). Can be abbreviated.
@@ -1525,7 +1525,7 @@ def _plot(data_object,
         if ((_plot_id.plot_type is not None) 
             and ((_plot_id.plot_subtype[0] != plot_rows) or (_plot_id.plot_subtype[1] != plot_columns))
             ):
-            raise ValueError("Row/column number for grid plot is different from existiung plot. Can not overplot.")
+            raise ValueError("Row/column number for grid plot is different from existing plot. Can not overplot.")
         _plot_id.plot_subtype = [plot_rows,plot_columns]
        
         if (pdd_list[2].data_object != d):
@@ -1556,7 +1556,7 @@ def _plot(data_object,
         # Getting row, columnm and x data        
         row_data, row_data_err = pdd_list[0].get_data(plot_error)
         column_data, column_data_err = pdd_list[1].get_data(plot_error)
-        plotdata_x, ploterror_x = pdd_list[2].get_data(plot_error)
+        # The x coordinate data is read when the first plot is made.
         
         # Plotting data
         _plot_opt = _plot_options[0]
@@ -1566,6 +1566,8 @@ def _plot(data_object,
                 ind[grid_dimensions[0]] = i_row
                 ind[grid_dimensions[1]] = i_col
                 ind[plot_x_dimension] = ...
+                if ((i_row == 0) and (i_col == 0)):
+                   plotdata_x, ploterror_x = pdd_list[2].get_data(plot_error,data_index=ind) 
                 plotdata_y, ploterror_y = pdd_list[3].get_data(plot_error,data_index=ind)
                 if (all_points is True):
                     x = plotdata_x

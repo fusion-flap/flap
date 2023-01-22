@@ -499,13 +499,13 @@ class Coordinate:
         ds_coord = [data_shape[x] for x in self.dimension_list]
         # Removing dimensions with one element
         ds_coord = [x for x in ds_coord if x != 1]
-        if (len(ds_coord) == 0):
-            ds_coord = 1
         if ((type(self.shape) is not tuple) and (type(self.shape) is not list)):
             shape = [self.shape]
         else:
             shape = list(self.shape)
-        return ds_coord == shape
+        # Removing dimensions with one element
+        shape_clean = [x for x in shape if x != 1]
+        return ds_coord == shape_clean
 
     def dtype(self):
         """ Return the data type of the coordinate.

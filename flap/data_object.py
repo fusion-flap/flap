@@ -4084,6 +4084,8 @@ def get_data(data_source,
                 if (len(coordinates[c_name]) != 2):
                     raise ValueError("coordinates keyword argument must be either a list of flap.Coordinates a value or a list of two values.")
                 _coordinates.append(flap.coordinate.Coordinate(name=c_name,c_range=coordinates[c_name]))
+            elif(coordinates[c_name] is None):
+                pass
             else:
                 _coordinates.append(flap.coordinate.Coordinate(name=c_name,c_range=[coordinates[c_name]]*2))
     else:
@@ -4116,7 +4118,7 @@ def get_data(data_source,
     try:
         d.check()
     except (ValueError, TypeError) as e:
-        raise e
+        raise type(e)("Bad DataObject returned by module {:s}: {:s}".format(data_source_local,str(e)))
         
     if ((object_name is not None) and (d is not None)):
         add_data_object(d,object_name)
