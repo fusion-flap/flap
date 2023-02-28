@@ -1792,7 +1792,7 @@ class DataObject:
             raise ValueError("Cannot slice data object without data.")
 
         try:
-            partial_intervals = options['Partial intervals']
+            partial_intervals = _options['Partial intervals']
         except (KeyError, TypeError):
             partial_intervals = False
 
@@ -1945,7 +1945,7 @@ class DataObject:
                     # If the sliced data contains only 1 element removing this dimension
                     if (d_slice.data.shape[slicing_coords[i_sc].dimension_list[0]] == 1):
                         sliced_removed = True
-                        d_slice.data = np.squeeze(d_slice.data)
+                        d_slice.data = np.squeeze(d_slice.data,slicing_coords[i_sc].dimension_list[0])
                     else:
                         sliced_removed = False
                         for i in range(slicing_coords[i_sc].dimension_list[0]+1,len(original_shape)):
@@ -2539,7 +2539,7 @@ class DataObject:
         try:
             d_slice.check()
         except Exception as e:
-            raise RuntimeError("Internal error. Bad data object after slicing:{:s}".format(str(e)))
+            raise RuntimeError("Internal error. Bad data object after slicing: {:s}".format(str(e)))
 
         return d_slice
     # End of slice_data
@@ -3975,6 +3975,7 @@ def list_data_objects(name='*', exp_id='*', screen=True):
                         s += str(c.dimension_list[i1])
                         if (i1 != len(c.dimension_list) - 1):
                             s += ","
+            s += ")"
             if (not c.mode.equidistant):
                 s = s + ", Shape:["
                 if (type(c.shape) is not list):
@@ -3986,7 +3987,8 @@ def list_data_objects(name='*', exp_id='*', screen=True):
                         s += str(shape[i1])
                         if (i1 != len(shape) - 1):
                             s += ","
-            s += "]) ["
+                s += "])"
+            s += " ["
             if (c.mode.equidistant):
                 s += '<Equ.>'
             if (c.mode.range_symmetric):
