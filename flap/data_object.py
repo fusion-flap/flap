@@ -2096,7 +2096,7 @@ class DataObject:
                             pass
 
                     if (len(joint_slices) == 1):
-                        # If slicing is along a single coordinatge then three types of indexing are possible:
+                        # If slicing is along a single coordinate then three types of indexing are possible:
                         # slice, interval list, index list
                         slice_type_processing = slicing_coords[i_sc].mode.equidistant \
                                                 and intervals[0].regular() \
@@ -2137,27 +2137,29 @@ class DataObject:
                             if ((slicing_coords[i_sc].mode.equidistant)  \
                                   and (len(slicing_coords[i_sc].dimension_list) == 1)):
                                 # In this case it is possible to determine index ranges
-                                try:
-                                    d_range
-                                except NameError:
-                                    d_range, d_range_ext = slicing_coords[i_sc].data_range(data_shape=self.shape)
+                                # try:
+                                #     d_range
+                                # except NameError:
+                                d_range, d_range_ext = slicing_coords[i_sc].data_range(data_shape=d_slice.shape)
                                 interval_starts, interval_stops  \
-                                       = intervals[i].interval_limits(limits=d_range,  \
+                                       = intervals[0].interval_limits(limits=d_range,  \
                                                                    partial_intervals=partial_intervals)
+                                # Determining arrays with start and stop indices for each interval
+                                # The stop index is the last index not as in slice where it is over the last index by one
                                 if (slicing_coords[i_sc].step[0] > 0):
                                     starts = np.round((interval_starts - slicing_coords[i_sc].start)
                                                      /slicing_coords[i_sc].step[0]
                                                       ).astype('int32')
                                     stops = np.round((interval_stops - slicing_coords[i_sc].start)
                                                      /slicing_coords[i_sc].step[0]
-                                                     ).astype('int32') + 1
+                                                     ).astype('int32')
                                 else:
                                     starts = np.round((interval_stops - slicing_coords[i_sc].start)
                                                      /slicing_coords[i_sc].step[0]
                                                       ).astype('int32')
                                     stops = np.round((interval_starts - slicing_coords[i_sc].start)
                                                      /slicing_coords[i_sc].step[0]
-                                                     ).astype('int32') + 1
+                                                     ).astype('int32')
 
                                 slice_description = {'Starts':starts, 'Stops':stops}
                                 n_int = starts.size
@@ -2215,13 +2217,13 @@ class DataObject:
                             # Creating an index list for the destination array
                             ind_out = [slice(0,n) for n in new_data_object.data.shape]
                             # Going through the elements in the intervals
-                            for i in range(n_in_int):
-                                s = slice(slice_description.start + i,
-                                          slice_description.stop + i,
+                            for i_interval in range(n_in_int):
+                                s = slice(slice_description.start + i_interval,
+                                          slice_description.stop + i_interval,
                                           slice_description.step)
                                 ind[-1] = s
                                 ind_out[interval_dimension] = slice(0,n_int)
-                                ind_out[in_interval_dimension] = i
+                                ind_out[in_interval_dimension] = i_interval
                                 new_data_object.__copy_data(d_slice,tuple(ind_out),tuple(ind))
                         else:
                             # Here we copy interval-wise
@@ -2238,17 +2240,17 @@ class DataObject:
                             # Creating an index list for the destination array
                             ind_out = [slice(0,n) for n in new_data_object.data.shape]
                             # Going through the intervals
-                            for i in range(n_int):
+                            for i_interval in range(n_int):
                                 if (type(slice_description) is dict):
-                                    s = slice(slice_description['Starts'][i],
-                                              slice_description['Stops'][i]+1)
+                                    s = slice(slice_description['Starts'][i_interval],
+                                              slice_description['Stops'][i_interval] + 1)
                                     s_out = slice(0,s.stop-s.start)
                                 else:
                                     # numpy array
-                                    s = slice_description[i]
+                                    s = slice_description[i_interval]
                                     s_out = slice(0,s.size)
                                 ind[-1] = s
-                                ind_out[interval_dimension] = i
+                                ind_out[interval_dimension] = i_interval
                                 ind_out[in_interval_dimension] = s_out
                                 if (s_out.stop > 0):
                                     new_data_object.__copy_data(d_slice,tuple(ind_out),tuple(ind))
@@ -2590,7 +2592,7 @@ class DataObject:
                 if (start_coord_obj.mode.equidistant):
                    start_coord_obj.start += rel_coord_obj.values
                 else:
-                   start_coord_obj.values += rel_coord_obj.values.astype(start_coord_obj.values.dtype)
+                   start_coord_obj.values = (start_coord_obj.values + rel_coord_obj.values).astype(start_coord_obj.values.dtype)
                 start_coord_obj.unit.name = orig_coord
                 del_list.append(rel_coord_obj.unit.name)
                 del_list.append('Interval('+slice_coord+')')

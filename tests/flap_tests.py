@@ -471,11 +471,13 @@ def test_binning():
               plot_type='image',
               axes=['Image x','Image y'],
               options={'Clear':True,'Interpolation':None,'Aspect':'equal'})
+    flap.list_data_objects('TEST_VIDEO')
     flap.slice_data('TEST_VIDEO',
                     slicing={'Image x':flap.Intervals(0,4,step=5), 'Image y':flap.Intervals(0,9,step=10)},
                     summing={'Interval(Image x) sample index':'Mean','Interval(Image y) sample index':'Mean'},
                     output_name='TEST_VIDEO_binned'
                     )
+    flap.list_data_objects('TEST_VIDEO_binned')
     print("***** Showing one image of the (5,10) binned video ")
     plt.figure()
     flap.plot('TEST_VIDEO_binned',
