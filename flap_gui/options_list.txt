@@ -1,0 +1,56 @@
+
+Time
+Lenght
+All
+Device x
+Device y
+Device z
+Sin
+Complex-Sin
+Const.
+Signal name
+Y sep
+Colormap
+Colorbar
+bwr
+Z range
+Y range
+X range
+linestyle
+marker
+Scaling
+Volt
+Frequency
+Row
+All points
+Interpol
+Linear
+Image x
+Image y
+Aspect ratio
+True
+False
+None
+Clear
+list
+o
+x
+-
+--
+Res
+Int
+step
+start
+stop
+number
+Interval
+Range
+Error
+Log x
+Log y
+Row (Ref)
+Norm
+Log
+Error
+Chop
+Defl
