@@ -285,3 +285,57 @@ After properly written the documentation strings in the code, one can generate t
 4. You got a basic documentation!
 
 Of course, the documentation can be tweaked later by hand and manual pages can also be added later. PDFs and various ebook file types also can be generated, but the default is a HTML structure, where you can search and navigate.
+
+## Other
+
+I found a good (and small) [summary snippet on GitHub](https://gist.github.com/ldong/15dd5764e8a8bf35b6fe) on how to use Sphinx with examples, I just copy it here.
+
+### Python Generate Docs
+
+#### List of Doc Generators
+
+|Name|List|
+|----|----|
+|[mkdocs](http://www.mkdocs.org)| Needs to use markdown files to generate documentations|
+|[pdoc](https://github.com/BurntSushi/pdoc)| Generate to HTML/Plain Text from modules and py files|
+|[sphinx](http://sphinx-doc.org/)| Generate from py files into rST and converts to HTMLs|
+
+
+
+#### Steps
+
+1. Create a sphinx project
+2. Download [RTD theme](https://github.com/snide/sphinx_rtd_theme) if you want it
+3. Edit `source/conf.py` file, and append project path to `sys.path.append('YOUR_PROJECT_PATH')`
+4. Run the following commands to generate sphinx docs
+	```
+	sphinx-build -b html source build
+	```
+	Generated files will be in `./build/index.html`
+5. open index.html
+
+
+Genearte more sphinx-apidocs
+
+```
+sphinx-apidoc --help
+Usage: sphinx-apidoc [options] -o <output_path> <module_path> [exclude_paths, ...]
+```
+
+#### Reference
+
+[Python documentation tools](https://wiki.python.org/moin/DocumentationTools)
+
+[Restructured Text (reST) and Sphinx CheatSheet](http://openalea.gforge.inria.fr/doc/openalea/doc/_build/html/source/sphinx/rest_syntax.html)
+
+[Sphinx Autodoc Tutorial for Dummies](http://codeandchaos.wordpress.com/2012/07/30/sphinx-autodoc-tutorial-for-dummies/)
+
+[Documenting Your Project Using Sphin](https://pythonhosted.org/an_example_pypi_project/sphinx.html)
+
+[First Steps with Sphinx](http://sphinx-doc.org/tutorial.html)
+
+[How to generate sphinx documentation for python code running in an embedded system](https://developer.ridgerun.com/wiki/index.php/How_to_generate_sphinx_documentation_for_python_code_running_in_an_embedded_system)
+
+[Automatically Generating Documentation for All Python Package Contents](http://stackoverflow.com/questions/4616693/automatically-generating-documentation-for-all-python-package-contents/4617804#4617804)
+
+[Easy and beautiful documentation with Sphinx](http://www.ibm.com/developerworks/library/os-sphinx-documentation/)
