@@ -1,11 +1,11 @@
 # FLAP Styleguide
 
 > written by Gabor Cseh  
-> last modified: 16th January 2019
+> last modified: 16th August 2023
 
 The purpose of this document is to give an overview of the coding style requirements for developing the main components of the Fusion Library of Analysis Programs (FLAP) package. (It is not a requirement for developing your own user programs, however, it is still suggested to use this coding style, even when just using FLAP. Or always.).
 
-The coding style in FLAP package follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/ "Link to the PEP 8 documentation") style guide (see examples later), so if you are already know it's rules, you are good to go. Otherwise here are some useful tips about installing and using a style- and code-checking extension ([flake8](http://flake8.pycqa.org/en/latest/ "Link to the flake8 documentation")) in Visual Studio Code and Spyder.
+The coding style in FLAP package follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/ "Link to the PEP 8 documentation") style guide (see examples later), so if you are already know it's rules, you are good to go. Otherwise here are some useful tips about installing and using a style- and code-checking extension ([flake8](http://flake8.pycqa.org/en/latest/ "Link to the flake8 documentation") or [black](https://black.readthedocs.io/en/stable/ "Link to Black documentation")) in Visual Studio Code and Spyder.
 
 ## Extensions/packages for style checking
 
@@ -15,7 +15,7 @@ Before getting to the actual code style guide, here is the list of packages/exte
 
 [Visual Studio Code](https://code.visualstudio.com/ "Link to Visual Studio Code website") is an open source, cross-platform code editor, which is widely used in many environments, e.g. it is available from the Anaconda Python distribution.
 
-To install flake8 code analyzer, you have to install first the [Python extension](https://github.com/Microsoft/vscode-python "Link to the GitHub page of the VSCode Python extension") for VSCode:
+To install flake8 (as of 2023, black formatter seems to be more commonly used) code analyzer, you have to install first the [Python extension](https://github.com/Microsoft/vscode-python "Link to the GitHub page of the VSCode Python extension") for VSCode:
 
 1. Go to the Extension sidebar (or press Ctrl+Shift+X).
 2. Type Python into the "Search Extension in Marketplace" search field.
@@ -100,7 +100,7 @@ Since we follow the guidelines articulated in [Python Enchancment Proposal 8 (PE
 
     > Limiting the required editor window width makes it possible to have several files open side-by-side, and works well when using code review tools that present the two versions in adjacent columns.
 
-    However, if this is not the case at your coding style (means you use one ), it is allowed (as a local rule) to use **120 characters** for code and/or docstrings/comments.
+    However, if this is not the case at your coding style (means you use one), it is allowed (as a local rule) to use **120 characters** for code and/or docstrings/comments.
 
 5. Wrapping long lines:
 
@@ -285,6 +285,16 @@ After properly written the documentation strings in the code, one can generate t
 4. You got a basic documentation!
 
 Of course, the documentation can be tweaked later by hand and manual pages can also be added later. PDFs and various ebook file types also can be generated, but the default is a HTML structure, where you can search and navigate.
+
+## How to update an existing documentation
+
+After you've created a Sphinx project, you can update your documentation by typing
+
+> make html
+
+in the documentation directory (flap/docs/code-docs in our case).
+
+This will build HTML docs in the build directory you chose. Execute **make** without an argument to see which targets are available.
 
 ## Other
 
