@@ -2,7 +2,10 @@
 """
 Created on Fri Apr 12 19:23:25 2019
 
-@author: Zoletnik
+Selecting parts of the data in FLAP.
+
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 import math
 import matplotlib.pyplot as plt

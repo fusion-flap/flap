@@ -2,7 +2,8 @@
 """
 Created on Thu Dec  6 22:11:28 2018
 
-@author: Sandor Zoletnik  (zoletnik.sandor@wigner.mta.hu)
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 
 Example/test programs for FLAP.
 Will run various tests and print/plot the result. 
@@ -79,6 +80,52 @@ def test_storage(signals='TEST-*',timerange=[0,0.001]):
     print("**** Storage contents")
     flap.list_data_objects()
 
+def test_testdata():
+    print()
+    print("\n>>>>>>>>>>>>>>>>>>> Test TESTDATA data source <<<<<<<<<<<<<<<<<<<<<<<<")
+    flap.delete_data_object('*',exp_id='*')
+    print("**** Generating 0.01 s long test data signals on [4,5] matrix with fixed frequency changing from channel to channel")
+    d=flap.get_data('TESTDATA',
+                    name='TEST-*-*',
+                    options={'Scaling':'Volt',
+                              'Frequency':[1e3,1e4],
+                              'Length':1e-2,
+                              'Row number':4,
+                              'Column number':5
+                              },
+                    object_name='TESTDATA'
+                    )
+    plt.figure()
+    print("**** Plotting row 2")
+    d.plot(slicing={'Row':2},axes=['Time'])
+    
+
+    print("**** Generating 0.01 s long test data signal with linearly changing frequency: 10-100kHz")   
+    f = np.linspace(1e4,1e5,num=11)
+    coord = flap.Coordinate(name='Time',
+                            start=0.0,
+                            step=0.001,
+                            mode=flap.CoordinateMode(equidistant=True),
+                            dimension_list=[0]
+                            )
+    f_obj = flap.DataObject(data_array=f,
+                            coordinates=[coord],
+                            data_unit=flap.Unit(name='Frequency',unit='Hz')
+                            )
+    flap.list_data_objects(f_obj)
+    d=flap.get_data('TESTDATA',
+                    name='TEST-1-1',
+                    options={'Scaling':'Volt',
+                             'Frequency':f_obj,
+                             'Length':0.01,
+                             'Row number':1,
+                             'Column number':1
+                             },
+                    object_name='TESTDATA'
+                    )
+    plt.figure()
+    d.plot(axes='Time',options={'All':True})  
+    
 def test_saveload():
     print()
     print("\n>>>>>>>>>>>>>>>>>>> Test save/load <<<<<<<<<<<<<<<<<<<<<<<<")
@@ -297,7 +344,7 @@ def test_plot_xy():
     print("**** Plotting measurement points in device corodinates.")
     plt.figure()
     flap.plot('TESTDATA',axes=['Device x','Device z'],plot_type ='scatter')
-    print("**** Plotting Device x as a funciton of Row.")
+    print("**** Plotting Device x as a function of Row.")
     plt.figure()
     flap.plot('TESTDATA',axes=['Row','Device x'],plot_type ='scatter',)
 
@@ -416,7 +463,7 @@ def test_binning():
     flap.get_data('TESTDATA',
                   name='VIDEO',
                   object_name='TEST_VIDEO',
-                  options={'Length':0.05,'Width':500,'Height':800,'Image':'Gauss','Spotsize':10})
+                  options={'Length':0.05,'Samplerate':1e3,'Width':500,'Height':800,'Image':'Gauss','Spotsize':10})
     print("***** Showing one image")
     plt.figure()
     flap.plot('TEST_VIDEO',
@@ -424,11 +471,13 @@ def test_binning():
               plot_type='image',
               axes=['Image x','Image y'],
               options={'Clear':True,'Interpolation':None,'Aspect':'equal'})
+    flap.list_data_objects('TEST_VIDEO')
     flap.slice_data('TEST_VIDEO',
                     slicing={'Image x':flap.Intervals(0,4,step=5), 'Image y':flap.Intervals(0,9,step=10)},
                     summing={'Interval(Image x) sample index':'Mean','Interval(Image y) sample index':'Mean'},
                     output_name='TEST_VIDEO_binned'
                     )
+    flap.list_data_objects('TEST_VIDEO_binned')
     print("***** Showing one image of the (5,10) binned video ")
     plt.figure()
     flap.plot('TEST_VIDEO_binned',
@@ -455,7 +504,7 @@ def test_detrend():
 def test_apsd():
     plt.close('all')
     print()
-    print('>>>>>>>>>>>>>>>>>>> Test apds (Auto Power Spectral Density) <<<<<<<<<<<<<<<<<<<<<<<<')
+    print('>>>>>>>>>>>>>>>>>>> Test apsd (Auto Power Spectral Density) <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
     #plt.close('all')
     print('**** Generating test signals with frequency changing from channel to channel.')
@@ -662,7 +711,7 @@ def test_image():
     print('>>>>>>>>>>>>>>>>>>> Test image <<<<<<<<<<<<<<<<<<<<<<<<')
     flap.delete_data_object('*')
     print("**** Generating a sequence of test images")
-    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1})
+    flap.get_data('TESTDATA',name='VIDEO',object_name='TEST_VIDEO',options={'Length':0.1,'Samplerate':1e3, 'Frequency':10,'Spotsize':100})
     flap.list_data_objects()
     print("***** Showing one image")
     plt.figure()
@@ -697,6 +746,49 @@ def test_image():
     print("**** Showing this video and saving to  test_video_noneq.avi")
     flap.plot('TEST_VIDEO_noneq',plot_type='anim-image',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_noneq.avi','Colorbar':True,'Aspect ratio':'equal'})
+def test_pdf():
+    print('>>>>>>>>>>>>>>>>>>> Test Probability Distribution Function (PDF) <<<<<<<<<<<<<<<<<<<<<<<<')
+    print("**** Generating 10x15 random test signals, 5000 points each, 1 MHz sampling.")
+    flap.get_data('TESTDATA',
+                  name='TEST-*-*',
+                  options={'Length':0.005, 'Signal':'Sin'},
+                  object_name='TESTDATA')
+    flap.pdf('TESTDATA',coordinate='Time',options={'Number':30},output_name='PDF')
+    flap.list_data_objects()
+    plt.figure()
+    flap.plot('PDF',slicing={'Column':3},axes=['Signal'])
+    plt.title('PDF of sine waves')
+    
+def test_stft():
+    print('>>>>>>>>>>>>>>>>>>> Test Short Time Fourier Transform (STFT) <<<<<<<<<<<<<<<<<<<<<<<<')
+    print("**** Generating 0.1 s long test data signal with linearly changing frequency: 10-100kHz")   
+    f = np.linspace(1e4,1e5,num=11)
+    coord = flap.Coordinate(name='Time',
+                            start=0.0,
+                            step=0.01,
+                            mode=flap.CoordinateMode(equidistant=True),
+                            dimension_list=[0]
+                            )
+    f_obj = flap.DataObject(data_array=f,
+                            coordinates=[coord],
+                            data_unit=flap.Unit(name='Frequency',unit='Hz')
+                            )
+    d=flap.get_data('TESTDATA',
+                    name='TEST-1-1',
+                    options={'Scaling':'Volt',
+                             'Frequency':f_obj,
+                             'Length':0.1,
+                             'Row number':1,
+                             'Column number':1
+                             },
+                    object_name='TESTDATA'
+                    )
+    flap.stft('TESTDATA',output_name='TEST_STFT')
+    flap.abs_value('TEST_STFT',output_name='TEST_STFT')
+    flap.list_data_objects()
+    plt.figure()
+    flap.plot('TEST_STFT',axes=['Time','Frequency'],plot_type='image')
+    
  
 def show_plot():
     plt.pause(0.05)
@@ -715,16 +807,22 @@ def key_pressed():
     global keypressed
     if (keypressed is not None):
         return True
+    
+def wait_press(flag=False):
+    if (flag):
+        input("Press Enter to continue...")
 
-def wait_for_key():
-    print("Press any key ON A PLOT to continue...")
-    fig = plt.gcf()
-    kbd_press = fig.canvas.mpl_connect('key_press_event', keypress_event)
-    keypress_start()
-    while not key_pressed():
-        time.sleep(0.01)
-        plt.pause(0.01)
-    fig.canvas.mpl_disconnect(kbd_press)
+def wait_for_key(flag=False):
+    if (flag):
+        print("Press any key ON A PLOT to continue...")
+        fig = plt.gcf()
+        kbd_press = fig.canvas.mpl_connect('key_press_event', keypress_event)
+        keypress_start()
+        while not key_pressed():
+            time.sleep(0.01)
+            plt.pause(0.01)
+        fig.canvas.mpl_disconnect(kbd_press)
+    
     
 # Reading configuration file in the test directory
 thisdir = os.path.dirname(os.path.realpath(__file__))
@@ -742,31 +840,31 @@ plt.rcParams["figure.figsize"] = [root.winfo_screenwidth()*0.3/dpi, root.winfo_s
 
 if (False or test_all):
     test_storage()
-    input("Press Enter to continue...")
+    wait_press()
+if (False or test_all):
+    test_testdata()
+    wait_press()
 if (False or test_all):
     test_saveload()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_coordinates()
     show_plot()
     wait_for_key()
 if (False or test_all):    
     test_arithmetic()
-    input("Press Enter to continue...")
+    wait_press()
 if (False or test_all):
     test_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_plot_xy()
     show_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_plot_multi_xy()
     show_plot()
     wait_for_key()
-#    input("Press Enter to continue...")
 if (False or test_all):
     test_simple_slice()
     show_plot()
@@ -804,9 +902,16 @@ if (False or test_all):
     show_plot()
     wait_for_key()
 if (False or test_all):
+    test_stft()
+    show_plot()
+    wait_for_key()
+if (False or test_all):
     test_image()
     show_plot()
     wait_for_key()
+if (False or test_all):
+    test_pdf()
+    wait_press()
 
 print(">>>>>>>>>>>>>>>> All tests finished <<<<<<<<<<<<<<<<<<<<")
 

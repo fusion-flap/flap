@@ -2,9 +2,10 @@
 """
 Created on Thu Mar  7 10:34:49 2019
 
-@author: Zoletnik
+Spectral analysis tools for FLAP
 
-Spectral analysis tools fro FLAP
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 import math
 import numpy as np
@@ -506,7 +507,8 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
                     error=out_err,
                     coordinates=d.coordinates,
                     exp_id=d.exp_id,
-                    data_unit=flap.coordinate.Unit("Spectral density"))
+                    data_unit=flap.coordinate.Unit("Spectral density"),
+                    data_title='Power spectrum')
 
     if (wavenumber):
         out_name = 'Wavenumber'
@@ -1075,9 +1077,10 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                 apsd_ref_interval[tuple(ind_nonzero_apsd_ref)] /= out_data_num[index_nonzero].reshape(bs_apsd_ref)
         else:
             out_data_interval /= out_data_num.reshape(bs)
-            apsd_interval /= out_data_num.reshape(bs_apsd)
-            apsd_ref_interval /= out_data_num.reshape(bs_apsd_ref)
-        out_data_interval /= interval_sample_n
+            if (aps_calc):
+                apsd_interval /= out_data_num.reshape(bs_apsd)
+                apsd_ref_interval /= out_data_num.reshape(bs_apsd_ref)
+            out_data_interval /= interval_sample_n
         out_data += out_data_interval
         if (aps_calc):
             apsd_interval /= interval_sample_n

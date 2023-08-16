@@ -6,9 +6,6 @@ It is assumed that measurement channels collect temporal data on a 2D mesh in th
 The measurement channels are named as TEST-<row>-<colunn>
 <row>:  1....15
 <column>:  1...10
-Sample time is 1 MHz between 0,1 seconds. The signals are sine waves with 1 kHz frequency
-The amplitude has Gaussian distribution around the channel matrix center.
-Signal unit is Volt, signal amplititude max is 1V, ADC digit is 1 mV
 
 The row/column locations relative to the array corner are:
     xr = (<column>-1)*0.5 [cm]
@@ -27,7 +24,8 @@ Z is z
 
 Created on Thu Jan 17 10:29:56 2019
 
-@author: Zoletnik
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 
 import math
@@ -53,23 +51,50 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                        
         options:
             'Scaling': 'Volt', 'Digit'
-            'Signal' : 'Sin'  Sine signals
+            'Signal' :'Sin'  Sine signals
                       'Const.' : Constant values with row*COLUMN_NUMBER+column
                       'Complex-Sin': Same as Sine but an imaginary cosine is added
                       'Random': Random (normal dist.) signal in all channels
+            'Row number': Number of rows for signal matrix
+            'Column number': Number of columns for signal matrix
+            'Matrix angle': The angle [deg] of the signal matrix
             'Image' : 'Gauss' Gaussian spot
                       'Random'  Random int16 values between 0 and 4095
             'Spotsize': Full width at half maximum of spot in pixels
             'Width'   : Image width in pixels (x size)
             'Height'  : Image height in pixels (y size)
-            'Frequency' : <number> Fixed frequency of signals
-                        : [f2,f2]: Changes from channel-to-channel between these frequencies
+            'Frequency' : <number> Fixed frequency of signals [Hz]
+                                   For "Gauss" video data the rotation frequency of the spot
+                        : [f2,f2]: Changes from channel-to-channel between these frequencies [Hz]
+                        : data object: should be data object with Time coordinate and Frequency as data
+                                       If has one channel describes frequency vs time for all channels
+                                       If multiple signals (coordinate Signal name describes signals) describes frequency
+                                          vs time for channels. Should have the same number of channels as for the generation.
+                                          
             'Length': Length in second. The sample rate is 1 MHz
             'Samplerate': Sample rate [Hz]
     """
     if (data_source is None ):
         data_source = 'TESTDATA'
-    
+
+    default_options = {'Row number': 10,
+                       'Column number': 15,
+                       'Matrix angle': 0.0,
+                       'Scaling': 'Volt',
+                       'Signal': 'Sin',
+                       'Image':'Gauss',
+                       'Spotsize':100,
+                       'Width': 640,
+                       'Height': 480,
+                       'Frequency': 1e3,
+                       'Length': 0.1,
+                       'Samplerate':1e6
+                       }
+    _options = flap.config.merge_options(default_options, options, data_source=data_source)
+
+    ROW_NUMBER = _options['Row number']
+    COLUMN_NUMBER = _options['Column number']
+    alpha = _options['Matrix angle']
     # creating a list of signal names
     signal_list = []
     for row in range(ROW_NUMBER):
@@ -91,28 +116,6 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
         test_image = False
     if (test_image and (len(signal_select) != 1)):
             raise ValueError("VIDEO data cannot be read together with test signals.")
-
-    if (test_image):
-        default_options = {'Signal': 'Sin',
-                           'Scaling': 'Volt',
-                           'Frequency': 30,
-                           'Length': 0.1,
-                           'Samplerate':1e3,
-                           'Image':'Gauss',
-                           'Width': 1280,
-                           'Height': 1024,
-                           'Spotsize': 100
-                           }
-    else:
-        default_options = {'Signal': 'Sin',
-                           'Scaling': 'Volt',
-                           'Frequency': 1E3,
-                           'Length': 0.1,
-                           'Samplerate':1e6,
-                           'Image':None
-                           }
-        
-    _options = flap.config.merge_options(default_options,options,data_source=data_source)
 
     meas_timerange = [0, _options['Length']]
     meas_sampletime = 1./_options['Samplerate']
@@ -229,7 +232,7 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
         # Reading the signals
     
         for i in range(len(row_list)):
-            # Determining row and column numbers from
+            # Determining row and column numbers
             r = row_list[i]
             c = column_list[i]
             signal_type = _options['Signal']
@@ -237,20 +240,34 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
                 amp = (r-float(ROW_NUMBER)/2)**2 / (2*(float(ROW_NUMBER)/4)**2) \
                        * (c-float(COLUMN_NUMBER)/2)**2 / (2*(float(COLUMN_NUMBER)/4)**2)
                 amp = math.exp(-amp)
-                s = np.linspace(float(meas_timerange[0]), float(meas_timerange[1]),
-                                num=meas_sample)
+                n_sample = round(_options['Samplerate'] * _options['Length'])
+                # Sample times for all signal 
+                t = np.arange(meas_sample) * meas_sampletime
                 if (type(_options['Frequency']) == list):
                     flist = _options['Frequency']
                     f = float(flist[1] - flist[0])/(len(signal_select)-1)*i + flist[0]
+                    ph = t * 2 * math.pi * f
+                elif (type(_options['Frequency']) == flap.DataObject):
+                    if (len(_options['Frequency'].shape) == 1):
+                        tf,t_low,t_high = _options['Frequency'].coordinate('Time',options={'Change only':True})
+                        f = _options['Frequency'].data
+                        if ((np.amin(tf) > 0) or (np.amax(tf) < _options['Length'])):
+                            raise ValueError('Frequency time evolution is not available for sample range [0,{:f}]s.'.format(_options['Length']))
+                        fi = np.interp(t,tf,f)
+                        ph = np.cumsum(2 * math.pi * fi /_options['Samplerate'])
+                    else:
+                        raise NotImplementedError("Variable frequency for multiple channels not supported yet.")
+                    
                 else:
                     f = float(_options['Frequency'])
+                    ph = t * 2 * math.pi * f
                 if (signal_type == 'Sin'):
-                    signal = np.sin(s*2*math.pi*f)*amp
+                    signal = np.sin(ph) * amp
                     signal = np.rint(signal/meas_ADC_step)
                 if (signal_type == 'Complex-Sin'):
-                    signal_re = np.sin(s*2*math.pi*f)*amp
+                    signal_re = np.sin(ph)*amp
                     signal_re = np.rint(signal_re/meas_ADC_step)
-                    signal_im = np.cos(s*2*math.pi*f)*amp
+                    signal_im = np.cos(ph)*amp
                     signal_im = np.rint(signal_im/meas_ADC_step)
                     signal = np.empty(signal_re.shape,dtype=complex)
                     signal.real = signal_re
@@ -262,22 +279,12 @@ def testdata_get_data(exp_id=None, data_name='*', no_data=False,
             else:
                 raise ValueError("Signal type '"+signal_type+"' is not understood.")
     
-            # The actual signal read. Excepts are not necessary here only if
-            # file read is involved.
             if (len(signal_select) == 1):
-                try:
-                    if (no_data == False):
-                        data_arr = signal[int(read_samplerange[0]):int(read_samplerange[1])+1]
-                except Exception as e:
-                    e
-                    raise IOError("Error reading from file.")
+                if (no_data == False):
+                    data_arr = signal[int(read_samplerange[0]):int(read_samplerange[1])+1]
             else:
-                try:
-                    if (no_data == False):
-                        d = signal[int(read_samplerange[0]):int(read_samplerange[1])+1]
-                except Exception as e:
-                    e
-                    raise IOError("Error reading from file.")
+                if (no_data == False):
+                    d = signal[int(read_samplerange[0]):int(read_samplerange[1])+1]
                 if (twodim):
                      if (no_data == False):
                         if (data_arr is None ):

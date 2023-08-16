@@ -1,15 +1,15 @@
-# -*- coding: utf-8 -*-
 """
 Created on Wed Jan 23 09:44:50 2019
 
-@author: Zoletnik
+This is the coordinate description and realted methods for FLAP
 
-This is the coordinate description for FLAP
+@author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
+Centre for Energy Research
 """
 
 import math
 import numpy as np
-import flap.tools
+from .tools import *
 import flap.config
 import copy
 from decimal import Decimal
@@ -304,7 +304,7 @@ class Coordinate:
                  value_index=None,
                  value_ranges=None,
                  dimension_list=[]):
-        # This is a UnitClass describing the name and unit
+        # This is a Unit Class describing the name and unit
         self.unit = Unit(name=name,unit=unit)
         # mode is a collection of flags
         # flap.Coordinate.EQUIDISTANT: coordinate changes proportionally to samples number
@@ -317,7 +317,7 @@ class Coordinate:
         # Actually in the equidistant case only the dimension of shape is used.
         self.shape = shape
         # start and step describes the coordinate mapping if EQUIDISTANT flag is set.
-        # Start is scalar and step is a 1Dd list with the same number of elements as dimension_list.
+        # Start is scalar and step is a 1D list with the same number of elements as dimension_list.
         # Would have been good to use decimal.Decimal types but operations between float and Decimal
         # are not allowed, therefore using float
         self.start = start
@@ -499,13 +499,13 @@ class Coordinate:
         ds_coord = [data_shape[x] for x in self.dimension_list]
         # Removing dimensions with one element
         ds_coord = [x for x in ds_coord if x != 1]
-        if (len(ds_coord) == 0):
-            ds_coord = 1
         if ((type(self.shape) is not tuple) and (type(self.shape) is not list)):
             shape = [self.shape]
         else:
             shape = list(self.shape)
-        return ds_coord == shape
+        # Removing dimensions with one element
+        shape_clean = [x for x in shape if x != 1]
+        return ds_coord == shape_clean
 
     def dtype(self):
         """ Return the data type of the coordinate.
@@ -624,7 +624,7 @@ class Coordinate:
         if ((index is not None) and _options['Change only']):
             raise ValueError("index and 'Change only' option cannot be used at the same time in Coordinate.data().")
         if (_options['Change only']):
-            if (self.change_dimensions is []):
+            if (self.change_dimensions() is []):
                 index = ...
             else:    
                 index = [0] * len(data_shape)
@@ -782,9 +782,9 @@ class Coordinate:
                     value_mx_high = None
 
             else:
-                # Interpolation is necesary
+                # Interpolation is necessary
                 raise NotImplementedError(
-                       "Interpolating for coordinate determination is not implemented yet.")
+                       "Interpolating for coordinate determination is not implemented yet. Coordinate:{:s}".format(self.unit.name))
 
         # Extending value_mx and like to the output shape
         # First creating a dimension list where this coordinate does not change
