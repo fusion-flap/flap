@@ -1835,7 +1835,7 @@ def _plot(data_object,
             raise TypeError("Image/contour plot is applicable only to real data.")
         # Checking for numeric type
         try:
-            d.data[0,0] += 1
+            testdat = d.data[0,0] + 1
         except TypeError:
             raise TypeError("Image plot is applicable only to numeric data.")
         
