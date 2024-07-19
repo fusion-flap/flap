@@ -3250,8 +3250,8 @@ class DataObject:
         except OSError:
             raise ValueError("Cannot open file "+filename)
         try:
-            d = self
-            pickle.dump(d,f,protocol=protocol)
+            save_data = {'FLAP any data':self}
+            pickle.dump(save_data,f,protocol=protocol)
         except pickle.PicklingError:
             raise TypeError("Error encoding data object.")
         try:
