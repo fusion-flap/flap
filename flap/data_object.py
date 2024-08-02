@@ -4204,7 +4204,7 @@ def plot(object_name,exp_id='*',axes=None, slicing=None, summing=None, options=N
 
 def slice_data(object_name,exp_id='*',output_name=None,slicing=None,summing=None,options=None):
     """
-    slice function for an object in flap storage. This is a wrapper for DataObject.slicec_data()
+    slice function for an object in flap storage. This is a wrapper for DataObject.slice_data()
     If output name is set the sliced object will be written back to the flap storage under this name.
     """
     try:
