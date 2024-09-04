@@ -3505,15 +3505,18 @@ class DataObject:
               the data name is not the same as `coordinate`, a coordinate with the
               same name will be searched for in the data object and the
               `value_ranges` will be used from it to set the intervals.
+
             - If not a dictionary and not None, it is interpreted as the
               interval description, the selection coordinate is taken the same
               as `coordinate`.
+
             - If None, the whole data interval will be used as a single
               interval.
 
         options : dict, optional, default=None
             Options for detrending. (Keys can be abbreviated.) Possible keys and
             values:
+
             - 'Trend removal' (default=['Poly', 2]): Trend removal description.
               (See also `flap.spectral_analysis._trend_removal()`.)
 
@@ -3926,19 +3929,21 @@ class DataObject:
             Information of processing intervals.
 
             - If dictionary with a single key: {selection coordinate:
-            description}). Key is a coordinate name which can be different
-            from the calculation coordinate. Description can be
-            `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
-            it is a data object with data name identical to the coordinate,
-            the error ranges of the data object will be used for interval. If
-            the data name is not the same as `coordinate`, a coordinate with the
-            same name will be searched for in the data object and the
-            `value_ranges` will be used from it to set the intervals.
+              description}). Key is a coordinate name which can be different
+              from the calculation coordinate. Description can be
+              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              it is a data object with data name identical to the coordinate,
+              the error ranges of the data object will be used for interval. If
+              the data name is not the same as `coordinate`, a coordinate with the
+              same name will be searched for in the data object and the
+              `value_ranges` will be used from it to set the intervals.
+
             - If not a dictionary and not None, it is interpreted as the
-            interval description, the selection coordinate is taken the same
-            as `coordinate` (or its first element).
+              interval description, the selection coordinate is taken the same
+              as `coordinate` (or its first element).
+
             - If None, the whole data interval will be used as a single
-            interval.
+              interval.
 
         options : dict, optional, default=None
             Options for generating the PDF. Possible keys and values:
@@ -5071,9 +5076,12 @@ def add_coordinate(object_name,
         Possible keys and values:
 
         - 'exp_ID': 
+
           - str: Use this `exp_id` for calculating coordinates instead of the one
             in the data object
+
         - 'data_source': 
+
           - str: Use this data source instead of the one in the data
             object.
 
@@ -6126,15 +6134,18 @@ def detrend(object_name,
           the data name is not the same as `coordinate`, a coordinate with the
           same name will be searched for in the data object and the
           `value_ranges` will be used from it to set the intervals.
+
         - If not a dictionary and not None, it is interpreted as the
           interval description, the selection coordinate is taken the same
           as `coordinate`.
+
         - If None, the whole data interval will be used as a single
           interval.
 
     options : dict, optional, default=None
         Options for detrending. (Keys can be abbreviated.) Possible keys and
         values:
+
         - 'Trend removal': Trend removal description. (See also
           `flap.spectral_analysis._trend_removal()`.)
 
@@ -6312,19 +6323,21 @@ def pdf(object_name,
         Information of processing intervals.
 
         - If dictionary with a single key: {selection coordinate:
-        description}). Key is a coordinate name which can be different
-        from the calculation coordinate. Description can be
-        `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
-        it is a data object with data name identical to the coordinate,
-        the error ranges of the data object will be used for interval. If
-        the data name is not the same as `coordinate`, a coordinate with the
-        same name will be searched for in the data object and the
-        `value_ranges` will be used from it to set the intervals.
+          description}). Key is a coordinate name which can be different
+          from the calculation coordinate. Description can be
+          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          it is a data object with data name identical to the coordinate,
+          the error ranges of the data object will be used for interval. If
+          the data name is not the same as `coordinate`, a coordinate with the
+          same name will be searched for in the data object and the
+          `value_ranges` will be used from it to set the intervals.
+
         - If not a dictionary and not None, it is interpreted as the
-        interval description, the selection coordinate is taken the same
-        as `coordinate` (or its first element).
+          interval description, the selection coordinate is taken the same
+          as `coordinate` (or its first element).
+
         - If None, the whole data interval will be used as a single
-        interval.
+          interval.
 
     options : dict, optional, default=None
         Options for generating the PDF. Possible keys and values:
@@ -6448,7 +6461,7 @@ def load(filename, options=None):
         - 'No storage' (default=False):
 
           - bool: If True, don't store data in `flap_storage`, just return a
-          list of them.
+            list of them.
 
     Returns
     -------

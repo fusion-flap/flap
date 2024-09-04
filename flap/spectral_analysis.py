@@ -207,7 +207,7 @@ def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=Fals
         - list: 
 
           - ``['poly', n]``: Fit an `n` order polynomial to the data
-              and subtract.
+            and subtract.
 
         - str:
 
@@ -232,7 +232,7 @@ def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=Fals
         - If `return_trend` is True, the trend data is returned.
         
         - If `return_trend` is True, and a polynomial fitting is performed, the
-        trend data is returned.
+          trend data is returned.
 
         - Otherwise, return None.
     """

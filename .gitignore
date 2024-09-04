@@ -67,6 +67,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+_build/
+docs/generated/
 
 # PyBuilder
 target/
@@ -113,3 +115,6 @@ venv.bak/
 
 #test save
 flap_save_test.dat
+
+# scratch folder
+/scratch

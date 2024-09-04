@@ -27,11 +27,11 @@ dependencies:
   - brotlipy=0.7.0=py39h3811e60_1003
   - bzip2=1.0.8=h7f98852_4
   - c-ares=1.18.1=h7f98852_0
-  - ca-certificates=2023.5.7=hbcca054_0
+  - ca-certificates=2024.7.2=h06a4308_0
   - cached-property=1.5.2=hd8ed1ab_1
   - cached_property=1.5.2=pyha770c72_1
   - cairo=1.16.0=ha12eb4b_1010
-  - certifi=2023.5.7=pyhd8ed1ab_0
+  - certifi=2024.7.4=py39h06a4308_0
   - cffi=1.15.0=py39h4bc2ebd_0
   - chardet=4.0.0=py39hf3d152e_2
   - charset-normalizer=2.0.12=pyhd8ed1ab_0
@@ -178,7 +178,7 @@ dependencies:
   - openh264=2.1.1=h780b84a_0
   - openjpeg=2.4.0=hb52868f_1
   - openpyxl=3.0.9=pyhd8ed1ab_0
-  - openssl=1.1.1o=h166bdaf_0
+  - openssl=1.1.1w=h7f8727e_0
   - packaging=21.3=pyhd8ed1ab_0
   - pandas=1.4.2=py39h1832856_1
   - pandoc=2.17.1.1=ha770c72_0
@@ -247,9 +247,12 @@ dependencies:
   - sortedcontainers=2.4.0=pyhd8ed1ab_0
   - soupsieve=2.3.1=pyhd8ed1ab_0
   - sphinx=4.4.0=pyh6c4a22f_1
+  - sphinx-rtd-theme=1.2.0=pyhd3eb1b0_0
+  - sphinx_rtd_theme=1.2.0=py39h06a4308_0
   - sphinxcontrib-applehelp=1.0.2=py_0
   - sphinxcontrib-devhelp=1.0.2=py_0
   - sphinxcontrib-htmlhelp=2.0.0=pyhd8ed1ab_0
+  - sphinxcontrib-jquery=4.1=py39h06a4308_0
   - sphinxcontrib-jsmath=1.0.1=py_0
   - sphinxcontrib-qthelp=1.0.3=py_0
   - sphinxcontrib-serializinghtml=1.1.5=pyhd8ed1ab_1
@@ -303,4 +306,6 @@ dependencies:
   - zipp=3.7.0=pyhd8ed1ab_1
   - zlib=1.2.11=h36c2ea0_1013
   - zstd=1.5.2=ha95c52a_0
-prefix: /home/zoletnik/anaconda3/envs/flap
+  - pip:
+      - lxml==5.3.0
+prefix: /home/takd/anaconda3/envs/flap

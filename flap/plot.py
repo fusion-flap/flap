@@ -110,7 +110,7 @@ class PlotDataDescription:
         plot_data : np.ndarray
             The data to plot.
         plot_error : np.ndarray
-            If `plot_error`is true, the calculated error.
+            If `plot_error` is True, the calculated error.
         """
             
         if (self.data_type == PddType.Data):

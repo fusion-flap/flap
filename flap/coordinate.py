@@ -766,20 +766,28 @@ class Coordinate:
             identical to the number of dimensions of the data array. Elements
             can be a mixture of numbers, slice objects, lists, numpy arrays,
             integer iterators and ellipses.
+
             Examples for 3D array:
+
             - ``(...,0,0)``: coordinates of the elements in the first row of the
               data array
+
             - ``(slice(2,5),2,...)``
+
         data_shape : array_like, optional, default=None
             The shape of the data array (without slicing) for which coordinates
             are requested.
         options : dict, optional, default=None
             Dictionary with options for processing:
+
             - 'Interpolation' (default='Linear'):
-                - 'Linear': For non-equidistant axis, when
-                  values shape is different from data shape)
+
+              - 'Linear': For non-equidistant axis, when
+                values shape is different from data shape)
+
             - 'Change only' (default=False): 
-                - True (return only the data for those dimensions where this
+
+              - True (return only the data for those dimensions where this
                 coordinate changes. E.g. if it changes only along one dimension
                 the output array will have 1 element in all other dimensions.)
 
