@@ -15,21 +15,28 @@ import copy
 from decimal import Decimal
 
 class Intervals:
-    """ A class to describe a series of intervals.
-        Regular intevals are identical length ones repeating with a fixed step.
-        Irregulars are just a list of start-stop values.
-        For integer type values both the start and stop value is included.
-        The optional number gives the number of ranges for the regular intervals.
+    """Class to describe a series of intervals.
+
+    Different types of intervals exist:
+    - Regular intevals are identical length ones repeating with a fixed step.
+    - Irregulars are just a list of start-stop values.
+    - For integer type values both the start and stop value is included.
+    - The optional number gives the number of ranges for the regular intervals.
+
+    Parameters
+    ----------
+    start, stop : int | float | ndarray
+        For regular intervals: start and stop value of first interval.
+        For irregular intervals: start and stop value of all intervals.
+        (Identical-length numpy arrays.)
+    step : int | float, optional, default=None
+        If not given, the intervals are assumed to be irregular, othewise
+        regular.
+    number : int, optional, default=None
+        The number of intervals in regular case. If not set, the intervals
+        continue indefinitely.
     """
     def __init__(self,start,stop,step=None,number=None):
-        """
-           step: If not given the intervals are assumed to be irregular, othewise regular.
-           start, stop: Regular case:
-                           start and stop value of first interval
-                        Irregular case:
-                           start and stop value of all intervals. (Identical length numpy arrays.)
-           number: The number of intervals in regular case. If not set the intervals continue indefinitely.
-        """
         if (step is None):
             regular = False
         else:
@@ -79,22 +86,34 @@ class Intervals:
                 raise ValueError("Non-numeric type in selection interval.")
 
     def regular(self):
+        """Returns True if the interval is regular, otherwise returns False.
+
+        Returns
+        -------
+        bool
+        """
         if (self.step is None):
             return False
         else:
             return True
 
     def interval_limits(self,limits=None,partial_intervals=False):
-        """ Return the range lower and upper limits as two numpy arrays.
-            Limit the ranges within argument limits. (limits[0] < limits[1])
-            limits: 2 elements list with lower and upper limit
+        """Return the range lower and upper limits as two numpy arrays. Limit
+        the ranges within argument limits.
+        
+        Parameters
+        ----------
+        limits : array_like, optional, default=None
+            Two-element list with lower and upper limit, in this order.
+        partial_intervals : bool, optional, default=False
+            Return also partial ranges which extend over limits.  Their size
+            will be truncated.
 
-            partial_intervals: Return also partial ranges which extend over limits.
-                            Their size will be truncated.
-
-            Raises a ValueError if there are no intervals within  limit or other problem.
+        Returns
+        -------
+        range_starts, range_stops: ndarray
+            The range lower and upper limits.
         """
-
         if ((limits is None) and self.regular() and (self.number is None)):
             raise ValueError("For the range limits either the number of intervals or limits must be set.")
 
@@ -131,15 +150,23 @@ class Intervals:
         return range_starts, range_stops
 
     def interval_number(self,limits=None,partial_intervals=False):
-        """ Return the number of intervals and the index of the start interval.
-            Limit the ranges within argument limits.
-            limits: 2 elements list with lower and upper limit
+        """Return the number of intervals and the index of the start interval.
+        Limit the ranges within argument limits.
 
-            partial_intervals: Take into account also partial ranges which extend over limits.
+        Parameters
+        ----------
+        limits : array_like, optional, default=None
+            2 elements list with lower and upper limit.
+        partial_intervals : bool, optional, default=False
+            Take into account also partial ranges which extend over limits.
 
-            Raises a ValueError in case of problem.
+        Returns
+        -------
+        int
+            The number of intervals.
+        int
+            The index of the start interval.
         """
-
         if ((limits is None) and self.regular() and (self.number is None)):
             raise ValueError("For the range limits either the number of intervals or limits must be set.")
 
@@ -201,20 +228,41 @@ class Intervals:
                 return ind.size, ind[0]
 
 class Unit:
-    """ Class for the unit of the data
+    """ Class representing the unit of a quantity.
+
+    Parameters
+    ----------
+    name: str, optional, default=''
+        Name of the quantity. (E.g. 'Time'.)
+    unit: str, optional, default=''
+        Name of the unit. (E.g. 'Second'.)
     """
     def __init__(self,name="",unit=""):
         self.name = name
         self.unit = unit
-    
+
     def title(self,language='EN',complex_txt=None,new_unit=None):
-        """ Returns a title string which will be used in plotting.
-            complex_txt: List of 2 numbers:
-                         [0,0]: Amplitude
-                         [0,1]: Phase
-                         [1,0]: Real
-                         [1,1]: Imaginary
-        """
+        """Returns a title string to be used in plotting.
+
+        Parameters
+        ----------
+        language : {'EN', 'HU'}, optional, default='EN'
+            Language to be used for creating the title string.
+        complex_txt : {[0, 0], [0, 1], [1, 0], [1, 1]}, optional, default=None
+            List of 2 numbers representing which component of a complex variable
+            is used:
+            - ``[0,0]``: Amplitude
+            - ``[0,1]``: Phase
+            - ``[1,0]``: Real
+            - ``[1,1]``: Imaginary
+        new_unit : str, optional, default=None
+            Unit string override to be used instead of `self.unit`.
+
+        Returns
+        -------
+        str
+            The title string.
+        """        
         if (language == 'EN'):
             if ((self.unit is None) or (self.unit == '')):
                 unit_txt = ' [a.u.]'
@@ -267,7 +315,14 @@ class Unit:
         return txt
 
 class CoordinateMode:
-    """ Class for storing mode flags of the coordinate description
+    """Class for storing mode flags of the coordinate description.
+
+        Parameters
+        ----------
+        equidistant : bool, optional, default=True
+            Whether the coordinate values are equidistant.
+        range_symmetric : bool, optional, default=True
+            Whether the ranges corresponding to the coordinates are symmetric.
     """
     def __init__(self,equidistant=True, range_symmetric=True):
         self.equidistant = equidistant
@@ -276,21 +331,76 @@ class CoordinateMode:
 
 class Coordinate:
     # These are bit flags for self.mode
-    """ Class for the description of a mapping of coordinate values from an n-dimensional coordinate
-        sample space to coordinates of an m-dimensional data matrix.
-        Coordinate sample space is a rectangular equidistant point matrix, with equal steps in each dimension.
-        For dimension i sample index is from 0...n-1 if shape[i] == n
-        The sample space in this coordinate description does not necessarily match the shape of
-        any sub-matrix of the data object. If the shape is different then interpolation is done assuming
-        the coordinate of the first(last) point of the coordinate matrix is the coordinate of the first(last)
-        data point.
+    """ Class for the description of a mapping of coordinate values from an
+    n-dimensional coordinate sample space to coordinates of an m-dimensional
+    data matrix.
 
-        Coordinate can be anything described by name and unit.
-        Standard coordinates: Time, Channel, Channel number, Device_x, Device_y, Device_z, Device_R, Device_Z, Device_phi,
-                              Flux_r, Flux_theta, Flux_phi, Frequency, Time lag
+    The coordinate sample space is a rectangular equidistant point matrix, with
+    equal steps in each dimension.  For dimension ``i``, the sample index spans
+    ``0 ... n-1`` if ``shape[i] == n``.
+    
+    The sample space in this coordinate description does not necessarily match
+    the shape of any sub-matrix of the data object. If the shape is different
+    then interpolation is done assuming the coordinate of the first(last) point
+    of the coordinate matrix is the coordinate of the first(last) data point.
+    
+    A coordinate can be anything described by name and unit.  Standard
+    coordinates: 'Time', 'Channel', 'Channel number', 'Device_x', 'Device_y',
+    'Device_z', 'Device_R', 'Device_Z', 'Device_phi', 'Flux_r', 'Flux_theta',
+    'Flux_phi', 'Frequency', 'Time lag'.
+    
+    The ranges and start-step pair of parameters are alternatives.
 
-        See the description of variables in the __init__ function.
-        The ranges and start-step pair of inputs are alternatives.
+    Parameters
+    ----------
+    name: str, optional, default=None
+        Name of the quantity measured in the coordinate. (E.g. 'Time'.)
+    unit: str, optional, default=None
+        Name of the unit used along the cooordinate. (E.g. 'Second'.)
+    mode: CoordinateMode, optional, default=``CoordinateMode()``
+        Coordinate mode to use.
+    shape: array_like, optional, default=``[]``
+        The shape of the sample space matrix in this coordinate description. If
+        ``len(shape) == 0``, then the coordinate is the same for all samples and
+        it is described by `values` and `value_ranges`. The parameter `shape`
+        should not have a ``1`` element. In the equidistant case only the
+        dimension of `shape` is used.
+    start: float, optional, default=None
+        Start of the coordinate mapping. Only valid if the coordinate mode is
+        equidistant.
+    step: list of float, optional, default=None
+        Steps of the coordinate mapping. One-dimensional list with the same
+        number of elements as `dimension_list`. Only valid if the coordinate
+        mode is equidistant.  
+    c_range: array_like, optional, default=None
+        Used for specifiing a range when reading data.
+    values, value_index: array_like, optional, default=None
+        Only valid if the coordinate mode is non-equidistant.  The `values`
+        describe the coordinate values at `value_index`. Sample values are a 2D
+        array of size ``(len(shape), N_sample)`` containing indices to the
+        coordinate matrix described by `shape`. That is, ``values_index[:,i]``
+        gives the coordinates of ``values[i]`` in the coordinate sample space.
+    value_ranges: float | array_like | dict, optional, default=None
+        Specifies the range around the coordinate values.
+
+        If the coordinate mode has symmetric ranges, it is symmetric around the
+        values: ``[values-value_ranges, value+value_ranges]``. If not
+        symmetric, it is ``[values-value_ranges_low, value+value_ranges_high]``.
+
+        For equidistant coordinates:
+        - if the range is not symmetric, `value_ranges` should be a 2 element
+        array;
+        - if the range is symmetric, `value_ranges` should be a scalar.
+
+        For non-equidistant coordinates:
+        - if the range is not symmetric, `value_ranges` should be a dictionary
+        with keys 'low', 'high', with each value having the same dimensions as
+        `values`;
+        - if the range is symmetric, `value_ranges` should have the same shape
+        as `values`.
+    dimension_list=[]
+        List of data dimensions with which this coordinate is associated (0...).
+        Length of `dimension_list` should be equal to length of `shape`.
     """
     def __init__(self,
                  name=None,
@@ -304,22 +414,11 @@ class Coordinate:
                  value_index=None,
                  value_ranges=None,
                  dimension_list=[]):
-        # This is a Unit Class describing the name and unit
         self.unit = Unit(name=name,unit=unit)
-        # mode is a collection of flags
-        # flap.Coordinate.EQUIDISTANT: coordinate changes proportionally to samples number
-        # flap.Coordinate.RANGE_ASYMMETRIC: The range around the coordiantes is asymmetric described
-        #                                   by lower and uper range
         self.mode = copy.deepcopy(mode)
-        # The shape of the sample space matrix in this coordinate description (tuple)
-        # If len(shape) == 0 then the coordinate is the same for all samples and it is described by values and value_ranges
-        # shape should not have a 1 element.
-        # Actually in the equidistant case only the dimension of shape is used.
         self.shape = shape
-        # start and step describes the coordinate mapping if EQUIDISTANT flag is set.
-        # Start is scalar and step is a 1D list with the same number of elements as dimension_list.
-        # Would have been good to use decimal.Decimal types but operations between float and Decimal
-        # are not allowed, therefore using float
+        # Would have been good to use decimal.Decimal types but operations
+        # between float and Decimal are not allowed, therefore using float
         self.start = start
         self.step = step
         if (type(self.start) is Decimal):
@@ -327,39 +426,28 @@ class Coordinate:
         if (type(self.step) is Decimal):
             self.step = float(step)
 
-        # Values and value_index are valid only for non-equidistant axis
-        # They describe the coordinate value at value_index in the coordinate matrix
-        # sample values is a 2D array (len(shape) times N_sample) of indices to the coordinate matrix described by self.shape,
-        # that is values_index[:,i] gives the coordinates of values[i] in the coordinate sample space.
+        self.c_range = c_range
+
         self.value_index = value_index
         self.values = values
         if (type(self.values) is list):
             self.values = np.array(self.values)
-        # Value ranges is the range around the coordinate values. If mode.range_symmetric it is symmetric
-        # around the values: [values-value_ranges, value+value_ranges] If not symmetric it is
-        # [values-value_ranges_low, value+value_ranges_high]
-        # If mode.equidistant:
-        #     if mode.range_symmetric is False:
-        #           value_ranges should be a 2 element array
-        #     if mode.symmetric is True: value_ranges should be scalar
-        # if mode.equidistant is False:
-        #     if mode.range_symmetric is False:
-        #           value_ranges should be a dictionary with keys 'low', 'high'. Each value has
-        #           the same dimensions as values,
-        #     if mode.symmetric is True: value_ranges should have same shape as values
         self.value_ranges = value_ranges
-        # dimension_list: list of data dimensions for which this coordinate is related (0...)
-        # len(dimension_list) should be equeal to len(shape)
         self.dimension_list = dimension_list
-        # c_range is just for specifiing a range when reading data
-        self.c_range = c_range
 
     @property
     def start(self):
+        """Start of the coordinate mapping. Only valid if the coordinate mode is
+        equidistant.
+
+        Returns
+        -------
+        float or None
+        """
         return self.__start
 
     @start.setter
-    def start(self,start):
+    def start(self, start):
         if (type(start) is type(None)):
             self.__start = None
             return
@@ -375,6 +463,13 @@ class Coordinate:
 
     @property
     def step(self):
+        """Steps of the coordinate mapping. Only valid if the coordinate mode is
+        equidistant.  
+
+        Returns
+        -------
+        list or None
+        """
         return self.__step
 
     @step.setter
@@ -398,6 +493,13 @@ class Coordinate:
 
     @property
     def dimension_list(self):
+        """List of data dimensions with which this coordinate is associated
+        (0...).
+
+        Returns
+        -------
+        list
+        """
         return self.__dimension_list
 
     @dimension_list.setter
@@ -409,6 +511,13 @@ class Coordinate:
 
     @property
     def shape(self):
+        """The shape of the sample space matrix in this coordinate
+        description.
+
+        Returns
+        -------
+        list
+        """
         return self.__shape
 
     @shape.setter
@@ -421,12 +530,20 @@ class Coordinate:
             self.__shape = shape
 
     def __ne__(self, c1):
-        """ compares two coordinates assuming same data shape
+        """Compares two coordinates, assuming the same data shape.
+
+        Returns
+        -------
+        bool
         """
         return not (self == c1)
-            
+
     def __eq__(self, c1):
-        """ compares two coordinates assuming same data shape
+        """Compares two coordinates, assuming the same data shape.
+
+        Returns
+        -------
+        bool
         """
         if (self.unit.name != c1.unit.name):
             return False
@@ -482,12 +599,20 @@ class Coordinate:
                             return False
         return True
                     
-    def non_interpol(self,data_shape):
-        """ Return True if the shape of the coordinate description
-            is the same as the sub-data-array for which it applies and self.value_index is None.
-            In this case there is no need for interpolation, just copy coordinate values
+    def non_interpol(self, data_shape):
+        """Return True if the shape of the coordinate description is the same as
+        the sub-data-array for which it applies and `self.value_index` is None.
+        In this case there is no need for interpolation, coordinate values are copied.
+        Valid only for non-equidistant coordinate mode.
 
-            Applicable only for non-equidistant case.
+        Parameters
+        ----------
+        data_shape: array_like
+            The shape of the sub-data-array.
+        
+        Returns
+        -------
+        bool
         """
         if (self.value_index is not None):
             return False
@@ -508,8 +633,13 @@ class Coordinate:
         return ds_coord == shape_clean
 
     def dtype(self):
-        """ Return the data type of the coordinate.
-        Returns standard Python types: str, int, float, complex, boolean, object
+        """Return the data type of the coordinate.
+        
+        Returns standard Python types: str, int, float, complex, boolean or object.
+
+        Returns
+        -------
+        type
         """
         if (self.mode.equidistant):
             if ((self.start is None) or (self.step is None)):
@@ -548,6 +678,12 @@ class Coordinate:
                 return type(self.values)
 
     def isnumeric(self):
+        """Returns whether the data type is numeric.
+
+        Returns
+        -------
+        bool
+        """
         dt = self.dtype()
         if ((dt == int) or (dt == float) or (dt == complex) or (dt == Decimal)):
             return True
@@ -555,6 +691,13 @@ class Coordinate:
             return False
 
     def string_subtype(self):
+        """Returns the type of the values if the coordinate type is str.
+        Otherwise returns None.
+
+        Returns
+        -------
+        type or None
+        """
         if (self.dtype == str):
             if (np.isscalar(self.values)):
                 return type(self.values)
@@ -564,17 +707,16 @@ class Coordinate:
             return None
 
     def change_dimensions(self):
-        """ Return the list of dimensions of the data array along which this coordinate
-            changes
+        """ Return the list of dimensions of the data array along which this
+        coordinate changes.
         """
         return self.dimension_list
 
-    def nochange_dimensions(self,data_shape):
-        """ Return the list of dimensions of the data array along which this coordinate
-            changes
+    def nochange_dimensions(self, data_shape):
+        """ Return the list of dimensions of the data array along which this
+        coordinate does not change.
         """
         if (self.change_dimensions == []):
-
             return list(range(len(data_shape)))
 
         nochange_list = []
@@ -585,35 +727,45 @@ class Coordinate:
                 nochange_list.append(i)
         return nochange_list
 
-    def data(self,data_shape=None,index=None,options=None):
-        """ Returns the coordinates, low and high limits for a sub-array of the data array in a DataObject.
+    def data(self, data_shape=None, index=None, options=None):
+        """Returns the coordinates, low and high limits for a sub-array of the
+        data array in a DataObject.
 
-        index:
-            list, tuple describing the elements in DataObject.data for which the coordinates are
-            required. The length of the array should be identical to the number of dimensions
-            of the data array. Elements can be a mixture of numbers, slice objects, lists, numpy arrays,
+        Parameters
+        ----------
+        index: list | tuple of int, optional, default=None
+            Describes the elements in `DataObject.data` for which the
+            coordinates are required. The length of the array should be
+            identical to the number of dimensions of the data array. Elements
+            can be a mixture of numbers, slice objects, lists, numpy arrays,
             integer iterators and ellipses.
             Examples for 3D array:
-                (...,0,0) coordinates of the elements in the first row of the data array
-                (slice(2,5),2,...)
-        data_shape:
-            The shape of the data array (without slicing) for which coordinates are requested.
-        options: Dictionary with options for processing:
-                   'Interpolation': 'Linear' (default, for non-equidistant axis when values shape is 
-                                              different from data shape)
-                   'Change only': Return only the data for those dimensions where this coordinate changes. 
-                                  E.g. if it changes only along one dimension the output array will have 1 element
-                                  in all other dimensions.
+            - ``(...,0,0)``: coordinates of the elements in the first row of the
+            data array
+            - ``(slice(2,5),2,...)``
+        data_shape: array_like, optional, default=None
+            The shape of the data array (without slicing) for which coordinates
+            are requested.
+        options: dict, optional, defualt=None
+            Dictionary with options for processing:
+            - 'Interpolation': 'Linear' (default, for non-equidistant axis when
+            values shape is different from data shape)
+            - 'Change only': True (return only the data for those dimensions
+            where this coordinate changes. E.g. if it changes only along one
+            dimension the output array will have 1 element in all other
+            dimensions.)
 
-        Return value:
-            values, value_range_low, value range_high
-            The low and high values are the absolute values not the difference from values
+        Returns
+        -------
+        values, value_range_low, value range_high: array_like
+            Values and the respective low and high range values. The low and
+            high values are the absolute values not, the difference from values.
         """
         default_options = {'Interpolation': 'Linear',
                            'Change only': False}
-        
+
         _options = flap.config.merge_options(default_options, options)
-        
+
         if (data_shape is None):
             raise ValueError("Missing data_shape argument in flap.Coordinate.data()")
         if (type(data_shape) is not np.ndarray):
@@ -808,12 +960,21 @@ class Coordinate:
 
         return out_coord, out_coord_low, out_coord_high
 
-    def data_range(self,data_shape=None):
-        """ Returns the data range and the data range with errors for the coordinate. Both are lists.
+    def data_range(self, data_shape=None):
+        """ Returns the data range and the data range with errors for the
+        coordinate.
+
+        Parameters
+        ----------
+        data_shape: array_like, optional, default=None
+            Data shape.
+
+        Returns
+        -------
+        value_range, value_range_error: list
         """
         if (data_shape is None):
             raise ValueError("Missing data_shape argument in flap.Coordinate.data()")
-
 
         if (self.mode.equidistant):
             if (len(self.dimension_list) == 0):
@@ -856,4 +1017,3 @@ class Coordinate:
             else:
                 value_range_error = value_range
             return value_range, value_range_error
-
