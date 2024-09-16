@@ -281,7 +281,6 @@ def list_config():
     Returns
     -------
     None.
-
     """
     sect = __flap_config.config.sections()
     for s in sect:
@@ -289,8 +288,8 @@ def list_config():
         s_data  = get_all_section(s)
         for ss in s_data.keys():
             print("{:s} = {:s}".format(str(ss),str(s_data[ss])))
-            
-    
+
+
 try:
     __flap_config
 except NameError:
