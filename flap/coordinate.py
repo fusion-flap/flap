@@ -111,7 +111,7 @@ class Intervals:
 
         Returns
         -------
-        range_starts, range_stops: ndarray
+        range_starts, range_stops : ndarray
             The range lower and upper limits.
         """
         if ((limits is None) and self.regular() and (self.number is None)):
@@ -232,9 +232,9 @@ class Unit:
 
     Parameters
     ----------
-    name: str, optional, default=''
+    name : str, optional, default=''
         Name of the quantity. (E.g. 'Time'.)
-    unit: str, optional, default=''
+    unit : str, optional, default=''
         Name of the unit. (E.g. 'Second'.)
     """
     def __init__(self,name="",unit=""):
@@ -353,34 +353,34 @@ class Coordinate:
 
     Parameters
     ----------
-    name: str, optional, default=None
+    name : str, optional, default=None
         Name of the quantity measured in the coordinate. (E.g. 'Time'.)
-    unit: str, optional, default=None
+    unit : str, optional, default=None
         Name of the unit used along the cooordinate. (E.g. 'Second'.)
-    mode: CoordinateMode, optional, default=``CoordinateMode()``
+    mode : flap.CoordinateMode, optional, default=``CoordinateMode()``
         Coordinate mode to use.
-    shape: array_like, optional, default=``[]``
+    shape : array_like, optional, default=``[]``
         The shape of the sample space matrix in this coordinate description. If
         ``len(shape) == 0``, then the coordinate is the same for all samples and
         it is described by `values` and `value_ranges`. The parameter `shape`
         should not have a ``1`` element. In the equidistant case only the
         dimension of `shape` is used.
-    start: float, optional, default=None
+    start : float, optional, default=None
         Start of the coordinate mapping. Only valid if the coordinate mode is
         equidistant.
-    step: list of float, optional, default=None
+    step : list of float, optional, default=None
         Steps of the coordinate mapping. One-dimensional list with the same
         number of elements as `dimension_list`. Only valid if the coordinate
         mode is equidistant.  
-    c_range: array_like, optional, default=None
+    c_range : array_like, optional, default=None
         Used for specifiing a range when reading data.
-    values, value_index: array_like, optional, default=None
+    values, value_index : array_like, optional, default=None
         Only valid if the coordinate mode is non-equidistant.  The `values`
         describe the coordinate values at `value_index`. Sample values are a 2D
         array of size ``(len(shape), N_sample)`` containing indices to the
         coordinate matrix described by `shape`. That is, ``values_index[:,i]``
         gives the coordinates of ``values[i]`` in the coordinate sample space.
-    value_ranges: float | array_like | dict, optional, default=None
+    value_ranges : float | array_like | dict, optional, default=None
         Specifies the range around the coordinate values.
 
         If the coordinate mode has symmetric ranges, it is symmetric around the
@@ -398,7 +398,7 @@ class Coordinate:
         `values`;
         - if the range is symmetric, `value_ranges` should have the same shape
         as `values`.
-    dimension_list=[]
+    dimension_list : list, optional, default=[]
         List of data dimensions with which this coordinate is associated (0...).
         Length of `dimension_list` should be equal to length of `shape`.
     """
@@ -532,6 +532,11 @@ class Coordinate:
     def __ne__(self, c1):
         """Compares two coordinates, assuming the same data shape.
 
+        Parameters
+        ----------
+        c1: flap.Coordinate
+            The coordinate to compare to.
+
         Returns
         -------
         bool
@@ -540,6 +545,11 @@ class Coordinate:
 
     def __eq__(self, c1):
         """Compares two coordinates, assuming the same data shape.
+
+        Parameters
+        ----------
+        c1: flap.Coordinate
+            The coordinate to compare to.
 
         Returns
         -------
@@ -607,7 +617,7 @@ class Coordinate:
 
         Parameters
         ----------
-        data_shape: array_like
+        data_shape : array_like
             The shape of the sub-data-array.
         
         Returns
@@ -707,14 +717,27 @@ class Coordinate:
             return None
 
     def change_dimensions(self):
-        """ Return the list of dimensions of the data array along which this
+        """Return the list of dimensions of the data array along which this
         coordinate changes.
+
+        Returns
+        -------
+        list
         """
         return self.dimension_list
 
     def nochange_dimensions(self, data_shape):
-        """ Return the list of dimensions of the data array along which this
+        """Return the list of dimensions of the data array along which this
         coordinate does not change.
+
+        Parameters
+        ----------
+        data_shape : array_like
+            The data shape to use.
+
+        Returns
+        -------
+        list
         """
         if (self.change_dimensions == []):
             return list(range(len(data_shape)))
@@ -733,7 +756,7 @@ class Coordinate:
 
         Parameters
         ----------
-        index: list | tuple of int, optional, default=None
+        index : list | tuple of int, optional, default=None
             Describes the elements in `DataObject.data` for which the
             coordinates are required. The length of the array should be
             identical to the number of dimensions of the data array. Elements
@@ -743,10 +766,10 @@ class Coordinate:
             - ``(...,0,0)``: coordinates of the elements in the first row of the
             data array
             - ``(slice(2,5),2,...)``
-        data_shape: array_like, optional, default=None
+        data_shape : array_like, optional, default=None
             The shape of the data array (without slicing) for which coordinates
             are requested.
-        options: dict, optional, defualt=None
+        options : dict, optional, defualt=None
             Dictionary with options for processing:
             - 'Interpolation': 'Linear' (default, for non-equidistant axis when
             values shape is different from data shape)
@@ -757,7 +780,7 @@ class Coordinate:
 
         Returns
         -------
-        values, value_range_low, value range_high: array_like
+        values, value_range_low, value range_high : array_like
             Values and the respective low and high range values. The low and
             high values are the absolute values not, the difference from values.
         """
@@ -966,12 +989,12 @@ class Coordinate:
 
         Parameters
         ----------
-        data_shape: array_like, optional, default=None
+        data_shape : array_like, optional, default=None
             Data shape.
 
         Returns
         -------
-        value_range, value_range_error: list
+        value_range, value_range_error : list
         """
         if (data_shape is None):
             raise ValueError("Missing data_shape argument in flap.Coordinate.data()")

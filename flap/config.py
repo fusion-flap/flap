@@ -16,7 +16,7 @@ class Config:
 
     Attributes
     ----------
-    config: ConfigParser
+    config: flap.ConfigParser
         The configuration itself.
     file_name: str
         The configuration filename.
@@ -61,6 +61,7 @@ def get(section, element, datatype=str, default=None, evaluate=False):
 
     Returns
     -------
+    object
         The value of the element `element` of section `section` 
         in the configuration, type-cast or evaluated.
     """
