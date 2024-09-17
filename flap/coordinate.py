@@ -1,7 +1,7 @@
 """
 Created on Wed Jan 23 09:44:50 2019
 
-This is the coordinate description and realted methods for FLAP
+This is the coordinate description and related methods for FLAP
 
 @author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
 Centre for Energy Research
@@ -18,7 +18,7 @@ class Intervals:
     """Class to describe a series of intervals.
 
     Different types of intervals exist:
-    - Regular intevals are identical length ones repeating with a fixed step.
+    - Regular intervals are identical length ones repeating with a fixed step.
     - Irregulars are just a list of start-stop values.
     - For integer type values both the start and stop value is included.
     - The optional number gives the number of ranges for the regular intervals.
@@ -30,7 +30,7 @@ class Intervals:
         For irregular intervals: start and stop value of all intervals.
         (Identical-length numpy arrays.)
     step : int | float, optional, default=None
-        If not given, the intervals are assumed to be irregular, othewise
+        If not given, the intervals are assumed to be irregular, otherwise
         regular.
     number : int, optional, default=None
         The number of intervals in regular case. If not set, the intervals
@@ -46,7 +46,7 @@ class Intervals:
             if ((type(start) is str) or (type(stop) is str) or (type(step) is str)):
                 raise ValueError("Non-numeric type in selection interval.")
             if (start >= stop):
-                raise ValueError("Bad interval decription: stop before start.")
+                raise ValueError("Bad interval description: stop before start.")
             self.start = start
             self.stop = stop
             self.step = step
@@ -76,7 +76,7 @@ class Intervals:
                     raise TypeError("Stop values should be 1D numpy array or scalar.")
                 self.stop = _stop
             if (len(self.start) != len(self.stop)):
-                raise ValueError("Lenght of start and stop arrays should be identical.")
+                raise ValueError("Length of start and stop arrays should be identical.")
             if (np.amin(self.stop - self.start) <= 0):
                 raise ValueError("Interval length should be positive.")
             self.number = len(self.start)
@@ -356,7 +356,7 @@ class Coordinate:
     name : str, optional, default=None
         Name of the quantity measured in the coordinate. (E.g. 'Time'.)
     unit : str, optional, default=None
-        Name of the unit used along the cooordinate. (E.g. 'Second'.)
+        Name of the unit used along the coordinate. (E.g. 'Second'.)
     mode : flap.CoordinateMode, optional, default=``CoordinateMode()``
         Coordinate mode to use.
     shape : array_like, optional, default=``[]``
@@ -373,7 +373,7 @@ class Coordinate:
         number of elements as `dimension_list`. Only valid if the coordinate
         mode is equidistant.  
     c_range : array_like, optional, default=None
-        Used for specifiing a range when reading data.
+        Used for specifying a range when reading data.
     values, value_index : array_like, optional, default=None
         Only valid if the coordinate mode is non-equidistant.  The `values`
         describe the coordinate values at `value_index`. Sample values are a 2D
@@ -769,7 +769,7 @@ class Coordinate:
         data_shape : array_like, optional, default=None
             The shape of the data array (without slicing) for which coordinates
             are requested.
-        options : dict, optional, defualt=None
+        options : dict, optional, default=None
             Dictionary with options for processing:
             - 'Interpolation': 'Linear' (default, for non-equidistant axis when
             values shape is different from data shape)
