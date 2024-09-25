@@ -36,19 +36,19 @@ def _spectral_calc_interval_selection(d,
         Information of processing intervals.
 
         - If dictionary with a single key: {selection coordinate:
-        description}). Key is a coordinate name which can be different from
-        the calculation coordinate.  Description can be `flap.Intervals`,
-        `flap.DataObject` or a list of two numbers. If it is a data object
-        with data name identical to the coordinate, the error ranges of the
-        data object will be used for interval. If the data name is not the
-        same as coordinate, a coordinate with the same name will be searched
-        for in the data object and the `value_ranges` will be used from it to
-        set the intervals.
+          description}). Key is a coordinate name which can be different from
+          the calculation coordinate.  Description can be `flap.Intervals`,
+          `flap.DataObject` or a list of two numbers. If it is a data object
+          with data name identical to the coordinate, the error ranges of the
+          data object will be used for interval. If the data name is not the
+          same as coordinate, a coordinate with the same name will be searched
+          for in the data object and the `value_ranges` will be used from it to
+          set the intervals.
         - If not a dictionary and not None, it is interpreted as the
-        interval description, the selection coordinate is taken the same as
-        coordinate.
+          interval description, the selection coordinate is taken the same as
+          coordinate.
         - If None, the whole data interval will be used as a single
-        interval.
+          interval.
 
     interval_n : int 
         Minimum number of intervals to use for the processing. These are
@@ -190,31 +190,58 @@ def _spectral_calc_interval_selection(d,
            flap.coordinate.Intervals(proc_interval_index_start, proc_interval_index_end),
 
 def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=False):
-    """ This function makes the _trend_removal internal function public
+    """Remove a given trend from the data. Operates on one axis between two
+    indices of the data array.
+
+    The input array is modified.
+
+    Parameters
+    ----------
+    d : np.ndarray
+        Data array.
+    ax : int
+        The axis along which to operate.
+    trend : list | str | None
+        Possible values:
+
+        - list: 
+
+          - ``['poly', n]``: Fit an `n` order polynomial to the data
+              and subtract.
+
+        - str:
+
+          - 'mean': Subtract mean.
+
+        - None: Don't remove trend.
+
+    x : np.ndarray, optional, default=None
+        The 'x' axis values used in certain types of trend fitting. If not
+        given, equidistant spacing will be assumed.
+    return_trend : bool, optional, default=False
+        Whether to return the trend data.
+    return_poly : bool, optional, default=False
+        Return polynomial coefficients for poly trend removal. The coefficients
+        will be in axis `ax`.
+
+    Returns
+    -------
+    array_like | None
+        Possible return values:
+
+        - If `return_trend` is True, the trend data is returned.
+        
+        - If `return_trend` is True, and a polynomial fitting is performed, the
+        trend data is returned.
+
+        - Otherwise, return None.
     """
     return _trend_removal(d, ax, trend, x=x, return_trend=return_trend, return_poly=return_poly)
 
 def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
-    """
-    Removes the trend from the data. Operates on one axis between two indices of the data array.
-    INPUT:
-        d: Data array (Numpy array)
-        ax: The axis along which to operate (0...)
-        trend: Trend removal description. A list, string or None.
-                None: Don't remove trend.
-                Strings:
-                    'Mean': subtract mean
-                Lists:
-                    ['Poly', n]: Fit an n order polynomial to the data and subtract.
-        x: X axis. If not used equidistant will be assumed.
-        return_trend: If True the trend data is returned
-        return_poly: Return polynomial coefficients for poly trend removal. The coefficients will
-                     be in axis ax.
-    RETURN value:
-        If return_trend == True the trend data is returned
-        If (return_poly == True) and polyfit then return polynomial parameters
-        Otherwise return None
-        The input array is modified.
+    """Remove a given trend from the data.
+    
+    See `flap.spectral_analysis.trend_removal_func` for details.
     """
     if (trend is None):
         return
@@ -294,6 +321,163 @@ def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
                 return
     raise ValueError("Unknown trend removal method.")
 
+def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, range_nat, log_scale, out_shape, proc_dim):
+    """Helper routine for apsd and cpsd for calculating numbers and indices for
+    processing the spectra.
+
+    Returns: ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, 
+    f_cent, fcent_index_range, res
+    """
+    # Calculating the binning boxes from the resolution and range
+    fscale_nat = (np.arange(n_apsd,dtype=float) - zero_ind) * res_nat
+    if (log_scale):
+        if (_options['Range'] is not None):
+            rang = _options['Range']
+            if ((type(rang) is not list) or (len(rang) != 2)):
+                raise ValueError("Invalid spectrum range setting.")
+            if (_options['Resolution'] is not None):
+                res = _options['Resolution']
+            else:
+                res = rang[0] / 10
+        else:
+            if (_options['Resolution'] is not None):
+                res = _options['Resolution']
+                rang = [res, range_nat[1]]
+            else:
+                res = res_nat
+                rang = [res_nat * 10, range_nat[1]]
+        if (rang[0] >= rang[1]):
+            raise ValueError("Illegal frequency range.")
+        if (rang[0] <= 0):
+            raise ValueError("Illegal frequency range for logarithmic frequency resolution.")
+        # Setting the lower and upper limit of the first box so as f_high-f_low=res and
+        # (log10(f_low)+log10(f_high))/2 = log10(range[0])
+        f_low = (-res + math.sqrt(res ** 2 + 4 * rang[0] ** 2))/ 2
+        f_high = rang[0] ** 2 / f_low
+        # Setting up a box list which is linear on the log scale
+        delta = math.log10(f_high/f_low)
+        nf_out = (math.log10(rang[1]) - math.log10(f_low)) // delta + 2
+        f_box = 10 ** (math.log10(f_low) + np.arange(nf_out) * delta)
+#        if (f_box[-1] > range_nat[1]):
+#            f_box[-1] = range_nat[1]
+        # Box index for the original spectrum points
+        apsd_index = np.digitize(fscale_nat, f_box) - 1
+        ind_out_low = np.nonzero(apsd_index < 0)[0]
+        ind_out_high = np.nonzero(apsd_index >= f_box.size - 1)[0]
+        if ((ind_out_low.size != 0) or (ind_out_high.size != 0)):
+            if (ind_out_low.size == 0):
+                slice_start = 0
+            else:
+                slice_start = ind_out_low[-1]+1
+            if (ind_out_high.size == 0):
+                slice_end = fscale_nat.size
+            else:
+                slice_end = ind_out_high[0]
+            apsd_slice = slice(slice_start, slice_end)
+            ind_slice = [slice(0,d) for d in out_shape]
+            ind_slice[proc_dim] = apsd_slice
+            apsd_index = apsd_index[apsd_slice]
+        else:
+            apsd_slice = None
+            ind_slice = None
+        f_cent = np.sqrt(f_box[0:-1] * f_box[1:])
+        nf_out = f_cent.size
+        out_data_num = np.zeros(nf_out,dtype=np.int32)
+        np.add.at(out_data_num, apsd_index, np.int32(1))
+        index_nonzero = np.nonzero(out_data_num != 0)[0]
+        if (index_nonzero.size == out_data_num.size):
+            ind_nonzero = None
+            ind_zero = None
+        else:
+            ind_nonzero = [slice(0,d) for d in out_shape]
+            ind_nonzero[proc_dim] = index_nonzero
+            index_zero = np.nonzero(out_data_num == 0)[0]
+            ind_zero = [slice(0,d) for d in out_shape]
+            ind_zero[proc_dim] = index_zero
+        ind_bin = [slice(0,d) for d in out_shape]
+        ind_bin[proc_dim] = apsd_index
+        fcent_index_range = None
+    else:
+        # Linear scale
+        if (_options['Resolution'] is not None):
+            if (wavenumber):
+                res = _options['Resolution']/2/math.pi
+            else:
+                res = _options['Resolution']
+            if (res > range_nat[1] / 2):
+                raise ValueError("Requested resolution is too coarse.")
+        else:
+            res = res_nat
+        res_bin = int(round(res / res_nat))
+        if (res_bin < 1):
+            res_bin = 1
+        res = res_nat * res_bin
+        # Determining the number of bins
+
+        nf_out = int(n_apsd / res_bin)
+
+        # The index range in the apsd array where the central frequencies are available
+        if (res_bin == 1):
+            fcent_index_range = [0, n_apsd - 1]
+            nf_out = n_apsd
+        else:
+            fcent_index_range = [zero_ind % res_bin,
+                                 (n_apsd - 1 - (zero_ind % res_bin)) // res_bin * res_bin
+                                   + zero_ind % res_bin]
+            nf_out = (fcent_index_range[1] - fcent_index_range[0]) // res_bin + 1
+        if (_options['Range'] is not None):
+            rang = _options['Range']
+            if ((type(rang) is not list) or (len(rang) != 2)):
+                raise ValueError("Invalid spectrum range setting.")
+            if (rang[0] >= rang[1]):
+                raise ValueError("Illegal frequency range.")
+            if (fcent_index_range[0] < rang[0] / res_nat + zero_ind):
+                fcent_index_range[0] = int(round(rang[0] / res)) * res_bin + zero_ind
+            if (fcent_index_range[1] > rang[1] / res_nat + zero_ind):
+                fcent_index_range[1] = int(round(rang[1] / res)) * res_bin + zero_ind
+        nf_out = (fcent_index_range[1] - fcent_index_range[0]) // res_bin + 1
+        if (nf_out < 3):
+            raise ValueError("Too coarse spectrum resolution.")
+        if ((fcent_index_range[0] < 0) or (fcent_index_range[0] > n_apsd - 1) \
+             or (fcent_index_range[1] < 0) or (fcent_index_range[1] > n_apsd - 1)):
+            raise ValueError("Spectrum axis range is outside of natural ranges.")
+        # This slice will cut the necessary part from the raw APSD sepctrum
+        apsd_slice = slice(fcent_index_range[0] - res_bin // 2,
+                          fcent_index_range[1] + (res_bin - res_bin // 2))
+        # A full box start is this number of apsd spectrum pints before apsd_slice.start
+        start_shift = 0
+        if (apsd_slice.start < 0):
+            start_shift = - apsd_slice.start
+            apsd_slice = slice(0, apsd_slice.stop)
+        if (apsd_slice.stop > n_apsd):
+            apsd_slice = slice(apsd_slice.start, n_apsd)
+        # This index array will contain the box index for each APSD spectral point remaining after
+        # the above slice
+        if (res_bin != 1):
+            apsd_index = (np.arange(apsd_slice.stop - apsd_slice.start,dtype=np.int32)
+                          + start_shift) // res_bin
+        else:
+            apsd_index = None
+        if (apsd_slice is not None):
+            ind_slice = [slice(0,d) for d in out_shape]
+            ind_slice[proc_dim] = apsd_slice
+        else:
+            ind_slice = None
+        if (apsd_index is not None):
+            ind_bin = [slice(0,d) for d in out_shape]
+            ind_bin[proc_dim] = apsd_index
+            out_data_num = np.zeros(nf_out,dtype=np.int32)
+            np.add.at(out_data_num, apsd_index, np.int32(1))
+        else:
+            ind_bin = None
+            out_data_num = np.zeros(nf_out,dtype=np.int32) + 1
+        ind_nonzero = None
+        index_nonzero = None
+        ind_zero = None
+        f_cent = None
+    return ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, \
+           f_cent,fcent_index_range, res
+    
 def _apsd(d, coordinate=None, intervals=None, options=None):
     """Calculates the auto-power spectral density (APSD) of the data `d`.
     See `flap.DataObject.apsd()` for more details.
@@ -519,162 +703,6 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
 
     return d_out
 
-def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, range_nat, log_scale, out_shape, proc_dim):
-    """ Helper routine for apsd and cpsd for calculating numbers and indices
-        for processing the spectra.
-        Returns: ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, 
-        f_cent, fcent_index_range, res
-    """
-    # Calculating the binning boxes from the resolution and range
-    fscale_nat = (np.arange(n_apsd,dtype=float) - zero_ind) * res_nat
-    if (log_scale):
-        if (_options['Range'] is not None):
-            rang = _options['Range']
-            if ((type(rang) is not list) or (len(rang) != 2)):
-                raise ValueError("Invalid spectrum range setting.")
-            if (_options['Resolution'] is not None):
-                res = _options['Resolution']
-            else:
-                res = rang[0] / 10
-        else:
-            if (_options['Resolution'] is not None):
-                res = _options['Resolution']
-                rang = [res, range_nat[1]]
-            else:
-                res = res_nat
-                rang = [res_nat * 10, range_nat[1]]
-        if (rang[0] >= rang[1]):
-            raise ValueError("Illegal frequency range.")
-        if (rang[0] <= 0):
-            raise ValueError("Illegal frequency range for logarithmic frequency resolution.")
-        # Setting the lower and upper limit of the first box so as f_high-f_low=res and
-        # (log10(f_low)+log10(f_high))/2 = log10(range[0])
-        f_low = (-res + math.sqrt(res ** 2 + 4 * rang[0] ** 2))/ 2
-        f_high = rang[0] ** 2 / f_low
-        # Setting up a box list which is linear on the log scale
-        delta = math.log10(f_high/f_low)
-        nf_out = (math.log10(rang[1]) - math.log10(f_low)) // delta + 2
-        f_box = 10 ** (math.log10(f_low) + np.arange(nf_out) * delta)
-#        if (f_box[-1] > range_nat[1]):
-#            f_box[-1] = range_nat[1]
-        # Box index for the original spectrum points
-        apsd_index = np.digitize(fscale_nat, f_box) - 1
-        ind_out_low = np.nonzero(apsd_index < 0)[0]
-        ind_out_high = np.nonzero(apsd_index >= f_box.size - 1)[0]
-        if ((ind_out_low.size != 0) or (ind_out_high.size != 0)):
-            if (ind_out_low.size == 0):
-                slice_start = 0
-            else:
-                slice_start = ind_out_low[-1]+1
-            if (ind_out_high.size == 0):
-                slice_end = fscale_nat.size
-            else:
-                slice_end = ind_out_high[0]
-            apsd_slice = slice(slice_start, slice_end)
-            ind_slice = [slice(0,d) for d in out_shape]
-            ind_slice[proc_dim] = apsd_slice
-            apsd_index = apsd_index[apsd_slice]
-        else:
-            apsd_slice = None
-            ind_slice = None
-        f_cent = np.sqrt(f_box[0:-1] * f_box[1:])
-        nf_out = f_cent.size
-        out_data_num = np.zeros(nf_out,dtype=np.int32)
-        np.add.at(out_data_num, apsd_index, np.int32(1))
-        index_nonzero = np.nonzero(out_data_num != 0)[0]
-        if (index_nonzero.size == out_data_num.size):
-            ind_nonzero = None
-            ind_zero = None
-        else:
-            ind_nonzero = [slice(0,d) for d in out_shape]
-            ind_nonzero[proc_dim] = index_nonzero
-            index_zero = np.nonzero(out_data_num == 0)[0]
-            ind_zero = [slice(0,d) for d in out_shape]
-            ind_zero[proc_dim] = index_zero
-        ind_bin = [slice(0,d) for d in out_shape]
-        ind_bin[proc_dim] = apsd_index
-        fcent_index_range = None
-    else:
-        # Linear scale
-        if (_options['Resolution'] is not None):
-            if (wavenumber):
-                res = _options['Resolution']/2/math.pi
-            else:
-                res = _options['Resolution']
-            if (res > range_nat[1] / 2):
-                raise ValueError("Requested resolution is too coarse.")
-        else:
-            res = res_nat
-        res_bin = int(round(res / res_nat))
-        if (res_bin < 1):
-            res_bin = 1
-        res = res_nat * res_bin
-        # Determining the number of bins
-
-        nf_out = int(n_apsd / res_bin)
-
-        # The index range in the apsd array where the central frequencies are available
-        if (res_bin == 1):
-            fcent_index_range = [0, n_apsd - 1]
-            nf_out = n_apsd
-        else:
-            fcent_index_range = [zero_ind % res_bin,
-                                 (n_apsd - 1 - (zero_ind % res_bin)) // res_bin * res_bin
-                                   + zero_ind % res_bin]
-            nf_out = (fcent_index_range[1] - fcent_index_range[0]) // res_bin + 1
-        if (_options['Range'] is not None):
-            rang = _options['Range']
-            if ((type(rang) is not list) or (len(rang) != 2)):
-                raise ValueError("Invalid spectrum range setting.")
-            if (rang[0] >= rang[1]):
-                raise ValueError("Illegal frequency range.")
-            if (fcent_index_range[0] < rang[0] / res_nat + zero_ind):
-                fcent_index_range[0] = int(round(rang[0] / res)) * res_bin + zero_ind
-            if (fcent_index_range[1] > rang[1] / res_nat + zero_ind):
-                fcent_index_range[1] = int(round(rang[1] / res)) * res_bin + zero_ind
-        nf_out = (fcent_index_range[1] - fcent_index_range[0]) // res_bin + 1
-        if (nf_out < 3):
-            raise ValueError("Too coarse spectrum resolution.")
-        if ((fcent_index_range[0] < 0) or (fcent_index_range[0] > n_apsd - 1) \
-             or (fcent_index_range[1] < 0) or (fcent_index_range[1] > n_apsd - 1)):
-            raise ValueError("Spectrum axis range is outside of natural ranges.")
-        # This slice will cut the necessary part from the raw APSD sepctrum
-        apsd_slice = slice(fcent_index_range[0] - res_bin // 2,
-                          fcent_index_range[1] + (res_bin - res_bin // 2))
-        # A full box start is this number of apsd spectrum pints before apsd_slice.start
-        start_shift = 0
-        if (apsd_slice.start < 0):
-            start_shift = - apsd_slice.start
-            apsd_slice = slice(0, apsd_slice.stop)
-        if (apsd_slice.stop > n_apsd):
-            apsd_slice = slice(apsd_slice.start, n_apsd)
-        # This index array will contain the box index for each APSD spectral point remaining after
-        # the above slice
-        if (res_bin != 1):
-            apsd_index = (np.arange(apsd_slice.stop - apsd_slice.start,dtype=np.int32)
-                          + start_shift) // res_bin
-        else:
-            apsd_index = None
-        if (apsd_slice is not None):
-            ind_slice = [slice(0,d) for d in out_shape]
-            ind_slice[proc_dim] = apsd_slice
-        else:
-            ind_slice = None
-        if (apsd_index is not None):
-            ind_bin = [slice(0,d) for d in out_shape]
-            ind_bin[proc_dim] = apsd_index
-            out_data_num = np.zeros(nf_out,dtype=np.int32)
-            np.add.at(out_data_num, apsd_index, np.int32(1))
-        else:
-            ind_bin = None
-            out_data_num = np.zeros(nf_out,dtype=np.int32) + 1
-        ind_nonzero = None
-        index_nonzero = None
-        ind_zero = None
-        f_cent = None
-    return ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, \
-           f_cent,fcent_index_range, res
-    
 def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     """Calculates the complex cross-power spectral density (CPSD) of the data
     `d`.  See `flap.DataObject.cpsd()` for more details.
