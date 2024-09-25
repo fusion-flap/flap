@@ -16,35 +16,50 @@ from scipy import signal
 import copy
 #import matplotlib.pyplot as plt
 
-def _spectral_calc_interval_selection(d, ref, coordinate,intervals,interval_n):
-    """ Helper function for spectral and correlation calculation.
-        Determines the processing intervals and returns in a
-        flap.Intervals object. The intervals will have identical length.
+def _spectral_calc_interval_selection(d,
+                                      ref,
+                                      coordinate,
+                                      intervals,
+                                      interval_n):
+    """Helper function for spectral and correlation calculation.  Determines the
+    processing intervals and returns in a `flap.Intervals` object. The intervals
+    will have identical length.
 
-        INPUT:
-            d, ref: flap.DataObjects
-            If ref is set it is assumed that the selection coordinate step size is identical in d and ref.
-            coordinate: Coordinate name (string)
-            intervals: Information of processing intervals.
-                       If dictionary with a single key: {selection coordinate: description})
-                           Key is a coordinate name which can be different from the calculation
-                           coordinate.
-                           Description can be flap.Intervals, flap.DataObject or
-                           a list of two numbers. If it is a data object with data name identical to
-                           the coordinate the error ranges of the data object will be used for
-                           interval. If the data name is not the same as coordinate a coordinate with the
-                           same name will be searched for in the data object and the value_ranges
-                           will be used fromm it to set the intervals.
-                       If not a dictionary and not None is is interpreted as the interval
-                           description, the selection coordinate is taken the same as
-                           coordinate.
-                       If None, the whole data interval will be used as a single interval.
-            interval_n: Minimum number of intervals to use for the processing. These are identical
-                        length intervals inserted into the input interval list.
-        Returns:
-            intervals, index_intervals
-                intervals: The intervals in the coordinate unit (Intervals object)
-                index_intervals: The index intervals in the data array (Intervals object)
+    Parameters
+    ----------
+    d, ref : flap.DataObject
+        If ref is set it is assumed that the selection coordinate step size is
+        identical in `d` and `ref`.
+    coordinate : str
+        Coordinate name.
+    intervals : dict | str | None
+        Information of processing intervals.
+
+        - If dictionary with a single key: {selection coordinate:
+        description}). Key is a coordinate name which can be different from
+        the calculation coordinate.  Description can be `flap.Intervals`,
+        `flap.DataObject` or a list of two numbers. If it is a data object
+        with data name identical to the coordinate, the error ranges of the
+        data object will be used for interval. If the data name is not the
+        same as coordinate, a coordinate with the same name will be searched
+        for in the data object and the `value_ranges` will be used from it to
+        set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+        interval description, the selection coordinate is taken the same as
+        coordinate.
+        - If None, the whole data interval will be used as a single
+        interval.
+
+    interval_n : int 
+        Minimum number of intervals to use for the processing. These are
+        identical length intervals inserted into the input interval list.
+    
+    Returns
+    -------
+    intervals : flap.Intervals
+        The intervals in the coordinate unit.
+    index_intervals : flap.Intervals
+        The index intervals in the data array.
     """
 
     if (type(intervals) is dict):
@@ -280,54 +295,8 @@ def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
     raise ValueError("Unknown trend removal method.")
 
 def _apsd(d, coordinate=None, intervals=None, options=None):
-    """
-        Auto power Spectral Density caclculation for the data object d.
-        Returns a data object with the coordinate replaced by frequency or wavenumber.
-        The power spectrum is calculated in multiple intervals (described by slicing)
-        and the mean and variance will be returned.
-
-        INPUT:
-            d: A flap.DataObject.
-            coordinate: The name of the coordinate (string) along which to calculate APSD.
-                        This coordinate should change only along one data dimension and should be equidistant.
-                        This and all other cordinates changing along the data dimension of
-                        this coordinate will be removed. A new coordinate with name
-                        Frequency/Wavenumber will be added. The unit will be
-                        derived from the unit of the coordinate (e.g., Hz cm-1, m-1)
-            intervals: Information of processing intervals.
-                       If dictionary with a single key: {selection coordinate: description})
-                           Key is a coordinate name which can be different from the calculation
-                           coordinate.
-                           Description can be flap.Intervals, flap.DataObject or
-                           a list of two numbers. If it is a data object with data name identical to
-                           the coordinate the error ranges of the data object will be used for
-                           interval. If the data name is not the same as coordinate a coordinate with the
-                           same name will be searched for in the data object and the value_ranges
-                           will be used fromm it to set the intervals.
-                       If not a dictionary and not None it is interpreted as the interval
-                           description, the selection coordinate is taken the same as
-                           coordinate.
-                       If None, the whole data interval will be used as a single interval.
-            options: Dictionary. (Keys can be abbreviated)
-                'Wavenumber' : True/False. Will use 2*Pi*f for the output coordinate scale, this is useful for
-                               wavenumber calculation.
-                'Resolution': Output resolution in the unit of the output coordinate.
-                'Range': Output range in the unit of the output coordinate.
-                'Logarithmic': True/False. If True will create logarithmic frequency binning.
-                'Interval_n': Minimum number of intervals to use for the processing. These are identical
-                              length intervals inserted into the input interval list. Default is 8.
-                'Error calculation' : True/False. Calculate or not error. Omitting error calculation
-                                      increases speed. If Interval_n is 1 no error calculation is done.
-                'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
-                             None: Don't remove trend.
-                             Strings:
-                               'Mean': subtract mean
-                             Lists:
-                               ['Poly', n]: Fit an n order polynomial to the data and subtract.
-                            Trend removal will be applied to each interval separately.
-                 'Hanning': True/False Use a Hanning window.
-
-
+    """Calculates the auto-power spectral density (APSD) of the data `d`.
+    See `flap.DataObject.apsd()` for more details.
     """
     if (d.data is None):
         raise ValueError("Cannot do spectral analysis without data.")
@@ -707,67 +676,9 @@ def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, r
            f_cent,fcent_index_range, res
     
 def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
+    """Calculates the complex cross-power spectral density (CPSD) of the data
+    `d`.  See `flap.DataObject.cpsd()` for more details.
     """
-        Complex Cross Power Spectrum calculation for the data object d taking d_ref as reference.
-        If ref is not set d is used as reference, that is all spectra are calculated within d.
-        Calculates all spectra between all signals in ref and d, but not inside d and ref.
-        d and ref both should have the same equidistant coordinate with equal sampling points.
-        Returns a data object with dimension number d.dim+ref.dim-1. The coordinate is replaced 
-        by frequency or wavenumber.
-        The spectrum is calculated in multiple intervals (described by slicing)
-        and the mean and variance will be returned.
-
-        INPUT:
-            d: A flap.DataObject.
-            ref: Another flap.DataObject
-            coordinate: The name of the coordinate (string) along which to calculate CPSD.
-                        This coordinate should change only along one data dimension and should be equidistant.
-                        This and all other cordinates changing along the data dimension of
-                        this coordinate will be removed. A new coordinate with name
-                        Frequency/Wavenumber will be added. The unit will be
-                        derived from the unit of the coordinate (e.g., Hz cm-1, m-1)
-            intervals: Information of processing intervals.
-                       If dictionary with a single key: {selection coordinate: description})
-                           Key is a coordinate name which can be different from the calculation
-                           coordinate.
-                           Description can be flap.Intervals, flap.DataObject or
-                           a list of two numbers. If it is a data object with data name identical to
-                           the coordinate the error ranges of the data object will be used for
-                           interval. If the data name is not the same as coordinate a coordinate with the
-                           same name will be searched for in the data object and the value_ranges
-                           will be used fromm it to set the intervals.
-                       If not a dictionary and not None it is interpreted as the interval
-                           description, the selection coordinate is taken the same as
-                           coordinate.
-                       If None, the whole data interval will be used as a single interval.
-            options: Dictionary. (Keys can be abbreviated)
-                'Wavenumber' : True/False. Will use 2*Pi*f for the output coordinate scale, this is useful for
-                               wavenumber calculation.
-                'Resolution': Output resolution in the unit of the output coordinate.
-                'Range': Output range in the unit of the output coordinate.
-                'Logarithmic': True/False. If True will create logarithmic frequency binning.
-                'Interval_n': Minimum number of intervals to use for the processing. These are identical
-                              length intervals inserted into the input interval list. Default is 8.
-                'Error calculation' : True/False. Calculate or not error. Omitting error calculation
-                                      increases speed. If Interval_n is 1 no error calculation is done.
-                'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
-                             None: Don't remove trend.
-                             Strings:
-                               'mean': subtract mean
-                             Lists:
-                               ['Poly', n]: Fit an n order polynomial to the data and subtract.
-                            Trend removal will be applied to each interval separately.
-                'Hanning': True/False Use a Hanning window.
-                'Error calculation' : True/False. Calculate or not error. Omitting error calculation
-                                      increases speed. If Interval_n is 1 no error calculation is done.
-                'Normalize': Normalize crosspower spectrum, that is return
-        Return value:
-            Three data objects:
-            spectrum, phase, confidence
-                spectrum: The complex power spectrum or coherency if options['Normalize'] is True
-                          The error will contain the condifence level.
-    """
-    
     if (d.data is None):
         raise ValueError("Cannot do spectral analysis without data.")
 

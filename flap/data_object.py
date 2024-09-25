@@ -29,9 +29,34 @@ from .time_frequency_analysis import _stft
 PICKLE_PROTOCOL = 3
 
 class DataObject:
-    """ This is the data object
-    """
+    """Main object in `flap` used for accessing, modifying and performing
+    calculations with data from various sources.
 
+    Parameters
+    ----------
+    data_array : array_like, optional, default=None
+        A numpy array containing the data.
+    error : array_like, optional, default=None
+        One or two numpy arrays with the error. 
+
+        - One array: Symmetric error.
+        - List of two arrays: asymmetric error ([low deviation,high deviation]).
+
+    data_unit : flap.Unit, optional, default=None
+        The unit of the data.
+    coordinates : flap.Coordinate | list of flap.Coordinate, optional, default=None
+        Coordinates compatible with the data array.
+    exp_id : str, optional, default=None
+        Experiment ID. Can be None if not applicable.
+    data_title : str, optional, default=None
+        Description of the data.
+    info : str, optional, default=None
+        Information about the DataObject.
+    data_shape : array_like, optional, default=None
+        Used only if `data_array` is not present.
+    data_source : str, optional, default=None
+        Data sourve description.
+    """
     def __init__(self,
                  data_array=None,
                  error=None,
@@ -42,19 +67,6 @@ class DataObject:
                  info=None,
                  data_shape=None,
                  data_source=None):
-        """
-        data_array: A numpy array with the data
-        error: One or two numpy arrays with the error.
-               An array: Symmetric error
-               List of two arrays: asymmetric error ([low deviation,high deviation])
-        data_unit: The unit of the data. Should be a UnitClass variable or None
-        exp_id: Experiment ID. Can be None if not applicable.
-        coordinates: flap.Coordinate class or list of flap.Coordinate class variables
-                     compatible with the data array.
-        data_title: Description of the data.
-        data_shape: Used only if data_array is not present
-        """
-
         self.coordinates = coordinates
         self.data_source = data_source
         self.exp_id = exp_id
@@ -95,6 +107,16 @@ class DataObject:
 
     @property
     def coordinates(self):
+        """Coordinates of the data object.
+
+        Returns
+        -------
+        flap.Coordinate | list of flap.Coordinate
+
+        Warnings
+        --------
+        Not to be confused with `flap.DataObject.coordinate()`.
+        """
         return self.__coordinates
 
     @coordinates.setter
@@ -113,7 +135,8 @@ class DataObject:
                 raise TypeError("Bad type for coordinates.")
                 
     def check(self):
-        """ Does a consistency check for the data object and raises errors if problems found.
+        """Perform a consistency check for the data object and raise errors if
+        problems are found.
         """
         if (self.data is not None):
             if (type(self.data) is not np.ndarray):
@@ -140,7 +163,7 @@ class DataObject:
                     else:
                         raise TypeError("Wrong error array in DataObject. It should be numpy.ndarray.")
                 if (err.shape != self.shape):
-                    raise ValueError("Shape of error  array un DataObject is different from data.")
+                    raise ValueError("Shape of error  array in DataObject is different from data.")
         if (self.coordinates is not None):
             for i,c in enumerate(self.coordinates):
                 for j in range(i):
@@ -165,16 +188,16 @@ class DataObject:
                     raise TypeError("Wrong coordinate mode type in '{:s}'. Should be flap.CoordinateMode().".format(c.unit.name))
                 if (c.mode.equidistant):
                     if (c.start is None):
-                        raise TypeError("No start for equdistant coordinate '{:s}'.".format(c.unit.name))
+                        raise TypeError("No start for equidistant coordinate '{:s}'.".format(c.unit.name))
                     if (type(c.start ) is str):
-                        raise TypeError("Invalid start value type for equdistant coordinate '{:s}'.".format(c.unit.name))
+                        raise TypeError("Invalid start value type for equidistant coordinate '{:s}'.".format(c.unit.name))
                     if (len(c.step) != len(c.dimension_list)):
                         raise ValueError("Number of step values is different from length of dimension_list in '{:s}'.".format(c.unit.name))
                     for cstep in c.step:
                         if (cstep is None):
-                            raise TypeError("One step is None for equdistant coordinate '{:s}'.".format(c.unit.name))
+                            raise TypeError("One step is None for equidistant coordinate '{:s}'.".format(c.unit.name))
                         if (type(cstep ) is str):
-                            raise TypeError("Invalid step type for equdistant coordinate '{:s}'.".format(c.unit.name))
+                            raise TypeError("Invalid step type for equidistant coordinate '{:s}'.".format(c.unit.name))
                         try:
                             cstep + c.start
                         except:
@@ -215,14 +238,25 @@ class DataObject:
                         raise ValueError("Coordinate value and data shape is inconsistent in coordinate '{:s}'.".format(c.unit.name))
                                                                     
     def coordinate_names(self):
-        """ Returns a list with the coordinate names.
+        """Return a list with the coordinate names.
+
+        Returns
+        -------
+        list
         """
         if (self.coordinates is not None):
             return [c.unit.name for c in self.coordinates]
         else:
             return []
 
-    def del_coordinate(self,name):
+    def del_coordinate(self, name):
+        """Delete a coordinate by its unit name.
+
+        Parameters
+        ----------
+        name : str
+            Unit name of the coordinate to delete.
+        """
         if (self.coordinates is None):
             raise ValueError("Coordinate '" + name + "' is not present in data object.")
         for i in range(len(self.coordinates)):
@@ -235,7 +269,17 @@ class DataObject:
             self.coordinates = None
 
     def get_coordinate_object(self, name):
-        """ Returns the Coordinate class having the given name. The returned object is a link not a copy.
+        """Returns the Coordinate class having the given name. The returned
+        object is a reference (link), not a copy.
+
+        Parameters
+        ----------
+        name : str
+            The name of the coordinate object to get.
+
+        Returns
+        -------
+        flap.Coordinate
         """
         if (self.coordinates is not None):
             for c in self.coordinates:
@@ -248,10 +292,16 @@ class DataObject:
             raise ValueError("Coordinate '" + name + "' is not present in data object.")
 
 
-    def add_coordinate_object(self,coordinate,index=None):
-        """ Adds a flap.Coordinate instance to the list of coordinates
-            If index is not set adds to the end of the list. Otherwise adds to the position
-            shown by index. (0 is beginning of list.)
+    def add_coordinate_object(self, coordinate, index=None):
+        """Adds a flap.Coordinate instance to the list of coordinates.
+
+        Parameters
+        ----------
+        coordinate : flap.Coordinate
+            The coordinate to add.
+        index : int, optional, default=None
+            The (zero-based) index of the position to insert the new coordinate
+            at. If None, the new coordinate is added to the end of the list.
         """
         if (self.coordinates is None):
             self.coordinates = [coordinate]
@@ -263,15 +313,30 @@ class DataObject:
             else:
                 self.coordinates.append(coordinate)
 
-    def add_coordinate(self, coordinates=None, data_source=None, exp_id=None, options=None):
-        """ This is a general coordinate conversion interface.
-            Adds the requested coordinate(s) to the data_object.
-        INPUT:
-            coordinates: List of coordinates to add. (string array)
-            data_source: Optional data_source. Use this not the one in data_object
-            exp_id: Optional exp_id. Use this not the one in data_object
-            options: Dictionary of options.
-        Returns the modified data object. Note that the input data object remanins the same.
+    def add_coordinate(self,
+                       coordinates=None,
+                       data_source=None,
+                       exp_id=None,
+                       options=None):
+        """A general coordinate conversion interface. Adds the requested
+        coordinate(s) to the data_object.
+
+        Parameters
+        ----------
+        coordinates : str | list of str, optional, default=None
+            List of coordinates to add, identified by unit name.
+        data_source : str, optional, default=None
+            Date source to override the one contained in the data object.
+        exp_id : str, optional, default=None
+            Experiment ID to override the one contained in the data object.
+        options : dict, optional, default=None
+            Dictionary of options to use.
+
+        Returns
+        -------
+        flap.DataObject
+            The modified data object. Note that the input data object remains
+            the same.
         """
         if (data_source is not None):
             _data_source = data_source
@@ -307,11 +372,20 @@ class DataObject:
         return d
 
     def coordinate_change_indices(self, name):
-        """ Returns the indices to the data array for which the coordinate changes.
-            The returned value is a tuple of indices, the number of elements equals the
-            dimension of the data. This can be directly used to get the coordinate values
-            using coordinate()
-        name: Coordinate name (string)
+        """Returns the indices to the data array for which the coordinate
+        changes. 
+
+        Parameters
+        ----------
+        name : str
+            Coordinate (unit) name.
+
+        Returns
+        -------
+        tuple of int
+            The number of elements in the tuple returned equals the dimension of
+            the data. This can be directly used to get the coordinate values
+            using `coordinate()`.
         """
         for c in self.coordinates:
             if c.unit.name == name:
@@ -322,9 +396,18 @@ class DataObject:
         for i in c.dimension_list:
             index[i] = ...
 
-    def to_intervals(self,coordinate):
-        """ Create an Intervals class object from either the data error ranges or
-            the coordinate value ranges.
+    def to_intervals(self, coordinate):
+        """Create an Intervals class object from either the data error ranges or
+        the coordinate value ranges.
+
+        Parameters
+        ----------
+        coordinate : str
+            Coordinate (unit) name.
+
+        Returns
+        -------
+        flap.coordinates.Intervals
         """
         if (self.data_unit.name != coordinate):
             try:
@@ -375,9 +458,18 @@ class DataObject:
                                                       )
         return intervals
 
-    def slicing_to_intervals(self,slicing):
-        """ Convert a multi-slicing description to an Intervals object.
-            For possibilities see DataObject.slice_data().
+    def slicing_to_intervals(self, slicing):
+        """Convert a multi-slicing description to an Intervals object. For
+        possibilities, see `flap.DataObject.slice_data()`.
+
+        Parameters
+        ----------
+        slicing : dict
+            The slicing to use.
+
+        Returns
+        -------
+        flap.Intervals
         """
         if (type(slicing) is not dict):
             raise TypeError("slicing_to_intervals(): slicing should be a dictionary.")
@@ -435,33 +527,45 @@ class DataObject:
         return intervals
 
     def proc_interval_limits(self, coordinate, intervals=None):
-        """ Determine processing interval limits, both in coordinates and data indices.
-            This is a helper routine for all functions which do some calculation as a function
-            of one coordinate and allow processing only a set of intervals instead of the whole dataset.
-            INPUT:
-                coordinate: Name of the coordinate along which calculation will be done. This must
-                            change only along a single data dimension.
-                intervals: Information of processing intervals.
-                           If dictionary with a single key: {selection coordinate: description})
-                               Key is a coordinate name which can be different from the calculation
-                               coordinate.
-                               Description can be flap.Intervals, flap.DataObject or
-                               a list of two numbers. If it is a data object with data name identical to
-                               the coordinate the error ranges of the data object will be used for
-                               interval. If the data name is not the same as coordinate a coordinate with the
-                               same name will be searched for in the data object and the value_ranges
-                               will be used fromm it to set the intervals.
-                           If not a dictionary and not None is is interpreted as the interval
-                               description, the selection coordinate is taken the same as
-                               coordinate.
-                           If None, the whole data interval will be used as a single interval.
-            Return value:
-                calc_int, calc_int_ind, sel_int, sel_int_ind
-                Each return value is a list of numpy arrays: [start, end]
-                The calc_xxx values are for the calculation coordinate, the sel_xxx are for the
-                selection coordinate. xxx_int is in coordinate values, xxx_int_ind is in data index
-                values which follows the Python convention, end index is not included.
-                The index start indices will be always smaller than the end indices.
+        """Determine processing interval limits, both in coordinates and data
+        indices. 
+        
+        This is a helper routine for all functions which do some calculation as
+        a function of one coordinate and allow processing only a set of
+        intervals instead of the whole dataset.
+
+        Parameters
+        ----------
+        coordinate : str
+            Name of the coordinate along which calculation will be done. This
+            must change only along a single data dimension.
+        intervals : dict | str, optional, default=None
+            Information of processing intervals.
+
+            - If dictionary with a single key: {selection coordinate:
+              description}). Key is a coordinate name which can be different from
+              the calculation coordinate.  Description can be `flap.Intervals`,
+              `flap.DataObject` or a list of two numbers. If it is a data object
+              with data name identical to the coordinate, the error ranges of the
+              data object will be used for interval. If the data name is not the
+              same as coordinate, a coordinate with the same name will be searched
+              for in the data object and the `value_ranges` will be used from it to
+              set the intervals.
+            - If not a dictionary and not None, it is interpreted as the
+              interval description, the selection coordinate is taken the same as
+              `coordinate`.
+            - If None, the whole data interval will be used as a single
+              interval.
+
+        Returns
+        -------
+        calc_int, calc_int_ind, sel_int, sel_int_ind: list of np.ndarray
+            Each return value is a list of numpy arrays: [start, end]. The
+            `calc_xxx` values are for the calculation coordinate, the `sel_xxx`
+            are for the selection coordinate. `xxx_int` is in coordinate values,
+            `xxx_int_ind` is in data index values, following the Python
+            convention, as the end index is not included. The index start
+            indices will be always smaller than the end indices.
         """
         # Getting the coordinate object for the processing coordinate
         try:
@@ -553,16 +657,34 @@ class DataObject:
         return calc_int, calc_int_ind, sel_int, sel_int_ind
         
     def coordinate(self, name, index=None, options=None):
-        """ Returns the coordinates of a subarray of the data array.
-        name: Coordinate name (string)
-        index: The indexes into the data array (tuple with various elements, see Coordinate.data())
-        options: The same options as for Coordinate.data()
+        """Returns the coordinates of a subarray of the data array.
 
-        returns 3 np.arrays:
-            data: the coordinates. The number of dimension is the same as the dimension of
-                  the data array, but the number  of elements are taken from index.
-            data_low: low ranges, same shape as data. None if no range data is present
-            data_high: high ranges, same shape as data. None if no range data is present
+        Parameters
+        ----------
+        name : str
+            Coordinate (unit) name.
+        index : tuple of objects, optional, default=None
+            The indexes into the data array. (For more details, see
+            `flap.Coordinate.data()`.)
+        options : _type_, optional, default=None
+            The same options as for `flap.Coordinate.data()`.
+
+        Returns
+        -------
+        data : np.ndarray
+            The coordinates. The number of dimension is the same as the
+            dimension of the data array, but the number  of elements are
+            taken from `index`.
+        data_low : np.ndarray
+            Low ranges, same shape as data. None if no range data is
+            present.
+        data_high : np.ndarray
+            High ranges, same shape as data. None if no range data is
+            present.
+
+        Warnings
+        --------
+        Not to be confused with `flap.DataObject.coordinates`.
         """
         if (type(name) is not str):
             raise TypeError("Invalid coordinate name.")
@@ -578,10 +700,19 @@ class DataObject:
         return d,d_low,d_high
     
     def coordinate_range(self, name, index=...):
-        """ Returns the ranges of a coordinate.
-        name: Coordinate name (string)
+        """Returns the data range and the data range with errors for the
+        coordinate.
 
-        Returns the data range and the data range with errors for the coordinate. Both are lists.
+        Parameters
+        ----------
+        name : str
+            Coordinate (unit) name.
+        index : object, optional, default=...
+            Unused argument.
+
+        Returns
+        -------
+        value_range, value_range_errors : list
         """
         for c in self.coordinates:
             if c.unit.name == name:
@@ -594,17 +725,22 @@ class DataObject:
             raise e
         return dr, dr_e
 
-
     def index_from_coordinate(self, name, coord_values):
-        """ Returns the closest data indices of the coordinate values.
-            Coordinates should change only along one dimension.
-            It is assumed that coordinates change monotonically.
-        INPUT:
-            name: Coordinate name (string)
-            coord_values: The coordinate values to convert to indices.
-                          (numpy array or list is scalar)
-        Return value:
-            Returns the indices in the same format as the input coordinates.
+        """Returns the closest data indices of the coordinate values.
+        Coordinates should change only along one dimension. It is assumed that
+        coordinates change monotonically.
+
+        Parameters
+        ----------
+        name : str
+            Coordinate name.
+        coord_values : array_like
+            The coordinate values to convert to indices.
+
+        Returns
+        -------
+        array_like
+            Indices in the same format as `coord_values`.
         """
         try:
             coord_obj = self.get_coordinate_object(name)
@@ -641,9 +777,18 @@ class DataObject:
 
         return index_values
 
-    def coordinate_change_dimensions(self,name):
-        """ Return the list of dimensions of the data array along which
-        the named coordinate changes
+    def coordinate_change_dimensions(self, name):
+        """Return the list of dimensions of the data array along which the named
+        named coordinate changes.
+
+        Parameters
+        ----------
+        name : str
+            Coordinate (unit) name.
+
+        Returns
+        -------
+        list
         """
         for c in self.coordinates:
             if c.unit.name == name:
@@ -652,9 +797,18 @@ class DataObject:
             raise ValueError("Coordinate '"+name+"' is not present in data object.")
         return c.change_dimensions()
 
-    def coordinate_nochange_dimensions(self,name):
-        """ Return the list of dimensions of the data array along which
-        the named coordinate changes
+    def coordinate_nochange_dimensions(self, name):
+        """Return the list of dimensions of the data array along which this
+        coordinate does not change.
+
+        Parameters
+        ----------
+        name : str
+            Coordinate (unit) name.
+
+        Returns
+        -------
+        list
         """
         for c in self.coordinates:
             if c.unit.name == name:
@@ -664,7 +818,8 @@ class DataObject:
         return c.change_dimensions(self.data.shape)
 
     def _plot_error_ranges(self, index=None):
-        """ Helper function to return error low and high limits as needed by matplotlib
+        """Helper function to return error low and high limits as needed by
+        matplotlib.
         """
         if (self.error is None):
             return None
@@ -681,8 +836,8 @@ class DataObject:
             return self.error[tuple(_index)].flatten()
 
     def _plot_coord_ranges(self,coord, c_data, c_low, c_high):
-        """ Helper function to return error low and high limits from coordiniate data
-            in the format needed by matplotlib
+        """Helper function to return error low and high limits from coordiniate
+        data in the format needed by matplotlib
         """
         if (c_low is None):
             return None
@@ -694,65 +849,9 @@ class DataObject:
             err[1,:] = c_high.flatten() - c_data.flatten()
             return err
 
-    def plot(self,
-             axes=None,
-             slicing=None,
-             slicing_options=None,
-             summing=None,
-             options=None,
-             plot_type=None,
-             plot_options=None,
-             plot_id=None):
-        """
-        Plot a data object.
-        axes: A list of coordinate names (strings). They should be one of the coordinate
-              names in the data object or 'Data'
-              They describes the axes of the plot.
-              If the number of axes is less than the number required for the plot, 'Data' will be added.
-              If no axes are given default will be used depending on the plot type. E.g. for
-              x-y plot the default first axis is the firs coordinate, the second axis is 'Data'
-        plot_type: The plot type (string)
-              'xy': Simple 1D plot. Default axes are: first coordinate, Data
-              'multi xy': In case of 2D data plots 1D curves with vertical shift
-                          Default x axis is first coordinate, y axis is Data
-                          The signals are named in the label with the 'Signal name' coordinate or the one
-                          named in options['Signal name']
-        plot_options: Dictionary. Will be passed over to the plot call.
-        slicing, summing: arguments for slice_data. Slicing will be applied before plotting.
-        options:
-            Matplotlib options like xtitle, xlimit, etc
-            Plot options:
-                'All points' True or False
-                             default is False. If True will plot all points otherwise will use
-                             the sample_to_plot function
-                'Error'      True: Plot all error bars (default: True)
-                             False: Do not plot errors
-                             number > 0: Plot this many error bars in plot
-                'Y separation' Vertical separation of curves in multi xy plot. For linear scale this will
-                               be added to consecutive cureves. For Log scale consecutive curves will be
-                               multiplied by this.
-                'Log x' : Logscale X axis
-                'Log y' : Logscale Y axis
-        """
-
-        try:
-            return _plot(self,
-                         axes=axes,
-                         slicing=slicing,
-                         slicing_options=slicing_options,
-                         summing=summing,
-                         options=options,
-                         plot_type=plot_type,
-                         plot_options=plot_options,
-                         plot_id=plot_id)
-        except Exception as e:
-
-            raise e
-            
-            
     def __moveaxis(self,source,destination):
-        """ This is an internal function to move an axis in the data and error arrays.
-            Does not do anything to the coordinates.
+        """This is an internal function to move an axis in the data and error
+        arrays.  Does not do anything to the coordinates.
         """
         self.data = np.moveaxis(self.data,source,destination)
         if (self.error is not None):
@@ -763,9 +862,8 @@ class DataObject:
                 self.error = np.moveaxis(self.error,source,destination)
 
     def __create_arrays(self, source_object, shape):
-        """ This is an internal function to create empty data and error arrays.
+        """This is an internal function to create empty data and error arrays.
         """
-
         self.data = np.empty(shape,dtype=source_object.data.dtype)
         if (source_object.error is not None):
             if (type(source_object.error) is list):
@@ -776,10 +874,9 @@ class DataObject:
                 self.error = np.empty(shape,dtype=source_object.error.dtype)
 
     def __copy_data(self, source_object, destination_ind, source_ind):
-        """ This is an internal function to copy data from one data object to the other with
-            possibly different shape.
+        """This is an internal function to copy data from one data object to the
+        other with possibly different shape.
         """
-
         self.data[destination_ind] = source_object.data[source_ind]
         if (source_object.error is not None):
             if (type(source_object.error) is list):
@@ -789,7 +886,8 @@ class DataObject:
                 self.error[destination_ind] = source_object.error[source_ind]
 
     def __fill_nan(self, ind):
-        """ This is an internal function to fill certain elements in the data and error with NaN.
+        """ This is an internal function to fill certain elements in the data
+        and error with NaN.
         """
         if (self.data.dtype.kind == 'f'):
             self.data[ind] = np.NaN
@@ -821,9 +919,17 @@ class DataObject:
                 elif (self.error.dtype.kind == 'O'):
                     self.error[ind] = None
 
-    def __check_coords_after_simple_slice(self,sliced_dimensions, sliced_removed, ind_slice_coord, original_shape, 
-                                          dimension_mapping, slicing_equidistant,slicing_coord,_options):
-        """ This is an internal function to modify the coordinates after a simple (non-interval) slice operation
+    def __check_coords_after_simple_slice(self,
+                                          sliced_dimensions,
+                                          sliced_removed,
+                                          ind_slice_coord,
+                                          original_shape, 
+                                          dimension_mapping,
+                                          slicing_equidistant,
+                                          slicing_coord,
+                                          _options):
+        """This is an internal function to modify the coordinates after a simple
+        (non-interval) slice operation.
         """
         for check_coord in self.coordinates:
             # Do nothing for scalar dimension
@@ -1005,30 +1111,50 @@ class DataObject:
                                          in_interval_dimension,
                                          n_int,
                                          n_in_int):
-        """ Internal function to modify all coordinate descriptions after a mult-slice process. This or
-            __check_coordds_after_simple_slice is called after each slice operation with a coordinate.
-            In the slicing process before this call the dimensions in joint_dimension_list were flattened and the data distributed
-            to the interval_dimension and in_interval_dimension.
-            self is a copy of the original data object before slice with the data already sliced as
-            described above.
-            slicing: The slincing input of self.slice_data()
-            original_shape: The original data shape before this slicing operation
-            joint slices: The index of the keys in slicing.keys() which were done jointly
-            joint_dimension_list: List of data dimension which were flattened
-            dimension_mapping: mapping from original to new dimension numbers
-            slice_description: Describing the indices in the data array for the intervals.
-                                There are 3 options:
-                                  slice: (for 1-coordinate slice only)
-                                  dictionary with 'Starts', 'Stops' keys: giving the interval
-                                     start and stop indices with numpy arrays.
-                                     Number of dimensions refer to the number of joint slice coordinates.
-                                  list of numpy arrays: indices. If multiple coordinate multi-slice then
-                                    list of lists, slicing_description[i][j][k] giving the numpy array
-                                    for interval i,j,k (in this 3 with 3 joint slicing coordinates)
-            interval_dimension: dimension number (in new numbering) for the intervals
-            in_interval_dimension: dimension number (in new numbering) inside the intervals
-            n_int: Number of intervals
-            n_in_int: number of elements in intervals
+        """Internal function to modify all coordinate descriptions after a
+        mult-slice process. This or __check_coordds_after_simple_slice is called
+        after each slice operation with a coordinate.
+
+        In the slicing process before this call, the dimensions in
+        joint_dimension_list were flattened and the data distributed to the
+        interval_dimension and in_interval_dimension.
+
+        Parameters
+        ----------
+
+        self:
+            A copy of the original data object before slice with the data
+            already sliced as described above.
+        slicing:
+            The slicing input of self.slice_data().
+        original_shape:
+            The original data shape before this slicing operation
+        joint slices:
+            The index of the keys in slicing.keys() which were done jointly
+        joint_dimension_list:
+            List of data dimension which were flattened.
+        dimension_mapping:
+            Mapping from original to new dimension numbers.
+        slice_description:
+            Describing the indices in the data array for the intervals.
+            There are 3 options:
+                - slice: (for 1-coordinate slice only)
+                - dictionary with 'Starts', 'Stops' keys: giving the interval
+                start and stop indices with numpy arrays.  Number of dimensions
+                refer to the number of joint slice coordinates.
+                - list of numpy arrays: indices. If multiple coordinate
+                multi-slice then
+                - list of lists, slicing_description[i][j][k] giving the numpy
+                array for interval i,j,k (in this 3 with 3 joint slicing
+                coordinates)
+        interval_dimension:
+            Dimension number (in new numbering) for the intervals.
+        in_interval_dimension:
+            Dimension number (in new numbering) inside the intervals.
+        n_int:
+            Number of intervals.
+        n_in_int:
+            Number of elements in intervals.
         """
         slicing_coord_names = ""
         for i in joint_slices:
@@ -1369,65 +1495,107 @@ class DataObject:
                                                      dimension_list = in_interval_dimension))
         self.coordinates.append(c)
 
+    def slice_data(self,
+                   slicing=None,
+                   summing=None,
+                   options=None):
+        """Slice (select areas) from the data object along one or more coordinates.
 
-    def slice_data(self,slicing=None,summing=None,options=None):
-        """
-        Slice (select areas) from the data object along one or more coordinates.
-        Return the sliced object.
-          slicing:
-              Dictionary with keys referring to coordinates in the data object.
-                 Values can be:
-                     a:SIMPLE SLICE: cases when closest value or interpolated value is selected.
-                         a1 slice objects, range objects, scalars, lists, numpy array.
-                         a2 flap.DataObjects without error and with data unit.name equal to
-                            the coordinate
-                         a3 flap.DataObject with the name of one coordinate equal to the dictionary
-                            key without having value_ranges values.
-                         a4 flap.Intervals objects with one interval
-                     b: MULTI SLICE: Various range selection objects. In this case ranges are
-                        selected and a new dimension is added to the data array
-                        (only of more than 1 interval is selected) going through the
-                        intervals. If intervals are of different length the longest will be used
-                        and missing elements filled with float('nan').
-                        Two new coordinates are added: "<coordinate> in interval",
-                        "<coordinate> interval"
-                        b1 flap.Intervals objects with more than one interval
-                        b2 flap.DataObjects with data unit.name equal to the slicing coordinate. The error
-                           values give the intervals.
-                        b3 flap.DataObject with the name of one coordinate equal to the slicing coordinate.
-                           The value_ranges select the intervals.
-                        If range slicing is done with multiple coordinates which have common element in the
-                        dimension list they will be done in one step. Otherwise the slicing is done sequentially.
-          summing:
-              Summing is applied to the sliced data. It processes data along one coordinate
-              and the result is a scalar. This way summing reduces the number of dimensions.
-              Dictionary with keys referring to coordinates and values as processing strings. If
-              the processed coordinate changes along multiple dimensions those dimensions will be flattened.
+        Parameters
+        ----------
+        slicing : dict, optional, default=None
+            Dictionary with keys referring to coordinates in the data object. Values can be:
 
-              For mean and avereage data errors are calculated as error of independent variables, that is taking the square
-              root of the squared sum of errors. For coordinates the mean of the ranges is taken.
+            a) For SIMPLE SLICE: cases when closest value or interpolated value
+               is selected.
+               
+               Possibilities:
 
-              Processing strings are the following:
-                       None: Nothing to be done in this dimension
-                      'Mean' : take mean of values in selection/coordinate
-                      'Sum'  : take sum of values in selection/coordinate
-                      'Min'  : take the minimum of the values/coordinate
-                      'Max'  : take the maximum of the values/coordinate
+               1) slice objects, range objects, scalars, lists, numpy array.
+               2) `flap.DataObject` objects without error and with data
+                  unit.name equal to the coordinate.
+               3) `flap.DataObject` with the name of one coordinate equal to the
+                  dictionary key without having value_ranges values.
+               4) `flap.Intervals` objects with one interval.
 
-          options: 'Partial intervals'  (bool). If true processes intervals which extend over the coordinate limits. 
-                                                If false only full intervals are processed.
-                   'Slice type': 'Simple': Case a above: closest or interpolated values are selected, dimensions 
-                                           are reduced or unchanged.
-                                 'Multi': Case b above: multiple intervals are selected and their data is placed into
-                                          new dimension.
-                                 None: Automatically select. For slicing data in case b multi slice, otherwise simple
-                   'Interpolation: 'Closest value'
-                                   'Linear'
-                   'Regenerate coordinates': True/False  (defaultL True)
-                                             If True and summing is done then looks for pairs of coordinates
-                                             'Rel. <coord> in int(<coord1>)'  'Start <coord> in int(<coord1>)'.
-                                             If such pairs are found and they change on the same dimension or one of them is constant then
-                                             coordinate <coord> is regenerated and these are removed.
+            b) For MULTI SLICE: Various range selection objects. In this case
+               ranges are selected and a new dimension is added to the data array
+               (only if more than 1 interval is selected) going through the
+               intervals. If intervals are of different length, the longest will be
+               used and missing elements filled with ``float('nan')``.
+               
+               Two new coordinates are added: "<coordinate> in interval",
+               "<coordinate> interval".
+
+               Possibilities:
+
+               1) `flap.Intervals` objects with more than one interval
+               2) `flap.DataObject` objects with data `unit.name` equal to the
+                  slicing coordinate. The error values give the intervals.
+               3) `flap.DataObject` with the name of one coordinate equal to the
+                  slicing coordinate. The `value_ranges` select the intervals.
+
+               If range slicing is done with multiple coordinates which have
+               common element in the dimension list, they will be done in one
+               step. Otherwise the slicing is done sequentially.
+
+        summing : dict, optional, default=None
+            Summing is applied to the sliced data. It processes data along one
+            coordinate and the result is a scalar. This way summing reduces the
+            number of dimensions.
+
+            Dictionary with keys referring to coordinates and values as
+            processing strings. If the processed coordinate changes along
+            multiple dimensions, those dimensions will be flattened.
+
+            For mean and avereage data, errors are calculated as error of
+            independent variables. That is, taking the square root of the
+            squared sum of errors. For coordinates the mean of the ranges is
+            taken.
+
+            Processing strings are the following:
+
+            - ``None``: Nothing to be done in this dimension.
+            - 'Mean': take mean of values in selection/coordinate.
+            - 'Sum': take sum of values in selection/coordinate.
+            - 'Min': take the minimum of the values/coordinate.
+            - 'Max': take the maximum of the values/coordinate.
+
+        options : dict, optional, default=True
+            Possible keys and values:
+
+            - 'Partial intervals'
+
+              - bool: If ``True``, processes intervals which extend over the
+                coordinate limits. If ``False``, only full intervals are
+                processed.
+            
+            - 'Slice type': 
+
+              - 'Simple': Case a) above: closest or interpolated values are
+                selected, dimensions are reduced or unchanged.
+              - 'Multi': Case b) above: multiple intervals are selected, and
+                their data is placed into a new dimension.
+              - ``None``: Automatically select. For slicing data in case b multi slice, otherwise simple
+
+            - 'Interpolation':
+
+              - 'Closest value'
+              - 'Linear'
+
+            - 'Regenerate coordinates': 
+              - bool: Default is ``True``. If ``True``, and summing is done,
+              then looks for pairs of coordinates ('Rel. <coord> in
+              int(<coord1>)', 'Start <coord> in int(<coord1>)').
+
+              If such pairs are found, and they change on the same dimension
+              or one of them is constant, then coordinate <coord> is
+              regenerated and these are removed.
+            
+        Returns
+        -------
+        flap.DataObject
+            The sliced object.
         """
 
         default_options = {'Partial intervals': True,
@@ -1450,10 +1618,11 @@ class DataObject:
         
                 
         def check_multi_slice(slicing, coord_dim):
-            """ Determines whether this slicing operation is multi-slice
-                slicing: the slicing list or dictionary element
-                coord_dim: Coordinate name in case of coordinate slincing,
-                           dimension index in case of dimension slicing.
+            """Determines whether this slicing operation is multi-slice.
+
+            slicing: the slicing list or dictionary element
+            coord_dim: Coordinate name in case of coordinate slincing,
+                        dimension index in case of dimension slicing.
             """
             if ( (type(slicing) is slice) or
                  (type(slicing) is range) or
@@ -1484,10 +1653,11 @@ class DataObject:
             raise TypeError("Invalid slicing description.")
 
         def simple_slice_index(slicing, slicing_coord, data_shape, _options):
-            """ Returns index array which can be used for indexing the selected elements in the
-                data array flattened in the dimensions of the coordinate.
-
-                Assumes simple (non-range) slicing.
+            """Returns index array which can be used for indexing the selected
+            elements in the data array flattened in the dimensions of the
+            coordinate.
+            
+            Assumes simple (non-range) slicing.
             """
             
             if (slicing_coord.mode.equidistant):
@@ -1735,9 +1905,12 @@ class DataObject:
                     return ind_coord
 
         def check_slicing_type(slicing_description, slicing_coord):
-            """ Check if the slicing description is compatible with the coordinate
-                Raise TypeError is not.
-                Returns the slicing type 'Numeric' or 'String'
+            """Check if the slicing description is compatible with the
+            coordinate.
+
+            Raise TypeError is not.
+
+            Returns the slicing type 'Numeric' or 'String'.
             """
 
             if ((type(slicing_description) is slice)
@@ -2547,6 +2720,10 @@ class DataObject:
     # End of slice_data
 
     def regenerate_coordinates(self):
+        """Regenerate coordinates.
+
+        See `flap.DataObject.slice_data` for details.
+        """
         while (True):
             rel_coord = None
             start_coord = None
@@ -2614,7 +2791,232 @@ class DataObject:
                 except Exception:
                     pass
                 
+    def plot(self,
+             axes=None,
+             slicing=None,
+             slicing_options=None,
+             summing=None,
+             options=None,
+             plot_type=None,
+             plot_options=None,
+             plot_id=None):
+        """Plot a data object.
+
+        Parameters
+        ----------
+        axes : list of str, optional, default=None
+            A list of coordinate names. They should be one of the coordinate
+            names in the data object or '__Data__'.  They describe the axes of the
+            plot. If the number of axes is less than the number required for the
+            plot, '__Data__' will be added. If no axes are given, the default
+            will be used, depending on the plot type. E.g. for an x-y plot the
+            default first axis is the first coordinate, the second axis is
+            '__Data__'.
+        slicing : dict, optional, default=None
+            Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+            will be applied before plotting.
+        slicing_options : dict, optional, default=None
+            Options for slicing. See `flap.DataObject.slice_data()` for details.
+        summing : str, optional, default=None
+            Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+            will be applied before plotting.
+        options : dict, optional, default=None
+            Options for plotting. Possible keys and values:
+
+            - 'Error' (default=``True``):
+
+              - ``True``: Plot all error bars
+              - ``False``: Do not plot errors.
+              - int > 0: Plot this many error bars in plot.
+
+            - 'Y separation':
+               
+              - float: Vertical separation of curves in multi xy plot. For
+                linear scale this will be added to consecutive curves. For Log
+                scale, consecutive curves will be multiplied by this.
+
+            - 'Log x': 
+
+              - ``True``: Logscale X axis
+
+            - 'Log y':
+
+              - ``True``: Logscale Y axis
+
+            - 'All points' (default=``False``):
+
+              - bool: Default is ``False``. If ``True``, will plot all points,
+                otherwise will plot only a reduced number of points (see
+                `'Maxpoints'`). Each plotted point will be the mean of data in a
+                box, and a vertical bar will indicate the value range in each
+                box. 
+
+            - 'Maxpoints': 
+
+              - int: The maximum number of data points plotted. Above this,
+                only this many points will be plotted if 'All points' is
+                ``False``.
+
+            - 'Complex mode': 
+
+              - 'Amp-phase': Plot amplitude and phase.
+              - 'Real-imag': Plot real and imaginary part.
+
+            - 'X range','Y range': 
+
+              - lists of two floats: Axes ranges.
+
+            - 'Z range': 
+
+              - list of two floats: Range of the vertical axis.
+
+            - 'Colormap': 
+
+              - str: Cmap name for image and contour plots.
+
+            - 'Levels': 
+
+              - int: Number of contour levels or array of levels.
+
+            - 'Aspect ratio': 
+
+              - 'equal', 'auto' or float. (See `imshow`.)
+
+            - 'Waittime': 
+
+              - float: Time to wait in seconds between two images in anim-...
+                type plots
+
+            - 'Video file': 
+
+              - str: Name of output video file for anim-... plots
+
+            - 'Video framerate': 
+
+              - float: Frame rate for output video.
+
+            - 'Video format':
+
+              - str: Format of the video. Valid options: 'avi'.
+
+            - 'Clear': 
+
+              - bool: If ``True``, don't use the existing plots, generate new
+                ones. (No overplotting.)
+
+            - 'Force axes':
+
+              - ``True``: Force overplotting, even if axes are incpomatible.
+
+            - 'Colorbar': 
+
+              - bool: Switch on/off colorbar
+
+            - 'NaN color': 
+
+              - The color to use in image data plotting for np.nan
+                (not-a-number) values.
+
+            - 'Interpolation':
+
+              - Interpolation method for image plot.
+
+            - 'Language':
+
+              - str: Language of certain standard elements in the plot.
+                Possible values: {'EN', 'HU'}.
+
+            - 'EFIT options':
+
+              - Dictionary of EFIT plotting options:
+
+                - 'Plot separatrix': Set this to plot the separatrix onto
+                  the video.
+                - 'Separatrix X': Name of the flap.DataObject for the
+                  separatrix X data (usually 'R').
+                - 'Separatrix Y': Name of the flap.DataObject for the
+                  separatrix Y data (usually 'z').
+                - 'Separatrix XY': Name of the 2D flap.DataObject for the
+                  separatrix XY data (usually 'Rz').
+                - 'Separatrix color': Color of the separatrix for the plot.
+                - 'Plot limiter': Set to plot the limiter onto the video.
+                - 'Limiter X': Name of the flap.DataObject for the limiter X
+                  data (usually 'R').
+                - 'Limiter Y': Name of the flap.DataObject for the limiter Y
+                  data (usually 'z').
+                - 'Limiter XY': Name of the 2D flap.DataObject for the
+                  limiter XY data (usually 'Rz').
+                - 'Limiter color': Color of the limiter for the plot.
+                - 'Plot flux surfaces': Name of the 2D flap.DataObject for
+                  the flux surfaces (should have the same coordinate names as
+                  the plot).
+                - 'nlevels': Number of contour lines for the flux surface
+                  plotting.
+
+            - 'Prevent saturation': Prevents saturation of the video signal when
+              it exceeds ``zrange[1]``. It uses data modulo ``zrange[1]`` ito
+              overcome the saturation. (Works for animation.)
+
+        plot_type : {'xy', 'multi xy', 'grid xy', 'image', 'contour', \
+                     'anim-image', 'anim-contour'}, optional, default=None
+            The plot type. Can be abbreviated. Possible values:
+
+            - 'xy': Simple 1D plot. Default axes are: first coordinate,
+              '__Data__'.
+
+            - 'multi xy': In case of 2D data, plots 1D curves with a vertical
+              shift.  Default x axis is the first coordinate, y axis is 'Data'.
+              The signals are labeled with the 'Signal name' coordinate, or with
+              the one named in ``options['Signal name']``.
+
+            - 'grid xy': In case of 3D data, plots xy plots on a 2D grid.  Axes
+              are: grid x, grid y, x, y All coordinates should change in one
+              dimension.
+
+            - 'image': Plots a 2D data matrix as an image. Options: 'Colormap',
+              'Data range', ...
+
+            - 'contour': Contour plot.
+
+            - 'anim-image', 'anim-contour': Like 'image' and 'contour', but the
+              third axis is time.
+
+        plot_options : dict | list of dict, optional, default=None
+            Dictionary containg matplotlib plot options. Will be passed over to
+            the plot call. For plots with multiple subplots, this can be a list
+            of dictionaries, each for one subplot.
+        plot_id : flap.plot.PlotID, optional, default=None
+            Can be used for overplotting, if the new plot should go into an
+            existing plot.
+
+        Returns
+        -------
+        flap.plot.PlotID
+            The plot ID of the current plot. This can be used later for
+            overplotting.
+        """
+        try:
+            return _plot(self,
+                         axes=axes,
+                         slicing=slicing,
+                         slicing_options=slicing_options,
+                         summing=summing,
+                         options=options,
+                         plot_type=plot_type,
+                         plot_options=plot_options,
+                         plot_id=plot_id)
+        except Exception as e:
+            raise e
+
     def real(self):
+        """Real part of the data.
+
+        Has no effect on real-valued data.
+
+        Returns
+        -------
+        flap.DataObject
+        """
         if ((self.data is None) or (self.data.dtype.kind != 'c')):
             return copy.deepcopy(self)
         d_out = copy.deepcopy(self)
@@ -2626,6 +3028,14 @@ class DataObject:
         return d_out
 
     def imag(self):
+        """Imaginary part of the data.
+
+        Has no effect on real-valued data.
+
+        Returns
+        -------
+        flap.DataObject
+        """
         if (self.data is None):
             return copy.deepcopy(self)
         if (self.data.dtype.kind != 'c'):
@@ -2639,6 +3049,12 @@ class DataObject:
         return d_out
 
     def abs_value(self):
+        """Absolute value of data.
+
+        Returns
+        -------
+        flap.DataObject
+        """
         d_out = copy.deepcopy(self)
         if (d_out.data is not None):
             d_out.data = np.abs(self.data)
@@ -2647,6 +3063,12 @@ class DataObject:
         return d_out
     
     def phase(self):
+        """Phase of data.
+
+        Returns
+        -------
+        flap.DataObject
+        """
         if (self.data is not None):
             if (self.data.dtype.kind != 'c'):
                 raise TypeError("Phase can be calculated only from complex data.")
@@ -2673,11 +3095,31 @@ class DataObject:
             d_out.data_unit.name = 'Phase('+self.data_unit.name+')'
         return d_out
 
-    def error_value(self,options=None):
-        """
-        Returns a data object with the error of self in it.
-        options: 'High': Use high error if error is asymmetric
-                 'Low': Use low error is error is asymmetric
+    def error_value(self, options=None):
+        """Returns a `DataObject` containing the error of the data.
+
+        Parameters
+        ----------
+        object_name : str
+            Name identifying the data object in `flap_storage`.
+        exp_id : str, optional, default='*'
+            Experiment ID. Supports extended Unix regular expressions.
+        output_name : str
+            Name of the new data object added to `flap_storage`.
+        options : dict
+            Possible keys and values:
+
+            - 'High': 
+
+              - bool: Use high error if error is asymmetric.
+
+            - 'Low':
+
+              - bool: Use low error is error is asymmetric
+            
+        Returns
+        -------
+        flap.DataObject
         """
         default_options = {'High': True, 'Low': False}
         try:
@@ -2702,133 +3144,229 @@ class DataObject:
         return d_out
 
     def stft(self, coordinate=None, options=None):
-        """
-        calculates the STFT of the data in a dataobject using scipy's stft method
+        """Calculates the short-time Fourier transform (STFT) of the data using
+        `scipy.signal.stft`.
 
-        INPUT:
-                d: A flap.DataObject.
-                coordinate: The name of the coordinate (string) along which to calculate STFT.
-                            This coordinate should change only along one data dimension and should be equidistant.
-                            This and all other coordinates changing along the data dimension of
-                            this coordinate will be removed. A new coordinate with name
-                            Frequency (unit HZ) will be added.
-                options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
-                """
+        Parameters
+        ----------
+        coordinate : str, optional, default=None
+            The name of the coordinate along which to calculate the STFT. This
+            coordinate should change only along one data dimension and should be
+            equidistant.
+
+            This and all other coordinates changing along the data dimension of
+            this coordinate will be removed. A new coordinate with name
+            'Frequency' (unit Hz) will be added.
+        options : dict, optional, default=None
+            Options of STFT will be passed to `scipy.signal.stft`.
+
+        Returns
+        -------
+        flap.DataObject
+        """
         try:
             return _stft(self, coordinate=coordinate, options=options)
         except Exception as e:
             raise e
 
     def apsd(self, coordinate=None, intervals=None, options=None):
+        """Auto-power spectral density calculation. Returns a data object with
+        the coordinate replaced by frequency or wavenumber. The power spectrum
+        is calculated in multiple intervals (described by slicing), and the mean
+        and variance will be returned.
+
+        Parameters
+        ----------
+        coordinate : str, optional, default=None
+            The name of the coordinate (string) along which to calculate APSD.
+            This coordinate should change only along one data dimension and
+            should be equidistant.
+
+            This and all other cordinates changing along the data dimension of
+            this coordinate will be removed. A new coordinate with name
+            'Frequency'/'Wavenumber' will be added. The unit will be
+            derived from the unit of the coordinate (e.g., Hz cm^-1, m^-1).
+        intervals : dict | str, optional, default=None
+            Information of processing intervals.
+
+            - If dictionary with a single key: {selection coordinate:
+              description}). Key is a coordinate name which can be different
+              from the calculation coordinate. Description can be
+              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              it is a data object with data name identical to the coordinate,
+              the error ranges of the data object will be used for interval. If
+              the data name is not the same as `coordinate`, a coordinate with the
+              same name will be searched for in the data object and the
+              `value_ranges` will be used from it to set the intervals.
+            - If not a dictionary and not None, it is interpreted as the
+              interval description, the selection coordinate is taken the same
+              as `coordinate`.
+            - If None, the whole data interval will be used as a single
+              interval.
+
+        options : dict, optional, default=None
+            Options for APSD calculation. (Keys can be abbreviated.) Possible
+            keys and values:
+
+            - 'Wavenumber': 
+
+              - bool: Whether to use 2*Pi*f for the output coordinate scale;
+                this is useful for wavenumber calculation.
+
+            - 'Resolution': 
+
+              - Output resolution in the unit of the output coordinate.
+
+            - 'Range':
+
+              - Output range in the unit of the output coordinate.
+            
+            - 'Logarithmic':
+
+              - bool: If ``True``, will create logarithmic frequency binning.
+
+            - 'Interval_n': 
+
+              - int: Minimum number of intervals to use for the processing.
+                These are identical length intervals inserted into the input
+                interval list. Default is 8.
+
+            - 'Error calculation': 
+
+              - bool: Whether to calculate the error. Omitting error
+                calculation increases speed. If 'Interval_n' is 1, no error
+                calculation is done.
+
+            - 'Trend removal': Trend removal description. (See also
+              `flap.spectral_analysis._trend_removal()`.)
+
+              - list: 
+
+                - ``['poly', n]``: Fit an `n` order polynomial to the data
+                  and subtract.
+
+              - str:
+
+                - 'mean': Subtract mean.
+
+              - None: Don't remove trend.
+                
+              Trend removal will be applied to each interval separately.
+
+            - 'Hanning': 
+
+              - bool: Whether to use a Hanning window.
+
+        Returns
+        -------
+        flap.DataObject
         """
-        Auto power Spectral Density caclculation for the data object d.
-        Returns a data object with the coordinate replaced by frequency or wavenumber.
-        The power spectrum is calculated in multiple intervals (described by slicing)
-        and the mean and variance will be returned.
-
-        INPUT:
-            d: A flap.DataObject.
-            coordinate: The name of the coordinate (string) along which to calculate APSD.
-                        This coordinate should change only along one data dimension and should be equidistant.
-                        This and all other cordinates changing along the data dimension of
-                        this coordinate will be removed. A new coordinate with name
-                        Frequency/Wavenumber will be added. The unit will be
-                        derived from the unit of the coordinate (e.g., Hz cm-1, m-1)
-            intervals: Information of processing intervals.
-                       If dictionary with a single key: {selection coordinate: description})
-                           Key is a coordinate name which can be different from the calculation
-                           coordinate.
-                           Description can be flap.Intervals, flap.DataObject or
-                           a list of two numbers. If it is a data object with data name identical to
-                           the coordinate the error ranges of the data object will be used for
-                           interval. If the data name is not the same as coordinate a coordinate with the
-                           same name will be searched for in the data object and the value_ranges
-                           will be used fromm it to set the intervals.
-                       If not a dictionary and not None is is interpreted as the interval
-                           description, the selection coordinate is taken the same as
-                           coordinate.
-                       If None, the whole data interval will be used as a single interval.
-            options: Dictionary. (Keys can be abbreviated)
-                'Wavenumber' : True/False. Will use 2*Pi*f for the output coordinate scale, this is useful for
-                               wavenumber calculation.
-                'Resolution': Output resolution in the unit of the output coordinate.
-                'Range': Output range in the unit of the output coordinate.
-                'Logarithmic': True/False. If True will create logarithmic frequency binning.
-                'Interval_n': Minimum number of intervals to use for the processing. These are identical
-                              length intervals inserted into the input interval list. Default is 8.
-                'Error calculation' : True/False. Calculate or not error. Omitting error calculation
-                                      increases speed. If Interval_n is 1 no error calculation is done.
-                'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
-                             None: Don't remove trend.
-                             Strings:
-                               'mean': subtract mean
-                             Lists:
-                               ['poly', n]: Fit an n order polynomial to the data and subtract.
-                            Trend removal will be applied to each interval separately.
-                 'Hanning': True/False Use a Hanning window.
-
-        Return value: The new data object
-
-        This method is implemented by the _apsd function in spectcral_analysis.py
-        """
+        # This method is implemented by the _apsd function in spectcral_analysis.py
         try:
             return _apsd(self, coordinate=coordinate, intervals=intervals, options=options)
         except Exception as e:
             raise e
 
     def cpsd(self, ref=None, coordinate=None, intervals=None, options=None):
-        """
-            Complex Cross Power Spectrum calculation for the data object self taking d_ref as reference.
-            If self is not set d is used as reference, that is all spectra are calculated within self.
-            Calculates all spectra between all signals in ref and self, but not inside self and ref.
-            self and ref both should have the same equidistant coordinate with equal sampling points.
-            Returns a data object with dimension number self.dim+ref.dim-1. The coordinate is replaced 
-            by frequency or wavenumber.
-            The spectrum is calculated in multiple intervals (described by intervals)
-            and the mean and variance will be returned.
-    
-            INPUT:
-                self: A flap.DataObject.
-                ref: Another flap.DataObject
-                coordinate: The name of the coordinate (string) along which to calculate CPSD.
-                            This coordinate should change only along one data dimension and should be equidistant.
-                            This and all other cordinates changing along the data dimension of
-                            this coordinate will be removed. A new coordinate with name
-                            Frequency/Wavenumber will be added. The unit will be
-                            derived from the unit of the coordinate (e.g., Hz cm-1, m-1)
-                intervals: Information of processing intervals.
-                           If dictionary with a single key: {selection coordinate: description})
-                               Key is a coordinate name which can be different from the calculation
-                               coordinate.
-                               Description can be flap.Intervals, flap.DataObject or
-                               a list of two numbers. If it is a data object with data name identical to
-                               the coordinate the error ranges of the data object will be used for
-                               interval. If the data name is not the same as coordinate a coordinate with the
-                               same name will be searched for in the data object and the value_ranges
-                               will be used fromm it to set the intervals.
-                           If not a dictionary and not None is is interpreted as the interval
-                               description, the selection coordinate is taken the same as
-                               coordinate.
-                           If None, the whole data interval will be used as a single interval.
-                options: Dictionary. (Keys can be abbreviated)
-                    'Wavenumber' : True/False. Will use 2*Pi*f for the output coordinate scale, this is useful for
-                                   wavenumber calculation.
-                    'Resolution': Output resolution in the unit of the output coordinate.
-                    'Range': Output range in the unit of the output coordinate.
-                    'Logarithmic': True/False. If True will create logarithmic frequency binning.
-                    'Interval_n': Minimum number of intervals to use for the processing. These are identical
-                                  length intervals inserted into the input interval list. Default is 8.
-                    'Error calculation' : True/False. Calculate or not error. Omitting error calculation
-                                          increases speed. If Interval_n is 1 no error calculation is done.
-                    'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
-                                 None: Don't remove trend.
-                                 Strings:
-                                   'mean': subtract mean
-                                 Lists:
-                                   ['poly', n]: Fit an n order polynomial to the data and subtract.
-                                Trend removal will be applied to each interval separately.
-                    'Hanning': True/False Use a Hanning window.
-                    'Normalize': Calculate coherency instead of crosspower
+        """Complex cross-power spectral density (CPSD) calculation.
+        
+        Calculates all spectra between all signals in `ref` and `self`, but not
+        inside `self` and `ref`. Objects `self` and `ref` should both have the
+        same equidistant coordinate with equal sampling points.
+
+        Returns a data object with dimension number ``self.dim+ref.dim-1``. The
+        coordinate is replaced by frequency or wavenumber. The spectrum is
+        calculated in multiple intervals (described by intervals) and the mean
+        and variance will be returned.
+
+        Parameters
+        ----------
+        ref : flap.DataObject, optional, default=None
+            Reference to use for CPSD calculation. If None, `self` is used as
+            reference.
+        coordinate : str, optional, default=None
+            The name of the coordinate along which to calculate CPSD.  This
+            coordinate should change only along one data dimension and should be
+            equidistant.
+
+            This and all other cordinates changing along the data dimension of
+            this coordinate will be removed. A new coordinate with name
+            'Frequency'/'Wavenumber' will be added. The unit will be
+            derived from the unit of the coordinate (e.g., Hz cm^-1, m^-1).
+        intervals : dict | str, optional, default=None
+            Information of processing intervals.
+
+            - If dictionary with a single key: {selection coordinate:
+              description}). Key is a coordinate name which can be different
+              from the calculation coordinate. Description can be
+              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              it is a data object with data name identical to the coordinate,
+              the error ranges of the data object will be used for interval. If
+              the data name is not the same as `coordinate`, a coordinate with the
+              same name will be searched for in the data object and the
+              `value_ranges` will be used from it to set the intervals.
+            - If not a dictionary and not None, it is interpreted as the
+              interval description, the selection coordinate is taken the same
+              as `coordinate`.
+            - If None, the whole data interval will be used as a single
+              interval.
+
+        options : dict, optional, default=None
+            Options for APSD calculation. (Keys can be abbreviated.) Possible
+            keys and values:
+
+            - 'Wavenumber': 
+
+                - bool: Whether to use 2*Pi*f for the output coordinate scale;
+                  this is useful for wavenumber calculation.
+
+            - 'Resolution': 
+
+                - Output resolution in the unit of the output coordinate.
+
+            - 'Range':
+
+                - Output range in the unit of the output coordinate.
+            
+            - 'Logarithmic':
+
+                - bool: If ``True``, will create logarithmic frequency binning.
+
+            - 'Interval_n': 
+
+                - int: Minimum number of intervals to use for the processing.
+                  These are identical length intervals inserted into the input
+                  interval list. Default is 8.
+
+            - 'Error calculation': 
+
+                - bool: Whether to calculate the error. Omitting error
+                  calculation increases speed. If 'Interval_n' is 1, no error
+                  calculation is done.
+
+            - 'Trend removal': Trend removal description. (See also
+              `flap.spectral_analysis._trend_removal()`.)
+
+                - list: 
+
+                  - ``['poly', n]``: Fit an `n` order polynomial to the data
+                     and subtract.
+
+                - str:
+
+                  - 'mean': Subtract mean.
+
+                - None: Don't remove trend.
+                
+                Trend removal will be applied to each interval separately.
+
+            - 'Hanning': 
+
+                - bool: Whether to use a Hanning window.
+
+        Returns
+        -------
+        flap.DataObject
         """
         try:
             return _cpsd(self, ref=ref, coordinate=coordinate, intervals=intervals, options=options)
@@ -2836,55 +3374,99 @@ class DataObject:
             raise e
 
     def ccf(self, ref=None, coordinate=None, intervals=None, options=None):
-        """
-            N dimensional Cross Correlation Function or covariance calculation for the data object self taking d_ref 
-            as reference. If ref is not set self is used as reference, that is all CCFs are calculated 
-            within self. Calculates all CCF between all signals in ref and sel, but not inside self and ref.
-            Correlation is calculated along the coordinate(s) listed in coordinate which should be
-            identical for the to input data objects.
-            Returns a data object with dimension number self.dim+ref.dim-len(coordinate). 
-            The coordinates are replaced by coordinate+' lag'.
-            The CCF is calculated in multiple intervals (described by intervals)
-            and the mean and variance will be returned.
-    
-            INPUT:
-                self: A flap.DataObject.
-                ref: Another flap.DataObject
-                coordinate: The name of the coordinate (string) along which to calculate CCF or a list of names.
-                            Each coordinate should change only along one data dimension and should be equidistant.
-                            This and all other cordinates changing along the data dimension of
-                            these coordinates will be removed. New coordinates with name+' lag' will be added. 
-                intervals: Information of processing intervals.
-                           If dictionary with a single key: {selection coordinate: description})
-                               Key is a coordinate name which can be different from the calculation
-                               coordinate.
-                               Description can be flap.Intervals, flap.DataObject or
-                               a list of two numbers. If it is a data object with data name identical to
-                               the coordinate the error ranges of the data object will be used for
-                               interval. If the data name is not the same as coordinate a coordinate with the
-                               same name will be searched for in the data object and the value_ranges
-                               will be used fromm it to set the intervals.
-                           If not a dictionary and not None is is interpreted as the interval
-                               description, the selection coordinate is taken the same as
-                               coordinate.
-                           If None, the whole data interval will be used as a single interval.
-                options: Dictionary. (Keys can be abbreviated)
-                    'Resolution': Output resolution for each coordinate. (list of values or single value)
-                    'Range': Output ranges for each coordinate. (List or list of lists)
-                    'Interval_n': Minimum number of intervals to use for the processing. These are identical
-                                  length intervals inserted into the input interval list. Default is 8.
-                    'Error calculation' : True/False. Calculate or not error. Omitting error calculation
-                                          increases speed. If Interval_n is 1 no error calculation is done.
-                    'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
-                                 None: Don't remove trend.
-                                 Strings:
-                                   'mean': subtract mean
-                                 Lists:
-                                   ['poly', n]: Fit an n order polynomial to the data and subtract.
-                                Trend removal will be applied to each interval separately.
-                                At present trend removal can be applied to 1D CCF only.
-                    'Hanning': True/False Use a Hanning window.
-                    'Normalize': Normalize with autocorrelations, that is calculate correlation instead of covariance.
+        """N-dimensional cross-correlation function (CCF) or covariance
+        calculation for the data object, taking `ref` as reference.        
+
+        Calculates all CCF between all signals in `ref` and `self`, but not
+        inside `self` and ref. Correlation is calculated along the coordinate(s)
+        listed in `coordinate`, which should be identical for the to input data
+        objects.
+
+        Returns a data object with dimension number
+        ``self.dim+ref.dim-len(coordinate)``. The coordinates are replaced by
+        `coordinate_name+' lag'`. The CCF is calculated in multiple intervals
+        (described by intervals) and the mean and variance will be returned.
+
+        Parameters
+        ----------
+        ref : flap.DataObject, optional, default=None
+            Reference to use for CPSD calculation. If None, `self` is used as
+            reference.
+        coordinate : str | list of str, optional, default=None
+            The name of the coordinate along which to calculate CCF,
+            or a list of names. Each coordinate should change only along
+            one data dimension and should be equidistant.
+            
+            This and all other cordinates changing along the data dimension
+            of these coordinates will be removed. New coordinates with
+            `coordinate_name+' lag'` will be added. 
+        intervals : dict | str, optional, default=None
+            Information of processing intervals.
+
+            - If dictionary with a single key: {selection coordinate:
+              description}). Key is a coordinate name which can be different
+              from the calculation coordinate. Description can be
+              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              it is a data object with data name identical to the coordinate,
+              the error ranges of the data object will be used for interval. If
+              the data name is not the same as `coordinate`, a coordinate with the
+              same name will be searched for in the data object and the
+              `value_ranges` will be used from it to set the intervals.
+            - If not a dictionary and not None, it is interpreted as the
+              interval description, the selection coordinate is taken the same
+              as `coordinate`.
+            - If None, the whole data interval will be used as a single
+              interval.
+
+        options : dict, optional, default=None
+            Options for CCF calculation. (Keys can be abbreviated.) Possible
+            keys and values:
+
+            - 'Resolution': 
+
+              - Output resolution for each coordinate. (Single value or list
+                of values.)
+
+            - 'Range':
+
+              - Output ranges for each coordinate. (List or list of lists.)
+
+            - 'Interval_n': 
+
+              - int: Minimum number of intervals to use for the processing.
+                These are identical length intervals inserted into the input
+                interval list. Default is 8.
+
+            - 'Error calculation': 
+
+              - bool: Whether to calculate the error. Omitting error
+                calculation increases speed. If 'Interval_n' is 1, no error
+                calculation is done.
+
+            - 'Trend removal': Trend removal description. (See also
+              `flap.spectral_analysis._trend_removal()`.)
+
+              - list: 
+
+                - ``['poly', n]``: Fit an `n` order polynomial to the data
+                  and subtract.
+
+              - str:
+
+                - 'mean': Subtract mean.
+
+              - None: Don't remove trend.
+                
+              Trend removal will be applied to each interval separately.
+
+            - 'Hanning': 
+
+              - bool: Whether to use a Hanning window.
+
+            - 'Normalize': 
+
+              - Normalize with autocorrelations, that is, calculate correlation
+                instead of covariance.
         """
         try:
             return _ccf(self, ref=ref, coordinate=coordinate, intervals=intervals, options=options)
@@ -2893,34 +3475,53 @@ class DataObject:
 
 
     def detrend(self, coordinate=None, intervals=None, options=None):
-        """ Trend removal.
-            INPUT:
-                coordinate: The x coordinate for the trend removal.
-                intervals: Information of processing intervals.
-                           If dictionary with a single key: {selection coordinate: description})
-                               Key is a coordinate name which can be different from the calculation
-                               coordinate.
-                               Description can be flap.Intervals, flap.DataObject or
-                               a list of two numbers. If it is a data object with data name identical to
-                               the coordinate the error ranges of the data object will be used for
-                               interval. If the data name is not the same as coordinate a coordinate with the
-                               same name will be searched for in the data object and the value_ranges
-                               will be used fromm it to set the intervals.
-                           If not a dictionary and not None is is interpreted as the interval
-                               description, the selection coordinate is taken the same as
-                               coordinate.
-                           If None, the whole data interval will be used as a single interval.
-                options:
-                  'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
-                    None: Don't remove trend.
-                    Strings:
-                      'Mean': subtract mean
-                    Lists:
-                      ['Poly', n]: Fit an n order polynomial to the data and subtract.
-                            Trend removal will be applied to each interval defined by slicing
-                            separately.
-            Return value: The data object with the trend removed data.
-       """
+        """Trend removal.
+
+        Parameters
+        ----------
+        coordinate: str, optional, default=None
+            The 'x' coordinate for the trend removal.
+        intervals : dict | str, optional, default=None
+            Information of processing intervals.
+
+            - If dictionary with a single key: {selection coordinate:
+              description}). Key is a coordinate name which can be different
+              from the calculation coordinate. Description can be
+              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              it is a data object with data name identical to the coordinate,
+              the error ranges of the data object will be used for interval. If
+              the data name is not the same as `coordinate`, a coordinate with the
+              same name will be searched for in the data object and the
+              `value_ranges` will be used from it to set the intervals.
+            - If not a dictionary and not None, it is interpreted as the
+              interval description, the selection coordinate is taken the same
+              as `coordinate`.
+            - If None, the whole data interval will be used as a single
+              interval.
+
+        options : dict, optional, default=None
+            Options for detrending. (Keys can be abbreviated.) Possible keys and
+            values:
+            - 'Trend removal': Trend removal description. (See also
+              `flap.spectral_analysis._trend_removal()`.)
+
+              - list: 
+
+                - ``['poly', n]``: Fit an `n` order polynomial to the data
+                  and subtract.
+
+              - str:
+
+                - 'mean': Subtract mean.
+
+              - None: Don't remove trend.
+
+            Trend removal will be applied to each interval separately.
+
+        Returns
+        -------
+        flap.DataObject
+        """
 
         if (self.data is None):
             raise ValueError("Cannot detrend without data.")
@@ -2988,50 +3589,96 @@ class DataObject:
                                x = coord_data)
         return d
 
-
     def filter_data(self, coordinate=None, intervals=None, options=None):
-        """ 1D Data filter.
-            INPUT:
-                coordinate: The x coordinate for the trend removal.
-                intervals: Information of processing intervals.
-                           If dictionary with a single key: {selection coordinate: description})
-                               Key is a coordinate name which can be different from the calculation
-                               coordinate.
-                               Description can be flap.Intervals, flap.DataObject or
-                               a list of two numbers. If it is a data object with data name identical to
-                               the coordinate the error ranges of the data object will be used for
-                               interval. If the data name is not the same as coordinate a coordinate with the
-                               same name will be searched for in the data object and the value_ranges
-                               will be used fromm it to set the intervals.
-                           If not a dictionary and not None is is interpreted as the interval
-                               description, the selection coordinate is taken the same as
-                               coordinate.
-                           If None, the whole data interval will be used as a single interval.
-                options:
-                    'Type' :
-                        None: Do nothing.
-                        'Int': Single term IIF filter, like RC integrator. 
-                        'Diff': Single term IIF filter, like RC differentiator.
-                        'Bandpass', 'Lowpass', 'Highpass': Filters designed by scipy.signal.iirdesign.
-                                                           The filter type is in 'Design'
-                                   Bandpass: f_low - f_high
-                                   Lowpass: - f_high
-                                   Highpass: - f_low
-                    'Design': The design type of the bandpass, lowpass or highpass filter. 
-                              ('Elliptic', 'Butterworth, 'Chebyshev I', 'Chebyshev II', 'Bessel') 
-                              The numpy.iirdesign function is used for generating the filter.  
-                              Setting inconsistent parameters can cause strange results. E.g. too high attenuation
-                              at too low frequency relative to the smapling frequency can be a problem.
-                    'f_low', 'f_high': Cut on/off frequencies. (Middle between passband and stopband edge.)
-                    'Steepness': Difference between passband and stopband edge frequencies as a fraction 
-                                 of the middle frequency.
-                     'Loss': The maximum loss in the passband in dB
-                     'Attenuation': The minimum attenuation in the stopband dB
-                    'Tau': time constant for integrator/differentiator (in units of the coordinate)
-                    'Power': Calculate square of the signal after filtering. (boolean)
-                    'Inttime': Integration time after power calculation. (in units of oordinate)
-            Return value: The data object with the filtered data.
-       """
+        """1D data filter.
+
+        Parameters
+        ----------
+        coordinate : str, optional, default=None
+            The 'x' coordinate for the filtering.
+        intervals : dict | str, optional, default=None
+            Information of processing intervals.
+
+            - If dictionary with a single key: {selection coordinate:
+              description}). Key is a coordinate name which can be different
+              from the calculation coordinate. Description can be
+              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              it is a data object with data name identical to the coordinate,
+              the error ranges of the data object will be used for interval. If
+              the data name is not the same as `coordinate`, a coordinate with the
+              same name will be searched for in the data object and the
+              `value_ranges` will be used from it to set the intervals.
+            - If not a dictionary and not None, it is interpreted as the
+              interval description, the selection coordinate is taken the same
+              as `coordinate`.
+            - If None, the whole data interval will be used as a single
+              interval.
+
+        options : dict, optional, default=None
+            Options for filtering. Possible keys and values:
+            
+            - 'Type':
+
+              - None: Do nothing.
+
+              - 'Int': Single-term IIF filter, like RC integrator. 
+
+              - 'Diff': Single term IIF filter, like RC differentiator.
+
+              - 'Bandpass' | 'Lowpass' | 'Highpass': Filters designed by
+                `scipy.signal.iirdesign`. The filter type is in 'Design'.
+                Relation of filters and required cutting frequencies:
+
+                - Bandpass: 'f_low' -- 'f_high'
+                - Lowpass: -- 'f_high'
+                - Highpass: -- 'f_low'
+
+            - 'Design': 
+                
+                - 'Elliptic' | 'Butterworth' | 'Chebyshev I' | 'Chebyshev II' |
+                  'Bessel': The design type of the bandpass, lowpass or highpass
+                  filter. 
+
+                  The `numpy.iirdesign` function is used for generating the filter.
+
+                  Setting inconsistent parameters can cause strange results.
+                  E.g. too high attenuation at too low frequency relative to the
+                  smapling frequency can be a problem.
+
+            - 'f_low', 'f_high': 
+
+              - float: Cut on/off frequencies in Hz. (Middle between passband
+                and stopband edge.)
+
+            - 'Steepness': 
+
+              - float: Difference between passband and stopband edge frequencies
+                as a fraction of the middle frequency.
+
+            - 'Loss': 
+
+              - float: The maximum loss in the passband in dB.
+
+            - 'Attenuation':
+
+              - float: The minimum attenuation in the stopband dB.
+
+            - 'Tau':
+
+              - Time constant for integrator/differentiator (in units of the coordinate).
+
+            - 'Power': 
+
+              - bool: Whether to calculate square of the signal after filtering.
+
+            - 'Inttime':
+
+              - Integration time after power calculation (in units of coordinate).
+
+        Returns
+        -------
+        flap.DataObject
+        """
 
         if (self.data is None):
             raise ValueError("Cannot filter without data.")
@@ -3102,7 +3749,7 @@ class DataObject:
         loss = _options['Loss']
         attenuation = _options['Attenuation']
         
-        try:    
+        try:
             calc_int, calc_int_ind, sel_int, sel_int_ind = self.proc_interval_limits(_coordinate, intervals=intervals)
         except Exception as e:
             raise e
@@ -3237,260 +3884,57 @@ class DataObject:
                                                 zi=zi
                                                 )   
         return d
-
-    def save(self,filename,protocol=PICKLE_PROTOCOL):
-        """
-        Save the data object to a binary file using pickle.
-        Use load to read the object.
-        Filename: The name of the output file
-        protocol: The pickle protocol to use
-        """
-        try:
-            f = io.open(filename,"wb")
-        except OSError:
-            raise ValueError("Cannot open file "+filename)
-        try:
-            save_data = {'FLAP any data':self}
-            pickle.dump(save_data,f,protocol=protocol)
-        except pickle.PicklingError:
-            raise TypeError("Error encoding data object.")
-        try:
-            f.close()
-        except Exception:
-            raise ValueError("Cannot close file "+filename)
-
-    def __add__(self, d1):
-        """ Addition for DataObject
-        """
-        if (type(d1) is DataObject):
-            if ((self.data is None) or (d1.data is None)):
-                raise ValueError("Cannot add data objects without data.")
-            if (self.data_unit.unit != d1.data_unit.unit):
-                raise ValueError("Cannot add data objects with different units.")
-            if (self.data_unit.name != d1.data_unit.name):
-                raise ValueError("Cannot add data objects with different data names.")
-            if (self.shape != d1.shape):
-                raise ValueError("Cannot add data objects with different shapes.")
-            if (self.error is None):
-                err = d1.error
-            elif (d1.error is None):
-                err = self.error
-            else:
-                if ((type(self.error) is not list) and (type(d1.error) is not list)):
-                    err = np.sqrt(self.error ** 2 + d1.error ** 2)
-                elif ((type(self.error) is list) and (type(d1.error) is list)):
-                    err = [np.sqrt(self.error[0] ** 2 + d1.error[0] ** 2),
-                           np.sqrt(self.error[1] ** 2 + d1.error[1] ** 2)]                    
-                elif (type(self.error) is list):
-                    err = [np.sqrt(self.error[0] ** 2 + d1.error ** 2),
-                           np.sqrt(self.error[1] ** 2 + d1.error ** 2)]
-                else:
-                    err = [np.sqrt(self.error ** 2 + d1.error[0] ** 2),
-                           np.sqrt(self.error ** 2 + d1.error[1] ** 2)]
-                                                   
-            d_out = DataObject(data_array=self.data+d1.data,
-                               error=err,
-                               data_unit=self.data_unit)
-            d_out.coordinates = []
-            for coord in self.coordinates:
-                try:
-                    c1 = d1.get_coordinate_object(coord.unit.name)
-                    if (coord != c1):
-                        continue
-                    d_out.coordinates.append(copy.deepcopy(coord))
-                except ValueError:
-                    pass
-            if (len(d_out.coordinates) == 0):
-                d_out.coordinates = None
-            if (self.exp_id == d1.exp_id):
-                d_out.exp_id = self.exp_id
-            if (self.data_source == d1.data_source):
-                d_out.data_source = self.data_source
-        elif (np.isscalar(d1)):
-            if (self.data is None):
-                raise ValueError("Cannot add data objects without data.")
-            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
-                raise ValueError("Cannot add strings.")
-            d_out = copy.deepcopy(self)
-            d_out.data += d1
-        else:
-            raise TypeError("Invalid data type for addition with flap.DataObject")
-
-        return d_out
-
-    def __radd__(self, d1):
-         try:
-             return self.__add__(d1)
-         except Exception as e:
-             raise e
-
-    def __sub__(self, d1):
-        """ Subtraction for DataObject
-        """
-        if (type(d1) is DataObject):
-            if ((self.data is None) or (d1.data is None)):
-                raise ValueError("Cannot subtract data objects without data.")
-            if (self.data_unit.unit != d1.data_unit.unit):
-                raise ValueError("Cannot subtract data objects with different units.")
-            if (self.data_unit.name != d1.data_unit.name):
-                raise ValueError("Cannot subtract data objects with different data names.")
-            if (self.shape != d1.shape):
-                raise ValueError("Cannot subtract data objects with different shapes.")
-            if (self.error is None):
-                err = d1.error
-            elif (d1.error is None):
-                err = self.error
-            else:
-                if ((type(self.error) is not list) and (type(d1.error) is not list)):
-                    err = np.sqrt(self.error ** 2 + d1.error ** 2)
-                elif ((type(self.error) is list) and (type(d1.error) is list)):
-                    err = [np.sqrt(self.error[0] ** 2 + d1.error[0] ** 2),
-                           np.sqrt(self.error[1] ** 2 + d1.error[1] ** 2)]                    
-                elif (type(self.error) is list):
-                    err = [np.sqrt(self.error[0] ** 2 + d1.error ** 2),
-                           np.sqrt(self.error[1] ** 2 + d1.error ** 2)]
-                else:
-                    err = [np.sqrt(self.error ** 2 + d1.error[0] ** 2),
-                           np.sqrt(self.error ** 2 + d1.error[1] ** 2)]
-                                                   
-            d_out = DataObject(data_array=self.data-d1.data,
-                               error=err,
-                               data_unit=self.data_unit)
-            d_out.coordinates = []
-            for coord in self.coordinates:
-                try:
-                    c1 = d1.get_coordinate_object(coord.unit.name)
-                    if (coord != c1):
-                        continue
-                    d_out.coordinates.append(copy.deepcopy(coord))
-                except ValueError:
-                    pass
-            if (len(d_out.coordinates) == 0):
-                d_out.coordinates = None
-            if (self.exp_id == d1.exp_id):
-                d_out.exp_id = self.exp_id
-            if (self.data_source == d1.data_source):
-                d_out.data_source = self.data_source
-        elif (np.isscalar(d1)):
-            if (self.data is None):
-                raise ValueError("Cannot add data objects without data.")
-            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
-                raise ValueError("Cannot add strings.")
-            d_out = copy.deepcopy(self)
-            d_out.data -= d1
-        else:
-            raise TypeError("Invalid data type for subtaction from flap.DataObject")
-
-        return d_out
-
-    def __rsub__(self, d1):
-         try:
-             d = self.__sub__(d1)
-             d.data = -d.data
-             return d
-         except Exception as e:
-             raise e
-
-    def __mul__(self, d1):
-        """ Multiplication for DataObject
-        """
-        if (type(d1) is DataObject):
-            if ((self.data is None) or (d1.data is None)):
-                raise ValueError("Cannot multiply data objects without data.")
-            if (self.shape != d1.shape):
-                raise ValueError("Cannot multiply data objects with different shapes.")
-            if ((self.error is None) or (d1.error is None)):
-                err = None
-            else:
-                if (type(self.error) is list):
-                    err1 = np.sqrt(self.error[0] ** 2 + self.error[1] ** 2)
-                else:
-                    err1 = self.error
-                if (type(d1.error) is list):
-                    err2 = np.sqrt(d1.error[0] ** 2 + d1.error[1] ** 2)
-                else:
-                    err2 = d1.error
-                err = np.sqrt(err1 ** 2 * err2 ** 2 
-                              + self.data ** 2 * err2 ** 2
-                              + d1.data **2 * err1 ** 2)
-            new_unit = flap.coordinate.Unit()
-            if (d1.data_unit.name == self.data_unit.name):
-                new_unit.name = self.data_unit.name+'^2'
-            else:
-                new_unit.name = self.data_unit.name+'*'+d1.unit.name
-            if (d1.data_unit.unit == self.data_unit.unit):
-                new_unit.unit = self.data_unit.unit+'^2'
-            else:
-                new_unit.unit = self.data_unit.unit+'*'+d1.unit.name
-                
-            d_out = DataObject(data_array=self.data * d1.data,
-                               error=err,
-                               data_unit=new_unit
-                               )
-            d_out.coordinates = []
-            for coord in self.coordinates:
-                try:
-                    c1 = d1.get_coordinate_object(coord.unit.name)
-                    if (coord != c1):
-                        continue
-                    d_out.coordinates.append(copy.deepcopy(coord))
-                except ValueError:
-                    pass
-            if (len(d_out.coordinates) == 0):
-                d_out.coordinates = None
-            if (self.exp_id == d1.exp_id):
-                d_out.exp_id = self.exp_id
-            if (self.data_source == d1.data_source):
-                d_out.data_source = self.data_source
-        elif (np.isscalar(d1)):
-            if (self.data is None):
-                raise ValueError("Cannot multiply data objects without data.")
-            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
-                raise ValueError("Cannot multiply strings.")
-            d_out = copy.deepcopy(self)
-            d_out.data *= d1
-            if (d_out.error is not None):
-                if (type(d_out.error) is list):
-                    d_out.error = [d_out.error[0] * d1, d_out.error[1] * d1]
-                else:
-                    d_out.error *= d1
-        else:
-            raise TypeError("Invalid data type for multiplication with flap.DataObject")
-        return d_out
-             
-    def __rmul__(self, d1):
-         try:
-             return self.__mul__(d1)
-         except Exception as e:
-             raise e
              
     def pdf(self, coordinate=None, intervals=None, options=None):
         """
-            Amplitude distribution (PDF) function of data. Flattens the data array in the dimensions where the 
-            coordinates change and calculates PDF on this data for each case of the other dimensions.
-            INPUT:
-                self: A flap.DataObject.
-                coordinate: The name of the coordinate(s) (string, or list of strings) along which to calculate. 
-                            If not set first coordinate in data object will be used.
-                            These coordinates will be removed and replaced by a new coordinate with the name of the data.
-                intervals: Information of processing intervals.
-                           If dictionary with a single key: {selection coordinate: description})
-                               Key is a coordinate name which can be different from the calculation
-                               coordinate.
-                               Description can be flap.Intervals, flap.DataObject or
-                               a list of two numbers. If it is a data object with data name identical to
-                               the coordinate the error ranges of the data object will be used for
-                               interval. If the data name is not the same as coordinate a coordinate with the
-                               same name will be searched for in the data object and the value_ranges
-                               will be used fromm it to set the intervals.
-                           If not a dictionary and not None is is interpreted as the interval
-                               description, the selection coordinate is taken the same as
-                               coordinate[0].
-                           If None, the whole data interval will be used as a single interval.
-                options: Dictionary. (Keys can be abbreviated)
-                    'Range': The data value range. If not set the data minimum-maximum will be used.
-                    'Resolution': The resolution of the PDF
-                    'Number': The number of intervals in Range. This is an alternative to Resolution.
+        Amplitude distribution function (PDF) of data.
+            
+        Flattens the data array in the dimensions where the coordinates change
+        and calculates PDF on this data for each case of the other dimensions.
+
+        Parameters
+        ----------
+
+        coordinate : str | list of str, optional, default=None
+            The name of the coordinate(s) along which to calculate.  If not set,
+            the first coordinate in the data object will be used.  These
+            coordinates will be removed and replaced by a new coordinate with
+            the name of the data.
+        
+        intervals : dict | str, optional, default=None
+            Information of processing intervals.
+
+            - If dictionary with a single key: {selection coordinate:
+            description}). Key is a coordinate name which can be different
+            from the calculation coordinate. Description can be
+            `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+            it is a data object with data name identical to the coordinate,
+            the error ranges of the data object will be used for interval. If
+            the data name is not the same as `coordinate`, a coordinate with the
+            same name will be searched for in the data object and the
+            `value_ranges` will be used from it to set the intervals.
+            - If not a dictionary and not None, it is interpreted as the
+            interval description, the selection coordinate is taken the same
+            as `coordinate` (or its first element).
+            - If None, the whole data interval will be used as a single
+            interval.
+
+        options : dict, optional, default=None
+            Options for generating the PDF. Possible keys and values:
+
+            - 'Range': 
+
+              - list of float: The data value range. If not set, the data
+                minimum-maximum will be used.
+
+            - 'Resolution': 
+
+              - float: The resolution of the PDF.
+
+            - 'Number':
+
+              - The number of intervals in 'Range'. This is an alternative to
+                'Resolution'.
         """
         if (self.data is None):
             raise ValueError("Cannot process without data.")
@@ -3624,13 +4068,248 @@ class DataObject:
         data_out.coordinates.append(new_coord)  
         data_out.check()
         return data_out
+
+    def save(self, filename, protocol=PICKLE_PROTOCOL):
+        """Save the data object to a binary file.
+        
+        Saving uses the pickle protocol. Use `flap.data_object.load()` to read
+        the object.
+
+        Parameters
+        ----------
+        filename : str
+            The name of the output file.
+        protocol : const
+            The pickle protocol to use.
+        """
+        try:
+            f = io.open(filename,"wb")
+        except OSError:
+            raise ValueError("Cannot open file "+filename)
+        try:
+            save_data = {'FLAP any data':self}
+            pickle.dump(save_data,f,protocol=protocol)
+        except pickle.PicklingError:
+            raise TypeError("Error encoding data object.")
+        try:
+            f.close()
+        except Exception:
+            raise ValueError("Cannot close file "+filename)
+
+    def __add__(self, d1):
+        """Addition for DataObject.
+        """
+        if (type(d1) is DataObject):
+            if ((self.data is None) or (d1.data is None)):
+                raise ValueError("Cannot add data objects without data.")
+            if (self.data_unit.unit != d1.data_unit.unit):
+                raise ValueError("Cannot add data objects with different units.")
+            if (self.data_unit.name != d1.data_unit.name):
+                raise ValueError("Cannot add data objects with different data names.")
+            if (self.shape != d1.shape):
+                raise ValueError("Cannot add data objects with different shapes.")
+            if (self.error is None):
+                err = d1.error
+            elif (d1.error is None):
+                err = self.error
+            else:
+                if ((type(self.error) is not list) and (type(d1.error) is not list)):
+                    err = np.sqrt(self.error ** 2 + d1.error ** 2)
+                elif ((type(self.error) is list) and (type(d1.error) is list)):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error[1] ** 2)]                    
+                elif (type(self.error) is list):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error ** 2)]
+                else:
+                    err = [np.sqrt(self.error ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error ** 2 + d1.error[1] ** 2)]
+                                                   
+            d_out = DataObject(data_array=self.data+d1.data,
+                               error=err,
+                               data_unit=self.data_unit)
+            d_out.coordinates = []
+            for coord in self.coordinates:
+                try:
+                    c1 = d1.get_coordinate_object(coord.unit.name)
+                    if (coord != c1):
+                        continue
+                    d_out.coordinates.append(copy.deepcopy(coord))
+                except ValueError:
+                    pass
+            if (len(d_out.coordinates) == 0):
+                d_out.coordinates = None
+            if (self.exp_id == d1.exp_id):
+                d_out.exp_id = self.exp_id
+            if (self.data_source == d1.data_source):
+                d_out.data_source = self.data_source
+        elif (np.isscalar(d1)):
+            if (self.data is None):
+                raise ValueError("Cannot add data objects without data.")
+            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
+                raise ValueError("Cannot add strings.")
+            d_out = copy.deepcopy(self)
+            d_out.data += d1
+        else:
+            raise TypeError("Invalid data type for addition with flap.DataObject")
+
+        return d_out
+
+    def __radd__(self, d1):
+        try:
+            return self.__add__(d1)
+        except Exception as e:
+            raise e
+
+    def __sub__(self, d1):
+        """Subtraction for DataObject.
+        """
+        if (type(d1) is DataObject):
+            if ((self.data is None) or (d1.data is None)):
+                raise ValueError("Cannot subtract data objects without data.")
+            if (self.data_unit.unit != d1.data_unit.unit):
+                raise ValueError("Cannot subtract data objects with different units.")
+            if (self.data_unit.name != d1.data_unit.name):
+                raise ValueError("Cannot subtract data objects with different data names.")
+            if (self.shape != d1.shape):
+                raise ValueError("Cannot subtract data objects with different shapes.")
+            if (self.error is None):
+                err = d1.error
+            elif (d1.error is None):
+                err = self.error
+            else:
+                if ((type(self.error) is not list) and (type(d1.error) is not list)):
+                    err = np.sqrt(self.error ** 2 + d1.error ** 2)
+                elif ((type(self.error) is list) and (type(d1.error) is list)):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error[1] ** 2)]                    
+                elif (type(self.error) is list):
+                    err = [np.sqrt(self.error[0] ** 2 + d1.error ** 2),
+                           np.sqrt(self.error[1] ** 2 + d1.error ** 2)]
+                else:
+                    err = [np.sqrt(self.error ** 2 + d1.error[0] ** 2),
+                           np.sqrt(self.error ** 2 + d1.error[1] ** 2)]
+                                                   
+            d_out = DataObject(data_array=self.data-d1.data,
+                               error=err,
+                               data_unit=self.data_unit)
+            d_out.coordinates = []
+            for coord in self.coordinates:
+                try:
+                    c1 = d1.get_coordinate_object(coord.unit.name)
+                    if (coord != c1):
+                        continue
+                    d_out.coordinates.append(copy.deepcopy(coord))
+                except ValueError:
+                    pass
+            if (len(d_out.coordinates) == 0):
+                d_out.coordinates = None
+            if (self.exp_id == d1.exp_id):
+                d_out.exp_id = self.exp_id
+            if (self.data_source == d1.data_source):
+                d_out.data_source = self.data_source
+        elif (np.isscalar(d1)):
+            if (self.data is None):
+                raise ValueError("Cannot add data objects without data.")
+            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
+                raise ValueError("Cannot add strings.")
+            d_out = copy.deepcopy(self)
+            d_out.data -= d1
+        else:
+            raise TypeError("Invalid data type for subtaction from flap.DataObject")
+
+        return d_out
+
+    def __rsub__(self, d1):
+        try:
+            d = self.__sub__(d1)
+            d.data = -d.data
+            return d
+        except Exception as e:
+            raise e
+
+    def __mul__(self, d1):
+        """Multiplication for DataObject.
+        """
+        if (type(d1) is DataObject):
+            if ((self.data is None) or (d1.data is None)):
+                raise ValueError("Cannot multiply data objects without data.")
+            if (self.shape != d1.shape):
+                raise ValueError("Cannot multiply data objects with different shapes.")
+            if ((self.error is None) or (d1.error is None)):
+                err = None
+            else:
+                if (type(self.error) is list):
+                    err1 = np.sqrt(self.error[0] ** 2 + self.error[1] ** 2)
+                else:
+                    err1 = self.error
+                if (type(d1.error) is list):
+                    err2 = np.sqrt(d1.error[0] ** 2 + d1.error[1] ** 2)
+                else:
+                    err2 = d1.error
+                err = np.sqrt(err1 ** 2 * err2 ** 2 
+                              + self.data ** 2 * err2 ** 2
+                              + d1.data **2 * err1 ** 2)
+            new_unit = flap.coordinate.Unit()
+            if (d1.data_unit.name == self.data_unit.name):
+                new_unit.name = self.data_unit.name+'^2'
+            else:
+                new_unit.name = self.data_unit.name+'*'+d1.unit.name
+            if (d1.data_unit.unit == self.data_unit.unit):
+                new_unit.unit = self.data_unit.unit+'^2'
+            else:
+                new_unit.unit = self.data_unit.unit+'*'+d1.unit.name
+                
+            d_out = DataObject(data_array=self.data * d1.data,
+                               error=err,
+                               data_unit=new_unit
+                               )
+            d_out.coordinates = []
+            for coord in self.coordinates:
+                try:
+                    c1 = d1.get_coordinate_object(coord.unit.name)
+                    if (coord != c1):
+                        continue
+                    d_out.coordinates.append(copy.deepcopy(coord))
+                except ValueError:
+                    pass
+            if (len(d_out.coordinates) == 0):
+                d_out.coordinates = None
+            if (self.exp_id == d1.exp_id):
+                d_out.exp_id = self.exp_id
+            if (self.data_source == d1.data_source):
+                d_out.data_source = self.data_source
+        elif (np.isscalar(d1)):
+            if (self.data is None):
+                raise ValueError("Cannot multiply data objects without data.")
+            if ((self.data.dtype.kind == 's') or (type(d1) is str)):
+                raise ValueError("Cannot multiply strings.")
+            d_out = copy.deepcopy(self)
+            d_out.data *= d1
+            if (d_out.error is not None):
+                if (type(d_out.error) is list):
+                    d_out.error = [d_out.error[0] * d1, d_out.error[1] * d1]
+                else:
+                    d_out.error *= d1
+        else:
+            raise TypeError("Invalid data type for multiplication with flap.DataObject")
+        return d_out
+             
+    def __rmul__(self, d1):
+        try:
+            return self.__mul__(d1)
+        except Exception as e:
+            raise e
             
 def _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,dim_i,ind):
-    """ Helper function for pdf.
-        Recursicely goes through all dimensions and calculates PDF.
-        Going through all dimensions of the data_proc_mx. The actual result write index
-        is in ind. dim_i is the index of the dimension. When dim_i reaches to the end of the dimensions
-        the PDF is calculated and written to the elements pointed by index.
+    """Helper function for PDF.
+
+    Recursively goes through all dimensions and calculates PDF.
+
+    Going through all dimensions of the data_proc_mx. The actual result write
+    index is in ind. dim_i is the index of the dimension. When dim_i reaches to
+    the end of the dimensions, the PDF is calculated and written to the elements
+    pointed by index.
     """
     i = dim_i
     if (i == flattened_dim):
@@ -3648,15 +4327,10 @@ def _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,dim_i,ind):
         ind[i] = j
         _pdf_recursive(data_proc_mx,output_mx,limits,flattened_dim,i + 1,ind)
         
-        
-            
-           
-        
-        
 ########## END of class DataObject            
             
 class FlapStorage:
-    """ This class is for data and data source information storage
+    """Stores data and data source information.
     """
     def __init__(self):
         # List of data sources
@@ -3668,30 +4342,85 @@ class FlapStorage:
         # The data objects. This is a dictionary, the keys are the data object names
         self.__data_objects = {}
 
-    """ The methods below are interfaces for the private variables of this class
-    """
+    # The methods below are interfaces for the private variables of this class
     def data_sources(self):
+        """List of data sources.
+
+        Returns
+        -------
+        list
+        """
         return self.__data_sources
 
-    def add_data_source(self,data_source,get_data_func=None, add_coord_func=None):
+    def add_data_source(self,
+                        data_source,
+                        get_data_func=None, 
+                        add_coord_func=None):
+        """Add data source.
+
+        Parameters
+        ----------
+        data_source : str
+            Name of the data source to add.
+        get_data_func : callable, optional, default=None
+            The function used for retrieving data.
+        add_coord_func : callable, optional, default=None
+            The function used for adding coordinates.
+        """
         self.__data_sources.append(data_source)
         self.__get_data_functions.append(get_data_func)
         self.__add_coordinate_functions.append(add_coord_func)
 
     def get_data_functions(self):
+        """Return the stored `get_data` functions.
+        
+        Returns
+        -------
+        list
+        """
         return self.__get_data_functions
 
     def add_coord_functions(self):
+        """Return the stored `add_coord` functions.
+        
+        Returns
+        -------
+        list
+        """
         return self.__add_coordinate_functions
 
     def data_objects(self):
+        """Return the stored data objects.
+         
+        Returns
+        -------
+        dict
+        """
         return self.__data_objects
 
-    def add_data_object(self,d,name):
+    def add_data_object(self, d, name):
+        """Add a data object to the storage.
+
+        Parameters
+        ----------
+        d : flap.DataObject
+            The data object to add.
+        name : str
+            Name of the data object.
+        """
         _name = name + '_exp_id:' + str(d.exp_id)
         self.__data_objects[_name] = d
 
-    def delete_data_object(self,name,exp_id=None):
+    def delete_data_object(self, name, exp_id=None):
+        """Delete a data object.
+
+        Parameters
+        ----------
+        name : str
+            The name of the data object to be deleted.
+        exp_id : str, optional, default=None
+            Experiment ID. Supports extended Unix regular expressions.
+        """
         _name = name + '_exp_id:' + str(exp_id)
         del_list = []
         for n in self.__data_objects.keys():
@@ -3700,11 +4429,22 @@ class FlapStorage:
         for n in del_list:
             del self.__data_objects[n]
 
-    def find_data_objects(self,name,exp_id='*'):
-        """" 
-        Find data objects in flap storage.
-        
-        Returns name list, exp_ID list
+    def find_data_objects(self, name, exp_id='*'):
+        """Find data objects in storage.
+
+        Parameters
+        ----------
+        name : str
+            Name of data object.
+        exp_id : str, optional, default='*'
+            Experiment ID. Supports extended Unix regular expressions.
+
+        Returns
+        -------
+        name_list : list
+            List of names of objects found.
+        exp_ID_list : list
+            List of experiment IDs of objects found.
         """
         _name = name + '_exp_id:' + str(exp_id)
         nlist = []
@@ -3717,8 +4457,22 @@ class FlapStorage:
                     explist.append(n_split[1])
         return nlist, explist
                 
+    def get_data_object(self, name, exp_id='*'):
+        """Retrieve an object from storage.
 
-    def get_data_object(self,name,exp_id='*'):
+        Note that the returned object is a copy, not a reference.
+
+        Parameters
+        ----------
+        name : str
+            Name of the object to retrieve.
+        exp_id : str, optional, default='*'
+            Experiment ID. Supports extended Unix regular expressions.
+
+        Returns
+        -------
+        flap.DataObject
+        """
         if (type(name) is not str ):
             raise ValueError("Object name should be a string.")
         _name = name + '_exp_id:' + str(exp_id)
@@ -3732,14 +4486,29 @@ class FlapStorage:
                     nlist.append(n)
             if len(nlist) == 0:
                 raise KeyError("Data object " + name
-                               + "(exp_id:" + str(exp_id) + ") does not exists.")
+                               + "(exp_id:" + str(exp_id) + ") does not exist.")
             if (len(nlist) > 1):
                 raise KeyError("Multiple data objects found for name "
                                + name + "(exp_id:" + str(exp_id) + ").")
             d = copy.deepcopy(self.__data_objects[nlist[0]])
             return d
 
-    def get_data_object_ref(self,name,exp_id='*'):
+    def get_data_object_ref(self, name, exp_id='*'):
+        """Retrieve a reference to an object from storage.
+
+        Note that the returned object is a reference, not a copy.
+
+        Parameters
+        ----------
+        name : str
+            Name of the object to retrieve.
+        exp_id : str, optional, default='*'
+            Experiment ID. Supports extended Unix regular expressions.
+
+        Returns
+        -------
+        flap.DataObject
+        """
         _name = name + '_exp_id:' + str(exp_id)
         try:
             d = self.__data_objects[_name]
@@ -3751,13 +4520,31 @@ class FlapStorage:
                     nlist.append(n)
             if len(nlist) == 0:
                 raise KeyError("Data object " + name
-                               + "(exp_id:" + str(exp_id) + ") does not exists.")
+                               + "(exp_id:" + str(exp_id) + ") does not exist.")
             if (len(nlist) > 1):
                 raise KeyError("Multiple data objects found for name "
                                + name + "(exp_id:" + str(exp_id) + ").")
             return self.__data_objects[nlist[0]]
 
-    def list_data_objects(self,name, exp_id='*'):
+    def list_data_objects(self, name, exp_id='*'):
+        """List data objects in storage.
+
+        Parameters
+        ----------
+        name : str | list of flap.DataObject
+            Name (with wildcards), or list of data objects.
+        exp_id : str, optional, default='*'
+            Experiment ID. Supports extended Unix regular expressions.
+
+        Returns
+        -------
+        d_list : list
+            List of data objects.
+        names : list
+            List of corresponding names.
+        exps : list
+            List of corresponding experiment IDs.
+        """
         if (name is None):
             _name = '*'
         else:
@@ -3771,9 +4558,8 @@ class FlapStorage:
             d_list.append(get_data_object(names[i_names], exp_id=exps[i_names]))
         return d_list, names, exps
 
-
-# This is the instance of the storage class
-# it will be created only if it does not exists.
+# This is the instance of the storage class.
+# It will be created only if it does not exist.
 global flap_storage
 try:
     flap_storage
@@ -3788,14 +4574,27 @@ except NameError:
 
 # The functions below are the flap interface
 def list_data_sources():
-    """ Return a list of registered data source names as a list.
+    """Return a list of registered data source names as a list.
+
+    Returns
+    -------
+    list
     """
     global flap_storage
     return flap_storage.data_sources()
 
 
 def get_data_function(data_source):
-    """ Return the get data function object for a given data source
+    """Return the `get_data` function for a given data source.
+
+    Parameters
+    ----------
+    data_source : str
+        The data source to use.
+
+    Returns
+    -------
+    callable
     """
     global flap_storage
     try:
@@ -3808,7 +4607,16 @@ def get_data_function(data_source):
 
 
 def get_addcoord_function(data_source):
-    """ Return the add_coord function object for a given data source
+    """Return the `add_coord` function for a given data source.
+
+    Parameters
+    ----------
+    data_source : str
+        The data source to use.
+
+    Returns
+    -------
+    callable
     """
     global flap_storage
     try:
@@ -3820,8 +4628,16 @@ def get_addcoord_function(data_source):
     return df[i]
 
 def register_data_source(name, get_data_func=None, add_coord_func=None):
-    """
-    Register a new data source name and the associated functions.
+    """Register a new data source name and the associated functions.
+
+    Parameters
+    ----------
+    name : str
+        The name of the data source.
+    get_data_func : callable, optional=None
+        The associated `get_data` function.
+    add_coord_func : callable, optional=None
+        The associated `add_coord` function.
     """
     global flap_storage
     try:
@@ -3834,15 +4650,29 @@ def register_data_source(name, get_data_func=None, add_coord_func=None):
         return ''
 
 
-def add_data_object(d,object_name):
-    """ Add a data object to the flap storage
+def add_data_object(d, object_name):
+    """Add a data object to `flap_storage`.
+
+    Parameters
+    ----------
+    d : flap.DataObject
+        The data object to add.
+    object_name : str
+        Name of the data object.
     """
     global flap_storage
     flap_storage.add_data_object(d,object_name)
 
 
-def delete_data_object(object_name,exp_id='*'):
-    """ Delete data object(s) from the flap storage
+def delete_data_object(object_name, exp_id='*'):
+    """Delete one or more data objects from `flap_storage`.
+
+    Parameters
+    ----------
+    object_name : str | list of str
+        The name of one or more data objects to be deleted.
+    exp_id : str, optional, default=None
+        Experiment ID. Supports extended Unix regular expressions.
     """
     global flap_storage
     if (type(object_name) is list):
@@ -3861,11 +4691,22 @@ def delete_data_object(object_name,exp_id='*'):
         except KeyError as e:
             raise e
 
-def find_data_objects(name,exp_id='*'):
-    """
-    Find data objects in flap storage.
-    
-    Returns list of names, list of expID.s
+def find_data_objects(name, exp_id='*'):
+    """Find data objects in `flap_storage`.
+
+    Parameters
+    ----------
+    name : str
+        Name of data object.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+
+    Returns
+    -------
+    name_list : list
+        List of names of objects found.
+    exp_ID_list : list
+        List of experiment IDs of objects found.
     """
     global flap_storage
     try:
@@ -3875,9 +4716,21 @@ def find_data_objects(name,exp_id='*'):
     return names, exps
 
 
-def get_data_object(object_name,exp_id='*'):
-    """  Return a data object from the flap storage
-         A coppy is returned not the object in the storage.
+def get_data_object(object_name, exp_id='*'):
+    """Retrieve an object from `flap_storage`.
+
+    Note that the returned object is a copy, not a reference.
+
+    Parameters
+    ----------
+    name : str
+        Name of the object to retrieve.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+
+    Returns
+    -------
+    flap.DataObject
     """
     global flap_storage
     try:
@@ -3886,8 +4739,21 @@ def get_data_object(object_name,exp_id='*'):
         raise e
     return d
 
-def get_data_object_ref(object_name,exp_id='*'):
-    """  Return a data object reference from the flap storage.
+def get_data_object_ref(object_name, exp_id='*'):
+    """Retrieve a reference to an object from `flap_storage`.
+
+    Note that the returned object is a reference, not a copy.
+
+    Parameters
+    ----------
+    name : str
+        Name of the object to retrieve.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+
+    Returns
+    -------
+    flap.DataObject
     """
     global flap_storage
     try:
@@ -3897,12 +4763,23 @@ def get_data_object_ref(object_name,exp_id='*'):
     return d
 
 def list_data_objects(name='*', exp_id='*', screen=True):
-    """ Prepare a printout of data objects is flap storage or the listed data objects.
-        name: name (with wildcards) or list of data objects
-        exp_id: exp id for name
-        screen: (bool) If True print to screen
-        
-        Return value: The text
+    """Prepare a printout of data objects.
+    
+    Objects can either be from `flap_storage` or from listed data
+    objects.
+
+    Parameters
+    ----------
+    name : str | list of flap.DataObject
+        Name (with wildcards) or list of data objects.
+    exp_id : str
+        Experiment ID. Supports extended Unix regular expressions.
+    screen : bool
+        Whether to print to screen.
+
+    Returns
+    -------
+    str
     """
     if ((type(name) is list) or (type(name) is DataObject)):
         if (type(name) is not list):
@@ -4055,23 +4932,44 @@ def get_data(data_source,
              options=None,
              coordinates=None,
              object_name=None):
-    """ This is a general data read interface. It will call the specific data read interface
-        for the registered data sources.
-        data_source: The name of the data source (string)
-        exp_id: Experiment ID
-        coordinates: Two options:
-                     1. List of flap.Coordinate objects. Thes can precisely describe which part of the data to read
-                     2. Dictionary. Each key is a coordinate name, the values can be 
-                         - A list of two elements (describes a range in the coordinate). 
-                         - A single element. Will be converted into a list with two identical elements
-                        The dictionary will be converted to a list of flap.Coordinate objects and
-                        the data source modulee will get that. 
-        name: The name of the data to get
-        no_data: Set to True to check data but do not read
-        options: Module specific options
-        object_name: the name of the data object in flap storage where data will be placed.
-        
-        Return value is the data object.
+    """A general interface for reading data.
+    
+    It will call the specific data read interface for the registered data
+    sources.
+
+    Parameters
+    ----------
+    data_source : str
+        The name of the data source.
+    exp_id : str, optional, default=None
+        Experiment ID.
+    name : str, optional, default=None
+        Name of data to retrieve.
+    no_data : bool, optional, default=False
+        Set to True to check data without reading it.
+    options : object, optional
+        Module-specific options.
+    coordinates : list of flap.Coordinate | dict, optional, default=None
+        Coordinates to use. Two possibilities:
+
+        1. List of `flap.Coordinate` objects. These can precisely describe which
+        part of the data to read.
+
+        2. Dictionary. Each key is a coordinate name, the values can be: 
+
+           a) A list of two elements (describes a range in the coordinate). 
+
+           b) A single element. Will be converted into a list with two identical elements
+
+           The dictionary will be converted to a list of `flap.Coordinate`
+           objects, which will be passed to the data source module.
+
+    object_name : str, optional, default=None
+        The name of the data object in `flap_storage` where data will be placed.
+
+    Returns
+    -------
+    flap.DataObject
     """
     if (name is None):
         raise ValueError("Data name is not given.")
@@ -4134,20 +5032,34 @@ def add_coordinate(object_name,
                    exp_id='*',
                    options=None,
                    output_name=None):
-    """ This is the function to add coordinates to a data object in flap storage.
-        This function is an interface to the add_coordinate method of flap.DataObject
+    """Add coordinates to a data object ib `flap_storage`.
 
-        INPUT:
-            object_name, exp_ID: These identify the data object in the storage
-            coordinates: List of new coordinates (string list)
-            output_name: The name of the new data object in the storage. If None
-                         the input will be overwritten
-            options: Dictionary
-                'exp_ID': Use this exp_id for calculating coordinates instead of the one
-                          in the data object
-                'data_source' : Use this data source instead of the one in the
-                                data object.
-                Other elements of options are passed over to flap.add_coordinate()
+    Parameters
+    ----------
+    object_name : str
+        Name of data object.
+    coordinates : str | list of str, optional, default=None
+        List of coordinates to add, identified by unit name.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        The name of the new data object in the storage. If None, the input will
+        be overwritten.
+    options : dict, optional, default=None
+        Possible keys and values:
+
+        - 'exp_ID': 
+          - str: Use this `exp_id` for calculating coordinates instead of the one
+            in the data object
+        - 'data_source': 
+          - str: Use this data source instead of the one in the data
+            object.
+
+        Other elements of `options` are passed on to `flap.add_coordinate()`.
+
+    Returns
+    -------
+    flap.DataObject
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -4180,10 +5092,214 @@ def add_coordinate(object_name,
         raise e
     return d
 
-def plot(object_name,exp_id='*',axes=None, slicing=None, summing=None, options=None,
-         plot_type=None, plot_options=None,plot_id=None,slicing_options=None):
-    """
-    plot function for an object in flap storage. This is a wrapper for DataObject.plot()
+def plot(object_name,
+         exp_id='*',
+         axes=None,
+         slicing=None,
+         summing=None,
+         options=None,
+         plot_type=None,
+         plot_options=None,
+         plot_id=None,
+         slicing_options=None):
+    """Plotting for a data object in `flap_storage`.
+
+    Parameters
+    ----------
+    object_name : str
+        Name of data object.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    axes : list of str, optional, default=None
+        A list of coordinate names. They should be one of the coordinate
+        names in the data object or '__Data__'.  They describe the axes of the
+        plot. If the number of axes is less than the number required for the
+        plot, '__Data__' will be added. If no axes are given, the default
+        will be used, depending on the plot type. E.g. for an x-y plot the
+        default first axis is the first coordinate, the second axis is
+        '__Data__'.
+    slicing : dict, optional, default=None
+        Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+        will be applied before plotting.
+    summing : str, optional, default=None
+        Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+        will be applied before plotting.
+    options : dict, optional, default=None
+        Options for plotting. Possible keys and values:
+
+        - 'Error' (default=``True``):
+
+          - ``True``: Plot all error bars
+          - ``False``: Do not plot errors.
+          - int > 0: Plot this many error bars in plot.
+
+        - 'Y separation':
+           
+          - float: Vertical separation of curves in multi xy plot. For
+            linear scale this will be added to consecutive curves. For Log
+            scale, consecutive curves will be multiplied by this.
+
+        - 'Log x': 
+
+          - ``True``: Logscale X axis
+
+        - 'Log y':
+
+          - ``True``: Logscale Y axis
+
+        - 'All points' (default=``False``):
+
+          - bool: Default is ``False``. If ``True``, will plot all points,
+            otherwise will plot only a reduced number of points (see
+            `'Maxpoints'`). Each plotted point will be the mean of data in a
+            box, and a vertical bar will indicate the value range in each
+            box. 
+
+        - 'Maxpoints': 
+
+          - int: The maximum number of data points plotted. Above this,
+            only this many points will be plotted if 'All points' is
+            ``False``.
+
+        - 'Complex mode': 
+
+          - 'Amp-phase': Plot amplitude and phase.
+          - 'Real-imag': Plot real and imaginary part.
+
+        - 'X range','Y range': 
+
+          - lists of two floats: Axes ranges.
+
+        - 'Z range': 
+
+          - list of two floats: Range of the vertical axis.
+
+        - 'Colormap': 
+
+          - str: Cmap name for image and contour plots.
+
+        - 'Levels': 
+
+          - int: Number of contour levels or array of levels.
+
+        - 'Aspect ratio': 
+
+          - 'equal', 'auto' or float. (See `imshow`.)
+
+        - 'Waittime': 
+
+          - float: Time to wait in seconds between two images in anim-...
+            type plots
+
+        - 'Video file': 
+
+          - str: Name of output video file for anim-... plots
+
+        - 'Video framerate': 
+
+          - float: Frame rate for output video.
+
+        - 'Video format':
+
+          - str: Format of the video. Valid options: 'avi'.
+
+        - 'Clear': 
+
+          - bool: If ``True``, don't use the existing plots, generate new
+            ones. (No overplotting.)
+
+        - 'Force axes':
+
+          - ``True``: Force overplotting, even if axes are incpomatible.
+
+        - 'Colorbar': 
+
+          - bool: Switch on/off colorbar
+
+        - 'NaN color': 
+
+          - The color to use in image data plotting for np.nan
+            (not-a-number) values.
+
+        - 'Interpolation':
+
+          - Interpolation method for image plot.
+
+        - 'Language':
+
+          - str: Language of certain standard elements in the plot.
+            Possible values: {'EN', 'HU'}.
+
+        - 'EFIT options':
+
+          - Dictionary of EFIT plotting options:
+
+            - 'Plot separatrix': Set this to plot the separatrix onto
+              the video.
+            - 'Separatrix X': Name of the flap.DataObject for the
+              separatrix X data (usually 'R').
+            - 'Separatrix Y': Name of the flap.DataObject for the
+              separatrix Y data (usually 'z').
+            - 'Separatrix XY': Name of the 2D flap.DataObject for the
+              separatrix XY data (usually 'Rz').
+            - 'Separatrix color': Color of the separatrix for the plot.
+            - 'Plot limiter': Set to plot the limiter onto the video.
+            - 'Limiter X': Name of the flap.DataObject for the limiter X
+              data (usually 'R').
+            - 'Limiter Y': Name of the flap.DataObject for the limiter Y
+              data (usually 'z').
+            - 'Limiter XY': Name of the 2D flap.DataObject for the
+              limiter XY data (usually 'Rz').
+            - 'Limiter color': Color of the limiter for the plot.
+            - 'Plot flux surfaces': Name of the 2D flap.DataObject for
+              the flux surfaces (should have the same coordinate names as
+              the plot).
+            - 'nlevels': Number of contour lines for the flux surface
+              plotting.
+
+        - 'Prevent saturation': Prevents saturation of the video signal when
+          it exceeds ``zrange[1]``. It uses data modulo ``zrange[1]`` ito
+          overcome the saturation. (Works for animation.)
+
+    plot_type : {'xy', 'multi xy', 'grid xy', 'image', 'contour', \
+                 'anim-image', 'anim-contour'}, optional, default=None
+        The plot type. Can be abbreviated. Possible values:
+
+        - 'xy': Simple 1D plot. Default axes are: first coordinate,
+          '__Data__'.
+
+        - 'multi xy': In case of 2D data, plots 1D curves with a vertical
+          shift.  Default x axis is the first coordinate, y axis is 'Data'.
+          The signals are labeled with the 'Signal name' coordinate, or with
+          the one named in ``options['Signal name']``.
+
+        - 'grid xy': In case of 3D data, plots xy plots on a 2D grid.  Axes
+          are: grid x, grid y, x, y All coordinates should change in one
+          dimension.
+
+        - 'image': Plots a 2D data matrix as an image. Options: 'Colormap',
+          'Data range', ...
+
+        - 'contour': Contour plot.
+
+        - 'anim-image', 'anim-contour': Like 'image' and 'contour', but the
+          third axis is time.
+
+    plot_options : dict | list of dict, optional, default=None
+        Dictionary containg matplotlib plot options. Will be passed over to
+        the plot call. For plots with multiple subplots, this can be a list
+        of dictionaries, each for one subplot.
+    plot_id : flap.plot.PlotID, optional, default=None
+        Can be used for overplotting, if the new plot should go into an
+        existing plot.
+    slicing_options : dict, optional, default=None
+        Options for slicing. See `flap.DataObject.slice_data()` for details.
+
+    Returns
+    -------
+    flap.plot.PlotID
+        The plot ID of the current plot. This can be used later for
+        overplotting.
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -4202,10 +5318,118 @@ def plot(object_name,exp_id='*',axes=None, slicing=None, summing=None, options=N
         raise e
 
 
-def slice_data(object_name,exp_id='*',output_name=None,slicing=None,summing=None,options=None):
-    """
-    slice function for an object in flap storage. This is a wrapper for DataObject.slice_data()
-    If output name is set the sliced object will be written back to the flap storage under this name.
+def slice_data(object_name,
+               exp_id='*',
+               output_name=None,
+               slicing=None,
+               summing=None,
+               options=None):
+    """Slice a data object form `flap_storage` along one or more coordinates.
+
+    If `output_name` is set, the sliced object will be written back to
+    `flap_storage` under this name. 
+    
+    Parameters
+    ----------
+    object_name : str
+        Name of data object.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        The name of the new data object in the storage. 
+    slicing : dict, optional, default=None
+        Dictionary with keys referring to coordinates in the data object. Values can be:
+
+        a) For SIMPLE SLICE: cases when closest value or interpolated value
+           is selected.
+           
+           Possibilities:
+
+           1) slice objects, range objects, scalars, lists, numpy array.
+           2) `flap.DataObject` objects without error and with data
+              unit.name equal to the coordinate.
+           3) `flap.DataObject` with the name of one coordinate equal to the
+              dictionary key without having value_ranges values.
+           4) `flap.Intervals` objects with one interval.
+
+        b) For MULTI SLICE: Various range selection objects. In this case
+           ranges are selected and a new dimension is added to the data array
+           (only if more than 1 interval is selected) going through the
+           intervals. If intervals are of different length, the longest will be
+           used and missing elements filled with ``float('nan')``.
+           
+           Two new coordinates are added: "<coordinate> in interval",
+           "<coordinate> interval".
+
+           Possibilities:
+
+           1) `flap.Intervals` objects with more than one interval
+           2) `flap.DataObject` objects with data `unit.name` equal to the
+              slicing coordinate. The error values give the intervals.
+           3) `flap.DataObject` with the name of one coordinate equal to the
+              slicing coordinate. The `value_ranges` select the intervals.
+
+           If range slicing is done with multiple coordinates which have
+           common element in the dimension list, they will be done in one
+           step. Otherwise the slicing is done sequentially.
+
+    summing : dict, optional, default=None
+        Summing is applied to the sliced data. It processes data along one
+        coordinate and the result is a scalar. This way summing reduces the
+        number of dimensions.
+
+        Dictionary with keys referring to coordinates and values as
+        processing strings. If the processed coordinate changes along
+        multiple dimensions, those dimensions will be flattened.
+
+        For mean and avereage data, errors are calculated as error of
+        independent variables. That is, taking the square root of the
+        squared sum of errors. For coordinates the mean of the ranges is
+        taken.
+
+        Processing strings are the following:
+
+        - ``None``: Nothing to be done in this dimension.
+        - 'Mean': take mean of values in selection/coordinate.
+        - 'Sum': take sum of values in selection/coordinate.
+        - 'Min': take the minimum of the values/coordinate.
+        - 'Max': take the maximum of the values/coordinate.
+
+    options : dict, optional, default=True
+        Possible keys and values:
+
+        - 'Partial intervals'
+
+          - bool: If ``True``, processes intervals which extend over the
+            coordinate limits. If ``False``, only full intervals are
+            processed.
+        
+        - 'Slice type': 
+
+          - 'Simple': Case a) above: closest or interpolated values are
+            selected, dimensions are reduced or unchanged.
+          - 'Multi': Case b) above: multiple intervals are selected, and
+            their data is placed into a new dimension.
+          - ``None``: Automatically select. For slicing data in case b multi slice, otherwise simple
+
+        - 'Interpolation':
+
+          - 'Closest value'
+          - 'Linear'
+
+        - 'Regenerate coordinates': 
+          - bool: Default is ``True``. If ``True``, and summing is done,
+          then looks for pairs of coordinates ('Rel. <coord> in
+          int(<coord1>)', 'Start <coord> in int(<coord1>)').
+
+          If such pairs are found, and they change on the same dimension
+          or one of them is constant, then coordinate <coord> is
+          regenerated and these are removed.
+        
+    Returns
+    -------
+    flap.DataObject
+        The sliced object.
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -4222,11 +5446,331 @@ def slice_data(object_name,exp_id='*',output_name=None,slicing=None,summing=None
             raise e
     return ds
 
-def apsd(object_name,exp_id='*',output_name=None, coordinate=None, intervals=None, options=None):
+        
+def real(object_name, exp_id='*', output_name=None):
+    """Real part of the data contained in the `DataObject` retrieved from
+    `flap_storage`.
+
+    Has no effect on real-valued data. 
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+
+    Returns
+    -------
+    flap.DataObject
     """
-    Auto Power Spetctrum for an object in flap storage. This is a wrapper for DataObject.apsd()
-    If output name is set the APSD object will be written back to the flap storage under this name.
-    If not set the APSD object will be written back with its original name.
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.real()
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+
+               
+def imag(object_name, exp_id='*', output_name=None):
+    """Imaginary part of the data contained in the `DataObject` retrieved from
+    `flap_storage`.
+
+    Has no effect on real-valued data. 
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+
+    Returns
+    -------
+    flap.DataObject
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.imag()
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+        
+def abs_value(object_name, exp_id='*', output_name=None):
+    """Absolute value of the data contained in the `DataObject` retrieved from
+    `flap_storage`.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+
+    Returns
+    -------
+    flap.DataObject
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.abs_value()
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+
+def phase(object_name, exp_id='*', output_name=None):
+    """Phase of the data contained in the `DataObject` retrieved from
+    `flap_storage`.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+
+    Returns
+    -------
+    flap.DataObject
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.phase()
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+
+def error_value(object_name, exp_id='*', output_name=None, options=None):
+    """Returns a `DataObject` containing the error of the data in the
+    `DataObject` retrieved from `flap_storage`.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+    options : dict
+        Possible keys and values:
+
+        - 'High': 
+
+          - bool: Use high error if error is asymmetric.
+
+        - 'Low':
+
+          - bool: Use low error is error is asymmetric
+        
+    Returns
+    -------
+    flap.DataObject
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.error_value(options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+
+def stft(object_name,
+         exp_id='*',
+         output_name=None,
+         coordinate=None,
+         options=None):
+    """Calculates the short-time Fourier transform (STFT) of the data in the
+    `DataObject` retrieved from `flap_storage`, using `scipy.signal.stft`.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+    coordinate : str, optional, default=None
+        The name of the coordinate along which to calculate the STFT. This
+        coordinate should change only along one data dimension and should be
+        equidistant.
+
+        This and all other coordinates changing along the data dimension of
+        this coordinate will be removed. A new coordinate with name
+        'Frequency' (unit Hz) will be added.
+    options : dict, optional, default=None
+        Options of STFT will be passed to `scipy.signal.stft`.
+
+    Returns
+    -------
+    flap.DataObject
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        ds=d.stft(coordinate=coordinate, options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(ds,output_name)
+        except Exception as e:
+            raise e
+    return ds
+
+def apsd(object_name,
+         exp_id='*',
+         output_name=None,
+         coordinate=None,
+         intervals=None,
+         options=None):
+    """Auto-power spectral density calculation for a data object in
+    `flap_storage`. Returns a data object with the coordinate replaced by
+    frequency or wavenumber. The power spectrum is calculated in multiple
+    intervals (described by slicing), and the mean and variance will be
+    returned.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+    coordinate : str, optional, default=None
+        The name of the coordinate along which to calculate APSD.
+        This coordinate should change only along one data dimension and
+        should be equidistant.
+
+        This and all other cordinates changing along the data dimension of
+        this coordinate will be removed. A new coordinate with name
+        'Frequency'/'Wavenumber' will be added. The unit will be
+        derived from the unit of the coordinate (e.g., Hz cm^-1, m^-1).
+    intervals : dict | str, optional, default=None
+        Information of processing intervals.
+
+        - If dictionary with a single key: {selection coordinate:
+            description}). Key is a coordinate name which can be different
+            from the calculation coordinate. Description can be
+            `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+            it is a data object with data name identical to the coordinate,
+            the error ranges of the data object will be used for interval. If
+            the data name is not the same as `coordinate`, a coordinate with the
+            same name will be searched for in the data object and the
+            `value_ranges` will be used from it to set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+            interval description, the selection coordinate is taken the same
+            as `coordinate`.
+        - If None, the whole data interval will be used as a single
+            interval.
+
+    options : dict, optional, default=None
+        Options for APSD calculation. (Keys can be abbreviated.) Possible
+        keys and values:
+
+        - 'Wavenumber': 
+
+          - bool: Whether to use 2*Pi*f for the output coordinate scale;
+            this is useful for wavenumber calculation.
+
+        - 'Resolution': 
+
+          - Output resolution in the unit of the output coordinate.
+
+        - 'Range':
+
+          - Output range in the unit of the output coordinate.
+        
+        - 'Logarithmic':
+
+          - bool: If ``True``, will create logarithmic frequency binning.
+
+        - 'Interval_n': 
+
+          - int: Minimum number of intervals to use for the processing.
+            These are identical length intervals inserted into the input
+            interval list. Default is 8.
+
+        - 'Error calculation': 
+
+          - bool: Whether to calculate the error. Omitting error
+            calculation increases speed. If 'Interval_n' is 1, no error
+            calculation is done.
+
+        - 'Trend removal': Trend removal description. (See also
+          `flap.spectral_analysis._trend_removal()`.)
+
+          - list: 
+
+            - ``['poly', n]``: Fit an `n` order polynomial to the data
+                and subtract.
+
+          - str:
+
+            - 'mean': Subtract mean.
+
+          - None: Don't remove trend.
+          
+          Trend removal will be applied to each interval separately.
+
+        - 'Hanning': 
+
+          - bool: Whether to use a Hanning window.
+
+    Returns
+    -------
+    flap.DataObject
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -4243,11 +5787,118 @@ def apsd(object_name,exp_id='*',output_name=None, coordinate=None, intervals=Non
             raise e
     return ds
 
-def cpsd(object_name, ref=None, exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
-    """
-    Cross Power Spectrum between two objects in flap storage. (ref can also be a data object.) 
-    This is a wrapper for DataObject.cpsd()
-    If output name is set the CPSD object will be written back to the flap storage under this name.
+def cpsd(object_name,
+         ref=None,
+         exp_id='*',
+         output_name=None,
+         coordinate=None,
+         intervals=None,
+         options=None):
+    """Complex cross-power spectral density (CPSD) calculation.
+    
+    Calculates all spectra between all signals in `ref` and `object_name`, but
+    not inside `object_name` and `ref`. Objects `object_name` and `ref` should
+    both have the same equidistant coordinate with equal sampling points.
+
+    Returns a data object with dimension number ``object_name.dim+ref.dim-1``.
+    The coordinate is replaced by frequency or wavenumber. The spectrum is
+    calculated in multiple intervals (described by intervals) and the mean and
+    variance will be returned.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    ref : flap.DataObject | str, optional, default=None
+        Reference to use for CPSD calculation, or name of reference in
+        `flap_storage`.  If None, `object_name` is used as reference.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+    coordinate : str, optional, default=None
+        The name of the coordinate along which to calculate CPSD.
+        This coordinate should change only along one data dimension and
+        should be equidistant.
+
+        This and all other cordinates changing along the data dimension of
+        this coordinate will be removed. A new coordinate with name
+        'Frequency'/'Wavenumber' will be added. The unit will be
+        derived from the unit of the coordinate (e.g., Hz cm^-1, m^-1).
+    intervals : dict | str, optional, default=None
+        Information of processing intervals.
+
+        - If dictionary with a single key: {selection coordinate:
+          description}). Key is a coordinate name which can be different
+          from the calculation coordinate. Description can be
+          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          it is a data object with data name identical to the coordinate,
+          the error ranges of the data object will be used for interval. If
+          the data name is not the same as `coordinate`, a coordinate with the
+          same name will be searched for in the data object and the
+          `value_ranges` will be used from it to set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+          interval description, the selection coordinate is taken the same
+          as `coordinate`.
+        - If None, the whole data interval will be used as a single
+          interval.
+
+    options : dict, optional, default=None
+        Options for APSD calculation. (Keys can be abbreviated.) Possible
+        keys and values:
+
+        - 'Wavenumber': 
+
+          - bool: Whether to use 2*Pi*f for the output coordinate scale;
+            this is useful for wavenumber calculation.
+
+        - 'Resolution': 
+
+          - Output resolution in the unit of the output coordinate.
+
+        - 'Range':
+
+          - Output range in the unit of the output coordinate.
+        
+        - 'Logarithmic':
+
+          - bool: If ``True``, will create logarithmic frequency binning.
+
+        - 'Interval_n': 
+
+          - int: Minimum number of intervals to use for the processing.
+            These are identical length intervals inserted into the input
+            interval list. Default is 8.
+
+        - 'Error calculation': 
+
+          - bool: Whether to calculate the error. Omitting error
+            calculation increases speed. If 'Interval_n' is 1, no error
+            calculation is done.
+
+        - 'Trend removal': Trend removal description. (See also
+          `flap.spectral_analysis._trend_removal()`.)
+
+          - list: 
+
+            - ``['poly', n]``: Fit an `n` order polynomial to the data
+                and subtract.
+
+          - str:
+
+            - 'mean': Subtract mean.
+
+          - None: Don't remove trend.
+            
+          Trend removal will be applied to each interval separately.
+
+        - 'Hanning': 
+
+          - bool: Whether to use a Hanning window.
+
+    Returns
+    -------
+    flap.DataObject
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -4276,11 +5927,112 @@ def cpsd(object_name, ref=None, exp_id='*', output_name=None, coordinate=None, i
             raise e
     return ds
 
-def ccf(object_name, ref=None, exp_id='*', ref_exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
-    """
-    Cross Corrrelation Function or covariance calculation between two objects in flap storage. 
-    This is a wrapper for DataObject.ccf()
-    If output name is set the CPSD object will be written back to the flap storage under this name.
+def ccf(object_name,
+        ref=None,
+        exp_id='*',
+        output_name=None,
+        coordinate=None,
+        intervals=None,
+        options=None):
+    """N-dimensional cross-correlation function (CCF) or covariance
+    calculation for the data object, taking `ref` as reference.        
+
+    Calculates all CCF between all signals in `ref` and `object_name`, but not
+    inside `object_name` and ref. Correlation is calculated along the
+    coordinate(s) listed in `coordinate`, which should be identical for the to
+    input data objects.
+
+    Returns a data object with dimension number
+    ``object_name.dim+ref.dim-len(coordinate)``. The coordinates are replaced by
+    `coordinate_name+' lag'`. The CCF is calculated in multiple intervals
+    (described by intervals) and the mean and variance will be returned.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    ref : flap.DataObject, optional, default=None
+        Reference to use for CPSD calculation. If None, `object_name` is used as
+        reference.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+    coordinate : str | list of str, optional, default=None
+        The name of the coordinate along which to calculate CCF,
+        or a list of names. Each coordinate should change only along
+        one data dimension and should be equidistant.
+        
+        This and all other cordinates changing along the data dimension
+        of these coordinates will be removed. New coordinates with
+        `coordinate_name+' lag'` will be added. 
+    intervals : dict | str, optional, default=None
+        Information of processing intervals.
+
+        - If dictionary with a single key: {selection coordinate:
+          description}). Key is a coordinate name which can be different
+          from the calculation coordinate. Description can be
+          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          it is a data object with data name identical to the coordinate,
+          the error ranges of the data object will be used for interval. If
+          the data name is not the same as `coordinate`, a coordinate with the
+          same name will be searched for in the data object and the
+          `value_ranges` will be used from it to set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+          interval description, the selection coordinate is taken the same
+          as `coordinate`.
+        - If None, the whole data interval will be used as a single
+          interval.
+
+    options : dict, optional, default=None
+        Options for CCF calculation. (Keys can be abbreviated.) Possible
+        keys and values:
+
+        - 'Resolution': 
+
+          - Output resolution for each coordinate. (Single value or list
+            of values.)
+
+        - 'Range':
+
+          - Output ranges for each coordinate. (List or list of lists.)
+
+        - 'Interval_n': 
+
+          - int: Minimum number of intervals to use for the processing.
+            These are identical length intervals inserted into the input
+            interval list. Default is 8.
+
+        - 'Error calculation': 
+
+          - bool: Whether to calculate the error. Omitting error
+            calculation increases speed. If 'Interval_n' is 1, no error
+            calculation is done.
+
+        - 'Trend removal': Trend removal description. (See also
+          `flap.spectral_analysis._trend_removal()`.)
+
+          - list: 
+
+            - ``['poly', n]``: Fit an `n` order polynomial to the data
+              and subtract.
+
+          - str:
+
+            - 'mean': Subtract mean.
+
+          - None: Don't remove trend.
+            
+          Trend removal will be applied to each interval separately.
+
+        - 'Hanning': 
+
+          - bool: Whether to use a Hanning window.
+
+        - 'Normalize': 
+
+          - Normalize with autocorrelations, that is, calculate correlation
+            instead of covariance.
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -4309,67 +6061,64 @@ def ccf(object_name, ref=None, exp_id='*', ref_exp_id='*', output_name=None, coo
             raise e
     return ds
 
-def stft(object_name,exp_id='*',output_name=None, coordinate=None, options=None):
-    """
-        Calculates the STFT of the data using scipy's stft method
+def detrend(object_name,
+            exp_id='*',
+            output_name=None,
+            coordinate=None,
+            intervals=None,
+            options=None):
+    """Trend removal.
 
-        INPUT:
-                object_name: Name of a data object in the flap storage
-                coordinate: The name of the coordinate (string) along which to calculate STFT.
-                            This coordinate should change only along one data dimension and should be equidistant.
-                            This and all other coordinates changing along the data dimension of
-                            this coordinate will be removed. A new coordinate with name
-                            Frequency (unit HZ) will be added.
-                options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
-    """
-    try:
-        d = get_data_object(object_name,exp_id=exp_id)
-    except Exception as e:
-        raise e
-    try:
-        ds=d.stft(coordinate=coordinate, options=options)
-    except Exception as e:
-        raise e
-    if (output_name is not None):
-        try:
-            add_data_object(ds,output_name)
-        except Exception as e:
-            raise e
-    return ds
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+    coordinate: str, optional, default=None
+        The 'x' coordinate for the trend removal.
+    intervals : dict | str, optional, default=None
+        Information of processing intervals.
 
-def detrend(object_name,exp_id='*',output_name=None, coordinate=None, intervals=None, options=None):
-    """ DETREND signal(s)
-        INPUT:
-            object_name: Name of the object in flap storage (string) 
-            exp_id: Experiment ID
-            output_name: Name of the output object. If set result will be  stored under this name.
-            coordinate: The coordinate for the detrend. If necessary data will be fitted with this coordinate
-                        as x value.
-            intervals: Information of processing intervals.
-                       If dictionary with a single key: {selection coordinate: description})
-                           Key is a coordinate name which can be different from the calculation
-                           coordinate.
-                           Description can be flap.Intervals, flap.DataObject or
-                           a list of two numbers. If it is a data object with data name identical to
-                           the coordinate the error ranges of the data object will be used for
-                           interval. If the data name is not the same as coordinate a coordinate with the
-                           same name will be searched for in the data object and the value_ranges
-                           will be used fromm it to set the intervals.
-                       If not a dictionary and not None is is interpreted as the interval
-                           description, the selection coordinate is taken the same as
-                           coordinate.
-                       If None, the whole data interval will be used as a single interval.
-            options:
-              'Trend removal': Trend removal description (see also _trend_removal()). A list, string or None.
-                None: Don't remove trend.
-                Strings:
-                  'mean': subtract mean
-                Lists:
-                  ['poly', n]: Fit an n order polynomial to the data and subtract.
-                        Trend removal will be applied to each interval defined by slicing
-                        separately.
-        Return value:
-            The resulting data object.
+        - If dictionary with a single key: {selection coordinate:
+          description}). Key is a coordinate name which can be different
+          from the calculation coordinate. Description can be
+          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          it is a data object with data name identical to the coordinate,
+          the error ranges of the data object will be used for interval. If
+          the data name is not the same as `coordinate`, a coordinate with the
+          same name will be searched for in the data object and the
+          `value_ranges` will be used from it to set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+          interval description, the selection coordinate is taken the same
+          as `coordinate`.
+        - If None, the whole data interval will be used as a single
+          interval.
+
+    options : dict, optional, default=None
+        Options for detrending. (Keys can be abbreviated.) Possible keys and
+        values:
+        - 'Trend removal': Trend removal description. (See also
+          `flap.spectral_analysis._trend_removal()`.)
+
+          - list: 
+
+            - ``['poly', n]``: Fit an `n` order polynomial to the data
+              and subtract.
+
+          - str:
+
+            - 'mean': Subtract mean.
+
+          - None: Don't remove trend.
+
+        Trend removal will be applied to each interval separately.
+
+    Returns
+    -------
+    flap.DataObject
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -4386,50 +6135,106 @@ def detrend(object_name,exp_id='*',output_name=None, coordinate=None, intervals=
             raise e
     return ds
 
-def filter_data(object_name, exp_id='*', output_name=None, coordinate=None, intervals=None, options=None):
-    """ 1D Data filter.
-    INPUT:
-        object_name: Name of the object in flap storage (string) 
-        exp_id: Experiment ID
-        output_name: Name of the output object. If not set object_name will be used.
-        coordinate: The x coordinate for the trend removal.
-        intervals: Information of processing intervals.
-                   If dictionary with a single key: {selection coordinate: description})
-                       Key is a coordinate name which can be different from the calculation
-                       coordinate.
-                       Description can be flap.Intervals, flap.DataObject or
-                       a list of two numbers. If it is a data object with data name identical to
-                       the coordinate the error ranges of the data object will be used for
-                       interval. If the data name is not the same as coordinate a coordinate with the
-                       same name will be searched for in the data object and the value_ranges
-                       will be used fromm it to set the intervals.
-                   If not a dictionary and not None is is interpreted as the interval
-                       description, the selection coordinate is taken the same as
-                       coordinate.
-                   If None, the whole data interval will be used as a single interval.
-                options:
-                    'Type' :
-                        None: Do nothing.
-                        'Int': Single term IIF filter, like RC integrator. 
-                        'Diff': Single term IIF filter, like RC differentiator.
-                        'Bandpass', 'Lowpass', 'Highpass': Filters designed by scipy.signal.iirdesign.
-                                                           The filter type is in 'Design'
-                                   Bandpass: f_low - f_high
-                                   Lowpass: - f_high
-                                   Highpass: - f_low
-                    'Design': The design type of the bandpass, lowpass or highpass filter. 
-                              ('Elliptic', 'Butterworth, 'Chebyshev I', 'Chebyshev II', 'Bessel') 
-                              The numpy.iirdesign function is used for generating the filter.  
-                              Setting inconsistent parameters can cause strange results. E.g. too high attenuation
-                              at too low frequency relative to the smapling frequency can be a problem.
-                    'f_low', 'f_high': Cut on/off frequencies. (Middle between passband and stopband edge.)
-                    'Steepness': Difference between passband and stopband edge frequencies as a fraction 
-                                 of the middle frequency.
-                     'Loss': The maximum loss in the passband in dB
-                     'Attenuation': The minimum attenuation in the stopband dB
-                    'Tau': time constant for integrator/differentiator (in units of the coordinate)
-                    'Power': Calculate square of the signal after filtering. (boolean)
-                    'Inttime': Integration time after power calculation. (in units of oordinate)    Return value: The data object with the filtered data.
+def filter_data(object_name,
+                exp_id='*',
+                output_name=None,
+                coordinate=None,
+                intervals=None,
+                options=None):
+    """1D data filter.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+    coordinate : str, optional, default=None
+        The 'x' coordinate for the filtering.
+    intervals : dict | str, optional, default=None
+        Information of processing intervals.
+
+        - If dictionary with a single key: {selection coordinate:
+          description}). Key is a coordinate name which can be different
+          from the calculation coordinate. Description can be
+          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          it is a data object with data name identical to the coordinate,
+          the error ranges of the data object will be used for interval. If
+          the data name is not the same as `coordinate`, a coordinate with the
+          same name will be searched for in the data object and the
+          `value_ranges` will be used from it to set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+          interval description, the selection coordinate is taken the same
+          as `coordinate`.
+        - If None, the whole data interval will be used as a single
+          interval.
+
+    options : dict, optional, default=None
+        Options for filtering. Possible keys and values:
+        
+        - 'Type':
+
+          - None: Do nothing.
+
+          - 'Int': Single-term IIF filter, like RC integrator. 
+
+          - 'Diff': Single term IIF filter, like RC differentiator.
+
+          - 'Bandpass' | 'Lowpass' | 'Highpass': Filters designed by
+            `scipy.signal.iirdesign`. The filter type is in 'Design'.
+            Relation of filters and required cutting frequencies:
+
+            - Bandpass: 'f_low' -- 'f_high'
+            - Lowpass: -- 'f_high'
+            - Highpass: -- 'f_low'
+
+        - 'Design': 
+            
+            - 'Elliptic' | 'Butterworth' | 'Chebyshev I' | 'Chebyshev II' |
+              'Bessel': The design type of the bandpass, lowpass or highpass
+              filter. 
+
+              The `numpy.iirdesign` function is used for generating the filter.
+
+              Setting inconsistent parameters can cause strange results.
+              E.g. too high attenuation at too low frequency relative to the
+              smapling frequency can be a problem.
+
+        - 'f_low', 'f_high': 
+
+          - float: Cut on/off frequencies in Hz. (Middle between passband
+            and stopband edge.)
+
+        - 'Steepness': 
+
+          - float: Difference between passband and stopband edge frequencies
+            as a fraction of the middle frequency.
+
+        - 'Loss': 
+
+          - float: The maximum loss in the passband in dB.
+
+        - 'Attenuation':
+
+          - float: The minimum attenuation in the stopband dB.
+
+        - 'Tau':
+
+          - Time constant for integrator/differentiator (in units of the coordinate).
+
+        - 'Power': 
+
+          - bool: Whether to calculate square of the signal after filtering.
+
+        - 'Inttime':
+
+          - Integration time after power calculation (in units of coordinate).
+
+    Returns
+    -------
+    flap.DataObject
     """
     
     try:
@@ -4447,20 +6252,101 @@ def filter_data(object_name, exp_id='*', output_name=None, coordinate=None, inte
             raise e
     return ds
 
-def save(data, filename, exp_id='*',  options=None, protocol=PICKLE_PROTOCOL):
+def pdf(object_name,
+        exp_id='*',
+        coordinate=None,
+        intervals=None,
+        options=None,
+        output_name=None):
     """
-    Save one or more flap.DataObject-s using pickle.
+    Amplitude distribution function (PDF) of data.
+        
+    Flattens the data array in the dimensions where the coordinates change
+    and calculates PDF on this data for each case of the other dimensions.
+
+    Parameters
+    ----------
+
+    coordinate : str | list of str, optional, default=None
+        The name of the coordinate(s) along which to calculate.  If not set,
+        the first coordinate in the data object will be used.  These
+        coordinates will be removed and replaced by a new coordinate with
+        the name of the data.
     
-    INPUT:
-        data: If flap.DataObject than save this.
-              If string or string list then find these data objects in flap storage and save them. 
-              Will also use exp_id to select data objects. These data objects can be restored
-              into flap storage using load.
-              If any other object save it.
-        exp_id: Experiment ID to use in conjuction with data of it is a string.
-        options: None at present
-        protocol: The protocol to use
-        filename: Name of the file to save to.
+    intervals : dict | str, optional, default=None
+        Information of processing intervals.
+
+        - If dictionary with a single key: {selection coordinate:
+        description}). Key is a coordinate name which can be different
+        from the calculation coordinate. Description can be
+        `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+        it is a data object with data name identical to the coordinate,
+        the error ranges of the data object will be used for interval. If
+        the data name is not the same as `coordinate`, a coordinate with the
+        same name will be searched for in the data object and the
+        `value_ranges` will be used from it to set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+        interval description, the selection coordinate is taken the same
+        as `coordinate` (or its first element).
+        - If None, the whole data interval will be used as a single
+        interval.
+
+    options : dict, optional, default=None
+        Options for generating the PDF. Possible keys and values:
+
+        - 'Range': 
+
+          - list of float: The data value range. If not set, the data
+            minimum-maximum will be used.
+
+        - 'Resolution': 
+
+          - float: The resolution of the PDF.
+
+        - 'Number':
+
+          - The number of intervals in 'Range'. This is an alternative to
+            'Resolution'.
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        d_out = d.pdf(coordinate=coordinate, intervals=intervals, options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return d_out
+
+def save(data, filename, exp_id='*', options=None, protocol=PICKLE_PROTOCOL):
+    """Save one or more data objects to a binary file.
+
+    Saving uses the pickle protocol.
+    
+    Parameters
+    ----------
+    data : flap.DataObject | str | list of str | object
+        Data to save, from various sources.
+
+        - If flap.DataObject then save that object.
+        - If str or list of str, then find these data objects in `flap_storage`
+          and save them. Will also use exp_id to select data objects. These data
+          objects can be restored into `flap_storage` using load.
+        - If any other object, save it.
+    
+    filename : str
+        The name of the output file.
+    exp_id : str, optional, default='*'
+        Experiment ID to use in conjuction with data.
+    options : None, optional, default=None
+        Currently unused.
+    protocol : int
+        The pickle protocol to use.
     """
     # Checking for string in data name.
     # If string or list of strings data will be taken from flap storage
@@ -4511,19 +6397,30 @@ def save(data, filename, exp_id='*',  options=None, protocol=PICKLE_PROTOCOL):
     except Exception as e:
         raise e
 
-        
-def load(filename,options=None):
-    """
-    Loads data saved with flap.save()
-    If the data in the file were written from the flap storage it will also be
-    loaded there, unless  no_storage is set to True.
-    
-    INPUT:
-        filename: Name of the file to read.
-        options: "No storage": (bool) If True don't store data in flap storage just return a list of them.
-    Return value:
-        If data was not written from flap storage the original object will be returned.
-        If it was written out from flap storage a list of the read objects will be returned..
+def load(filename, options=None):
+    """Load data saved by `flap.save()`.
+
+    If the data in the file were saved from `flap_storage`, it will also be
+    loaded there, unless `no_storage` is set to True.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to read.
+    options : dict, optional, default=None
+        Possible keys and values:
+
+        - 'No storage':
+
+          - bool: If True, don't store data in `flap_storage`, just return a
+          list of them.
+
+    Returns
+    -------
+    flap.DataObject | list of str
+        If data was not written from `flap_storage`, the original object will be
+        returned. If it was written out from `flap_storage`, a list of the read
+        objects will be returned.
     """
     default_options = {"No storage":False}
     try:
@@ -4563,144 +6460,3 @@ def load(filename,options=None):
         return output
     else:
         raise ValueError("File "+filename+" is not a flap save file.")
-        
-def abs_value(object_name,exp_id='*',output_name=None):
-    """
-    Absolute value
-    """
-    try:
-        d = get_data_object(object_name,exp_id=exp_id)
-    except Exception as e:
-        raise e
-    try:
-        d_out = d.abs_value()
-    except Exception as e:
-        raise e
-    if (output_name is not None):
-        try:
-            add_data_object(d_out,output_name)
-        except Exception as e:
-            raise e
-    return d_out
-
-def phase(object_name,exp_id='*',output_name=None):
-    """
-    Phase
-    """
-    try:
-        d = get_data_object(object_name,exp_id=exp_id)
-    except Exception as e:
-        raise e
-    try:
-        d_out = d.phase()
-    except Exception as e:
-        raise e
-    if (output_name is not None):
-        try:
-            add_data_object(d_out,output_name)
-        except Exception as e:
-            raise e
-    return d_out
-
-def real(object_name,exp_id='*',output_name=None):
-    """
-    Real value. (Does nothing for real data)
-    """
-    try:
-        d = get_data_object(object_name,exp_id=exp_id)
-    except Exception as e:
-        raise e
-    try:
-        d_out = d.real()
-    except Exception as e:
-        raise e
-    if (output_name is not None):
-        try:
-            add_data_object(d_out,output_name)
-        except Exception as e:
-            raise e
-    return d_out
-
-               
-def imag(object_name,exp_id='*',output_name=None):
-    """
-    Real value. (Does nothing for real data)
-    """
-    try:
-        d = get_data_object(object_name,exp_id=exp_id)
-    except Exception as e:
-        raise e
-    try:
-        d_out = d.imag()
-    except Exception as e:
-        raise e
-    if (output_name is not None):
-        try:
-            add_data_object(d_out,output_name)
-        except Exception as e:
-            raise e
-    return d_out
-
-def error_value(object_name,exp_id='*',output_name=None, options=None):
-    """
-        Returns a data object with the error of self in it.
-        options: 'High': Use high error if error is asymmetric
-                 'Low': Use low error is error is asymmetric
-    """
-    try:
-        d = get_data_object(object_name,exp_id=exp_id)
-    except Exception as e:
-        raise e
-    try:
-        d_out = d.error_value(options=options)
-    except Exception as e:
-        raise e
-    if (output_name is not None):
-        try:
-            add_data_object(d_out,output_name)
-        except Exception as e:
-            raise e
-    return d_out
-
-def pdf(object_name,exp_id='*',coordinate=None, intervals=None, options=None, output_name=None):
-    """
-        Amplitude distribution (PDF) function of data. Flattens the data array in the dimensions where the 
-        coordinates change and calculates PDF on this data for each case of the other dimensions.
-        INPUT:
-            coordinate: The name of the coordinate(s) (string, or list of strings) along which to calculate. 
-                        If not set first coordinate in data object will be used.
-                        These coordinates will be removed and replaced by a new coordinate with the name of the data.
-            intervals: Information of processing intervals.
-                       If dictionary with a single key: {selection coordinate: description})
-                           Key is a coordinate name which can be different from the calculation
-                           coordinate.
-                           Description can be flap.Intervals, flap.DataObject or
-                           a list of two numbers. If it is a data object with data name identical to
-                           the coordinate the error ranges of the data object will be used for
-                           interval. If the data name is not the same as coordinate a coordinate with the
-                           same name will be searched for in the data object and the value_ranges
-                           will be used fromm it to set the intervals.
-                       If not a dictionary and not None is is interpreted as the interval
-                           description, the selection coordinate is taken the same as
-                           coordinate.
-                       If None, the whole data interval will be used as a single interval.
-            options: Dictionary. (Keys can be abbreviated)
-                'Range': The data value range. If not set the data minimum-maximum will be used.
-                'Resolution': The resolution of the PDF
-            
-    """
-    try:
-        d = get_data_object(object_name,exp_id=exp_id)
-    except Exception as e:
-        raise e
-    try:
-        d_out = d.pdf(coordinate=coordinate, intervals=intervals, options=options)
-    except Exception as e:
-        raise e
-    if (output_name is not None):
-        try:
-            add_data_object(d_out,output_name)
-        except Exception as e:
-            raise e
-    return d_out
-

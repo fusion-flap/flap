@@ -987,86 +987,9 @@ def _plot(data_object,
           plot_id=None):
     """
     Plot a data object.
+
+    Description of parameters has been moved to `flap.DataObject.plot`.
     
-    Parameters
-    ----------
-    axes: A list of coordinate names (strings). They should be one of the coordinate
-          names in the data object or '__Data__'
-          They describe the axes of the plot.
-          If the number of axes is less than the number required for the plot, '__Data__' will be added.
-          If no axes are given default will be used depending on the plot type. E.g. for
-          x-y plot the default first axis is the first coordinate, the second axis is '__Data__'
-    slicing, summing: arguments for slice_data. Slicing will be applied before plotting.
-    slicing_options: options for slicing. See slice_data()
-    plot_type: The plot type (string). Can be abbreviated.
-          'xy': Simple 1D plot. Default axes are: first coordinate, Data. For complex signals this
-                produces two plots, see option "Complex mode'.
-          'multi xy': In case of 2D data plots 1D curves with vertical shift
-                      Default x axis is first coordinate, y axis is Data
-                      The signals are named in the label with the 'Signal name' coordinate or the one
-                      names in options['Signal name']
-          'grid xy':In case of 3D data plots xy plots on a 2D grid. 
-                    axes are: grid x, grid y, x, y
-                    All coordinates should change in one dimension.
-          'image': Plots a 2D data matrix as an image. Options: Colormap, Data range, ...
-          'contour': Contour plot
-          'anim-image', 'anim-contour': Like image and contour but third axis is time.
-    plot_options: Dictionary or list of dictionaries. Will be passed over to the plot call. For plots with multiple subplots this can be
-                  a list of dictionaries, each for one subplot.
-    plot_id: A PlotID object is the plot should go into an existing plot.
-    options:
-        'Error'      True: Plot all error bars (default: True)
-                     False: Do not plot errors
-                     number > 0: Plot this many error bars in plot
-        'Y separation' Vertical separation of curves in multi xy plot. For linear scale this will
-                       be added to consecutive cureves. For Log scale consecutive curves will be
-                       multiplied by this.
-        'Log x' : Logscale X axis
-        'Log y' : Logscale Y axis
-        'All points' True or False
-                     Default is False. If True will plot all points otherwise will plot only a reduced 
-                     number of points (see maxpoints). Each plotted point will be the mean of data
-                     in a box and a vertical bar will indicate the value range in each box. 
-        'Maxpoints': The maximum number of data points plotted. Above this only this many points will 
-                     be plotted if "All points" is False.
-        'Complex mode': 'Amp-phase': Plot amplitude and phase 
-                        'Real-imag': Plot real and imaginary part
-        'X range','Y range': Axes ranges. (List of two numbers.)
-        'Z range': Range of the vertical axis. (List of two numbers.)
-        'Colormap': Cmap name for image and contour plots.
-        'Levels': Number of contour levels or array of levels.
-        'Aspect ratio': 'equal', 'auto' or float. (See imshow)
-        'Waittime' : Time to wait [Seconds] between two images in anim-... type plots
-        'Video file': Name of output video file for anim-... plots
-        'Video framerate':  Frame rate for output video.
-        'Video format': Format of the video. Valid: 'avi'
-        'Clear': Boolean. If True don't use the existing plots, generate new. (No overplotting.)
-        'Force axes': Force overplotting even if axes are incpomatible
-        'Colorbar': Boolelan. Switch on/off colorbar
-        'Nan color': The color to use in image data plotting for np.nan (not-a-number) values
-        'Interpolation': Interpolation method for image plot.
-        'Language': Language of certain standard elements in the plot. ('EN', 'HU')
-        'EFIT options': Dictionary of EFIT plotting options:
-            'Plot separatrix': Set to plot the separatrix onto the video
-                'Separatrix X': Name of the flap.DataObject for the separatrix X data (usually R)
-                'Separatrix Y': Name of the flap.DataObject for the separatrix Y data (usually z)
-                'Separatrix XY': Name of the 2D flap.DataObject for the separatrix XY data (usually Rz)
-                'Separatrix color': Color of the separatrix for the plot
-            'Plot limiter': Set to plot the limiter onto the video
-                'Limiter X': Name of the flap.DataObject for the limiter X data (usually R)
-                'Limiter Y': Name of the flap.DataObject for the limiter Y data (usually z)
-                'Limiter XY': Name of the 2D flap.DataObject for the limiter XY data (usually Rz)
-                'Limiter color': Color of the limiter for the plot
-            'Plot flux surfaces': Name of the 2D flap.DataObject for the flux surfaces
-                (should have the same coordinate names as the plot)
-                'nlevels': Number of contour lines for the flux surface plotting
-        'Prevent saturation': Prevents saturation of the video signal when it exceeds zrange[1]
-            It uses data modulo zrange[1] to overcome the saturation. (works for animation)
-            
-      Return value
-      ------------
-      plotID: plotID
-          The plot ID of the current plot. This can be used later to overplot.
     """
 
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
