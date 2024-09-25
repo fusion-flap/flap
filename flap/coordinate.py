@@ -18,6 +18,7 @@ class Intervals:
     """Class to describe a series of intervals.
 
     Different types of intervals exist:
+
     - Regular intervals are identical length ones repeating with a fixed step.
     - Irregulars are just a list of start-stop values.
     - For integer type values both the start and stop value is included.
@@ -228,7 +229,7 @@ class Intervals:
                 return ind.size, ind[0]
 
 class Unit:
-    """ Class representing the unit of a quantity.
+    """Class representing the unit of a quantity.
 
     Parameters
     ----------
@@ -251,10 +252,12 @@ class Unit:
         complex_txt : {[0, 0], [0, 1], [1, 0], [1, 1]}, optional, default=None
             List of 2 numbers representing which component of a complex variable
             is used:
+
             - ``[0,0]``: Amplitude
             - ``[0,1]``: Phase
             - ``[1,0]``: Real
             - ``[1,1]``: Imaginary
+
         new_unit : str, optional, default=None
             Unit string override to be used instead of `self.unit`.
 
@@ -330,8 +333,7 @@ class CoordinateMode:
 
 
 class Coordinate:
-    # These are bit flags for self.mode
-    """ Class for the description of a mapping of coordinate values from an
+    """Class for the description of a mapping of coordinate values from an
     n-dimensional coordinate sample space to coordinates of an m-dimensional
     data matrix.
 
@@ -388,16 +390,19 @@ class Coordinate:
         symmetric, it is ``[values-value_ranges_low, value+value_ranges_high]``.
 
         For equidistant coordinates:
+
         - if the range is not symmetric, `value_ranges` should be a 2 element
-        array;
+          array;
         - if the range is symmetric, `value_ranges` should be a scalar.
 
         For non-equidistant coordinates:
+
         - if the range is not symmetric, `value_ranges` should be a dictionary
-        with keys 'low', 'high', with each value having the same dimensions as
-        `values`;
+          with keys 'low', 'high', with each value having the same dimensions as
+          `values`;
         - if the range is symmetric, `value_ranges` should have the same shape
-        as `values`.
+          as `values`.
+
     dimension_list : list, optional, default=[]
         List of data dimensions with which this coordinate is associated (0...).
         Length of `dimension_list` should be equal to length of `shape`.
@@ -984,7 +989,7 @@ class Coordinate:
         return out_coord, out_coord_low, out_coord_high
 
     def data_range(self, data_shape=None):
-        """ Returns the data range and the data range with errors for the
+        """Returns the data range and the data range with errors for the
         coordinate.
 
         Parameters

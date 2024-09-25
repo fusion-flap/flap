@@ -121,8 +121,8 @@ def interpret_config_value(value_str):
         The value string to convert.
 
         Conversions:
-        - 'True', 'Yes' converts to ``True``
-        - 'False', 'No' converts to ``False``
+        - 'True', 'Yes' converts to True
+        - 'False', 'No' converts to False
         - Starting and ending with ``'`` or ``"`` converts to str
         - If can be converted to int, float or complex, it is converted to the
         corresponding converted numeric value
