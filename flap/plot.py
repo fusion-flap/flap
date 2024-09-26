@@ -151,6 +151,13 @@ class PlotDataDescription:
         return plotdata,ploterror
     
     def axis_label(self):
+        """Generate label for axis based on the plot data type.
+
+        Returns
+        -------
+        str
+            The label.
+        """
         if (self.data_type == PddType.Data):
             return self.data_object.data_unit.name +' ['+self.data_object.data_unit.unit+']'
         elif (self.data_type == PddType.Coordinate):
@@ -651,7 +658,6 @@ class PlotAnimation:
                                             interval=self.speed,blit=False)
         
     def animate_plot(self, it):
-        
         time_index = [slice(0,dim) for dim in self.d.data.shape]
         time_index[self.coord_t.dimension_list[0]] = it
         time_index = tuple(time_index)
