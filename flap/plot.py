@@ -57,32 +57,60 @@ import flap.coordinate
 global act_plot_id, gca_invalid
 
 class PddType(Enum):
+    """Enum class for identifying the plot data type.
+
+    Possible values:
+
+    - 'Coordinate' = 0
+
+    - 'Constant' = 1
+
+    - 'Data' = 2
+    """
     Coordinate = 0
     Constant = 1
     Data = 2
-    
+
 class PlotDataDescription:
-    """ Plot axis description for use in PlotID() and plot(). 
-        data_object: The data object from which the data for this coordinate originates. This may
-                     be None if the data is constant.
-        data_type: PddType
-                   PddType.Coordinate: A coordinate in data_object. 
-                                 self.value is a flap.Coordinate object. 
-                   PddType.Constant: A float constant, stored in value.
-                   PddType.Data: The data in self.data_object. 
-        value: Value, see above
+    """Plot axis description for use in `flap.PlotID()` and `flap.plot()`.
+
+    Parameters
+    ----------
+    data_type : flap.PddType, optional, default=None
+
+        - PddType.Coordinate: A coordinate in `data_object`. 
+
+        - PddType.Constant: A float constant, stored in `value`.
+
+        - PddType.Data: The data in `self.data_object`. 
+
+    data_object : flap.DataObject, optional, default=None
+        The data object from which the data for this coordinate originates. This
+        may be None if the data is constant.
+    value : flap.Coordinate, optional, default=None
+        Value, see above.
     """
     def __init__(self, data_type=None, data_object=None, value=None):
         self.data_type = data_type
         self.data_object = data_object
         self.value = value
     
-    def get_data(self,plot_error,data_index=None):
-        """ get data for plot
-            plot_error: boolean
-                If True error is also calculated
-            data_index: tuple or list
-                index into the data array if the data type is PddType.Data
+    def get_data(self, plot_error, data_index=None):
+        """Get data for plot.
+        
+        Parameters
+        ----------
+        plot_error : bool
+            If True, the error is also calculated.
+        data_index : tuple or list, optional, default=None
+            Index into the data array if the data type is `PddType.Data`.
+
+        Returns
+        -------
+        plot_data : np.ndarray
+            The data to plot.
+        plot_error : np.ndarray
+            If `plot_error`is true, the calculated error.
         """
             
         if (self.data_type == PddType.Data):
@@ -130,12 +158,23 @@ class PlotDataDescription:
         elif (self.data_type == PddType.Constant):
             return ""
         
-def axes_to_pdd_list(d,axes):
-    """ Convert a plot() axes parameter to a list of PlotAxisDescription and axes list for PlotID
-    d: data object
-    axes: axes parameter of plot()
+def axes_to_pdd_list(d, axes):
+    """Convert a `plot()` axes parameter to a list of `PlotAxisDescription` and
+    axes list for `PlotID`.
+
+    Parameters
+    ----------
+    d : flap.DataObject
+        The data object.
+    axes : list of str
+        Axes parameter of `plot()`.
     
-    return pdd_list, ax_list
+    Returns
+    -------
+    pdd_list : list of flap.PlotAxisDescription
+        The Pdd list for the axes.
+    ax_list : list of flap.Unit.
+        The axes list.
     """
     if (axes is None):
         return [],[]
@@ -186,12 +225,31 @@ def axes_to_pdd_list(d,axes):
     return pdd_list,ax_list
 
 class PlotAnimation:
-    
-    def __init__(self, ax_list, axes, d, xdata, ydata, tdata, xdata_range, ydata_range,
-                 cmap_obj, contour_levels, coord_t, coord_x,
-                 coord_y, cmap, options, xrange, yrange,
-                 zrange, image_like, plot_options, language, plot_id, gs):
-   
+    def __init__(self,
+                 ax_list,
+                 axes,
+                 d,
+                 xdata,
+                 ydata,
+                 tdata,
+                 xdata_range,
+                 ydata_range,
+                 cmap_obj,
+                 contour_levels,
+                 coord_t,
+                 coord_x,
+                 coord_y,
+                 cmap,
+                 options,
+                 xrange,
+                 yrange,
+                 zrange,
+                 image_like,
+                 plot_options,
+                 language,
+                 plot_id,
+                 gs):
+
         self.ax_list = ax_list
         self.axes = axes        
         self.contour_levels = contour_levels        
@@ -228,7 +286,6 @@ class PlotAnimation:
             self.contour_levels = 255
             
     def animate(self):
-        
         #These lines do the coordinate unit conversion
         self.axes_unit_conversion=np.zeros(len(self.axes))
         self.axes_unit_conversion[:]=1.
@@ -733,31 +790,49 @@ class PlotAnimation:
         self.pause = False
             
 class PlotID:
+    """Class for storing identifying and other information about the plot.
+
+    Attributes
+    ----------
+    figure : int
+        The figure number where the plot resides.
+    base_subplot : matplotlib.pyplot.AxesSubplot
+        The subplot containing the whole plot.
+    plot_type : str
+        The plot type string.
+    plot_subtype : int
+        Subtype is dependent on the plot type. It marks various versions, e.g.
+        real-complex.
+    number_of_plots : int
+        Number of plot calls which generated this.
+    axes : list
+        The axes list. Each element is a `flap.Unit` and describes one axis of the
+        plot.
+    plot_data : list
+        The description of the axis data. This is a list of
+        `self.number_of_plots` lists. Each inner list is a list of
+        PlotDataDescriptions. 
+    plt_axis_list : list
+        The list of Axes which can be used for plotting into the individual
+        plots. If there is only a single plot, `base_subplot` is the same as
+        ``plt_axis_list[0]``.
+    options : list
+        These are a list of the options to plot.
+    """
     def __init__(self):
-        # The figure number where the plto resides
         self.figure = None
-        # The subplot containing the whole plot
         self.base_subplot = None
-        # The plot type string 
         self.plot_type = None
-        # Subtype is dependent on the plot type. It marks various versions, e.g. real-complex
         self.plot_subtype = None
-        # Number of plot calls which generated this
         self.number_of_plots = 0
-        # The axes list. Each element is a flap.Unit and describes one axis of the plot.
         self.axes = None
-        # The description of the axis data. This is a list of self.number_of_plots lists. Each inner list 
-        # is a list of PlotDataDescriptions. 
         self.plot_data = []
-        # The list of Axes which can be used for plotting into the individual plots. If there is only a single
-        # plot self.base_subplot is the same as plt_axis_list[0]
         self.plt_axis_list = None
-        # These are a list of the options to plot
         self.options = []
 
     def clear(self):
-        """ Clears the parameters of the plot, but does not clear the
-        base_subplot and figure
+        """Clears the parameters of the plot, but does not clear the
+        base_subplot and figure.
         """
         self.plot_type = None
         self.plot_subtype = None
@@ -773,19 +848,35 @@ class PlotID:
 #            for ax in self.plt_axis_list:
 #                ax.remove()
                 
-    def check_axes(self,d, axes, clear=True, default_axes=None, force=False):
-        """ Checks whether the required plot axes are correct, present and compatible with the self PlotID. 
-            In case of problems raises ValueError.
-        INPUT:
-            d: data object
-            axes: List of the required axes or None as input to plot() 
-            clear: (bool) If True the plot will be cleared, therefore the axes in the PlotID are irrelevant.
-            default_axes: The default axes desired for this type of plot. (strings)
-            force: (bool) Force accept incompatibe axes
-        Return value:
-            pdd_list, ax_list
-            pdd_list: list of PlotDataDescription objects which can be used to generate the plot.
-            ax_list: axis list which can be put into axes in self.  
+    def check_axes(self,
+                   d,
+                   axes,
+                   clear=True,
+                   default_axes=None,
+                   force=False):
+        """Check whether the required plot axes are correct, present and
+        compatible with the self PlotID. 
+
+        Parameters
+        ----------
+        d : flap.DataObject
+            The data object to check against.
+        axes : list | None
+            List of the required axes or None as input to `plot()`.
+        clear : bool, optional, default=True
+            If True, the plot will be cleared, therefore the axes in the
+            `PlotID` are irrelevant.
+        default_axes : list of str, optional, default=None
+            The default axes desired for this type of plot.
+        force : bool, optional, default=False
+            Force accepting incompatibe axes.
+
+        Returns
+        -------
+        pdd_list : list of flap.PlotDataDescription 
+            List of objects which can be used to generate the plot.
+        ax_list : list of flap.Unit
+            Axis list which can be put into axes in self.  
         """
         if (axes is not None):
             if (type(axes) is not list):
@@ -865,8 +956,12 @@ class PlotID:
         return pdd_list, ax_out_list
     
 def set_plot_id(plot_id):
-    """
-    Set the current plot.
+    """Set the current plot.
+
+    Parameters
+    ----------
+    plot_id : flap.PlotID
+        The plot ID to use.
     """
     global act_plot_id, gca_invalid
 
@@ -907,24 +1002,39 @@ def __get_gca_invalid():
     return gca_invalid
         
    
-def sample_for_plot(x,y,x_error,y_error,n_points):
-    """
-    Resamples the y(x) function to np points for plotting.
-    This is useful for plotting large arrays in a way that short outlier pulses
-    are still indicated.
-    The original function is divided into np equal size blocks in x and in each block
-    the minimum and maximum is determined. The output will contain 2*np number
-    or points. Each consecutive point pair contains the minimum and maximum in
-    a block, the time is the centre time of the block.
+def sample_for_plot(x, y, x_error, y_error, n_points):
+    """Resamples the function before plotting for better performance.
 
-    x: Input x array.
-    y: input y array.
-    np: Desired number of blocks. This would be a number larger than the number
+    Resamples the y(x) function to `n_points` points for plotting. This is
+    useful for plotting large arrays in a way that short outlier pulses are
+    still indicated.
+
+    The original function is divided into `n_points` equal size blocks in `x`
+    and in each block, the minimum and maximum is determined. The output will
+    contain 2*`n_points` number or points. Each consecutive point pair contains
+    the minimum and maximum in a block, the time is the centre time of the
+    block.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Input 'x' array.
+    y : np.ndarray
+        Input 'y' array.
+    n_points : int
+        Desired number of blocks. This would be a number larger than the number
         of pixels in the plot in the horizontal direction.
 
-    Return values:
-        x_out, y_out
-        If the box length is less than 5 the original data will be returned.
+    Returns
+    -------
+    x_out : np.ndarrray
+        Resampled 'x' values.
+
+        If the box length is less than 5, the original data will be returned.
+    y_out : np.ndarrray
+        Resampled 'y' values.
+
+        If the box length is less than 5, the original data will be returned.
     """
 
     binlen = int(len(x) / n_points)
@@ -976,7 +1086,7 @@ def sample_for_plot(x,y,x_error,y_error,n_points):
 
     return x_bin, y_bin, x_error_bin, y_error_bin
 
-def _plot(data_object, 
+def _plot(data_object,
           axes=None,
           slicing=None,
           summing=None,
@@ -985,11 +1095,9 @@ def _plot(data_object,
           plot_type=None,
           plot_options={},
           plot_id=None):
-    """
-    Plot a data object.
+    """Plot a data object.
 
     Description of parameters has been moved to `flap.DataObject.plot`.
-    
     """
 
     default_options = {'All points': False, 'Error':True, 'Y separation': None,
