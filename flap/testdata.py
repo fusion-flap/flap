@@ -6,8 +6,9 @@ It is assumed that measurement channels collect temporal data on a 2D mesh in
 the physical space.
 
 The measurement channels are named as TEST-<row>-<column>.
-<row>:  1....15
-<column>:  1...10
+
+- <row>:  1....15
+- <column>:  1...10
 
 The row/column locations relative to the array corner are:
 

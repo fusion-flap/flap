@@ -32,7 +32,7 @@ def read(file_name='flap_defaults.cfg'):
     Parameters
     ----------
     file_name : str, optional
-        File name of configuration file, by default 'flap_defaults.cfg'
+        File name of configuration file, by default 'flap_defaults.cfg'.
     """
     __flap_config.file_name = file_name
 
@@ -182,7 +182,7 @@ def merge_options(default_options, input_options, data_source=None, section=None
     for options in section Module `exp_id` for options starting with `section`.
     
     The precedence of options is: default_options < section options < module
-    options < input_options
+    options < input_options.
 
     Parameters
     ----------
