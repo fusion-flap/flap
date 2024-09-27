@@ -2916,7 +2916,7 @@ class DataObject:
 
               - bool: Switch on/off colorbar
 
-            - 'NaN color' (default=None): 
+            - 'Nan color' (default=None): 
 
               - The color to use in image data plotting for np.nan
                 (not-a-number) values.
@@ -2958,6 +2958,7 @@ class DataObject:
                   plotting.
 
             - 'Prevent saturation' (default=False):
+
               - bool: Prevent saturation of the video signal when it exceeds
                 ``zrange[1]``. It uses data modulo ``zrange[1]`` ito overcome
                 the saturation. (Works for animation.)
@@ -5152,104 +5153,108 @@ def plot(object_name,
           - False: Do not plot errors.
           - int > 0: Plot this many error bars in plot.
 
-        - 'Y separation':
+        - 'Y separation' (default=None):
            
           - float: Vertical separation of curves in multi xy plot. For
             linear scale this will be added to consecutive curves. For Log
             scale, consecutive curves will be multiplied by this.
 
-        - 'Log x': 
+        - 'Log x' (default=False): 
 
-          - True: Logscale X axis
+          - bool: Whether to use logscale X axis.
 
-        - 'Log y':
+        - 'Log y' (default=False):
 
-          - True: Logscale Y axis
+          - bool: Whether to use logscale Y axis.
+
+        - 'Log z' (default=False):
+
+          - bool: Whether to use logscale Z axis.
 
         - 'All points' (default=False):
 
           - bool: Default is False. If True, will plot all points,
             otherwise will plot only a reduced number of points (see
-            `'Maxpoints'`). Each plotted point will be the mean of data in a
+            'Maxpoints'). Each plotted point will be the mean of data in a
             box, and a vertical bar will indicate the value range in each
             box. 
 
-        - 'Maxpoints': 
+        - 'Maxpoints' (default=4000): 
 
           - int: The maximum number of data points plotted. Above this,
             only this many points will be plotted if 'All points' is
             False.
 
-        - 'Complex mode': 
+        - 'Complex mode' (default='Amp-phase'): 
 
           - 'Amp-phase': Plot amplitude and phase.
           - 'Real-imag': Plot real and imaginary part.
 
-        - 'X range','Y range': 
+        - 'X range','Y range' (default=None): 
 
           - lists of two floats: Axes ranges.
 
-        - 'Z range': 
+        - 'Z range' (default=None): 
 
           - list of two floats: Range of the vertical axis.
 
-        - 'Colormap': 
+        - 'Colormap' (default=None): 
 
           - str: Cmap name for image and contour plots.
 
-        - 'Levels': 
+        - 'Levels' (default=10): 
 
           - int: Number of contour levels or array of levels.
 
-        - 'Aspect ratio': 
+        - 'Aspect ratio' (default='auto'): 
 
           - 'equal', 'auto' or float. (See `imshow`.)
 
-        - 'Waittime': 
+        - 'Waittime' (default=1): 
 
           - float: Time to wait in seconds between two images in anim-...
             type plots
 
-        - 'Video file': 
+        - 'Video file' (default=None): 
 
           - str: Name of output video file for anim-... plots
 
-        - 'Video framerate': 
+        - 'Video framerate' (default=20): 
 
           - float: Frame rate for output video.
 
-        - 'Video format':
+        - 'Video format' (default='avi'):
 
           - str: Format of the video. Valid options: 'avi'.
 
-        - 'Clear': 
+        - 'Clear' (default=False): 
 
           - bool: If True, don't use the existing plots, generate new
             ones. (No overplotting.)
 
-        - 'Force axes':
+        - 'Force axes' (default=False):
 
           - True: Force overplotting, even if axes are incpomatible.
 
-        - 'Colorbar': 
+        - 'Colorbar' (default=True): 
 
           - bool: Switch on/off colorbar
 
-        - 'NaN color': 
+        - 'Nan color' (default=None): 
 
           - The color to use in image data plotting for np.nan
             (not-a-number) values.
 
-        - 'Interpolation':
+        - 'Interpolation' (default='bilinear'):
 
           - Interpolation method for image plot.
 
-        - 'Language':
+        - 'Language' (default='EN'):
 
           - str: Language of certain standard elements in the plot.
             Possible values: {'EN', 'HU'}.
 
-        - 'EFIT options':
+        - 'EFIT options' (default=None):
 
           - Dictionary of EFIT plotting options:
 
@@ -5276,9 +5281,11 @@ def plot(object_name,
             - 'nlevels': Number of contour lines for the flux surface
               plotting.
 
-        - 'Prevent saturation': Prevents saturation of the video signal when
-          it exceeds ``zrange[1]``. It uses data modulo ``zrange[1]`` ito
-          overcome the saturation. (Works for animation.)
+        - 'Prevent saturation' (default=False):
+
+          - bool: Prevent saturation of the video signal when it exceeds
+            ``zrange[1]``. It uses data modulo ``zrange[1]`` ito overcome
+            the saturation. (Works for animation.)
 
     plot_type : {'xy', 'multi xy', 'grid xy', 'image', 'contour', \
                  'anim-image', 'anim-contour'}, optional, default=None
