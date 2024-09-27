@@ -1555,7 +1555,7 @@ class DataObject:
 
             Processing strings are the following:
 
-            - ``None``: Nothing to be done in this dimension.
+            - None: Nothing to be done in this dimension.
             - 'Mean': take mean of values in selection/coordinate.
             - 'Sum': take sum of values in selection/coordinate.
             - 'Min': take the minimum of the values/coordinate.
@@ -1566,8 +1566,8 @@ class DataObject:
 
             - 'Partial intervals'
 
-              - bool: If ``True``, processes intervals which extend over the
-                coordinate limits. If ``False``, only full intervals are
+              - bool: If True, processes intervals which extend over the
+                coordinate limits. If False, only full intervals are
                 processed.
             
             - 'Slice type': 
@@ -1576,7 +1576,7 @@ class DataObject:
                 selected, dimensions are reduced or unchanged.
               - 'Multi': Case b) above: multiple intervals are selected, and
                 their data is placed into a new dimension.
-              - ``None``: Automatically select. For slicing data in case b multi slice, otherwise simple
+              - None: Automatically select. For slicing data in case b multi slice, otherwise simple
 
             - 'Interpolation':
 
@@ -1584,7 +1584,7 @@ class DataObject:
               - 'Linear'
 
             - 'Regenerate coordinates': 
-              - bool: Default is ``True``. If ``True``, and summing is done,
+              - bool: Default is True. If True, and summing is done,
               then looks for pairs of coordinates ('Rel. <coord> in
               int(<coord1>)', 'Start <coord> in int(<coord1>)').
 
@@ -2823,10 +2823,10 @@ class DataObject:
         options : dict, optional, default=None
             Options for plotting. Possible keys and values:
 
-            - 'Error' (default=``True``):
+            - 'Error' (default=True):
 
-              - ``True``: Plot all error bars
-              - ``False``: Do not plot errors.
+              - True: Plot all error bars
+              - False: Do not plot errors.
               - int > 0: Plot this many error bars in plot.
 
             - 'Y separation':
@@ -2837,15 +2837,15 @@ class DataObject:
 
             - 'Log x': 
 
-              - ``True``: Logscale X axis
+              - True: Logscale X axis
 
             - 'Log y':
 
-              - ``True``: Logscale Y axis
+              - True: Logscale Y axis
 
-            - 'All points' (default=``False``):
+            - 'All points' (default=False):
 
-              - bool: Default is ``False``. If ``True``, will plot all points,
+              - bool: Default is False. If True, will plot all points,
                 otherwise will plot only a reduced number of points (see
                 `'Maxpoints'`). Each plotted point will be the mean of data in a
                 box, and a vertical bar will indicate the value range in each
@@ -2855,7 +2855,7 @@ class DataObject:
 
               - int: The maximum number of data points plotted. Above this,
                 only this many points will be plotted if 'All points' is
-                ``False``.
+                False.
 
             - 'Complex mode': 
 
@@ -2901,12 +2901,12 @@ class DataObject:
 
             - 'Clear': 
 
-              - bool: If ``True``, don't use the existing plots, generate new
+              - bool: If True, don't use the existing plots, generate new
                 ones. (No overplotting.)
 
             - 'Force axes':
 
-              - ``True``: Force overplotting, even if axes are incpomatible.
+              - True: Force overplotting, even if axes are incpomatible.
 
             - 'Colorbar': 
 
@@ -3223,7 +3223,7 @@ class DataObject:
             
             - 'Logarithmic':
 
-              - bool: If ``True``, will create logarithmic frequency binning.
+              - bool: If True, will create logarithmic frequency binning.
 
             - 'Interval_n': 
 
@@ -3330,7 +3330,7 @@ class DataObject:
             
             - 'Logarithmic':
 
-                - bool: If ``True``, will create logarithmic frequency binning.
+                - bool: If True, will create logarithmic frequency binning.
 
             - 'Interval_n': 
 
@@ -5127,10 +5127,10 @@ def plot(object_name,
     options : dict, optional, default=None
         Options for plotting. Possible keys and values:
 
-        - 'Error' (default=``True``):
+        - 'Error' (default=True):
 
-          - ``True``: Plot all error bars
-          - ``False``: Do not plot errors.
+          - True: Plot all error bars
+          - False: Do not plot errors.
           - int > 0: Plot this many error bars in plot.
 
         - 'Y separation':
@@ -5141,15 +5141,15 @@ def plot(object_name,
 
         - 'Log x': 
 
-          - ``True``: Logscale X axis
+          - True: Logscale X axis
 
         - 'Log y':
 
-          - ``True``: Logscale Y axis
+          - True: Logscale Y axis
 
-        - 'All points' (default=``False``):
+        - 'All points' (default=False):
 
-          - bool: Default is ``False``. If ``True``, will plot all points,
+          - bool: Default is False. If True, will plot all points,
             otherwise will plot only a reduced number of points (see
             `'Maxpoints'`). Each plotted point will be the mean of data in a
             box, and a vertical bar will indicate the value range in each
@@ -5159,7 +5159,7 @@ def plot(object_name,
 
           - int: The maximum number of data points plotted. Above this,
             only this many points will be plotted if 'All points' is
-            ``False``.
+            False.
 
         - 'Complex mode': 
 
@@ -5205,12 +5205,12 @@ def plot(object_name,
 
         - 'Clear': 
 
-          - bool: If ``True``, don't use the existing plots, generate new
+          - bool: If True, don't use the existing plots, generate new
             ones. (No overplotting.)
 
         - 'Force axes':
 
-          - ``True``: Force overplotting, even if axes are incpomatible.
+          - True: Force overplotting, even if axes are incpomatible.
 
         - 'Colorbar': 
 
@@ -5389,7 +5389,7 @@ def slice_data(object_name,
 
         Processing strings are the following:
 
-        - ``None``: Nothing to be done in this dimension.
+        - None: Nothing to be done in this dimension.
         - 'Mean': take mean of values in selection/coordinate.
         - 'Sum': take sum of values in selection/coordinate.
         - 'Min': take the minimum of the values/coordinate.
@@ -5400,8 +5400,8 @@ def slice_data(object_name,
 
         - 'Partial intervals'
 
-          - bool: If ``True``, processes intervals which extend over the
-            coordinate limits. If ``False``, only full intervals are
+          - bool: If True, processes intervals which extend over the
+            coordinate limits. If False, only full intervals are
             processed.
         
         - 'Slice type': 
@@ -5410,7 +5410,7 @@ def slice_data(object_name,
             selected, dimensions are reduced or unchanged.
           - 'Multi': Case b) above: multiple intervals are selected, and
             their data is placed into a new dimension.
-          - ``None``: Automatically select. For slicing data in case b multi slice, otherwise simple
+          - None: Automatically select. For slicing data in case b multi slice, otherwise simple
 
         - 'Interpolation':
 
@@ -5418,7 +5418,7 @@ def slice_data(object_name,
           - 'Linear'
 
         - 'Regenerate coordinates': 
-          - bool: Default is ``True``. If ``True``, and summing is done,
+          - bool: Default is True. If True, and summing is done,
           then looks for pairs of coordinates ('Rel. <coord> in
           int(<coord1>)', 'Start <coord> in int(<coord1>)').
 
@@ -5734,7 +5734,7 @@ def apsd(object_name,
         
         - 'Logarithmic':
 
-          - bool: If ``True``, will create logarithmic frequency binning.
+          - bool: If True, will create logarithmic frequency binning.
 
         - 'Interval_n': 
 
@@ -5862,7 +5862,7 @@ def cpsd(object_name,
         
         - 'Logarithmic':
 
-          - bool: If ``True``, will create logarithmic frequency binning.
+          - bool: If True, will create logarithmic frequency binning.
 
         - 'Interval_n': 
 
