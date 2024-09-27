@@ -775,7 +775,7 @@ class Coordinate:
             are requested.
         options : dict, optional, default=None
             Dictionary with options for processing:
-            - 'Interpolation':
+            - 'Interpolation' (default='Linear'):
                 - 'Linear': For non-equidistant axis, when
                   values shape is different from data shape)
             - 'Change only' (default=False): 

@@ -1106,14 +1106,35 @@ def _plot(data_object,
     Description of parameters has been moved to `flap.DataObject.plot`.
     """
 
-    default_options = {'All points': False, 'Error':True, 'Y separation': None,
-                       'Log x': False, 'Log y': False, 'Log z': False, 'maxpoints':4000, 'Complex mode':'Amp-phase',
-                       'X range':None, 'Y range': None, 'Z range': None,'Aspect ratio':'auto',
-                       'Clear':False,'Force axes':False,'Language':'EN','Maxpoints': 4000,
-                       'Levels': 10, 'Colormap':None, 'Waittime':1,'Colorbar':True,'Nan color':None,
-                       'Interpolation':'bilinear','Video file':None, 'Video framerate': 20,'Video format':'avi',
-                       'EFIT options':None, 'Prevent saturation':False, 'Plot units':None,
-                       }
+    default_options = {
+        'Error':True,
+        'Y separation': None,
+        'Log x': False,
+        'Log y': False,
+        'Log z': False,
+        'All points': False,
+        'Maxpoints':4000,
+        'Complex mode':'Amp-phase',
+        'X range':None,
+        'Y range': None,
+        'Z range': None,
+        'Colormap':None,
+        'Levels': 10,
+        'Aspect ratio':'auto',
+        'Waittime':1,
+        'Video file':None,
+        'Video framerate': 20,
+        'Video format':'avi',
+        'Clear':False,
+        'Force axes':False,
+        'Colorbar':True,
+        'NaN color':None,
+        'Interpolation':'bilinear',
+        'Language':'EN',
+        'EFIT options':None,
+        'Prevent saturation':False,
+        'Plot units':None,
+        }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
     
     if (plot_options is None):

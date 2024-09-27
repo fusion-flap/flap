@@ -489,8 +489,8 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
                        'Range': None,
                        'Logarithmic': False,
                        'Interval_n': 8,
-                       'Trend removal': ['Poly', 2],
                        'Error calculation': True,
+                       'Trend removal': ['Poly', 2],
                        'Hanning' : True
                        }
     _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='PS')
@@ -715,9 +715,9 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                        'Range': None,
                        'Logarithmic': False,
                        'Interval_n': 8,
+                       'Error calculation': True,
                        'Trend removal': ['Poly', 2],
                        'Hanning' : True,
-                       'Error calculation': True,
                        'Normalize': False
                        }
     _options = flap.config.merge_options(default_options, options, data_source=d.data_source, section='PS')
@@ -1203,8 +1203,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     default_options = {'Resolution': None,
                        'Range': None,
                        'Interval_n': 8,
-                       'Trend removal': ['Poly', 2],
                        'Error calculation': True,
+                       'Trend removal': ['Poly', 2],
                        'Normalize': False,
                        'Verbose':True
                        }

@@ -1561,16 +1561,16 @@ class DataObject:
             - 'Min': take the minimum of the values/coordinate.
             - 'Max': take the maximum of the values/coordinate.
 
-        options : dict, optional, default=True
+        options : dict, optional, default=None
             Possible keys and values:
 
-            - 'Partial intervals'
+            - 'Partial intervals' (default=True):
 
               - bool: If True, processes intervals which extend over the
                 coordinate limits. If False, only full intervals are
                 processed.
             
-            - 'Slice type': 
+            - 'Slice type' (default=None): 
 
               - 'Simple': Case a) above: closest or interpolated values are
                 selected, dimensions are reduced or unchanged.
@@ -1578,12 +1578,12 @@ class DataObject:
                 their data is placed into a new dimension.
               - None: Automatically select. For slicing data in case b multi slice, otherwise simple
 
-            - 'Interpolation':
+            - 'Interpolation' (default='Closest value'):
 
               - 'Closest value'
               - 'Linear'
 
-            - 'Regenerate coordinates': 
+            - 'Regenerate coordinates' (default=True): 
               - bool: Default is True. If True, and summing is done,
               then looks for pairs of coordinates ('Rel. <coord> in
               int(<coord1>)', 'Start <coord> in int(<coord1>)').
@@ -2829,104 +2829,108 @@ class DataObject:
               - False: Do not plot errors.
               - int > 0: Plot this many error bars in plot.
 
-            - 'Y separation':
+            - 'Y separation' (default=None):
                
               - float: Vertical separation of curves in multi xy plot. For
                 linear scale this will be added to consecutive curves. For Log
                 scale, consecutive curves will be multiplied by this.
 
-            - 'Log x': 
+            - 'Log x' (default=False): 
 
-              - True: Logscale X axis
+              - bool: Whether to use logscale X axis.
 
-            - 'Log y':
+            - 'Log y' (default=False):
 
-              - True: Logscale Y axis
+              - bool: Whether to use logscale Y axis.
+
+            - 'Log z' (default=False):
+
+              - bool: Whether to use logscale Z axis.
 
             - 'All points' (default=False):
 
               - bool: Default is False. If True, will plot all points,
                 otherwise will plot only a reduced number of points (see
-                `'Maxpoints'`). Each plotted point will be the mean of data in a
+                'Maxpoints'). Each plotted point will be the mean of data in a
                 box, and a vertical bar will indicate the value range in each
                 box. 
 
-            - 'Maxpoints': 
+            - 'Maxpoints' (default=4000): 
 
               - int: The maximum number of data points plotted. Above this,
                 only this many points will be plotted if 'All points' is
                 False.
 
-            - 'Complex mode': 
+            - 'Complex mode' (default='Amp-phase'): 
 
               - 'Amp-phase': Plot amplitude and phase.
               - 'Real-imag': Plot real and imaginary part.
 
-            - 'X range','Y range': 
+            - 'X range','Y range' (default=None): 
 
               - lists of two floats: Axes ranges.
 
-            - 'Z range': 
+            - 'Z range' (default=None): 
 
               - list of two floats: Range of the vertical axis.
 
-            - 'Colormap': 
+            - 'Colormap' (default=None): 
 
               - str: Cmap name for image and contour plots.
 
-            - 'Levels': 
+            - 'Levels' (default=10): 
 
               - int: Number of contour levels or array of levels.
 
-            - 'Aspect ratio': 
+            - 'Aspect ratio' (default='auto'): 
 
               - 'equal', 'auto' or float. (See `imshow`.)
 
-            - 'Waittime': 
+            - 'Waittime' (default=1): 
 
               - float: Time to wait in seconds between two images in anim-...
                 type plots
 
-            - 'Video file': 
+            - 'Video file' (default=None): 
 
               - str: Name of output video file for anim-... plots
 
-            - 'Video framerate': 
+            - 'Video framerate' (default=20): 
 
               - float: Frame rate for output video.
 
-            - 'Video format':
+            - 'Video format' (default='avi'):
 
               - str: Format of the video. Valid options: 'avi'.
 
-            - 'Clear': 
+            - 'Clear' (default=False): 
 
               - bool: If True, don't use the existing plots, generate new
                 ones. (No overplotting.)
 
-            - 'Force axes':
+            - 'Force axes' (default=False):
 
               - True: Force overplotting, even if axes are incpomatible.
 
-            - 'Colorbar': 
+            - 'Colorbar' (default=True): 
 
               - bool: Switch on/off colorbar
 
-            - 'NaN color': 
+            - 'NaN color' (default=None): 
 
               - The color to use in image data plotting for np.nan
                 (not-a-number) values.
 
-            - 'Interpolation':
+            - 'Interpolation' (default='bilinear'):
 
               - Interpolation method for image plot.
 
-            - 'Language':
+            - 'Language' (default='EN'):
 
               - str: Language of certain standard elements in the plot.
                 Possible values: {'EN', 'HU'}.
 
-            - 'EFIT options':
+            - 'EFIT options' (default=None):
 
               - Dictionary of EFIT plotting options:
 
@@ -2953,9 +2957,10 @@ class DataObject:
                 - 'nlevels': Number of contour lines for the flux surface
                   plotting.
 
-            - 'Prevent saturation': Prevents saturation of the video signal when
-              it exceeds ``zrange[1]``. It uses data modulo ``zrange[1]`` ito
-              overcome the saturation. (Works for animation.)
+            - 'Prevent saturation' (default=False):
+              - bool: Prevent saturation of the video signal when it exceeds
+                ``zrange[1]``. It uses data modulo ``zrange[1]`` ito overcome
+                the saturation. (Works for animation.)
 
         plot_type : {'xy', 'multi xy', 'grid xy', 'image', 'contour', \
                      'anim-image', 'anim-contour'}, optional, default=None
@@ -3106,14 +3111,14 @@ class DataObject:
             Experiment ID. Supports extended Unix regular expressions.
         output_name : str
             Name of the new data object added to `flap_storage`.
-        options : dict
+        options : dict, optional, default=None
             Possible keys and values:
 
-            - 'High': 
+            - 'High' (default=True): 
 
               - bool: Use high error if error is asymmetric.
 
-            - 'Low':
+            - 'Low' (default=False):
 
               - bool: Use low error is error is asymmetric
             
@@ -3208,37 +3213,37 @@ class DataObject:
             Options for APSD calculation. (Keys can be abbreviated.) Possible
             keys and values:
 
-            - 'Wavenumber': 
+            - 'Wavenumber' (default=False): 
 
               - bool: Whether to use 2*Pi*f for the output coordinate scale;
                 this is useful for wavenumber calculation.
 
-            - 'Resolution': 
+            - 'Resolution' (default=None): 
 
               - Output resolution in the unit of the output coordinate.
 
-            - 'Range':
+            - 'Range' (default=None):
 
               - Output range in the unit of the output coordinate.
             
-            - 'Logarithmic':
+            - 'Logarithmic' (default=False):
 
               - bool: If True, will create logarithmic frequency binning.
 
-            - 'Interval_n': 
+            - 'Interval_n' (default=8): 
 
               - int: Minimum number of intervals to use for the processing.
                 These are identical length intervals inserted into the input
                 interval list. Default is 8.
 
-            - 'Error calculation': 
+            - 'Error calculation' (default=True): 
 
               - bool: Whether to calculate the error. Omitting error
                 calculation increases speed. If 'Interval_n' is 1, no error
                 calculation is done.
 
-            - 'Trend removal': Trend removal description. (See also
-              `flap.spectral_analysis._trend_removal()`.)
+            - 'Trend removal' (default=['Poly', 2]): Trend removal description.
+              (See also `flap.spectral_analysis._trend_removal()`.)
 
               - list: 
 
@@ -3253,7 +3258,7 @@ class DataObject:
                 
               Trend removal will be applied to each interval separately.
 
-            - 'Hanning': 
+            - 'Hanning' (default=True): 
 
               - bool: Whether to use a Hanning window.
 
@@ -3315,54 +3320,58 @@ class DataObject:
             Options for APSD calculation. (Keys can be abbreviated.) Possible
             keys and values:
 
-            - 'Wavenumber': 
+            - 'Wavenumber' (default=False): 
 
-                - bool: Whether to use 2*Pi*f for the output coordinate scale;
-                  this is useful for wavenumber calculation.
+              - bool: Whether to use 2*Pi*f for the output coordinate scale;
+                this is useful for wavenumber calculation.
 
-            - 'Resolution': 
+            - 'Resolution' (default=None): 
 
-                - Output resolution in the unit of the output coordinate.
+              - Output resolution in the unit of the output coordinate.
 
-            - 'Range':
+            - 'Range' (default=None):
 
-                - Output range in the unit of the output coordinate.
+              - Output range in the unit of the output coordinate.
             
-            - 'Logarithmic':
+            - 'Logarithmic' (default=False):
 
-                - bool: If True, will create logarithmic frequency binning.
+              - bool: If True, will create logarithmic frequency binning.
 
-            - 'Interval_n': 
+            - 'Interval_n' (default=8): 
 
-                - int: Minimum number of intervals to use for the processing.
-                  These are identical length intervals inserted into the input
-                  interval list. Default is 8.
+              - int: Minimum number of intervals to use for the processing.
+                These are identical length intervals inserted into the input
+                interval list. Default is 8.
 
-            - 'Error calculation': 
+            - 'Error calculation' (default=True): 
 
-                - bool: Whether to calculate the error. Omitting error
-                  calculation increases speed. If 'Interval_n' is 1, no error
-                  calculation is done.
+              - bool: Whether to calculate the error. Omitting error
+                calculation increases speed. If 'Interval_n' is 1, no error
+                calculation is done.
 
-            - 'Trend removal': Trend removal description. (See also
-              `flap.spectral_analysis._trend_removal()`.)
+            - 'Trend removal' (default=['Poly', 2]): Trend removal description.
+              (See also `flap.spectral_analysis._trend_removal()`.)
 
-                - list: 
+              - list: 
 
-                  - ``['poly', n]``: Fit an `n` order polynomial to the data
-                     and subtract.
+                - ``['poly', n]``: Fit an `n` order polynomial to the data
+                  and subtract.
 
-                - str:
+              - str:
 
-                  - 'mean': Subtract mean.
+                - 'mean': Subtract mean.
 
-                - None: Don't remove trend.
+              - None: Don't remove trend.
                 
-                Trend removal will be applied to each interval separately.
+              Trend removal will be applied to each interval separately.
 
-            - 'Hanning': 
+            - 'Hanning' (default=True): 
 
-                - bool: Whether to use a Hanning window.
+              - bool: Whether to use a Hanning window.
+
+            - 'Normalize' (default=False): 
+
+              - bool: Whether to use normalization.
 
         Returns
         -------
@@ -3422,29 +3431,29 @@ class DataObject:
             Options for CCF calculation. (Keys can be abbreviated.) Possible
             keys and values:
 
-            - 'Resolution': 
+            - 'Resolution' (default=None): 
 
               - Output resolution for each coordinate. (Single value or list
                 of values.)
 
-            - 'Range':
+            - 'Range' (default=None):
 
               - Output ranges for each coordinate. (List or list of lists.)
 
-            - 'Interval_n': 
+            - 'Interval_n' (default=8): 
 
               - int: Minimum number of intervals to use for the processing.
                 These are identical length intervals inserted into the input
                 interval list. Default is 8.
 
-            - 'Error calculation': 
+            - 'Error calculation' (default=True): 
 
               - bool: Whether to calculate the error. Omitting error
                 calculation increases speed. If 'Interval_n' is 1, no error
                 calculation is done.
 
-            - 'Trend removal': Trend removal description. (See also
-              `flap.spectral_analysis._trend_removal()`.)
+            - 'Trend removal' (default=['Poly', 2]): Trend removal description.
+              (See also `flap.spectral_analysis._trend_removal()`.)
 
               - list: 
 
@@ -3459,14 +3468,14 @@ class DataObject:
                 
               Trend removal will be applied to each interval separately.
 
-            - 'Hanning': 
+            - 'Normalize' (default=False): 
 
-              - bool: Whether to use a Hanning window.
+              - bool: whether to normalize with autocorrelations, that is,
+                calculate correlation instead of covariance.
+            
+            - 'Verbose' (default=True):
 
-            - 'Normalize': 
-
-              - Normalize with autocorrelations, that is, calculate correlation
-                instead of covariance.
+              - bool: Whether to print progress messages.
         """
         try:
             return _ccf(self, ref=ref, coordinate=coordinate, intervals=intervals, options=options)
@@ -3502,8 +3511,8 @@ class DataObject:
         options : dict, optional, default=None
             Options for detrending. (Keys can be abbreviated.) Possible keys and
             values:
-            - 'Trend removal': Trend removal description. (See also
-              `flap.spectral_analysis._trend_removal()`.)
+            - 'Trend removal' (default=['Poly', 2]): Trend removal description.
+              (See also `flap.spectral_analysis._trend_removal()`.)
 
               - list: 
 
@@ -3617,7 +3626,7 @@ class DataObject:
         options : dict, optional, default=None
             Options for filtering. Possible keys and values:
             
-            - 'Type':
+            - 'Type' (default=None):
 
               - None: Do nothing.
 
@@ -3633,7 +3642,7 @@ class DataObject:
                 - Lowpass: -- 'f_high'
                 - Highpass: -- 'f_low'
 
-            - 'Design': 
+            - 'Design' (default='Elliptic'): 
                 
                 - 'Elliptic' | 'Butterworth' | 'Chebyshev I' | 'Chebyshev II' |
                   'Bessel': The design type of the bandpass, lowpass or highpass
@@ -3645,33 +3654,33 @@ class DataObject:
                   E.g. too high attenuation at too low frequency relative to the
                   smapling frequency can be a problem.
 
-            - 'f_low', 'f_high': 
+            - 'f_low' (default=None), 'f_high' (default=None): 
 
               - float: Cut on/off frequencies in Hz. (Middle between passband
                 and stopband edge.)
 
-            - 'Steepness': 
+            - 'Steepness' (default=0.2): 
 
               - float: Difference between passband and stopband edge frequencies
                 as a fraction of the middle frequency.
 
-            - 'Loss': 
+            - 'Loss' (default=3): 
 
               - float: The maximum loss in the passband in dB.
 
-            - 'Attenuation':
+            - 'Attenuation' (default=20):
 
               - float: The minimum attenuation in the stopband dB.
 
-            - 'Tau':
+            - 'Tau' (default=None):
 
               - Time constant for integrator/differentiator (in units of the coordinate).
 
-            - 'Power': 
+            - 'Power' (default=False): 
 
               - bool: Whether to calculate square of the signal after filtering.
 
-            - 'Inttime':
+            - 'Inttime' (default=None):
 
               - Integration time after power calculation (in units of coordinate).
 
@@ -3682,8 +3691,17 @@ class DataObject:
 
         if (self.data is None):
             raise ValueError("Cannot filter without data.")
-        default_options = {'Type':None, 'Tau': None, 'Design':'Elliptic', 'f_low': None, 'f_high': None,
-                           'Steepness': 0.2, 'Power': False, 'Inttime': None, 'Loss': 3, 'Attenuation':20}
+        default_options = {'Type':None,
+                           'Design':'Elliptic',
+                           'f_low': None,
+                           'f_high': None,
+                           'Steepness': 0.2,
+                           'Attenuation': 20,
+                           'Tau': None,
+                           'Loss': 3,
+                           'Power': False,
+                           'Inttime': None,
+                           }
 
         try:
             _options = flap.config.merge_options(default_options, options,
@@ -3922,22 +3940,23 @@ class DataObject:
         options : dict, optional, default=None
             Options for generating the PDF. Possible keys and values:
 
-            - 'Range': 
+            - 'Range' (default=None): 
 
               - list of float: The data value range. If not set, the data
                 minimum-maximum will be used.
 
-            - 'Resolution': 
+            - 'Resolution' (default=None): 
 
               - float: The resolution of the PDF.
 
-            - 'Number':
+            - 'Number' (default=None):
 
               - The number of intervals in 'Range'. This is an alternative to
                 'Resolution'.
         """
         if (self.data is None):
             raise ValueError("Cannot process without data.")
+
         default_options = {'Range':None, 'Resolution': None, 'Number':None}
 
         try:
@@ -5647,7 +5666,10 @@ def stft(object_name,
         this coordinate will be removed. A new coordinate with name
         'Frequency' (unit Hz) will be added.
     options : dict, optional, default=None
-        Options of STFT will be passed to `scipy.signal.stft`.
+        Options of STFT will be passed to `scipy.signal.stft`. Default options
+        used are: {'window': 'hann', 'nperseg': 256, 'noverlap': None, 'nfft':
+        None, 'detrend': False, 'return_onesided': True, 'boundary': 'zeros',
+        'padded': True}
 
     Returns
     -------
@@ -5719,37 +5741,37 @@ def apsd(object_name,
         Options for APSD calculation. (Keys can be abbreviated.) Possible
         keys and values:
 
-        - 'Wavenumber': 
+        - 'Wavenumber' (default=False): 
 
           - bool: Whether to use 2*Pi*f for the output coordinate scale;
             this is useful for wavenumber calculation.
 
-        - 'Resolution': 
+        - 'Resolution' (default=None): 
 
           - Output resolution in the unit of the output coordinate.
 
-        - 'Range':
+        - 'Range' (default=None):
 
           - Output range in the unit of the output coordinate.
         
-        - 'Logarithmic':
+        - 'Logarithmic' (default=False):
 
           - bool: If True, will create logarithmic frequency binning.
 
-        - 'Interval_n': 
+        - 'Interval_n' (default=9): 
 
           - int: Minimum number of intervals to use for the processing.
             These are identical length intervals inserted into the input
             interval list. Default is 8.
 
-        - 'Error calculation': 
+        - 'Error calculation' (default=True): 
 
           - bool: Whether to calculate the error. Omitting error
             calculation increases speed. If 'Interval_n' is 1, no error
             calculation is done.
 
-        - 'Trend removal': Trend removal description. (See also
-          `flap.spectral_analysis._trend_removal()`.)
+        - 'Trend removal' (default=['Poly', 2]): Trend removal description. (See
+          also `flap.spectral_analysis._trend_removal()`.)
 
           - list: 
 
@@ -5764,7 +5786,7 @@ def apsd(object_name,
           
           Trend removal will be applied to each interval separately.
 
-        - 'Hanning': 
+        - 'Hanning' (default=True): 
 
           - bool: Whether to use a Hanning window.
 
@@ -5847,12 +5869,12 @@ def cpsd(object_name,
         Options for APSD calculation. (Keys can be abbreviated.) Possible
         keys and values:
 
-        - 'Wavenumber': 
+        - 'Wavenumber' (default=False): 
 
           - bool: Whether to use 2*Pi*f for the output coordinate scale;
             this is useful for wavenumber calculation.
 
-        - 'Resolution': 
+        - 'Resolution' (default=None): 
 
           - Output resolution in the unit of the output coordinate.
 
@@ -5860,24 +5882,24 @@ def cpsd(object_name,
 
           - Output range in the unit of the output coordinate.
         
-        - 'Logarithmic':
+        - 'Logarithmic' (default=False):
 
           - bool: If True, will create logarithmic frequency binning.
 
-        - 'Interval_n': 
+        - 'Interval_n' (default=8): 
 
           - int: Minimum number of intervals to use for the processing.
             These are identical length intervals inserted into the input
             interval list. Default is 8.
 
-        - 'Error calculation': 
+        - 'Error calculation' (default=True): 
 
           - bool: Whether to calculate the error. Omitting error
             calculation increases speed. If 'Interval_n' is 1, no error
             calculation is done.
 
-        - 'Trend removal': Trend removal description. (See also
-          `flap.spectral_analysis._trend_removal()`.)
+        - 'Trend removal' (default=['Poly', 2]): Trend removal description. (See
+          also `flap.spectral_analysis._trend_removal()`.)
 
           - list: 
 
@@ -5892,9 +5914,13 @@ def cpsd(object_name,
             
           Trend removal will be applied to each interval separately.
 
-        - 'Hanning': 
+        - 'Hanning' (default=True): 
 
           - bool: Whether to use a Hanning window.
+
+        - 'Normalize' (default=False): 
+
+          - bool: Whether to use normalization.
 
     Returns
     -------
@@ -5988,29 +6014,29 @@ def ccf(object_name,
         Options for CCF calculation. (Keys can be abbreviated.) Possible
         keys and values:
 
-        - 'Resolution': 
+        - 'Resolution' (default=None): 
 
           - Output resolution for each coordinate. (Single value or list
             of values.)
 
-        - 'Range':
+        - 'Range' (default=None):
 
           - Output ranges for each coordinate. (List or list of lists.)
 
-        - 'Interval_n': 
+        - 'Interval_n' (default=8): 
 
           - int: Minimum number of intervals to use for the processing.
             These are identical length intervals inserted into the input
             interval list. Default is 8.
 
-        - 'Error calculation': 
+        - 'Error calculation' (default=True): 
 
           - bool: Whether to calculate the error. Omitting error
             calculation increases speed. If 'Interval_n' is 1, no error
             calculation is done.
 
-        - 'Trend removal': Trend removal description. (See also
-          `flap.spectral_analysis._trend_removal()`.)
+        - 'Trend removal' (default=['Poly', 2]): Trend removal description.
+          (See also `flap.spectral_analysis._trend_removal()`.)
 
           - list: 
 
@@ -6025,14 +6051,14 @@ def ccf(object_name,
             
           Trend removal will be applied to each interval separately.
 
-        - 'Hanning': 
+        - 'Normalize' (default=False): 
 
-          - bool: Whether to use a Hanning window.
+          - bool: whether to normalize with autocorrelations, that is,
+            calculate correlation instead of covariance.
+        
+        - 'Verbose' (default=True):
 
-        - 'Normalize': 
-
-          - Normalize with autocorrelations, that is, calculate correlation
-            instead of covariance.
+          - bool: Whether to print progress messages.
     """
     try:
         d = get_data_object(object_name,exp_id=exp_id)
@@ -6410,7 +6436,7 @@ def load(filename, options=None):
     options : dict, optional, default=None
         Possible keys and values:
 
-        - 'No storage':
+        - 'No storage' (default=False):
 
           - bool: If True, don't store data in `flap_storage`, just return a
           list of them.
