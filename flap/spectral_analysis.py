@@ -50,10 +50,10 @@ def _spectral_calc_interval_selection(d,
         - If None, the whole data interval will be used as a single
           interval.
 
-    interval_n : int 
+    interval_n : int
         Minimum number of intervals to use for the processing. These are
         identical length intervals inserted into the input interval list.
-    
+
     Returns
     -------
     intervals : flap.Intervals
@@ -73,13 +73,13 @@ def _spectral_calc_interval_selection(d,
         coord = d.get_coordinate_object(coordinate)
     except Exception as e:
         raise e
-    
-    try:    
+
+    try:
         calc_int, calc_int_ind, sel_int, sel_int_ind = d.proc_interval_limits(coordinate, intervals=intervals)
     except Exception as e:
         raise e
     intervals_low = sel_int[0]
-    intervals_high = sel_int[1]    
+    intervals_high = sel_int[1]
 # This part is commented out as we assume identiacl coordinate for d and ref
 
 #    d_intervals_low = sel_int[0]
@@ -87,7 +87,7 @@ def _spectral_calc_interval_selection(d,
 
 #
 #    if (ref is not None):
-#        try:    
+#        try:
 #            calc_int, calc_int_ind, sel_int, sel_int_ind = ref.proc_interval_limits(coordinate, intervals=intervals)
 #        except Exception as e:
 #            raise e
@@ -104,11 +104,11 @@ def _spectral_calc_interval_selection(d,
 #                intervals_high.append(ref_intervals_high[i])
 #        ref_coord = ref.get_coordinate_object(coordinate)
 #        if ((math.fabs(ref_coord.start - coord.start) > math.fabs(ref_coord.step[0] ) / 10)
-#            or (math.fabs(ref_coord.step[0] - coord.step[0]) / math.fabs(ref_coord.step[0]) > 1e-4) 
+#            or (math.fabs(ref_coord.step[0] - coord.step[0]) / math.fabs(ref_coord.step[0]) > 1e-4)
 #            ):
 #            raise ValueError("The start and step of the calculating coordinates in the two data objects should be identical.")
 #    else:
-#        intervals_low = d_intervals_low 
+#        intervals_low = d_intervals_low
 #        intervals_high = d_intervals_high
 
     if (len(intervals_low) > 1):
@@ -204,7 +204,7 @@ def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=Fals
     trend : list | str | None
         Possible values:
 
-        - list: 
+        - list:
 
           - ``['poly', n]``: Fit an `n` order polynomial to the data
             and subtract.
@@ -230,7 +230,7 @@ def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=Fals
         Possible return values:
 
         - If `return_trend` is True, the trend data is returned.
-        
+
         - If `return_trend` is True, and a polynomial fitting is performed, the
           trend data is returned.
 
@@ -240,7 +240,7 @@ def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=Fals
 
 def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
     """Remove a given trend from the data.
-    
+
     See `flap.spectral_analysis.trend_removal_func` for details.
     """
     if (trend is None):
@@ -325,7 +325,7 @@ def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, r
     """Helper routine for apsd and cpsd for calculating numbers and indices for
     processing the spectra.
 
-    Returns: ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, 
+    Returns: ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out,
     f_cent, fcent_index_range, res
     """
     # Calculating the binning boxes from the resolution and range
@@ -477,9 +477,9 @@ def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, r
         f_cent = None
     return ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, \
            f_cent,fcent_index_range, res
-    
+
 def _apsd(d, coordinate=None, intervals=None, options=None):
-    """Calculates the auto-power spectral density (APSD) of the data `d`.
+    """Calculate the auto-power spectral density (APSD) of the data `d`.
     See `flap.DataObject.apsd()` for more details.
     """
     if (d.data is None):
@@ -532,7 +532,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
 
     index_int_low, index_int_high = index_intervals.interval_limits()
     interval_sample_n = (index_int_high[0] - index_int_low[0]) + 1
-    
+
     # Determining the output array shape.
     out_shape = list(d.shape)
     # Determining two pairs of index tuples for copying the data after PS calculation
@@ -566,18 +566,18 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
         ind_out2 = None
 
 
-    # Calculating the binning boxes from the resolution and range and related indices   
+    # Calculating the binning boxes from the resolution and range and related indices
     ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, f_cent, \
     fcent_index_range, res = _spectrum_binning_indices(wavenumber,
-                                                       n_apsd, 
-                                                       _options, 
-                                                       zero_ind, 
+                                                       n_apsd,
+                                                       _options,
+                                                       zero_ind,
                                                        res_nat,
                                                        range_nat,
-                                                       log_scale, 
-                                                       out_shape, 
+                                                       log_scale,
+                                                       out_shape,
                                                        proc_dim)
-                
+
     out_shape[proc_dim] = nf_out
     # These arrays will collect the data and the square of the data to enable error calculation
     out_data = np.zeros(tuple(out_shape), dtype=float)
@@ -588,13 +588,13 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
     # Number of processing intervals
     n_proc_int = len(int_low)
     if (hanning):
-        hanning_window = np.hanning(index_int_high[0] - index_int_low[0] + 1) 
+        hanning_window = np.hanning(index_int_high[0] - index_int_low[0] + 1)
         hanning_window /= math.sqrt(3./8)
         if (len(d.shape) > 1):
             han_sh = [1] * len(d.shape)
             han_sh[proc_dim] = hanning_window.size
             hanning_window = hanning_window.reshape(han_sh)
-    # We need to determine a shape to which the out_data_num array will be broadcasted to 
+    # We need to determine a shape to which the out_data_num array will be broadcasted to
     # allow dividing all spectra. bs is this shape
     if (ind_nonzero is not None):
         bs = [1]*out_data.ndim
@@ -704,7 +704,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
     return d_out
 
 def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
-    """Calculates the complex cross-power spectral density (CPSD) of the data
+    """Calculate the complex cross-power spectral density (CPSD) of the data
     `d`.  See `flap.DataObject.cpsd()` for more details.
     """
     if (d.data is None):
@@ -737,7 +737,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     hanning = _options['Hanning']
     norm = _options['Normalize']
     error_calc = _options['Error calculation']
-    
+
     try:
         coord_obj = d.get_coordinate_object(_coordinate)
     except Exception as e:
@@ -746,13 +746,13 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         raise ValueError("Spectrum calculation is possible only along coordinates changing in one dimension.")
     if (not coord_obj.mode.equidistant):
         raise ValueError("Spectrum calculation is possible only along equidistant coordinates.")
-    
+
     if (ref is None):
         _ref = d
         ref_coord_obj = coord_obj
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
-                                                                           None, 
+                                                                           None,
                                                                            _coordinate,
                                                                            intervals,
                                                                            interval_n)
@@ -767,7 +767,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         if (len(ref_coord_obj.dimension_list) != 1):
             raise ValueError("Spectrum calculation is possible only along coordinates changing in one dimension (ref).")
         if (not ref_coord_obj.mode.equidistant):
-            raise ValueError("Spectrum calculation is possible only along equidistant coordinates (ref).")    
+            raise ValueError("Spectrum calculation is possible only along equidistant coordinates (ref).")
         if (math.fabs(ref_coord_obj.step[0] - coord_obj.step[0]) * d.shape[coord_obj.dimension_list[0]] \
             > math.fabs(ref_coord_obj.step[0])):
                raise ValueError("Incompatible coordinate step sizes." )
@@ -775,13 +775,13 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                    raise ValueError("Incompatible coordinate start values." )
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
-                                                                           _ref, 
+                                                                           _ref,
                                                                            _coordinate,
                                                                            intervals,
                                                                            interval_n)
         except Exception as e:
             raise e
-                        
+
     interval_n, start_ind = intervals.interval_number()
 
     int_low, int_high = intervals.interval_limits()
@@ -794,7 +794,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     # The processing dimensions in the two objects
     proc_dim = coord_obj.dimension_list[0]
     proc_dim_ref = ref_coord_obj.dimension_list[0]
-    
+
     # Determining the output array shape. First the d object dimensions will come, the
     # spectrum scale will be proc_dim. Then the ref dimensions will come with proc_dim_ref removed.
     # The size of the output array in the processig dimension will be entered later
@@ -803,10 +803,10 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     del out_shape_add[proc_dim_ref]
     out_shape += out_shape_add
     proc_dim_out = proc_dim
-    
+
     # Flag to show whether the APSDs should be calculated
     aps_calc = error_calc or norm
-    
+
     # Determining two pairs of index tuples for copying the data after PS calculation
     # of one time interval. For complex data we need to copy in two steps
     if ((d.data.dtype.kind == 'c' ) or (_ref.data.dtype.kind == 'c')):
@@ -857,15 +857,15 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             ind_in1_apsd[proc_dim] = slice(0,n_apsd)
             ind_in1_apsd_ref = [slice(0,ds) for ds in _ref.shape]
             ind_in1_apsd_ref[proc_dim_ref] = slice(0,n_apsd)
- 
+
     ind_bin, ind_slice, out_data_num, ind_nonzero, index_nonzero, ind_zero, nf_out, f_cent, \
-    fcent_index_range, res = _spectrum_binning_indices(wavenumber, n_apsd, 
-                                            _options, 
-                                            zero_ind, 
+    fcent_index_range, res = _spectrum_binning_indices(wavenumber, n_apsd,
+                                            _options,
+                                            zero_ind,
                                             res_nat,
                                             range_nat,
-                                            log_scale, 
-                                            out_shape, 
+                                            log_scale,
+                                            out_shape,
                                             proc_dim_out)
     if (aps_calc):
         if (ind_slice is not None):
@@ -875,7 +875,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             ind_slice_apsd_ref[proc_dim_ref] = ind_slice[proc_dim_out]
         else:
             ind_slice_apsd = None
-            ind_slice_apsd_ref = None 
+            ind_slice_apsd_ref = None
         if (ind_bin is not None):
             ind_bin_apsd = [slice(0,ds) for ds in d.shape]
             ind_bin_apsd[proc_dim] = ind_bin[proc_dim_out]
@@ -892,7 +892,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         else:
             ind_nonzero_apsd = None
             ind_nonzero_apsd_ref = None
-        
+
     out_shape[proc_dim_out] = nf_out
 
     # This will collect the output data
@@ -911,7 +911,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     # Number of processing intervals
     n_proc_int = len(int_low)
     if (hanning):
-        hanning_window = np.hanning(index_int_high[0] - index_int_low[0] + 1) 
+        hanning_window = np.hanning(index_int_high[0] - index_int_low[0] + 1)
         hanning_window /= math.sqrt(3./8)
         hanning_window_ref = copy.deepcopy(hanning_window)
         if (len(d.shape) > 1):
@@ -923,7 +923,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             han_sh[proc_dim_ref] = hanning_window.size
             hanning_window_ref = hanning_window.reshape(han_sh)
 
-    # We need to determine a shape to which the out_data_num array will be broadcasted to 
+    # We need to determine a shape to which the out_data_num array will be broadcasted to
     # allow dividing all spectra. bs is this shape
     if (ind_nonzero is not None):
         bs = [1]*out_data.ndim
@@ -963,8 +963,8 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         # Calculating FFT
         dfft = np.fft.fft(data_proc,axis=proc_dim)
         dfft_ref = np.fft.fft(data_proc_ref,axis=proc_dim_ref)
-        dps, axis_source, axis_number = flap.tools.multiply_along_axes(dfft, 
-                                                                       dfft_ref.conjugate(), 
+        dps, axis_source, axis_number = flap.tools.multiply_along_axes(dfft,
+                                                                       dfft_ref.conjugate(),
                                                                        [proc_dim, proc_dim_ref])
         if (aps_calc):
             dfft_aps = (dfft * dfft.conjugate()).real
@@ -1027,14 +1027,14 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             apsd_ref_interval /= interval_sample_n
             apsd += apsd_interval
             apsd_ref += apsd_ref_interval
-                        
+
     out_data /= n_proc_int
     if (aps_calc):
-       apsd_norm, axis_source, axis_number = flap.tools.multiply_along_axes(apsd, 
-                                                                            apsd_ref, 
+       apsd_norm, axis_source, axis_number = flap.tools.multiply_along_axes(apsd,
+                                                                            apsd_ref,
                                                                             [proc_dim, proc_dim_ref])
        apsd_norm /= n_proc_int ** 2
-    if (norm): 
+    if (norm):
        if (ind_nonzero is not None):
            out_data[tuple(ind_nonzero)] /= np.sqrt(apsd_norm[tuple(ind_nonzero)])
        else:
@@ -1054,7 +1054,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     error[:] = error_arr.reshape(tuple(es))
     if (not norm and error_calc):
         error *= apsd_norm
-      
+
     #Assembling the coordinates
     coord_list = []
     for c in d.coordinates:
@@ -1070,7 +1070,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             # Has to update the dimension list
             for idim in range(len(c.dimension_list)):
                 for i in range(len(axis_number)):
-                    if ((axis_source[i] == 0) 
+                    if ((axis_source[i] == 0)
                           and (axis_number[i] == c.dimension_list[idim])):
                         coord_list[-1].dimension_list[idim] = i
                         break
@@ -1089,7 +1089,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             # Has to update the dimension list
             for idim in range(len(c.dimension_list)):
                 for i in range(len(axis_number)):
-                    if ((axis_source[i] == 1) 
+                    if ((axis_source[i] == 1)
                           and (axis_number[i] == c.dimension_list[idim])):
                         coord_list[-1].dimension_list[idim] = i
                         break
@@ -1099,8 +1099,8 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             for c1 in coord_list:
                 if (c1.unit.name == c.unit.name):
                     coord_list[-1].unit.name = coord_list[-1].unit.name + ' (Ref)'
-    
-    # Adding the frequency/wavenumber coordinate            
+
+    # Adding the frequency/wavenumber coordinate
     if (wavenumber):
         out_name = 'Wavenumber'
         out_unit = '1/'+coord_obj.unit.unit
@@ -1130,7 +1130,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
         unit_name = 'Coherency'
     else:
         unit_name = 'Spectral density'
- 
+
     if (d.exp_id == _ref.exp_id):
         exp_id_out = d.exp_id
     else:
@@ -1143,28 +1143,29 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
                     exp_id = exp_id_out,
                     data_unit = flap.coordinate.Unit(unit_name)
                     )
-    
+
     return d_out
 
 def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     """
-        N dimensional Cross Correlation Function or covariance calculation for the data object d taking d_ref 
-        as reference. If ref is not set d is used as reference, that is all CCFs are calculated 
+        N dimensional Cross Correlation Function or covariance calculation for the data object d taking d_ref
+        as reference. If ref is not set d is used as reference, that is all CCFs are calculated
         within d. Calculates all CCF between all signals in ref and d, but not inside d and ref.
         Correlation is calculated along the coordinate(s) listed in coordinate which should be
         identical for the to input data objects.
-        Returns a data object with dimension number d.dim+ref.dim-len(coordinate). 
+
+        Returns a data object with dimension number d.dim+ref.dim-len(coordinate).
         The coordinates are replaced by coordinate+' lag'.
         The CCF is calculated in multiple intervals (described by intervals)
         and the mean and variance will be returned.
-    
+
         INPUT:
             d: A flap.DataObject.
             ref: Another flap.DataObject
             coordinate: The name of the coordinate (string) along which to calculate CCF or a list of names.
                         Each coordinate should change only along one data dimension and should be equidistant.
                         This and all other cordinates changing along the data dimension of
-                        these coordinates will be removed. New coordinates with name+' lag' will be added. 
+                        these coordinates will be removed. New coordinates with name+' lag' will be added.
             intervals: Information of processing intervals.
                        If dictionary with a single key: {selection coordinate: description})
                            Key is a coordinate name which can be different from the calculation
@@ -1194,7 +1195,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                ['Poly', n]: Fit an n order polynomial to the data and subtract.
                             Trend removal will be applied to each interval separately.
                             At present trend removal can be applied to 1D CCF only.
-                'Normalize': Normalize with autocorrelations, that is calculate correlation instead of 
+                'Normalize': Normalize with autocorrelations, that is calculate correlation instead of
                              covariance.
                 'Verbose': Print progress messages
     """
@@ -1234,8 +1235,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     if (len(_coordinate) != 1):
         error_calc = False
         interval_n = 1
-        
-    # Getting coordinate objects and checking properties    
+
+    # Getting coordinate objects and checking properties
     coord_obj = []
     # This will contain the dimension list in d.data and the output of the correlations
     correlation_dimensions = []
@@ -1243,7 +1244,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         try:
             c = d.get_coordinate_object(c_name)
         except Exception as e:
-            raise e      
+            raise e
         coord_obj.append(c)
         if (len(c.dimension_list) != 1):
             raise ValueError("Correlation calculation is possible only along coordinates changing in one dimension.")
@@ -1255,14 +1256,14 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         except ValueError:
             pass
         correlation_dimensions.append(c.dimension_list[0])
-        
+
     if (ref is None):
         _ref = d
         coord_obj_ref = coord_obj
         correlation_dimensions_ref = correlation_dimensions
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
-                                                                           None, 
+                                                                           None,
                                                                            _coordinate[0],
                                                                            intervals,
                                                                            interval_n)
@@ -1276,7 +1277,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             try:
                 c = _ref.get_coordinate_object(c_name)
             except Exception as e:
-                raise e      
+                raise e
             coord_obj_ref.append(c)
             if (len(c.dimension_list) != 1):
                 raise ValueError("Correlation calculation is possible only along coordinates changing in one dimension.")
@@ -1292,18 +1293,18 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                    raise ValueError("Incompatible coordinate step sizes." )
             if (math.fabs(c.start - coord_obj[i].start) > math.fabs(c.step[0])):
                    raise ValueError("Incompatible coordinate start values." )
-            if (list(_ref.data.shape)[correlation_dimensions_ref[i]] 
+            if (list(_ref.data.shape)[correlation_dimensions_ref[i]]
                            != list(d.data.shape)[correlation_dimensions[i]]):
                    raise ValueError("Incompatible data dimensions." )
         try:
             intervals, index_intervals = _spectral_calc_interval_selection(d,
-                                                                           _ref, 
+                                                                           _ref,
                                                                            _coordinate[0],
                                                                            intervals,
                                                                            interval_n)
         except Exception as e:
             raise e
-                        
+
     interval_n, start_ind = intervals.interval_number()
     int_low, int_high = intervals.interval_limits()
     index_int_low, index_int_high = index_intervals.interval_limits()
@@ -1311,7 +1312,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     n_proc_int = len(int_low)
     # Numper of points in the selection coordinate
     n_sample_sel = index_int_high[0] - index_int_low[0]
-    
+
     # Creating indices to take out data for each processing interval and place it into the processing arrays
     interval_slice_1 = [slice(0,dim) for dim in list(d.data.shape)]
     interval_out_slice = copy.deepcopy(interval_slice_1)
@@ -1331,10 +1332,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         for i in range(n_proc_int):
             interval_slice_ref[i][correlation_dimensions_ref[0]] = slice(index_int_low[i],index_int_high[i])
 
-    # Number of correlation points in the correlation dimensions after FFT before binning 
-    corr_point_n_nat = [list(d.data.shape)[dim] for dim in correlation_dimensions]   
+    # Number of correlation points in the correlation dimensions after FFT before binning
+    corr_point_n_nat = [list(d.data.shape)[dim] for dim in correlation_dimensions]
     corr_point_n_nat[0] = n_sample_sel
-    
+
     # Setting resolution
     corr_res = _options['Resolution']
     if (corr_res is None):
@@ -1342,11 +1343,11 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     if (type(corr_res) is not list):
         corr_res = [corr_res] * len(_coordinate)
     corr_range = _options['Range']
-    #Setting default correlation range to 10-th of coordinate range 
+    #Setting default correlation range to 10-th of coordinate range
     if (corr_range is None):
         corr_range = []
         for i,coord in enumerate(coord_obj):
-            corr_range.append([-(coord.step[0] * corr_point_n_nat[i]) /10 , 
+            corr_range.append([-(coord.step[0] * corr_point_n_nat[i]) /10 ,
                                (coord.step[0] * corr_point_n_nat[i]) /10
                                ])
     if (type(corr_range) is not list):
@@ -1390,17 +1391,17 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                             r_samp[1] * corr_res_sample[-1] + int(corr_res_sample[-1] / 2)])
         pad_length.append(max([abs(shift_range[-1][0]), abs(shift_range[-1][1])]))
         corr_point_n_nat[i] += pad_length[i]
-        
+
     # Check if we have lag 0 data in  all dimensions
     lag0_present = True
     for i in range(len(correlation_dimensions)):
         if ((range_sampout[i][0] > 0) or (range_sampout[i][1] < 0)):
             lag0_present = False
-    
+
     # This flag indicates whether we need to calculate ACFs separately
     calc_acf = not lag0_present or (ref is not None) and _options['Normalize']
-                
-    # Determining the output shape. First the dimensions of d without the common dimensions, 
+
+    # Determining the output shape. First the dimensions of d without the common dimensions,
     # then the common dimensions, then the reference with the calculation dimensions removed
     out_shape = []
     correlation_dimensions_out = []
@@ -1430,7 +1431,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     proc_shape = list(d.data.shape)
     if (ref is not None):
         proc_shape_ref = list(_ref.data.shape)
-        
+
     pad_slice = [slice(0,ds) for ds in d.data.shape]
     for i,dim in enumerate(correlation_dimensions):
         pad_slice[dim] = slice(corr_point_n_nat[i]-pad_length[i],corr_point_n_nat[i])
@@ -1439,7 +1440,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
     if (ref is not None):
         pad_slice_ref = [slice(0,ds) for ds in _ref.data.shape]
         for i,dim in enumerate(correlation_dimensions_ref):
-            pad_slice_ref[dim] = slice(corr_point_n_nat[i]-pad_length[i],corr_point_n_nat[i]) 
+            pad_slice_ref[dim] = slice(corr_point_n_nat[i]-pad_length[i],corr_point_n_nat[i])
             proc_shape_ref[dim] = corr_point_n_nat[i] + pad_length[i]
     # Index arrays to rearrange after FFT and multiplying
     ind_in1 = [slice(0,d) for d in out_shape]
@@ -1457,11 +1458,11 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             ind_in2_acf_ref = copy.deepcopy(ind_in1_acf_ref)
             ind_out1_acf_ref = copy.deepcopy(ind_in1_acf_ref)
             ind_out2_acf_ref = copy.deepcopy(ind_in1_acf_ref)
-            
+
     # zero_ind is the index where the 0 time lag will be after rearranging the CCF to final form
     zero_ind = [0] * len(correlation_dimensions)
     # A slicing list which will cut out the needed part of the CCF
-    # The CCF will have first the remaining dimensions of d, then the correlation dimensions, 
+    # The CCF will have first the remaining dimensions of d, then the correlation dimensions,
     # then the remaining dimensions of ref
     ind_slice = [slice(0,d) for d in out_shape]
     ind_bin = copy.deepcopy(ind_slice)
@@ -1494,19 +1495,19 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                 ind_out2_acf_ref[i] = ind_out2[cd]
                 ind_slice_acf_ref[i] = ind_slice[cd]
                 ind_bin_acf_ref[i]  = ind_bin[cd]
-                
-    # The processing array for each interval, data will be read here                
+
+    # The processing array for each interval, data will be read here
     proc_array = np.zeros(tuple(proc_shape),dtype=d.data.dtype)
     if (ref is not None):
         proc_array_ref = np.zeros(tuple(proc_shape_ref),dtype=_ref.data.dtype)
-    # The output array    
+    # The output array
     if ((d.data.dtype.kind != 'c') and (_ref.data.dtype.kind != 'c')):
         out_dtype = float
     else:
         out_dtype= complex
     out_corr = np.zeros(tuple(out_shape), dtype=out_dtype)
     if (error_calc):
-        out_corr_square = np.zeros(tuple(out_shape), dtype=out_dtype)  
+        out_corr_square = np.zeros(tuple(out_shape), dtype=out_dtype)
     all_points = 1
     for i in range(len(correlation_dimensions)):
         all_points *= n_corr[i]
@@ -1520,7 +1521,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                 _trend_removal(proc_array_trend,correlation_dimensions[0],trend)
             except Exception as e:
                 raise e
-            proc_array[tuple(interval_out_slice)] = proc_array_trend 
+            proc_array[tuple(interval_out_slice)] = proc_array_trend
         else:
             proc_array[tuple(interval_out_slice)] = d.data[tuple(interval_slice[i_int])]
         proc_array[tuple(pad_slice)] = 0
@@ -1532,23 +1533,23 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     _trend_removal(proc_array_trend_ref,correlation_dimensions_ref[0],trend)
                 except Exception as e:
                     raise e
-                proc_array_ref[tuple(interval_out_slice_ref)] = proc_array_trend_ref 
+                proc_array_ref[tuple(interval_out_slice_ref)] = proc_array_trend_ref
             else:
                 proc_array_ref[tuple(interval_out_slice_ref)] = _ref.data[tuple(interval_slice_ref[i_int])]
             proc_array_ref[tuple(pad_slice_ref)] = 0
             fft_ref = np.fft.fftn(proc_array_ref,axes=correlation_dimensions_ref)
         else:
             fft_ref = fft
-        res, axis_source, axis_number = flap.multiply_along_axes(fft, 
+        res, axis_source, axis_number = flap.multiply_along_axes(fft,
                                                                  np.conj(fft_ref),
                                                                  [correlation_dimensions,correlation_dimensions_ref],
                                                                  keep_a1_dims = False
                                                                  )
         corr_dim_start = len(d.data.shape) - len(correlation_dimensions)
-        cps_corr_dims = np.arange(len(correlation_dimensions),dtype=int) + corr_dim_start 
+        cps_corr_dims = np.arange(len(correlation_dimensions),dtype=int) + corr_dim_start
         res = np.fft.ifftn(res,axes=cps_corr_dims)
         if (out_dtype is float):
-            res = np.real(res)        
+            res = np.real(res)
         corr = np.empty(res.shape,dtype=res.dtype)
         corr[tuple(ind_out1)] = res[tuple(ind_in1)]
         corr[tuple(ind_out2)] = res[tuple(ind_in2)]
@@ -1579,7 +1580,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     for i in range(len(correlation_dimensions)):
                         ind_autocorr[corr_dimension_start + i] = np.full(tuple(autocorr_index_shape),zero_ind_out[i])
                     ind_autocorr[len(autocorr_index_shape)+len(correlation_dimensions):] \
-                           = copy.deepcopy(ind_autocorr[0:len(autocorr_index_shape)])     
+                           = copy.deepcopy(ind_autocorr[0:len(autocorr_index_shape)])
                     autocorr_mx = corr_binned[tuple(ind_autocorr)]
                     extend_shape = [1] * (len(out_corr.shape) - len(autocorr_mx.shape))
                     corr_binned /= np.sqrt(np.reshape(autocorr_mx,tuple(list(autocorr_mx.shape) + extend_shape)))
@@ -1627,15 +1628,15 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         else:
             corr_binned /= all_points
         out_corr += corr_binned
-        if (error_calc):   
+        if (error_calc):
             out_corr_square += corr_binned ** 2
     out_corr /= n_proc_int
     if (error_calc):
         out_error = np.sqrt(np.clip((out_corr_square / n_proc_int - out_corr ** 2),
-                                  0,None)) / math.sqrt(n_proc_int) 
+                                  0,None)) / math.sqrt(n_proc_int)
     else:
         out_error = None
-    
+
     #Assembling the coordinates
     # Removing all coordinates which have common dimensions with the correlation coordinates
     coord_list = []
@@ -1670,9 +1671,9 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
             for c1 in coord_list:
                 if (c1.unit.name == c.unit.name):
                     coord_list[-1].unit.name = coord_list[-1].unit.name + ' (Ref)'
-    
+
     # Adding the correlation coordinates
-    for i,c in enumerate(coord_obj):           
+    for i,c in enumerate(coord_obj):
         c_new = flap.coordinate.Coordinate(name = c.unit.name + ' lag',
                                            unit = c.unit.unit,
                                            mode = flap.coordinate.CoordinateMode(equidistant=True),
@@ -1686,7 +1687,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         unit_name = 'Correlation'
     else:
         unit_name = 'Covariance'
- 
+
     if (d.exp_id == _ref.exp_id):
         exp_id_out = d.exp_id
     else:
@@ -1699,5 +1700,5 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                     exp_id = exp_id_out,
                     data_unit = flap.coordinate.Unit(unit_name)
                     )
-    
+
     return d_out

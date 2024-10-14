@@ -131,7 +131,7 @@ class FlapXml:
         for e in self.section_elements[i]:
             if e.tag == element:
                 return e.attrib
-        raise ValueError("Element '{:s}' not found in section '{:s}' in xml file.".format(element,section))                       
+        raise ValueError("Element '{:s}' not found in section '{:s}' in xml file.".format(element,section))
         return None
 
     def write_file(self, filename):

@@ -24,7 +24,7 @@ def del_list_elements(input_list, indices):
 
 
 def unify_list(list1, list2):
-    """ Returns list with elements present in any of the two lists.
+    """ Return list with elements present in any of the two lists.
         Output list is sorted.
     """
     unified_list = copy.deepcopy(list1)
@@ -212,7 +212,7 @@ def expand_matrix(mx,new_shape,dim_list):
             act_list += 1
         act_dim += 1
     return mx
-    
+
 def flatten_multidim(mx, dim_list):
     """ Flatten the dimensions in dim_list to dim_list[0]
         Returns the modified matrix and a mapping from the original to the new dimension list.
@@ -275,19 +275,19 @@ def flatten_multidim(mx, dim_list):
     return  mx[tuple(mx_list)], out_dim_mapping
 
 def multiply_along_axes(a1_orig, a2_orig, axes,keep_a1_dims=True):
-    """ 
-    Multiplies two arrays along given axes. 
+    """
+    Multiplies two arrays along given axes.
     INPUT:
         a1_orig: Array 1.
         a2_orig: Array 2.
         axes: List of two axis numbers or list of two lists of axis numbers
-        keep_1_dims: (bool) 
+        keep_1_dims: (bool)
                      If True: The output array has dimensions of a1 followed by a2 with the common dims removed
                      If False: The output array has the a1 dimensions without common dims then the common dims
                                followed by a2 with the common dims removed
     Return values:
         a, axis_source, axis_number
-            a: An array with dimension number a1.dim+a2.dim-1. 
+            a: An array with dimension number a1.dim+a2.dim-1.
             axis_source: List of integers telling the source array for each output axis ( 0 or 1)
             axis_number: Axis numbers in the arrays listed in axes_source
     """
@@ -295,7 +295,7 @@ def multiply_along_axes(a1_orig, a2_orig, axes,keep_a1_dims=True):
         axes[0] = [axes[0]]
     if (type(axes[1]) is not list):
         axes[1] = [axes[1]]
-    for i in range(len(axes[0])):       
+    for i in range(len(axes[0])):
         if (a1_orig.shape[axes[0][i]] != a2_orig.shape[axes[1][i]]):
             raise ValueError("Incompatible shapes.")
 
@@ -322,7 +322,7 @@ def multiply_along_axes(a1_orig, a2_orig, axes,keep_a1_dims=True):
     for i in range(len(out_shape)-len(a1_shape)):
         a1 = np.expand_dims(a1,-1)
     for i in range(len(out_shape)-len(a2_shape)):
-        a2 = np.expand_dims(a2,0)    
+        a2 = np.expand_dims(a2,0)
     r = a1 * a2
     if (keep_a1_dims):
         # Moving the processing axes back where they were in the original array
@@ -352,7 +352,7 @@ def move_axes_to_end(mx_orig,axes):
         del mx_axes[ind]
         mx_axes.append(axes[i])
     return mx, mx_axes
-    
+
 def move_axes_to_start(mx_orig,axes):
     """ Moves the listed axes to the start axes.
     """
@@ -367,11 +367,11 @@ def move_axes_to_start(mx_orig,axes):
         del mx_axes[ind]
         mx_axes.insert(i,axes[i])
     return mx, mx_axes
-    
+
 def find_str_match(value, options):
     """
     Given value string and a list of possibilities in the list of strings option
-    find matches assuming value is an abbreviation. Return ValueError if no match 
+    find matches assuming value is an abbreviation. Return ValueError if no match
     or multiple match is found.
     If one match is found return the matching string
     """
@@ -391,8 +391,8 @@ def grid_to_box(xdata,ydata):
     """
     Given 2D x and y coordinate matrices create box coordinates around the points as
     needed by matplotlib.pcolomesh.
-    xdata: X coordinates. 
-    ydata: Y coordinates. 
+    xdata: X coordinates.
+    ydata: Y coordinates.
     In both arrays x direction is along first dimension, y direction along second dimension.
     Returns xbox, ybox.
     """
@@ -401,7 +401,7 @@ def grid_to_box(xdata,ydata):
     xbox_shape[0] += 1
     xbox_shape[1] += 1
     xbox = np.empty(tuple(xbox_shape),dtype=xdata.dtype)
-    xbox[1:,1:-1] = (xdata[:,:-1] + xdata[:,1:]) / 2 
+    xbox[1:,1:-1] = (xdata[:,:-1] + xdata[:,1:]) / 2
     xbox[1:-1,1:-1] = (xbox[2:,1:-1] + xbox[1:-1,1:-1]) / 2
     xbox[1:-1,0] = ((xdata[1:,0] + xdata[:-1,0]) / 2 - xbox[1:-1,1]) * 2 + xbox[1:-1,1]
     xbox[1:-1,-1] = ((xdata[1:,-1] + xdata[:-1,-1]) / 2 - xbox[1:-1,-2]) * 2 + xbox[1:-1,-2]
@@ -409,15 +409,15 @@ def grid_to_box(xdata,ydata):
     xbox[-1,1:-1] = ((xdata[-1,:-1] + xdata[-1,1:]) / 2 - xbox[-2,1:-1]) * 2 + xbox[-2,1:-1]
     xbox[0,0] = xbox[1,1] + (xbox[0,1] - xbox[1,1]) + (xbox[1,0] - xbox[1,1])
     xbox[-1,-1] = xbox[-2,-2] + (xbox[-1,-2] - xbox[-2,-2]) + (xbox[-2,-1] - xbox[-2,-2])
-    xbox[0,-1] = xbox[1,-2] + (xbox[0,-2] - xbox[1,-2]) + (xbox[1,-1] - xbox[1,-2]) 
+    xbox[0,-1] = xbox[1,-2] + (xbox[0,-2] - xbox[1,-2]) + (xbox[1,-1] - xbox[1,-2])
     xbox[-1,0] = xbox[-2,1] + (xbox[-1,1] - xbox[-2,1]) + (xbox[-2,0] - xbox[-2,1])
-      
+
     ydata = np.transpose(ydata.astype(float))
     ybox_shape = list(ydata.shape)
     ybox_shape[0] += 1
     ybox_shape[1] += 1
     ybox = np.empty(tuple(ybox_shape),dtype=ydata.dtype)
-    ybox[1:,1:-1] = (ydata[:,:-1] + ydata[:,1:]) / 2 
+    ybox[1:,1:-1] = (ydata[:,:-1] + ydata[:,1:]) / 2
     ybox[1:-1,1:-1] = (ybox[2:,1:-1] + ybox[1:-1,1:-1]) / 2
     ybox[1:-1,0] = ((ydata[1:,0] + ydata[:-1,0]) / 2 - ybox[1:-1,1]) * 2 + ybox[1:-1,1]
     ybox[1:-1,-1] = ((ydata[1:,-1] + ydata[:-1,-1]) / 2 - ybox[1:-1,-2]) * 2 + ybox[1:-1,-2]
@@ -425,13 +425,13 @@ def grid_to_box(xdata,ydata):
     ybox[-1,1:-1] = ((ydata[-1,:-1] + ydata[-1,1:]) / 2 - ybox[-2,1:-1]) * 2 + ybox[-2,1:-1]
     ybox[0,0] = ybox[1,1] + (ybox[0,1] - ybox[1,1]) + (ybox[1,0] - ybox[1,1])
     ybox[-1,-1] = ybox[-2,-2] + (ybox[-1,-2] - ybox[-2,-2]) + (ybox[-2,-1] - ybox[-2,-2])
-    ybox[0,-1] = ybox[1,-2] + (ybox[0,-2] - ybox[1,-2]) + (ybox[1,-1] - ybox[1,-2]) 
+    ybox[0,-1] = ybox[1,-2] + (ybox[0,-2] - ybox[1,-2]) + (ybox[1,-1] - ybox[1,-2])
     ybox[-1,0] = ybox[-2,1] + (ybox[-1,1] - ybox[-2,1]) + (ybox[-2,0] - ybox[-2,1])
-    
+
     return xbox,ybox
 
 def time_unit_translation(time_unit=None,max_value=None):
-    if (str(type(time_unit)) == 'str' or 
+    if (str(type(time_unit)) == 'str' or
        str(type(time_unit)) == "<class 'numpy.str_'>"):
         _time_unit=time_unit.lower()
     else:
@@ -476,7 +476,7 @@ def time_unit_translation(time_unit=None,max_value=None):
         else:
             print(_time_unit+' was not found in the translation. Returning 1.')
             return 1
-    
+
 def spatial_unit_translation(spatial_unit=None):
     _spatial_unit=spatial_unit.lower()
     translation={'meters':1,
@@ -500,16 +500,16 @@ def spatial_unit_translation(spatial_unit=None):
     else:
         print(_spatial_unit+' was not found in the translation. Returning 1.')
         return 1
-    
+
 def unit_conversion(original_unit=None,
                     new_unit=None
                     ):
-    
+
     #The code provides a unit conversion between any unit types for most
-    #of the prefixes. 
+    #of the prefixes.
     #There are certain limitations:
     #   The unit compatibility is not checked (e.g. mm-->MegaHertz is allowed)
-    
+
     known_conversions_full={'Terra':1e12,
                             'Giga':1e9,
                             'Mega':1e6,
@@ -519,7 +519,7 @@ def unit_conversion(original_unit=None,
                             'nano':1e-9,
                             'pico':1e-12,
                             }
-    
+
     known_conversions_short={'T':1e12,
                              'G':1e9,
                              'M':1e6,
@@ -529,18 +529,18 @@ def unit_conversion(original_unit=None,
                              'n':1e-9,
                              'p':1e-12
                              }
-    
+
     original_unit_translation=None
     new_unit_translation=None
-    
+
     #Trying to find the long unit names in the inputs
-    
+
     for keys_full in known_conversions_full:
         if keys_full in original_unit:
             original_unit_translation=known_conversions_full[keys_full]
         if keys_full in new_unit:
             new_unit_translation=known_conversions_full[keys_full]
-            
+
     if original_unit_translation is None:
         if len(original_unit) == 1 or len(original_unit) > 3 : # SI units are longer than 3 if using the full name
             original_unit_translation=1.
@@ -548,16 +548,16 @@ def unit_conversion(original_unit=None,
             for keys_short in known_conversions_short:
                 if keys_short == original_unit[0]:
                     original_unit_translation=known_conversions_short[keys_short]
-                    
-    if new_unit_translation is None:                    
+
+    if new_unit_translation is None:
         if len(new_unit) == 1 or len(new_unit) > 3:
             new_unit_translation=1.
         else:
             for keys_short in known_conversions_short:
                 if keys_short == new_unit[0]:
                     new_unit_translation=known_conversions_short[keys_short]
-                    
-    if original_unit_translation is None: 
+
+    if original_unit_translation is None:
         print('Unit translation cannot be done for the original unit. Returning 1.')
         if VERBOSE:
             if len(original_unit) > 3:
@@ -567,7 +567,7 @@ def unit_conversion(original_unit=None,
                 print('Known conversion units are:')
                 print(known_conversions_short)
         original_unit_translation=1.
-        
+
     if new_unit_translation is None:
         print('Unit translation cannot be done for the new unit. Returning 1.')
         if VERBOSE:
@@ -578,13 +578,13 @@ def unit_conversion(original_unit=None,
                 print('Known conversion units are:')
                 print(known_conversions_short)
             new_unit_translation=1.
-        
+
     return original_unit_translation/new_unit_translation
-            
-    
-        
-        
-    
+
+
+
+
+
 
 #import matplotlib.pyplot as plt
 
@@ -598,4 +598,3 @@ def unit_conversion(original_unit=None,
 #data =  (xdata + ydata)
 #plt.pcolormesh(xbox,ybox,np.transpose(data),cmap='Greys')
 #plt.scatter(xdata.flatten(), ydata.flatten())
-

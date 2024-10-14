@@ -62,7 +62,7 @@ def get(section, element, datatype=str, default=None, evaluate=False):
     Returns
     -------
     object
-        The value of the element `element` of section `section` 
+        The value of the element `element` of section `section`
         in the configuration, type-cast or evaluated.
     """
     if (__flap_config.file_name is None):
@@ -92,6 +92,7 @@ def get_all_section(section):
     Parameters
     ----------
     section : str
+        Section of configuration to parse.
 
     Returns
     -------
@@ -180,7 +181,7 @@ def merge_options(default_options, input_options, data_source=None, section=None
     Uses default options of function, input options of function and options read
     from config file from section `section`. If `exp_id` is set, will also look
     for options in section Module `exp_id` for options starting with `section`.
-    
+
     The precedence of options is: default_options < section options < module
     options < input_options.
 
