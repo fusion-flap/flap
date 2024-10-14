@@ -115,7 +115,7 @@ class DataObject:
 
         Warnings
         --------
-        Not to be confused with `flap.DataObject.coordinate()`.
+        Not to be confused with :func:`DataObject.coordinate`.
         """
         return self.__coordinates
 
@@ -397,7 +397,7 @@ class DataObject:
             index[i] = ...
 
     def to_intervals(self, coordinate):
-        """Create an Intervals class object from either the data error ranges or
+        """Create an :class:`.Intervals` class object from either the data error ranges or
         the coordinate value ranges.
 
         Parameters
@@ -460,7 +460,7 @@ class DataObject:
 
     def slicing_to_intervals(self, slicing):
         """Convert a multi-slicing description to an Intervals object. For
-        possibilities, see `flap.DataObject.slice_data()`.
+        possibilities, see :func:`~flap.data_object.DataObject.slice_data()`.
 
         Parameters
         ----------
@@ -544,8 +544,8 @@ class DataObject:
 
             - If dictionary with a single key: {selection coordinate:
               description}). Key is a coordinate name which can be different from
-              the calculation coordinate.  Description can be `flap.Intervals`,
-              `flap.DataObject` or a list of two numbers. If it is a data object
+              the calculation coordinate.  Description can be :class:`.Intervals`,
+              :class:`.DataObject` or a list of two numbers. If it is a data object
               with data name identical to the coordinate, the error ranges of the
               data object will be used for interval. If the data name is not the
               same as coordinate, a coordinate with the same name will be searched
@@ -667,9 +667,9 @@ class DataObject:
             Coordinate (unit) name.
         index : tuple of objects, optional, default=None
             The indexes into the data array. (For more details, see
-            `flap.Coordinate.data()`.)
+            :func:`flap.coordinate.Coordinate.data()`.)
         options : _type_, optional, default=None
-            The same options as for `flap.Coordinate.data()`.
+            The same options as for :func:`flap.coordinate.Coordinate.data()`.
 
         Returns
         -------
@@ -686,7 +686,7 @@ class DataObject:
 
         Warnings
         --------
-        Not to be confused with `flap.DataObject.coordinates`.
+        Not to be confused with :attr:`DataObject.coordinates`.
         """
         if (type(name) is not str):
             raise TypeError("Invalid coordinate name.")
@@ -1514,11 +1514,11 @@ class DataObject:
                Possibilities:
 
                1) slice objects, range objects, scalars, lists, numpy array.
-               2) `flap.DataObject` objects without error and with data
+               2) :class:`.DataObject` objects without error and with data
                   unit.name equal to the coordinate.
-               3) `flap.DataObject` with the name of one coordinate equal to the
+               3) :class:`.DataObject` with the name of one coordinate equal to the
                   dictionary key without having value_ranges values.
-               4) `flap.Intervals` objects with one interval.
+               4) :class:`.Intervals` objects with one interval.
 
             b) For MULTI SLICE: Various range selection objects. In this case
                ranges are selected and a new dimension is added to the data array
@@ -1531,10 +1531,10 @@ class DataObject:
 
                Possibilities:
 
-               1) `flap.Intervals` objects with more than one interval
-               2) `flap.DataObject` objects with data `unit.name` equal to the
+               1) :class:`.Intervals` objects with more than one interval
+               2) :class:`.DataObject` objects with data `unit.name` equal to the
                   slicing coordinate. The error values give the intervals.
-               3) `flap.DataObject` with the name of one coordinate equal to the
+               3) :class:`.DataObject` with the name of one coordinate equal to the
                   slicing coordinate. The `value_ranges` select the intervals.
 
                If range slicing is done with multiple coordinates which have
@@ -2726,7 +2726,7 @@ class DataObject:
     def regenerate_coordinates(self):
         """Regenerate coordinates.
 
-        See `flap.DataObject.slice_data` for details.
+        See :func:`~flap.data_object.DataObject.slice_data()` for details.
         """
         while (True):
             rel_coord = None
@@ -2817,12 +2817,12 @@ class DataObject:
             default first axis is the first coordinate, the second axis is
             '__Data__'.
         slicing : dict, optional, default=None
-            Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+            Passed as an argument to :func:`~flap.data_object.DataObject.slice_data()`. Slicing
             will be applied before plotting.
         slicing_options : dict, optional, default=None
-            Options for slicing. See `flap.DataObject.slice_data()` for details.
+            Options for slicing. See :func:`~flap.data_object.DataObject.slice_data()` for details.
         summing : str, optional, default=None
-            Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+            Passed as an argument to :func:`~flap.data_object.DataObject.slice_data()`. Slicing
             will be applied before plotting.
         options : dict, optional, default=None
             Options for plotting. Possible keys and values:
@@ -3196,7 +3196,7 @@ class DataObject:
             - If dictionary with a single key: {selection coordinate:
               description}). Key is a coordinate name which can be different
               from the calculation coordinate. Description can be
-              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
               it is a data object with data name identical to the coordinate,
               the error ranges of the data object will be used for interval. If
               the data name is not the same as `coordinate`, a coordinate with the
@@ -3244,7 +3244,7 @@ class DataObject:
                 calculation is done.
 
             - 'Trend removal' (default=['Poly', 2]): Trend removal description.
-              (See also `flap.spectral_analysis._trend_removal()`.)
+              (See also :func:`flap.spectral_analysis._trend_removal()`.)
 
               - list:
 
@@ -3305,7 +3305,7 @@ class DataObject:
             - If dictionary with a single key: {selection coordinate:
               description}). Key is a coordinate name which can be different
               from the calculation coordinate. Description can be
-              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
               it is a data object with data name identical to the coordinate,
               the error ranges of the data object will be used for interval. If
               the data name is not the same as `coordinate`, a coordinate with the
@@ -3353,7 +3353,7 @@ class DataObject:
                 calculation is done.
 
             - 'Trend removal' (default=['Poly', 2]): Trend removal description.
-              (See also `flap.spectral_analysis._trend_removal()`.)
+              (See also :func:`flap.spectral_analysis._trend_removal()`.)
 
               - list:
 
@@ -3418,7 +3418,7 @@ class DataObject:
             - If dictionary with a single key: {selection coordinate:
               description}). Key is a coordinate name which can be different
               from the calculation coordinate. Description can be
-              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
               it is a data object with data name identical to the coordinate,
               the error ranges of the data object will be used for interval. If
               the data name is not the same as `coordinate`, a coordinate with the
@@ -3458,7 +3458,7 @@ class DataObject:
                 calculation is done.
 
             - 'Trend removal' (default=['Poly', 2]): Trend removal description.
-              (See also `flap.spectral_analysis._trend_removal()`.)
+              (See also :func:`flap.spectral_analysis._trend_removal()`.)
 
               - list:
 
@@ -3505,7 +3505,7 @@ class DataObject:
             - If dictionary with a single key: {selection coordinate:
               description}). Key is a coordinate name which can be different
               from the calculation coordinate. Description can be
-              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
               it is a data object with data name identical to the coordinate,
               the error ranges of the data object will be used for interval. If
               the data name is not the same as `coordinate`, a coordinate with the
@@ -3524,7 +3524,7 @@ class DataObject:
             values:
 
             - 'Trend removal' (default=['Poly', 2]): Trend removal description.
-              (See also `flap.spectral_analysis._trend_removal()`.)
+              (See also :func:`flap.spectral_analysis._trend_removal()`.)
 
               - list:
 
@@ -3623,7 +3623,7 @@ class DataObject:
             - If dictionary with a single key: {selection coordinate:
               description}). Key is a coordinate name which can be different
               from the calculation coordinate. Description can be
-              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
               it is a data object with data name identical to the coordinate,
               the error ranges of the data object will be used for interval. If
               the data name is not the same as `coordinate`, a coordinate with the
@@ -3939,7 +3939,7 @@ class DataObject:
             - If dictionary with a single key: {selection coordinate:
               description}). Key is a coordinate name which can be different
               from the calculation coordinate. Description can be
-              `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+              :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
               it is a data object with data name identical to the coordinate,
               the error ranges of the data object will be used for interval. If
               the data name is not the same as `coordinate`, a coordinate with the
@@ -4111,7 +4111,7 @@ class DataObject:
     def save(self, filename, protocol=PICKLE_PROTOCOL):
         """Save the data object to a binary file.
 
-        Saving uses the pickle protocol. Use `flap.data_object.load()` to read
+        Saving uses the pickle protocol. Use :func:`~flap.data_object.load()` to read
         the object.
 
         Parameters
@@ -4995,7 +4995,7 @@ def get_data(data_source,
     coordinates : list of flap.Coordinate | dict, optional, default=None
         Coordinates to use. Two possibilities:
 
-        1. List of `flap.Coordinate` objects. These can precisely describe which
+        1. List of :class:`~flap.coordinate.Coordinate` objects. These can precisely describe which
         part of the data to read.
 
         2. Dictionary. Each key is a coordinate name, the values can be:
@@ -5004,7 +5004,7 @@ def get_data(data_source,
 
            b) A single element. Will be converted into a list with two identical elements
 
-           The dictionary will be converted to a list of `flap.Coordinate`
+           The dictionary will be converted to a list of :class:`~flap.coordinate.Coordinate`
            objects, which will be passed to the data source module.
 
     object_name : str, optional, default=None
@@ -5098,7 +5098,7 @@ def add_coordinate(object_name,
           - str: Use this data source instead of the one in the data
             object.
 
-        Other elements of `options` are passed on to `flap.add_coordinate()`.
+        Other elements of `options` are passed on to :func:`flap.data_object.DataObject.add_coordinate()`.
     output_name : str, optional, default=None
         The name of the new data object in the storage. If None, the input will
         be overwritten.
@@ -5165,10 +5165,10 @@ def plot(object_name,
         default first axis is the first coordinate, the second axis is
         '__Data__'.
     slicing : dict, optional, default=None
-        Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+        Passed as an argument to :func:`~flap.data_object.DataObject.slice_data()`. Slicing
         will be applied before plotting.
     summing : str, optional, default=None
-        Passed as an argument to `flap.DataObject.slice_data()`. Slicing
+        Passed as an argument to :func:`~flap.data_object.DataObject.slice_data()`. Slicing
         will be applied before plotting.
     options : dict, optional, default=None
         Options for plotting. Possible keys and values:
@@ -5345,7 +5345,7 @@ def plot(object_name,
         Can be used for overplotting, if the new plot should go into an
         existing plot.
     slicing_options : dict, optional, default=None
-        Options for slicing. See `flap.DataObject.slice_data()` for details.
+        Options for slicing. See :func:`~flap.data_object.DataObject.slice_data()` for details.
 
     Returns
     -------
@@ -5398,11 +5398,11 @@ def slice_data(object_name,
            Possibilities:
 
            1) slice objects, range objects, scalars, lists, numpy array.
-           2) `flap.DataObject` objects without error and with data
+           2) :class:`.DataObject` objects without error and with data
               unit.name equal to the coordinate.
-           3) `flap.DataObject` with the name of one coordinate equal to the
+           3) :class:`.DataObject` with the name of one coordinate equal to the
               dictionary key without having value_ranges values.
-           4) `flap.Intervals` objects with one interval.
+           4) :class:`.Intervals` objects with one interval.
 
         b) For MULTI SLICE: Various range selection objects. In this case
            ranges are selected and a new dimension is added to the data array
@@ -5415,10 +5415,10 @@ def slice_data(object_name,
 
            Possibilities:
 
-           1) `flap.Intervals` objects with more than one interval
-           2) `flap.DataObject` objects with data `unit.name` equal to the
+           1) :class:`.Intervals` objects with more than one interval
+           2) :class:`.DataObject` objects with data `unit.name` equal to the
               slicing coordinate. The error values give the intervals.
-           3) `flap.DataObject` with the name of one coordinate equal to the
+           3) :class:`.DataObject` with the name of one coordinate equal to the
               slicing coordinate. The `value_ranges` select the intervals.
 
            If range slicing is done with multiple coordinates which have
@@ -5758,7 +5758,7 @@ def apsd(object_name,
         - If dictionary with a single key: {selection coordinate:
             description}). Key is a coordinate name which can be different
             from the calculation coordinate. Description can be
-            `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+            :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
             it is a data object with data name identical to the coordinate,
             the error ranges of the data object will be used for interval. If
             the data name is not the same as `coordinate`, a coordinate with the
@@ -5806,7 +5806,7 @@ def apsd(object_name,
             calculation is done.
 
         - 'Trend removal' (default=['Poly', 2]): Trend removal description. (See
-          also `flap.spectral_analysis._trend_removal()`.)
+          also :func:`flap.spectral_analysis._trend_removal()`.)
 
           - list:
 
@@ -5888,7 +5888,7 @@ def cpsd(object_name,
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different
           from the calculation coordinate. Description can be
-          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
           it is a data object with data name identical to the coordinate,
           the error ranges of the data object will be used for interval. If
           the data name is not the same as `coordinate`, a coordinate with the
@@ -5936,7 +5936,7 @@ def cpsd(object_name,
             calculation is done.
 
         - 'Trend removal' (default=['Poly', 2]): Trend removal description. (See
-          also `flap.spectral_analysis._trend_removal()`.)
+          also :func:`flap.spectral_analysis._trend_removal()`.)
 
           - list:
 
@@ -6035,7 +6035,7 @@ def ccf(object_name,
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different
           from the calculation coordinate. Description can be
-          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
           it is a data object with data name identical to the coordinate,
           the error ranges of the data object will be used for interval. If
           the data name is not the same as `coordinate`, a coordinate with the
@@ -6075,7 +6075,7 @@ def ccf(object_name,
             calculation is done.
 
         - 'Trend removal' (default=['Poly', 2]): Trend removal description.
-          (See also `flap.spectral_analysis._trend_removal()`.)
+          (See also :func:`flap.spectral_analysis._trend_removal()`.)
 
           - list:
 
@@ -6154,7 +6154,7 @@ def detrend(object_name,
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different
           from the calculation coordinate. Description can be
-          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
           it is a data object with data name identical to the coordinate,
           the error ranges of the data object will be used for interval. If
           the data name is not the same as `coordinate`, a coordinate with the
@@ -6173,7 +6173,7 @@ def detrend(object_name,
         values:
 
         - 'Trend removal': Trend removal description. (See also
-          `flap.spectral_analysis._trend_removal()`.)
+          :func:`flap.spectral_analysis._trend_removal()`.)
 
           - list:
 
@@ -6231,7 +6231,7 @@ def filter_data(object_name,
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different
           from the calculation coordinate. Description can be
-          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
           it is a data object with data name identical to the coordinate,
           the error ranges of the data object will be used for interval. If
           the data name is not the same as `coordinate`, a coordinate with the
@@ -6356,7 +6356,7 @@ def pdf(object_name,
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different
           from the calculation coordinate. Description can be
-          `flap.Intervals`, `flap.DataObject` or a list of two numbers. If
+          :class:`.Intervals`, :class:`.DataObject` or a list of two numbers. If
           it is a data object with data name identical to the coordinate,
           the error ranges of the data object will be used for interval. If
           the data name is not the same as `coordinate`, a coordinate with the
@@ -6484,7 +6484,7 @@ def save(data, filename, exp_id='*', options=None, protocol=PICKLE_PROTOCOL):
         raise e
 
 def load(filename, options=None):
-    """Load data saved by `flap.save()`.
+    """Load data saved by :func:`~flap.data_object.save()`.
 
     If the data in the file were saved from `flap_storage`, it will also be
     loaded there, unless `no_storage` is set to True.

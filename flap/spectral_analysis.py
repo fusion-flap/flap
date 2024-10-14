@@ -22,7 +22,7 @@ def _spectral_calc_interval_selection(d,
                                       intervals,
                                       interval_n):
     """Helper function for spectral and correlation calculation.  Determines the
-    processing intervals and returns in a `flap.Intervals` object. The intervals
+    processing intervals and returns in a :class:`.Intervals` object. The intervals
     will have identical length.
 
     Parameters
@@ -37,8 +37,8 @@ def _spectral_calc_interval_selection(d,
 
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different from
-          the calculation coordinate.  Description can be `flap.Intervals`,
-          `flap.DataObject` or a list of two numbers. If it is a data object
+          the calculation coordinate.  Description can be :class:`.Intervals`,
+          :class:`.DataObject` or a list of two numbers. If it is a data object
           with data name identical to the coordinate, the error ranges of the
           data object will be used for interval. If the data name is not the
           same as coordinate, a coordinate with the same name will be searched
@@ -241,7 +241,7 @@ def trend_removal_func(d,ax, trend, x=None, return_trend=False, return_poly=Fals
 def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
     """Remove a given trend from the data.
 
-    See `flap.spectral_analysis.trend_removal_func` for details.
+    See :func:`.trend_removal_func()` for details.
     """
     if (trend is None):
         return
@@ -480,7 +480,7 @@ def _spectrum_binning_indices(wavenumber, n_apsd, _options, zero_ind, res_nat, r
 
 def _apsd(d, coordinate=None, intervals=None, options=None):
     """Calculate the auto-power spectral density (APSD) of the data `d`.
-    See `flap.DataObject.apsd()` for more details.
+    See :func:`flap.data_object.DataObject.apsd()` for more details.
     """
     if (d.data is None):
         raise ValueError("Cannot do spectral analysis without data.")
@@ -705,7 +705,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
 
 def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     """Calculate the complex cross-power spectral density (CPSD) of the data
-    `d`.  See `flap.DataObject.cpsd()` for more details.
+    `d`.  See :func:`flap.data_object.DataObject.cpsd()` for more details.
     """
     if (d.data is None):
         raise ValueError("Cannot do spectral analysis without data.")

@@ -72,7 +72,7 @@ class PddType(Enum):  # numpydoc ignore=PR01
     Data = 2
 
 class PlotDataDescription:
-    """Plot axis description for use in `flap.PlotID()` and `flap.plot()`.
+    """Plot axis description for use in :func:`.PlotID()` and :func:`.plot()`.
 
     Parameters
     ----------
@@ -812,7 +812,7 @@ class PlotID:
     number_of_plots : int
         Number of plot calls which generated this.
     axes : list
-        The axes list. Each element is a `flap.Unit` and describes one axis of the
+        The axes list. Each element is a :class:`~flap.coordinate.Unit` and describes one axis of the
         plot.
     plot_data : list
         The description of the axis data. This is a list of
@@ -1100,7 +1100,7 @@ def _plot(data_object,
           plot_id=None):
     """Plot a data object.
 
-    Description of parameters has been moved to `flap.DataObject.plot`.
+    Description of parameters has been moved to :func:`flap.data_object.DataObject.plot()`.
     """
 
     default_options = {

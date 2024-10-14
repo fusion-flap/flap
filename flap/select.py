@@ -44,8 +44,8 @@ def select_intervals(object_descr,
 
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different from
-          the calculation coordinate.  Description can be `flap.Intervals`,
-          `flap.DataObject` or a list of two numbers. If it is a data object
+          the calculation coordinate.  Description can be :class:`.Intervals`,
+          :class:`.DataObject` or a list of two numbers. If it is a data object
           with data name identical to the coordinate, the error ranges of the
           data object will be used for interval. If the data name is not the
           same as coordinate, a coordinate with the same name will be searched
