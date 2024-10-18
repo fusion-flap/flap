@@ -54,6 +54,9 @@ language = 'en'
 extensions = [
     'sphinx.ext.autodoc',
     'numpydoc',
+    'myst_parser',
+    'sphinx_gallery.gen_gallery',
+    'sphinx_copybutton',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -63,7 +66,10 @@ templates_path = ['templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = {'.rst': 'restructuredtext'}
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
 
 # The master toctree document.
 master_doc = 'index'
@@ -95,7 +101,12 @@ html_logo = "static/FLAP_logo.png"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = [abspath('static')]
 
+# -- Options for autosummary -------------------------------------------------
+
 autoclass_content = 'both'
+autosummary_generate = True
+
+# -- Options for numpydoc ----------------------------------------------------
 
 # All checks, except...
 numpydoc_validation_checks = {'all', 'GL01', 'SS06', 'ES01', 'PR09', 'RT02', 'RT03', 'SA01', 'EX01'}
@@ -103,4 +114,10 @@ numpydoc_validation_checks = {'all', 'GL01', 'SS06', 'ES01', 'PR09', 'RT02', 'RT
 numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
-autosummary_generate = True
+
+# -- Options for gen_gallery -------------------------------------------------
+
+sphinx_gallery_conf = {
+     'examples_dirs': '../../examples',  # path to your example scripts
+     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
+}

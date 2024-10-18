@@ -1,31 +1,66 @@
-.. FLAP documentation master file, created by
-   sphinx-quickstart on Wed Sep  4 12:57:59 2024.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-FLAP:  Fusion Library of Analysis Programs 
-==========================================
-
-Heading 1
-=========
-
-Text 1
-
-Heading 2
-=========
-
-Text 2
+.. These will be included in the navigation bar on the left
 
 .. toctree::
-   :maxdepth: 8
+   :hidden:
+   :maxdepth: 1
 
    self
+   Examples Gallery <auto_examples/index>
+   User's Guide <users_guide>
+   Extensions <extensions>
+   Developer's Guide <developers_guide>
    API reference <flap>
+   GitHub <http://github.com/fusion-flap/flap>
+
+
+FLAP - Fusion Library of Analysis Programs
+==========================================
+
+This package is intended for analysing large multidimensional datasets.
+
+Install
+-------
+After downloading FLAP from `GitHub <http://github.com/fusion-flap/flap>`_, set up an Anaconda environment using the appropriate, platform-specific ``.yml`` file provided for either Linux or Windows.
+
+For example, on Windows, from the Anaconda Prompt run:
+
+.. code:: bash
+
+   $ conda env create -f docs/flap_windows.yml
+
+Activate the new ``flap`` environment:
+
+.. code:: bash
+
+   $ conda activate flap
+
+Install the package:
+
+.. code:: bash
+
+   $ python setup.py install
+
+FLAP is now ready to use!
+
+
+Getting started
+---------------
+
+To get started, see the :doc:`Examples Gallery <auto_examples/index>`.
+
+For more information, see the :doc:`User's Guide <users_guide>`.
+
+Extensions
+----------
+:doc:`Various extensions <extensions>` are available for FLAP.
+
+API reference
+-------------
+
+For developers, an :doc:`API reference <flap>` is also available.
 
 
 Indices and tables
-==================
-
+------------------
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
