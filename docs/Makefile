@@ -20,7 +20,7 @@ html: flap.rst .deps
 	mkdir -p $(GENDIR)
 	mkdir -p $(BUILDDIR)
 	cp conf.py $(GENDIR)
-	cp $(CONTENT)/* $(GENDIR)
+	cp -r $(CONTENT)/* $(GENDIR)
 
 flap.rst: .deps
 	$(SPHINXGEN) -eTf -t "$(TEMPLATESDIR)" -o "$(GENDIR)" ../flap ../flap/tools.py

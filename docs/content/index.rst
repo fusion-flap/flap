@@ -6,7 +6,7 @@
 
    self
    Examples Gallery <auto_examples/index>
-   User's Guide <users_guide>
+   User's Guide <users_guide/index>
    Extensions <extensions>
    Developer's Guide <developers_guide>
    API reference <flap>
@@ -57,7 +57,7 @@ Extensions
 API reference
 -------------
 
-For developers, an :doc:`API reference <flap>` is also available.
+For developers, a :doc:`Guide <developers_guide>` and an :doc:`API reference <flap>` is available.
 
 
 Indices and tables
