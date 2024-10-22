@@ -18,20 +18,31 @@ except NameError:
     pass
 
 class FlapXml:
+    """Class for creating XML files.
+    """
     def __init__(self):
         self.sections = []
         self.section_elements = []
         self.head = None
 
     def create_head(self, head_name='FLAPXml', attrib=None):
+        """Create head (root) element.
+
+        Parameters
+        ----------
+        head_name : str, optional, default='FLAPXml'
+            Name of head (root) element.
+        attrib : dict, optional, default=None
+            Additional attributes to add.
+        """
         attrib_xml = copy.deepcopy(attrib)
         if (attrib is None):
             attrib_xml = {'FLAPVersion':'1.0'}
         else:
             if (type(attrib) is not dict):
-                raise TypeError("FLAPXml.creade_head: attrib argument should be a dictionary.")
+                raise TypeError("FLAPXml.create_head: attrib argument should be a dictionary.")
             attrib_xml['FLAPVersion'] = '1.0'
-        self.top = ET.Element(head_name,attrib=attrib_xml)
+        self.top = ET.Element(head_name, attrib=attrib_xml)
 
     def add_element(self,
                     section=None,
@@ -40,6 +51,23 @@ class FlapXml:
                     unit=None,
                     comment=None,
                     value_type=None):
+        """Add an element to the XML tree.
+
+        Parameters
+        ----------
+        section : str, optional, default=None
+            Section to add the element to.
+        element : str, optional
+            Name of the element to be added.
+        value : int | float | str, optional, default=None
+            Value associated to the element.
+        unit : str, optional, default=None
+            Unit of the given value.
+        comment : str, optional, default=None
+            Comment to add to element.
+        value_type : str, optional, default=None
+            Type of the given value.
+        """
         if (section is None) or (element is None) or (value is None):
             raise ValueError("FLAPXml.add_element: Missing input data")
 
@@ -81,7 +109,21 @@ class FlapXml:
                                                       "Type":type_str,
                                                       "Comment":comment})
 
-    def get_element(self,section,element):
+    def get_element(self, section, element):
+        """Get an element of the XML tree.
+
+        Parameters
+        ----------
+        section : str
+            Section to search `element` in.
+        element : str
+            Element to search for.
+
+        Returns
+        -------
+        dict
+            The attributes of `element`.
+        """
         try:
             i = self.sections.index(section)
         except ValueError:
@@ -92,10 +134,24 @@ class FlapXml:
         raise ValueError("Element '{:s}' not found in section '{:s}' in xml file.".format(element,section))                       
         return None
 
-    def write_file(self,filename):
+    def write_file(self, filename):
+        """Write the XML tree to a file.
+
+        Parameters
+        ----------
+        filename : str
+            Name of the file to save to.
+        """
         ET.ElementTree(self.top).write(filename)
 
-    def read_file(self,filename):
+    def read_file(self, filename):
+        """Read XML file into the object.
+
+        Parameters
+        ----------
+        filename : str
+            Name of the file to read from.
+        """
         self.__init__()
         tree = ET.parse(filename)
         self.head = tree.getroot()
@@ -108,6 +164,10 @@ class FlapXml:
 
 
 def test_write():
+    """Test XML write.
+
+    Creates a file named 'xx.xml'.
+    """
     m = FlapXml()
     m.create_head()
     m.add_element(section="ADCSettings",
@@ -123,5 +183,9 @@ def test_write():
 
 
 def test_read():
+    """Test XML read.
+
+    Reads a file named 'xx.xml'.
+    """
     m = FlapXml()
     m.read_file("xx.xml")

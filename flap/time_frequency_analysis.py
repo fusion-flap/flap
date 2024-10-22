@@ -13,18 +13,8 @@ import flap.coordinate
 
 
 def _stft(d, coordinate=None, options=None):
-    """
-    calculates the STFT of the data in a dataobject using scipy's stft method
-
-    INPUT:
-            d: A flap.DataObject.
-            coordinate: The name of the coordinate (string) along which to calculate STFT.
-                        This coordinate should change only along one data dimension and should be equidistant.
-                        This and all other coordinates changing along the data dimension of
-                        this coordinate will be removed. A new coordinate with name
-                        Frequency (unit HZ) will be added.
-            options:    Options of STFT (as dictionary) will be given to scipy.signal.stft
-
+    """Calculates the short-time Fourier transform of data `d`. See
+    `flap.DataObject.stft()` for more details.
     """
     default_options = {'window': 'hann',
                        'nperseg': 256,

@@ -1,26 +1,30 @@
 # -*- coding: utf-8 -*-
 """
-This is a test data source for flap
+This is a test data source for flap.
 
-It is assumed that measurement channels collect temporal data on a 2D mesh in the physical space
-The measurement channels are named as TEST-<row>-<colunn>
-<row>:  1....15
-<column>:  1...10
+It is assumed that measurement channels collect temporal data on a 2D mesh in
+the physical space.
+
+The measurement channels are named as TEST-<row>-<column>.
+
+- <row>:  1....15
+- <column>:  1...10
 
 The row/column locations relative to the array corner are:
-    xr = (<column>-1)*0.5 [cm]
-    yr = 0
-    zr = (<row>-1)*0.4 [cm]
+
+- xr = (<column>-1)*0.5 [cm]
+- yr = 0
+- zr = (<row>-1)*0.4 [cm]
 
 Conversion to device coordinates is:
 alpha = 15 degree
-  x = xr*cos(alpha) - zr*sin(alpha)
-  z = xr*sin(alpha) + zr*cos(alpha)
-  y = yr
 
-The Device R,Z,phi coordinate system origin in at x,y,z = 0
-R is along x
-Z is z
+- x = ``xr*cos(alpha) - zr*sin(alpha)``
+- z = ``xr*sin(alpha) + zr*cos(alpha)``
+- y = ``yr``
+
+The Device (R, Z, phi) coordinate system origin is at (x, y, z) = (0, 0, 0).  R
+is along x. Z is z.
 
 Created on Thu Jan 17 10:29:56 2019
 
@@ -43,53 +47,116 @@ COLUMN_NUMBER = 15
 meas_ADC_step = 0.001  # ADC resolution in Volt
 alpha = 18. # degree angle of measurement matrix
 
-def testdata_get_data(exp_id=None, data_name='*', no_data=False,
-                      options=None, coordinates=None, data_source=None):
-    """ Data read function for flap test data source
-        Channel names: TEST-col-row: Signals on a 15x5 spatial matrix
-                       VIDEO: A test image with timescale as for the signals.
-                       
-        options:
-            'Scaling': 'Volt', 'Digit'
-            'Signal' :'Sin'  Sine signals
-                      'Const.' : Constant values with row*COLUMN_NUMBER+column
-                      'Complex-Sin': Same as Sine but an imaginary cosine is added
-                      'Random': Random (normal dist.) signal in all channels
-            'Row number': Number of rows for signal matrix
-            'Column number': Number of columns for signal matrix
-            'Matrix angle': The angle [deg] of the signal matrix
-            'Image' : 'Gauss' Gaussian spot
-                      'Random'  Random int16 values between 0 and 4095
-            'Spotsize': Full width at half maximum of spot in pixels
-            'Width'   : Image width in pixels (x size)
-            'Height'  : Image height in pixels (y size)
-            'Frequency' : <number> Fixed frequency of signals [Hz]
-                                   For "Gauss" video data the rotation frequency of the spot
-                        : [f2,f2]: Changes from channel-to-channel between these frequencies [Hz]
-                        : data object: should be data object with Time coordinate and Frequency as data
-                                       If has one channel describes frequency vs time for all channels
-                                       If multiple signals (coordinate Signal name describes signals) describes frequency
-                                          vs time for channels. Should have the same number of channels as for the generation.
-                                          
-            'Length': Length in second. The sample rate is 1 MHz
-            'Samplerate': Sample rate [Hz]
+def testdata_get_data(exp_id=None,
+                      data_name='*',
+                      no_data=False,
+                      options=None,
+                      coordinates=None,
+                      data_source=None):
+    """Data read function for flap test data source.
+
+    Channel names:
+        - 'TEST-<col>-<row>': Signals on a 15x5 spatial matrix
+        - 'VIDEO': A test image with timescale as for the signals.
+    
+    Parameters
+    ----------
+    exp_id : str, optional, default=None
+        Experiment ID.
+    data_name : str, optional, default='*'
+        Name of data channels to select.
+    no_data : bool, optional, default=False
+        If True, do not read the data itself.
+    options : dict, optional, default=None
+        Options for test data.
+        
+        Possible keys and values:
+
+        - 'Scaling' (default=Volt):
+
+          - 'Volt': Voltage scaling.
+          - 'Digit': Digital scaling.
+
+        - 'Signal' (default='Sin'):
+
+          - 'Sin': Sine signals.
+          - 'Const.': Constant values with ``row * COLUMN_NUMBER + column``.
+          - 'Complex-Sin': Same as Sine, but a cosine imaginary part is added.
+          - 'Random': Random (normal dist.) signal in all channels.
+
+        - 'Row number' (default=10): 
+
+          - int: Number of rows for signal matrix.
+
+        - 'Column number' (default=15):
+
+          - int: Number of columns for signal matrix.
+
+        - 'Matrix angle' (default=0):
+
+          - float: The angle [deg] of the signal matrix.
+
+        - 'Image' (default='Gauss'):
+
+          - 'Gauss': Gaussian spot.
+          - 'Random': Random int16 values between 0 and 4095.
+
+        - 'Spotsize' (default=100):
+
+          - int: Full width at half maximum of spot, in pixels.
+
+        - 'Width' (default=640):
+
+          - int: Image width in pixels (x size).
+
+        - 'Height' (default=480):
+
+          - int: Image height in pixels (y size).
+
+        - 'Frequency' (default=1e3):
+
+          - float: Fixed frequency of signals [Hz]. For "Gauss" video data, the
+            rotation frequency of the spot
+          - [f2,f2]: Changes from channel-to-channel between these frequencies [Hz].
+          - flap.DataObject: Should be data object with 'Time' coordinate and
+            'Frequency' as data.
+
+            If has one channel, describes frequency vs. time for all channels.
+
+            If multiple signals (coordinate 'Signal' name describes signals),
+            describes frequency vs. time per channel. Should have the same
+            number of channels as for the generation.
+                                      
+        -  'Length' (default=0.1):
+
+          - float: Length in seconds. The sample rate is 1 MHz.
+
+        - 'Samplerate' (default=1e6):
+
+          - float: Sample rate [Hz]
+
+    coordinates : list of flap.Coordinate, optional, default=None
+        Coordinates for 'Time' or 'Sample' axes.
+    data_source : src, optional, default=None
+        Data source description.
     """
     if (data_source is None ):
         data_source = 'TESTDATA'
 
-    default_options = {'Row number': 10,
-                       'Column number': 15,
-                       'Matrix angle': 0.0,
-                       'Scaling': 'Volt',
-                       'Signal': 'Sin',
-                       'Image':'Gauss',
-                       'Spotsize':100,
-                       'Width': 640,
-                       'Height': 480,
-                       'Frequency': 1e3,
-                       'Length': 0.1,
-                       'Samplerate':1e6
-                       }
+    default_options = {
+        'Scaling': 'Volt',
+        'Signal': 'Sin',
+        'Row number': 10,
+        'Column number': 15,
+        'Matrix angle': 0.0,
+        'Image':'Gauss',
+        'Spotsize':100,
+        'Width': 640,
+        'Height': 480,
+        'Frequency': 1e3,
+        'Length': 0.1,
+        'Samplerate':1e6
+        }
     _options = flap.config.merge_options(default_options, options, data_source=data_source)
 
     ROW_NUMBER = _options['Row number']
@@ -460,12 +527,20 @@ def add_coordinate(data_object,
                    coordinates=None,
                    exp_id=None,
                    options=None):
-    """ This is the registered function for adding coordinates to the
-        data object.
+    """The registered function for adding coordinates to the data object.
 
-        handled coordinates:
-            Device x, Device z, Device r
+    Handled coordinates: Device x, Device y, Device z.
 
+    Parameters
+    ----------
+    data_object : flap.DataObject
+        The data object to add the coordinates to.
+    coordinates : list of str, optional, default=None
+        The coordinates to add.
+    exp_id : str, optional, default=None
+        Experiment ID. (Currently unused.)
+    options : dict, optional, default=None
+        Options. (Currently unused.)
     """
     for new_coord in coordinates:
         if (new_coord == 'Device y'):
@@ -555,6 +630,13 @@ def add_coordinate(data_object,
 
 
 def register(data_source=None):
+    """Register data source.
+
+    Parameters
+    ----------
+    data_source : str, optional, default=None
+        Data source description.
+    """
     if (data_source is None ):
         data_source = 'TESTDATA'
     flap.register_data_source('TESTDATA',
