@@ -1001,6 +1001,7 @@ def _plot(data_object,
     plot_type: The plot type (string). Can be abbreviated.
           'xy': Simple 1D plot. Default axes are: first coordinate, Data. For complex signals this
                 produces two plots, see option "Complex mode'.
+          'scatter' : Scatter plot.
           'multi xy': In case of 2D data plots 1D curves with vertical shift
                       Default x axis is first coordinate, y axis is Data
                       The signals are named in the label with the 'Signal name' coordinate or the one

@@ -194,8 +194,23 @@ def test_select_signals():
         print(e)
     print(chl)
 
+def list_config():
+    """
+    List the contents of the configuration file as stored in memory.
 
+    Returns
+    -------
+    None.
 
+    """
+    sect = __flap_config.config.sections()
+    for s in sect:
+        print("[{:s}]".format(s))
+        s_data  = get_all_section(s)
+        for ss in s_data.keys():
+            print("{:s} = {:s}".format(str(ss),str(s_data[ss])))
+            
+    
 try:
     __flap_config
 except NameError:
