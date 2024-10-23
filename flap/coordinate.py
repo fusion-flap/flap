@@ -447,11 +447,11 @@ class Coordinate:
                 c1_step = c1.step
             minstep = math.fabs(self_step[0])    
             for i in range(len(self_step)):
-                if (math.fabs(self_step[i] - c1_step[i]) / math.fabs(self_step[i]) > 0.00001):
+                if (math.fabs(self_step[i] - c1_step[i]) / math.fabs(self_step[i]) > 0.001):
                     return False
                 if (math.fabs(self_step[i]) < minstep):
                     minstep = math.fabs(self_step[i])
-            if (math.fabs(self.start - c1.start) / minstep > 0.00001):
+            if (math.fabs(self.start - c1.start) / minstep > 0.001):
                 return False
             if (self.value_ranges != c1.value_ranges):
                 return False

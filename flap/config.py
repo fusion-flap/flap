@@ -124,7 +124,7 @@ def merge_options(default_options, input_options, data_source=None, section=None
         default_options: Default options in a function. This should contain all the possible options.
         input_options: Contents of options argument of function. Option keys can also be abbreviated.
         data_source: The data source of the measurement. (May be None)
-        section: Name of the section in the config file related to the fnction. (May be None.)
+        section: Name of the section in the config file related to the function. (May be None.)
       Return value:
           The merged options dictionary. Abbreviated keys are expanded to full name.
     """
@@ -143,9 +143,10 @@ def merge_options(default_options, input_options, data_source=None, section=None
     # MOdule separator keys
     module_sep = '{}'
 
+    if (section is not None):
+        options.update(section_options)        
     if ((section is not None) and (data_source is not None)):
         # Looking for options in the data source which refer to this section, that is start with {section}
-        options.update(section_options)
         module_selected_options = {}
         for module_key in module_options.keys():
             if ((module_key[0] == module_sep[0]) and (module_key.find(module_sep[1]) != 0)):

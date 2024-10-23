@@ -2185,6 +2185,8 @@ class DataObject:
                                 for i_int in range(interval_starts.size):
                                     ind = np.nonzero(np.logical_and(c_data >= interval_starts[i_int], \
                                                      c_data <= interval_stops[i_int]))[0]
+                                    if (len(ind) == 0):
+                                        raise ValueError("No data in interval.")
                                     slice_description.append(ind)
                                     n = np.amax(ind) - np.amin(ind) + 1
                                     if (n > n_max):
@@ -4204,7 +4206,7 @@ def plot(object_name,exp_id='*',axes=None, slicing=None, summing=None, options=N
 
 def slice_data(object_name,exp_id='*',output_name=None,slicing=None,summing=None,options=None):
     """
-    slice function for an object in flap storage. This is a wrapper for DataObject.slicec_data()
+    slice function for an object in flap storage. This is a wrapper for DataObject.slice_data()
     If output name is set the sliced object will be written back to the flap storage under this name.
     """
     try:
