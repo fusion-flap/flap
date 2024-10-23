@@ -2185,6 +2185,8 @@ class DataObject:
                                 for i_int in range(interval_starts.size):
                                     ind = np.nonzero(np.logical_and(c_data >= interval_starts[i_int], \
                                                      c_data <= interval_stops[i_int]))[0]
+                                    if (len(ind) == 0):
+                                        raise ValueError("No data in interval.")
                                     slice_description.append(ind)
                                     n = np.amax(ind) - np.amin(ind) + 1
                                     if (n > n_max):
