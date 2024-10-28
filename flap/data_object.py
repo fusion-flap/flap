@@ -892,9 +892,9 @@ class DataObject:
         and error with NaN.
         """
         if (self.data.dtype.kind == 'f'):
-            self.data[ind] = np.NaN
+            self.data[ind] = np.nan
         elif (self.data.dtype.kind == 'c'):
-            self.data[ind] = complex(np.NaN,np.NaN)
+            self.data[ind] = complex(np.nan,np.nan)
         elif ((self.data.dtype.kind == 'u') or (self.data.dtype.kind == 'i')):
             self.data[ind] = 0
         elif (self.data.dtype.kind == 'O'):
@@ -904,18 +904,18 @@ class DataObject:
             if (type(self.error) == list):
                 for i in range(2):
                     if (self.error.dtype.kind == 'f'):
-                        self.error[i][ind] = np.NaN
+                        self.error[i][ind] = np.nan
                     elif (self.error.dtype.kind == 'c'):
-                        self.error[i][ind] = complex(np.NaN,np.NaN)
+                        self.error[i][ind] = complex(np.nan,np.nan)
                     elif ((self.error.dtype.kind == 'u') or (self.error.dtype.kind == 'i')):
                         self.error[i][ind] = 0
                     elif (self.error.dtype.kind == 'O'):
                         self.error[i][ind] = None
             else:
                 if (self.error.dtype.kind == 'f'):
-                    self.error[ind] = np.NaN
+                    self.error[ind] = np.nan
                 elif (self.error.dtype.kind == 'c'):
-                    self.error[ind] = complex(np.NaN,np.NaN)
+                    self.error[ind] = complex(np.nan,np.nan)
                 elif ((self.error.dtype.kind == 'u') or (self.error.dtype.kind == 'i')):
                     self.error[ind] = 0
                 elif (self.error.dtype.kind == 'O'):
@@ -1414,13 +1414,13 @@ class DataObject:
                                         new_coord_data[tuple(ind_out)] = ''
                                     else:
                                         if (check_coord.dtype() is float):
-                                            new_coord_data[tuple(ind_out)] = np.NaN
+                                            new_coord_data[tuple(ind_out)] = np.nan
                                         else:
                                             # There is no NaN for integer, we put in 0. There is no other solution
                                             new_coord_data[tuple(ind_out)] = 0
                                         if (new_data_low is not None):
-                                            new_data_low[tuple(ind_out)] = np.NaN
-                                            new_data_high[tuple(ind_out)] = np.NaN
+                                            new_data_low[tuple(ind_out)] = np.nan
+                                            new_data_high[tuple(ind_out)] = np.nan
                             # Moving the interval dimension to the end
                             new_coord_data = np.moveaxis(new_coord_data, len(new_coord_data.shape) - 2, len(new_coord_data.shape) - 1)
                             if (data_low is not None):

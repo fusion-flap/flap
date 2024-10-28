@@ -654,7 +654,7 @@ def _apsd(d, coordinate=None, intervals=None, options=None):
         out_err = None
     # If there are frequency bins without data setting them to np.NaN
     if (ind_nonzero is not None):
-        out_data[tuple(ind_zero)] = np.NaN
+        out_data[tuple(ind_zero)] = np.nan
     # We create the new data object with this trick as data_object.py cannot be imported
     d_out = type(d)(data_array=out_data,
                     error=out_err,
@@ -1041,10 +1041,10 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
            out_data /= np.sqrt(apsd_norm)
     # If there are frequency bins without data setting them to np.NaN
     if (ind_nonzero is not None):
-        out_data[tuple(ind_zero)] = np.NaN
+        out_data[tuple(ind_zero)] = np.nan
     # Putting significance into error
-    error = np.full(tuple(out_shape), np.NaN, dtype = float)
-    error_arr = np.full(out_data_num.shape, np.NaN, dtype=float)
+    error = np.full(tuple(out_shape), np.nan, dtype = float)
+    error_arr = np.full(out_data_num.shape, np.nan, dtype=float)
     if (ind_nonzero is not None):
         error_arr[index_nonzero] = 1./np.sqrt(out_data_num[index_nonzero] * n_proc_int)
     else:
