@@ -1410,7 +1410,7 @@ def _plot(data_object,
             # Complex xy and scatter plot
             # Creating two sublots if this is a new plot
             if (_plot_id.number_of_plots == 0):
-                gs = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=_plot_id.base_subplot)
+                gs = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
                 _plot_id.plt_axis_list = []
                 _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
                 _plot_id.plt_axis_list.append(plt.subplot(gs[1,0],sharex=_plot_id.plt_axis_list[0]))
@@ -1916,7 +1916,7 @@ def _plot(data_object,
             plt.sca(_plot_id.base_subplot)
 #            plt.subplot(_plot_id.base_subplot)  Changed 6 March, 2022
             plt.cla()
-        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
         ax = _plot_id.plt_axis_list[0]
@@ -2168,7 +2168,7 @@ def _plot(data_object,
         except ValueError:
             raise ValueError("Invalid color map.")
 
-        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
 #        ax=plt.plot()
         _plot_id.plt_axis_list = []
 #        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
@@ -2180,8 +2180,7 @@ def _plot(data_object,
         for it in range(len(tdata)):
             # This is a hack here. The problem is, that the colorbar() call reduces the axes size
             del gs
-            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
-            plt.subplot(gs[0,0])
+            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
 #            plt.subplot(_plot_id.base_subplot)
 #            ax_act = _plot_id.base_subplot
             ax_act = plt.subplot(gs[0,0])
@@ -2221,11 +2220,11 @@ def _plot(data_object,
                     else:
                         im = np.clip(d.data[time_index],vmin,vmax)
 
-                    img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                     cmap=cmap_obj,vmin=vmin,vmax=vmax,
-                                     aspect=_options['Aspect ratio'],
-                                     interpolation=_options['Interpolation'],
-                                     origin='lower',**_plot_opt)
+                    img = ax_act.imshow(im,extent=xdata_range + ydata_range,norm=norm,
+                                        cmap=cmap_obj,vmin=vmin,vmax=vmax,
+                                        aspect=_options['Aspect ratio'],
+                                        interpolation=_options['Interpolation'],
+                                        origin='lower',**_plot_opt)
                     del im
                 except Exception as e:
                     raise e
@@ -2234,16 +2233,16 @@ def _plot(data_object,
                     xgrid, ygrid = flap.tools.grid_to_box(xdata,ydata)
                     im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     try:
-                        img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
-                                             vmax=vmax,**_plot_opt)
+                        img = ax_act.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
+                                                vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
                     del im
                 else:
                     try:
                         im = np.clip(d.data[time_index],vmin,vmax)
-                        img = plt.contourf(xdata,ydata,im,contour_levels,norm=norm,
-                                           origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
+                        img = ax_act.contourf(xdata,ydata,im,contour_levels,norm=norm,
+                                              origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
                         del im
                     except Exception as e:
                         raise e
@@ -2396,7 +2395,7 @@ def _plot(data_object,
         except ValueError:
             raise ValueError("Invalid color map.")
 
-        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
 
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
