@@ -9,6 +9,7 @@
    User's Guide <users_guide/index>
    Extensions <extensions>
    Developer's Guide <developers_guide>
+   Presentations <presentations>
    API reference <flap>
    GitHub <http://github.com/fusion-flap/flap>
 
@@ -17,6 +18,8 @@ FLAP - Fusion Library of Analysis Programs
 ==========================================
 
 This package is intended for analysing large multidimensional datasets.
+
+.. _install:
 
 Install
 -------
@@ -48,7 +51,7 @@ Getting started
 
 To get started, see the :doc:`Examples Gallery <auto_examples/index>`.
 
-For more information, see the :doc:`User's Guide <users_guide>`.
+For more information, see the :doc:`User's Guide <users_guide/index>`.
 
 Extensions
 ----------
