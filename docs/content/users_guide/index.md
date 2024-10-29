@@ -714,7 +714,7 @@ The 'DATA_SOURCE_NAME' string should be replaced by the desired data source name
 
 ## Using data source modules
 
-To make use of a data source module it should be first imported in the user program as any other module. The data read and coordinate add functions are integrated into FLAP by calling the register function of the. In the example below we will use module name `testdata` and data source name 'TESTDATA'.
+To make use of a data source module it should be first imported in the user program as any other module. The data read and coordinate add functions are integrated into FLAP by calling the `register` function of the data source. In the example below we will use module name `testdata` and data source name 'TESTDATA'.
 
 ### Reading data
 
@@ -726,7 +726,7 @@ print(flap.list_data_sources())
 
 d=flap.get_data('TESTDATA',
                 exp_id=12345,
-                name=['Signal-1',’Signal-[20-23]’],
+                name=['Signal-1','Signal-[20-23]'],
                 options={'Scaling':'Volt'},\
                 coordinates={'Time': [1,3]},
                 object_name='TESTDATA_SIGNALS')

@@ -54,9 +54,10 @@ language = 'en'
 extensions = [
     'sphinx.ext.autodoc',
     'numpydoc',
-    'myst_parser',
-    'sphinx_gallery.gen_gallery',
+    'myst_nb',
+    'myst_sphinx_gallery',
     'sphinx_copybutton',
+    'sphinx_design',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -67,8 +68,9 @@ templates_path = ['templates']
 #
 # source_suffix = ['.rst', '.md']
 source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
+    ".rst": "restructuredtext",
+    ".md": "myst-nb",
+    ".myst": "myst-nb",
 }
 
 # The master toctree document.
@@ -115,13 +117,21 @@ numpydoc_show_class_members = False
 numpydoc_class_members_toctree = False
 
 
-# -- Options for gen_gallery -------------------------------------------------
+# -- Options for myst_sphinx_gallery -----------------------------------------
 
-sphinx_gallery_conf = {
-     'examples_dirs': '../../examples',  # path to your example scripts
-     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-}
+from pathlib import Path
+from myst_sphinx_gallery import GalleryConfig, generate_gallery
 
+myst_sphinx_gallery_config = GalleryConfig(
+    examples_dirs='../../examples',
+    gallery_dirs='auto_examples',
+    root_dir=Path(__file__).parent,
+    notebook_thumbnail_strategy='code',
+)
 
 # MyST
-myst_enable_extensions = ["dollarmath", "colon_fence"]
+myst_enable_extensions = [
+    'amsmath',
+    'dollarmath',
+    'colon_fence',
+]

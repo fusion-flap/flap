@@ -31,13 +31,13 @@ Images, downloadable files etc. are located in the `docs/static/` folder.
 Generating the documentation is done by running
 
 ```bash
-make html
+$ make html
 ```
 
 from the `docs/` folder under Linux, or using the `make.bat` file under Windows. 
 
 :::{Note}
-There is no `make` by default on Windows, so the `make.bat` implements a rudimentary `make` and `Makefile` that must be edited parallel to the `Makefile`, as they are completely independent.
+There is no `make` by default on Windows, so the `make.bat` implements the functions of both `make` and `Makefile` in a rudimentary way. The `make.bat` must be edited parallel to the `Makefile`, as they are completely independent.
 :::
 
 The `make` script generates the API reference using the `sphinx-apidoc` extension, copies this, the `docs/content/` and the `examples/` folder to the `docs/generated/` folder, and then runs `sphinx-build` to get the HTML output which is placed in `docs/build/`. For more details, see `docs/Makefile`.
@@ -45,7 +45,7 @@ The `make` script generates the API reference using the `sphinx-apidoc` extensio
 To clean the already generated files, run
 
 ```bash
-make clean
+$ make clean
 ```
 
 which will delete everything in the `docs/generated` and `docs/build` folder.
@@ -63,6 +63,26 @@ Two types of code examples are supported.
 Smaller code snippets showing the use of e.g. a method can be [included in the NumPy docstring itself](https://numpydoc.readthedocs.io/en/latest/format.html#examples), and will be included in the API reference.
 
 More comprehensive examples can be automatically added to the [Examples Gallery](auto_examples/index.rst) by placing the corresponding `.ipynb` files into the `examples/` folder. The [MyST Sphinx Gallery](https://myst-sphinx-gallery.readthedocs.io/) extension is used for this.
+
+:::{note}
+The example notebook files are executed during the compilation of the documentation.
+:::
+
+:::{tip}
+A download link to the notebook can be added by including the following markdown snippet:
+
+```markdown
+This notebook can be downloaded as **{nb-download}`name_of_notebook.ipynb`**.
+```
+
+This is usually included as a footnote:
+
+```markdown
+Introduction text of the example.[^download]
+
+[^download]This notebook can be downloaded as **{nb-download}`name_of_notebook.ipynb`**.
+```
+:::
 
 ## Style guide
 
