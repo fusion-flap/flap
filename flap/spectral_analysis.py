@@ -974,6 +974,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
     if (hanning):
         hanning_window = np.hanning(index_int_high[0] - index_int_low[0] + 1) 
         hanning_window /= math.sqrt(3./8)
+        hanning_window_ref = copy.deepcopy(hanning_window)
         if (len(d.shape) > 1):
             han_sh = [1] * len(d.shape)
             han_sh[proc_dim] = hanning_window.size
