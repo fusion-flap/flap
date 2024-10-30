@@ -1,0 +1,640 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Presentations about FLAP" href="presentations.html" /><link rel="prev" title="Extensions" href="extensions.html" />
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Developer’s Guide - FLAP documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/myst_sphinx_gallery.css?v=92de7a9e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">FLAP  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/FLAP_logo.png" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">FLAP - Fusion Library of Analysis Programs</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="auto_examples/index.html">Examples Gallery</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples Gallery</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="auto_examples/basic_examples/index.html">Basic examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Basic examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/basic_examples/using_data_sources.html">Using data source modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="users_guide/index.html">User's Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Developer's Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="presentations.html">Presentations</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="flap.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="flap.config.html">flap.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.coordinate.html">flap.coordinate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.data_object.html">flap.data_object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.flap_xml.html">flap.flap_xml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.plot.html">flap.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.select.html">flap.select</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.spectral_analysis.html">flap.spectral_analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.testdata.html">flap.testdata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.time_frequency_analysis.html">flap.time_frequency_analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/fusion-flap/flap">GitHub</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/blob/master/docs/developers_guide.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/edit/master/docs/developers_guide.md" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="developer-s-guide">
+<h1>Developer’s Guide<a class="headerlink" href="#developer-s-guide" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>G. Cseh, D. M. Takács, Centre for Energy Research</p>
+<p>2024 October</p>
+</div></blockquote>
+<p>A few useful notes regarding development and documentation are collected here for reference.</p>
+<section id="notes-on-writing-documentation">
+<h2>Notes on writing documentation<a class="headerlink" href="#notes-on-writing-documentation" title="Link to this heading">¶</a></h2>
+<p>FLAP uses the <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> package for generating its documentation. The documentation can be divided into two main parts: the <a class="reference internal" href="flap.html"><span class="std std-doc">API documentation</span></a>, which is generated from the docstrings included in the code itself, and all other parts of the documentation that are written separately, such as the <a class="reference internal" href="users_guide/index.html"><span class="std std-doc">FLAP Version 1.12 User’s Guide</span></a> or the present Developer’s Guide.</p>
+<section id="writing-docstrings">
+<h3>Writing docstrings<a class="headerlink" href="#writing-docstrings" title="Link to this heading">¶</a></h3>
+<p>The <a class="reference internal" href="flap.html"><span class="std std-doc">API documentation</span></a> is automatically generated from the docstrings in the Python files of the library itself using the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html">autodoc</a> Sphinx extension. This way, developer documentation can be written simultaneously with the code, embodying the <em>Documentation as Code</em> principle.</p>
+<p>The docstrings follow the <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html">NumPy convention</a>. This style is easily readable and enables the use of various tools that can check or process the docstrings, such as the <code class="docutils literal notranslate"><span class="pre">numpydoc</span></code> package. NumPy-style docstrings also allow for rich formatting: for details and examples, see the above link.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Including bullet lists and similar enumeration constructs in a NumPy-style docstring requires the use of ReST syntax. This is slightly different from the Markdown/MyST syntax, <a class="reference external" href="https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#bullet-lists">some care</a> must be taken with whitespaces for those not familiar with it.</p>
+</div>
+</section>
+<section id="editing-the-documentation">
+<h3>Editing the documentation<a class="headerlink" href="#editing-the-documentation" title="Link to this heading">¶</a></h3>
+<p>The files describing the documentation structure and contents are in <code class="docutils literal notranslate"><span class="pre">docs/content</span></code>. The file <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> is the main file describing the overall structure, other parts of the documentation are imported to or linked from this file. While most parts of the documentation are written in <a class="reference external" href="https://myst-parser.readthedocs.io/">MyST</a> format (an extended form of Markdown), <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> is in <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">ReStructuredText</a> format, as the Sphinx core uses this format. Both MyST and ReST can be used for any other parts of the documentation: see the respective links for the syntax and other details.</p>
+<p>Images, downloadable files etc. are located in the <code class="docutils literal notranslate"><span class="pre">docs/static/</span></code> folder.</p>
+</section>
+<section id="generating-the-documentation">
+<h3>Generating the documentation<a class="headerlink" href="#generating-the-documentation" title="Link to this heading">¶</a></h3>
+<p>Generating the documentation is done by running</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>make<span class="w"> </span>html
+</pre></div>
+</div>
+<p>from the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder under Linux, or using the <code class="docutils literal notranslate"><span class="pre">make.bat</span></code> file under Windows.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is no <code class="docutils literal notranslate"><span class="pre">make</span></code> by default on Windows, so the <code class="docutils literal notranslate"><span class="pre">make.bat</span></code> implements the functions of both <code class="docutils literal notranslate"><span class="pre">make</span></code> and <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> in a rudimentary way. The <code class="docutils literal notranslate"><span class="pre">make.bat</span></code> must be edited parallel to the <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>, as they are completely independent.</p>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">make</span></code> script generates the API reference using the <code class="docutils literal notranslate"><span class="pre">sphinx-apidoc</span></code> extension, copies this, the <code class="docutils literal notranslate"><span class="pre">docs/content/</span></code> and the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder to the <code class="docutils literal notranslate"><span class="pre">docs/generated/</span></code> folder, and then runs <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> to get the HTML output which is placed in <code class="docutils literal notranslate"><span class="pre">docs/build/</span></code>. For more details, see <code class="docutils literal notranslate"><span class="pre">docs/Makefile</span></code>.</p>
+<p>To clean the already generated files, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>make<span class="w"> </span>clean
+</pre></div>
+</div>
+<p>which will delete everything in the <code class="docutils literal notranslate"><span class="pre">docs/generated</span></code> and <code class="docutils literal notranslate"><span class="pre">docs/build</span></code> folder.</p>
+<p>When the documentation is generated, Sphinx calls the <code class="docutils literal notranslate"><span class="pre">numpydoc</span></code> extension to check the docstrings’ syntax, and raises warnings appropriately.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>To change Sphinx’s or any of the extensions’ behaviour, the <code class="docutils literal notranslate"><span class="pre">docs/conf.py</span></code> configuration file can be edited.</p>
+</div>
+</section>
+<section id="adding-examples">
+<h3>Adding examples<a class="headerlink" href="#adding-examples" title="Link to this heading">¶</a></h3>
+<p>Two types of code examples are supported.</p>
+<p>Smaller code snippets showing the use of e.g. a method can be <a class="reference external" href="https://numpydoc.readthedocs.io/en/latest/format.html#examples">included in the NumPy docstring itself</a>, and will be included in the API reference.</p>
+<p>More comprehensive examples can be automatically added to the <a class="reference internal" href="auto_examples/index.html"><span class="std std-doc">Examples Gallery</span></a> by placing the corresponding <code class="docutils literal notranslate"><span class="pre">.ipynb</span></code> files into the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder. The <a class="reference external" href="https://myst-sphinx-gallery.readthedocs.io/">MyST Sphinx Gallery</a> extension is used for this.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The example notebook files are executed during the compilation of the documentation.</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>A download link to the notebook can be added by including the following markdown snippet:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>This notebook can be downloaded as <span class="gs">**{nb-download}`name_of_notebook.ipynb`**</span>.
+</pre></div>
+</div>
+<p>This is usually included as a footnote:</p>
+<div class="highlight-markdown notranslate"><div class="highlight"><pre><span></span>Introduction text of the example.[^download]
+
+[^download]This notebook can be downloaded as <span class="gs">**{nb-download}`name_of_notebook.ipynb`**</span>.
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+<section id="style-guide">
+<h2>Style guide<a class="headerlink" href="#style-guide" title="Link to this heading">¶</a></h2>
+<p>The purpose of this document is to give an overview of the coding style requirements for developing the main components of the Fusion Library of Analysis Programs (FLAP) package. (It is not a requirement for developing your own user programs, however, it is still suggested to use this coding style, even when just using FLAP. Or always.)</p>
+<p>The coding style in FLAP package follows the <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/" title="Link to the PEP 8 documentation">PEP 8</a> style guide (see examples later), so if you are already know it’s rules, you are good to go. Otherwise here are some useful tips about installing and using a style- and code-checking extension (<a class="reference external" href="http://flake8.pycqa.org/en/latest/" title="Link to the flake8 documentation">flake8</a>) in Visual Studio Code and Spyder.</p>
+<section id="extensions-packages-for-style-checking">
+<h3>Extensions/packages for style checking<a class="headerlink" href="#extensions-packages-for-style-checking" title="Link to this heading">¶</a></h3>
+<p>Before getting to the actual code style guide, here is the list of packages/extensions, one can use to automatically check the style of one’s coding.</p>
+<section id="python-extension-for-visual-studio-code">
+<h4>Python extension for Visual Studio Code<a class="headerlink" href="#python-extension-for-visual-studio-code" title="Link to this heading">¶</a></h4>
+<p><a class="reference external" href="https://code.visualstudio.com/" title="Link to Visual Studio Code website">Visual Studio Code</a> is an open source, cross-platform code editor, which is widely used in many environments, e.g. it is available from the Anaconda Python distribution.</p>
+<p>To install flake8 code analyzer, you have to install first the <a class="reference external" href="https://github.com/Microsoft/vscode-python" title="Link to the GitHub page of the VSCode Python extension">Python extension</a> for VSCode:</p>
+<ol class="arabic simple">
+<li><p>Go to the Extension sidebar (or press Ctrl+Shift+X).</p></li>
+<li><p>Type Python into the “Search Extension in Marketplace” search field.</p></li>
+<li><p>Click on the green Install button.</p></li>
+<li><p>That’s it!</p></li>
+</ol>
+<p>After installing the Python extension, a text will appear on the bottom sidebar of the VSCode window, which says Python a version number and 32/64 bit in the form of “Python 3.7.2 64-bit”. By clicking on this text, you can select the Python version, you want to use for code analysis, and running your Python programs. This list contains (in principle) all the available Python installations on your machine, not just the ones, which are in the PATH variable.</p>
+<p>To have your code checked, you need to install a linting module to your Python installation. The recommended module for this is flake8 (as mentioned before), which not only checks your code, but also analyze your programs and notices you about uninitialized/unused variables etc.</p>
+<p>To install flake8, you just have to set VSCode settings accordingly. This means, that go to File –&gt; Preferences –&gt; Settings (Ctrl+,). Then type “python.” in the search bar, and click on the “edit in settings.json” option (it appears multiple times, it does not matter, which one you click on). Then you have to insert the following lines or - if they are present - check, that the settings are the same as below.</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;python.linting.pylintEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;python.linting.flake8Enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;python.linting.enabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;python.linting.flake8Args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;--max-line-length=120&quot;</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>If you have no flake8 installed with your Python distribution, an automatic message will come up, offering the possibility to install this module automatically. You can choose either this to install flake8 (in this case, an embedded command line will come up inside the VSCode window and install the extension), or you can install it manually by using the</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>&gt;<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>flake8
+</pre></div>
+</div>
+<p>In this manual case, take care that you use the python version you mean, and not another installation.</p>
+<p>After installing flake8, the style and code analysis messages will appear in a dedicated block, if you click the error/warning sign icons in the navigation bar at the bottom of the screen.</p>
+</section>
+<section id="python-with-spyder">
+<h4>Python with Spyder<a class="headerlink" href="#python-with-spyder" title="Link to this heading">¶</a></h4>
+<p>Since Spyder is optimized solely around the Python language, Spyder is coming pylint preinstalled, so to have a good linter, you just have to switch it on. You have to check on the:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>Tools<span class="w"> </span>--&gt;<span class="w"> </span>Preferences<span class="w"> </span>--&gt;<span class="w"> </span>Editor<span class="w"> </span>--&gt;<span class="w"> </span>Code<span class="w"> </span>Instrospection/Analysis<span class="w"> </span>--&gt;
+Real-time<span class="w"> </span>code<span class="w"> </span>style<span class="w"> </span>analysis
+</pre></div>
+</div>
+<p>checkbox, and you are good to go. After checking this checkmark and applying the settings, the warning/error messages will appear next to the line numbering with a yellow warning sign. Hovering the mouse over these warning signs will give you the exact message.</p>
+</section>
+</section>
+<section id="style-guide-a-short-summary">
+<h3>Style guide - a short summary<a class="headerlink" href="#style-guide-a-short-summary" title="Link to this heading">¶</a></h3>
+<p>Since we follow the guidelines articulated in <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/#" title="Link to the Python Enchancment Proposal 0008 website">Python Enchancment Proposal 8 (PEP 8)</a>, if something is not clear and/or not written in this document, this is a good web page to start. Otherwise I try to give a short, but comprehensive summary about the ideas described there.</p>
+<ol class="arabic">
+<li><p>Use 4 spaces for indentation - no tabs!! (It can be easily set in modern code editors, even VI(m) has this possibility. It is called either “indent using spaces” or “soft tab”.)</p></li>
+<li><p>No trailing spaces at the end of the line.</p></li>
+<li><p>Line continuation:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Aligned with opening delimiter.</span>
+<span class="n">foo</span> <span class="o">=</span> <span class="n">long_function_name</span><span class="p">(</span><span class="n">var_one</span><span class="p">,</span> <span class="n">var_two</span><span class="p">,</span>
+                        <span class="n">var_three</span><span class="p">,</span> <span class="n">var_four</span><span class="p">)</span>
+
+<span class="c1"># Add 4 spaces (an extra level of indentation) to distinguish</span>
+<span class="c1"># arguments from the rest.</span>
+<span class="k">def</span> <span class="nf">long_function_name</span><span class="p">(</span>
+        <span class="n">var_one</span><span class="p">,</span> <span class="n">var_two</span><span class="p">,</span> <span class="n">var_three</span><span class="p">,</span>
+        <span class="n">var_four</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">var_one</span><span class="p">)</span>
+
+<span class="c1"># The closing brace/bracket/parenthesis on multiline constructs</span>
+<span class="c1"># line up under the first non-whitespace character of the last</span>
+<span class="c1"># line of list (or the first character of the line)</span>
+<span class="n">my_list</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="p">]</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">some_function_that_takes_arguments</span><span class="p">(</span>
+    <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Line length: <strong>79 characters</strong> for code, <strong>72 characters</strong> for docstrings/comments. The original argument for this decision is:</p>
+<blockquote>
+<div><p>Limiting the required editor window width makes it possible to have several files open side-by-side, and works well when using code review tools that present the two versions in adjacent columns.</p>
+</div></blockquote>
+<p>However, if this is not the case at your coding style (means you use one ), it is allowed (as a local rule) to use <strong>120 characters</strong> for code and/or docstrings/comments.</p>
+</li>
+<li><p>Wrapping long lines:</p>
+<blockquote>
+<div><p>The preferred way of wrapping long lines is by using Python’s implied line continuation inside parentheses, brackets and braces. Long lines can be broken over multiple lines by wrapping expressions in parentheses. These should be used in preference to using a backslash for line continuation.
+Backslashes may still be appropriate at times. For example, long, multiple with-statements cannot use implicit continuation, so backslashes are acceptable:</p>
+</div></blockquote>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/path/to/some/file/you/want/to/read&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_1</span><span class="p">,</span> \
+     <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/path/to/some/file/being/written&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_2</span><span class="p">:</span>
+    <span class="n">file_2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">file_1</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+</pre></div>
+</div>
+</li>
+<li><p>Line breaks with binary operators (short: operator should be <em>before</em> the operand):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Yes: easy to match operators with operands</span>
+<span class="n">income</span> <span class="o">=</span> <span class="p">(</span><span class="n">gross_wages</span>
+          <span class="o">+</span> <span class="n">taxable_interest</span>
+          <span class="o">+</span> <span class="p">(</span><span class="n">dividends</span> <span class="o">-</span> <span class="n">qualified_dividends</span><span class="p">)</span>
+          <span class="o">-</span> <span class="n">ira_deduction</span>
+          <span class="o">-</span> <span class="n">student_loan_interest</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>Blank lines.</p>
+<ul class="simple">
+<li><p>Surround <em><strong>top-level functions</strong></em> and <em><strong>class definitions</strong></em> with <em><strong>two</strong></em> blank lines.</p></li>
+<li><p><em><strong>Method definitions</strong></em> inside a class are surrounded by a <em><strong>single</strong></em> blank line.</p></li>
+<li><p>Use blank lines in functions, sparingly, to indicate logical sections.</p></li>
+</ul>
+</li>
+<li><p>Source file encoding: <a class="reference external" href="https://en.wikipedia.org/wiki/UTF-8" title="Link to the UTF-8 Wikipedia page">UTF-8</a>. Set this every time. However, you should use English words and ASCII <em>characters</em> in those files. Except explicit test cases for non-ASCII characters and author names.</p></li>
+<li><p>Naming conventions</p>
+<ul class="simple">
+<li><p>Names to avoid: ‘l’ (lowercase letter L), ‘o’ (lowercase letter ‘oh’), ‘I’ (uppercase letter ‘eye’) as single-letter variable names. Reason: confusing.</p></li>
+<li><p>All the names should be ASCII compatibility (however, the character-encoding is UTF-8).</p></li>
+<li><p><em><strong>Module</strong></em> names should be <em><strong>short, lowercase</strong></em> letters (like flap).</p></li>
+<li><p><em><strong>Class names: CamelCase.</strong></em></p></li>
+<li><p><em><strong>Function names: lowercase</strong></em>, words separated by <em><strong>underscores.</strong></em></p></li>
+<li><p>Always use self for the first argument to instance methods.</p></li>
+<li><p>Always use cls for the first argument to class methods.</p></li>
+<li><p>At name collision (e.g. with a reserved keyword) use a trailing underscore. E.g. class_.</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="logging">
+<h3>Logging<a class="headerlink" href="#logging" title="Link to this heading">¶</a></h3>
+<p>Instead of using print messages and verbose keywords etc. throughout the whole code, it it strongly advised to use <a class="reference external" href="https://docs.python.org/3.7/library/logging.html" title="Link to the Python logging facility website">Python’s built-in logging system</a>. It is capable of save the log messages in a stream, on the console or in a file (actually, the latter two are also kinds of streams) based on predefined criterions, e.g. severity. The logging system is easy-to-use and easy-to-config. Some examples are below.</p>
+<ul>
+<li><p>A logging.conf file for the logger setup.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[loggers]
+keys=root,flapLogger
+
+[handlers]
+keys=consoleHandler,fileHandler
+
+[formatters]
+keys=fileFormatter,consoleFormatter
+
+[logger_root]
+level=DEBUG
+handlers=consoleHandler
+
+[logger_edvisLogger]
+level=DEBUG
+handlers=consoleHandler,fileHandler
+qualname=edvisLogger
+propagate=0
+
+[handler_fileHandler]
+class=logging.handlers.RotatingFileHandler
+level=DEBUG
+formatter=fileFormatter
+args=(&#39;./flap.log&#39;, &#39;a&#39;, 5*1024*1024, 1)
+
+[handler_consoleHandler]
+class=StreamHandler
+level=INFO
+formatter=consoleFormatter
+args=(sys.stdout,)
+
+[formatter_fileFormatter]
+format=%(asctime)s - %(name)s - %(filename)s - line: %(lineno)s -
+%(levelname)s - %(message)s
+datefmt=
+
+[formatter_consoleFormatter]
+format=%(asctime)s - %(levelname)s - %(message)s
+datefmt=
+</pre></div>
+</div>
+</li>
+<li><p>Usage of the logger after setting up a logging.conf file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">logging.config</span>
+
+<span class="c1"># Loading the logger config file</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">fileConfig</span><span class="p">(</span><span class="s1">&#39;logging.conf&#39;</span><span class="p">)</span>
+
+<span class="c1"># Create logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;flapLogger&#39;</span><span class="p">)</span>
+
+<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;The FLAP logger facility has been initialized.&quot;</span><span class="p">)</span>
+
+<span class="c1"># Doing some everyday work (only need info about that if we are in verbose mode)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Pam pam param...&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Here is some verbose, debug level logging message</span>
+              <span class="n">about</span> <span class="s1">&#39;Pam pam param...&#39;</span><span class="s2">&quot;)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="presentations.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Presentations about FLAP</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="extensions.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Extensions</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2019-2024, FLAP contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Developer’s Guide</a><ul>
+<li><a class="reference internal" href="#notes-on-writing-documentation">Notes on writing documentation</a><ul>
+<li><a class="reference internal" href="#writing-docstrings">Writing docstrings</a></li>
+<li><a class="reference internal" href="#editing-the-documentation">Editing the documentation</a></li>
+<li><a class="reference internal" href="#generating-the-documentation">Generating the documentation</a></li>
+<li><a class="reference internal" href="#adding-examples">Adding examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#style-guide">Style guide</a><ul>
+<li><a class="reference internal" href="#extensions-packages-for-style-checking">Extensions/packages for style checking</a><ul>
+<li><a class="reference internal" href="#python-extension-for-visual-studio-code">Python extension for Visual Studio Code</a></li>
+<li><a class="reference internal" href="#python-with-spyder">Python with Spyder</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#style-guide-a-short-summary">Style guide - a short summary</a></li>
+<li><a class="reference internal" href="#logging">Logging</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=8a448e45"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

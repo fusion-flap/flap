@@ -1,0 +1,1130 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Extensions" href="../extensions.html" /><link rel="prev" title="Using data source modules" href="../auto_examples/basic_examples/using_data_sources.html" />
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>FLAP Version 1.12 User’s Guide - FLAP documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/myst_sphinx_gallery.css?v=92de7a9e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../index.html"><div class="brand">FLAP  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../_static/FLAP_logo.png" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">FLAP - Fusion Library of Analysis Programs</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../auto_examples/index.html">Examples Gallery</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples Gallery</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../auto_examples/basic_examples/index.html">Basic examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Basic examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../auto_examples/basic_examples/using_data_sources.html">Using data source modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">User's Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../extensions.html">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../developers_guide.html">Developer's Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../presentations.html">Presentations</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../flap.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../flap.config.html">flap.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.coordinate.html">flap.coordinate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.data_object.html">flap.data_object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.flap_xml.html">flap.flap_xml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.plot.html">flap.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.select.html">flap.select</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.spectral_analysis.html">flap.spectral_analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.testdata.html">flap.testdata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../flap.time_frequency_analysis.html">flap.time_frequency_analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/fusion-flap/flap">GitHub</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/blob/master/docs/users_guide/index.md?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/edit/master/docs/users_guide/index.md" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="flap-version-1-12-user-s-guide">
+<h1>FLAP Version 1.12 User’s Guide<a class="headerlink" href="#flap-version-1-12-user-s-guide" title="Link to this heading">¶</a></h1>
+<p>S. Zoletnik, M. Vécsei, Centre for Energy Research</p>
+<p>M. Vavrik, BME NTI</p>
+<p>zoletnik.sandor&#64;ek-cer.hu</p>
+<p>Document version 1.72, 28 October, 2024</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h2>
+<p>The Fusion Library of Analysis Programs (FLAP) is a Python framework to work with large multi-dimensional data sets especially for turbulence data evaluation in fusion experiments. Data are stored in <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">data objects</span></a> together with coordinates and data names, thus the built-in plotting functions create figures with correct axes. The data set can be sliced to reduce dimensions and thus enable visualization of more than 2D data sets. FLAP is a modular package: data are read through modules which register themselves to the FLAP framework. This way data are read through a uniform interface by defining data source, experiment ID and data name. Also coordinate conversion is done by functions in the data source modules.</p>
+</section>
+<section id="obtaining-and-installing-flap">
+<h2>Obtaining and installing FLAP<a class="headerlink" href="#obtaining-and-installing-flap" title="Link to this heading">¶</a></h2>
+<p>Flap is available on GitHub at <a class="reference external" href="https://github.com/fusion-flap">https://github.com/fusion-flap</a>. There are multiple repositories. The core FLAP repository is named <code class="docutils literal notranslate"><span class="pre">flap</span></code>. Some data source packages are also stored here with names <code class="docutils literal notranslate"><span class="pre">flap_xxx</span></code>. See the <a class="reference internal" href="../index.html#install"><span class="std std-ref">Install</span></a> for the installation steps of the main package. To use the data source packages, either refer to their README, or just clone the appropriate repository and add it to your Python <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.</p>
+<p>To test and see examples look at file <code class="docutils literal notranslate"><span class="pre">tests/flap_tests.py</span></code> in the flap repository. It contains various functions to test and demonstrate different functionalities. These functions are called at the end of the file where they can be one-by one switched on/off by changing True/False values. The test programs print some information and the contents the FLAP storage into the console and generate various plots with Matplotlib.</p>
+<p>Additional illustrative examples are available in the <a class="reference internal" href="../auto_examples/index.html"><span class="std std-doc">Examples Gallery</span></a>.</p>
+</section>
+<section id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Link to this heading">¶</a></h2>
+<p>FLAP can be adapted to the local environment using a configuration file. When flap is imported the default configuration file <code class="docutils literal notranslate"><span class="pre">flap_defaults.cfg</span></code> is loaded from the working directory. If the file is not found a warning is printed. A configuration file can also be read explicitly using the <a class="reference internal" href="../flap.config.html#flap.config.read" title="flap.config.read"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">flap.config.read</span></code></a> function.</p>
+<p>The configuration file is a windows-style configuration file consisting of sections and elements. Sections start with their name in <code class="docutils literal notranslate"><span class="pre">[]</span></code>. The
+elements follow on individual lines. The name of the element and the value is separated by <code class="docutils literal notranslate"><span class="pre">=</span></code>. Space can be used in both the section names and element names. Lowercase and uppercase characters are different. Usually names start with upper case but this is not a requirement. An example:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[PS]
+Resolution = 1e3
+Range = [1e3, 1e6]
+[Module TESTDATA]
+PS/Resolution = 100
+Name = &#39;This is a string&#39;
+</pre></div>
+</div>
+<p>In the above example section “PS” contains two elements. Section “Module TESTDATA” refers to the TESTDATA data source module. The element PS/Resolution refers to the resolution element in the PS section and enables overriding section settings with module specific values.</p>
+<p>All elements in a section can be read with the <a class="reference internal" href="../flap.config.html#flap.config.get_all_section" title="flap.config.get_all_section"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">flap.config.get_all_section</span></code></a> function. This returns a dictionary with keys referring to element names. The values are converted using the following rules:</p>
+<ul class="simple">
+<li><p>True and Yes is converted to boolean True.</p></li>
+<li><p>False and No is converted to boolean False.</p></li>
+<li><p>An element enclosed in single or double quotes is handled as string (without the quotes).</p></li>
+<li><p>Elements which can be converted to int, float or complex are interpreted accordingly.</p></li>
+<li><p>An element enclosed in square brackets (<code class="docutils literal notranslate"><span class="pre">[]</span></code>) is interpreted as a list. List elements should be separated by commas. Each list element is interpreted using the same rules as one element of the section.</p></li>
+<li><p>If all the above interpretation attempt fails the element is handled as string.</p></li>
+</ul>
+</section>
+<section id="options-and-defaults">
+<span id="id1"></span><h2>Options and defaults<a class="headerlink" href="#options-and-defaults" title="Link to this heading">¶</a></h2>
+<p>Standard flap functions (like <a class="reference internal" href="../flap.data_object.html#flap.data_object.get_data" title="flap.data_object.get_data"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">flap.data_object.get_data</span></code></a>, <a class="reference internal" href="../flap.data_object.html#flap.data_object.apsd" title="flap.data_object.apsd"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">flap.data_object.apsd</span></code></a>, …) take an <code class="docutils literal notranslate"><span class="pre">options</span></code> keyword argument. A default options list is defined inside the routine, which contains all possible option keys understood by the function and default values for them. If no options are passed to the function these will take effect. The function might also be linked to a section in the configuration file. Options read from this section override the default options.</p>
+<p>The above section defaults might be overridden with data source related values. The data object processed by the function might contain a data_source variable. If that is not <code class="docutils literal notranslate"><span class="pre">None</span></code>, configuration file elements in the section <code class="docutils literal notranslate"><span class="pre">[Module</span> <span class="pre">&lt;data_source&gt;]</span></code> are read and elements in the form <code class="docutils literal notranslate"><span class="pre">{&lt;section&gt;}&lt;parameter&gt;</span></code> are searched for. (Here <code class="docutils literal notranslate"><span class="pre">&lt;section&gt;</span></code> and <code class="docutils literal notranslate"><span class="pre">&lt;paramter&gt;</span></code> are names of a section and a parameter in it, respectively.) If such an element is found the respecting default parameter in <code class="docutils literal notranslate"><span class="pre">&lt;section&gt;</span></code> is overwritten with the value on the Module section.</p>
+<p>As all possible options of the function are known from the default options dictionary it is allowed to abbreviate the option names in the function input options list up to the point where it matches only one key. (In the configuration file full option keys should be used.) This also means that any key in the default key list cannot be an abbreviation of another one. (E.g. ‘A’ and ‘A1’ are not allowed.)</p>
+<p>This procedure is handled by the <a class="reference internal" href="../flap.config.html#flap.config.merge_options" title="flap.config.merge_options"><code class="xref myst py py-func docutils literal notranslate"><span class="pre">flap.config.merge_options</span></code></a> function.</p>
+</section>
+<section id="data-objects">
+<h2>Data objects<a class="headerlink" href="#data-objects" title="Link to this heading">¶</a></h2>
+<p>Data objects are <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> class variables. They contain a multi-dimensional data array, an optional error array (symmetric or asymmetric), data name and data unit (in a <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Unit" title="flap.coordinate.Unit"><span class="xref myst py py-class">flap.Unit</span></a> object) and various information elements (info, history) which at present are not fully developed. A data object can optionally contain an <code class="docutils literal notranslate"><span class="pre">exp_id</span></code> variable (the type depending on the data module) describing the experiment ID from which the data originates from and the data source module name. An arbitrary number of coordinates are contained in the data object. This enables automatic plotting with proper axes and various calibrations. The coordinates are given as a list of <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> objects is the dataobject’s <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> attribute. The order in this list is irrelevant, as the <code class="docutils literal notranslate"><span class="pre">dimension_list</span></code> attribute in the coordinates defines how they map to the dataobject’s data_array. The <code class="docutils literal notranslate"><span class="pre">data_source</span></code> attribute contains the name of the data source (see below).</p>
+<p>Data objects are normally created by the class constructor by giving the contents as its input arguments. It is also possible to omit some arguments and fill the elements in the data object later. Care should be taken that if the data array is given later, the <code class="docutils literal notranslate"><span class="pre">data_shape</span></code> element should also be filled.</p>
+</section>
+<section id="data-sources">
+<h2>Data sources<a class="headerlink" href="#data-sources" title="Link to this heading">¶</a></h2>
+<p>FLAP can make use of various data read modules which can be dynamically added to the package. Each package registers its data read and optional coordinate addition function in FLAP so as data are read using a single FLAP function called <code class="docutils literal notranslate"><span class="pre">get_data</span></code>. The parameters are the data source name, data name (interpreted by the data source module), experiment ID and additional coordinate information so as data can be limited to certain ranges or resampled in channels, time, etc. A single <code class="docutils literal notranslate"><span class="pre">get_data</span></code> call can read any number of measurement channels, there is an extended wildcard interpretation method which enables e.g. using <code class="docutils literal notranslate"><span class="pre">Signal[2-28]</span></code> to read signals from 2 to 28 into one data array. The module data read function can add as many coordinates to the data array as it desires to be useful. (See information on FLAP coordinates below.) Standard coordinates are Time, Signal name, Channel, etc. For information on writing a FLAP data source please see the appropriate section below.</p>
+</section>
+<section id="coordinates-in-flap">
+<h2>Coordinates in FLAP<a class="headerlink" href="#coordinates-in-flap" title="Link to this heading">¶</a></h2>
+<p>In the FLAP program package coordinates are stored with the data. This document describes the implementation of this feature.</p>
+<section id="data-storage-and-coordinates">
+<h3>Data storage and coordinates<a class="headerlink" href="#data-storage-and-coordinates" title="Link to this heading">¶</a></h3>
+<p>Data are stored in an n-dimensional numpy array in the <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> class variable. This n-dimensional space we call <em>data sample space</em>. Different dimensions of the array are associated with primary coordinates, like sample number, channel number, or e.g. for simulated data x, y. However, these primary coordinates are often not useful and we need to make plots along physical coordinates. This can be handled by adding other coordinates to the <code class="docutils literal notranslate"><span class="pre">DataObject</span></code>. Also during processing some coordinates might be turned to others. An example is calculating power spectra. From a 2D measurement data with channel, time coordinates spectrum calculation creates another 2D array with channel, frequency as coordinates.</p>
+<p>In order to be more general by coordinate we will consider all information related to the data, like measurement times, spatial locations, frequency, etc, especially what is variable for the data array elements. However, this is not necessarily the case, a single scalar coordinate value can be assigned to all elements as well. Coordinate information is not necessarily of numeric type, e.g. channel name can also be considered as coordinate information. On the other hand, other information (e.g. date of the measurement, measurement device configuration information) are not considered as coordinate but stored in the info dictionary of <code class="docutils literal notranslate"><span class="pre">DataObject</span></code>.</p>
+<p>Multiple coordinate information may be present in the <code class="docutils literal notranslate"><span class="pre">DataObject</span></code> but all of them assign a value to all the array data elements. Storage of the coordinate information is designed by considering that a coordinate mostly changes along one or a few dimensions of the data, in a lot of cases coordinate values are equidistant but in special cases a coordinate value might change along all dimensions of the data array. This way the simple cases are described with minimal amount of data, while enabling even the most complicated case when data is practicably doubled by adding a randomly varying coordinate. Data processing, plotting is optimal if a coordinate changes along one dimension only.</p>
+</section>
+<section id="representation-of-coordinates">
+<h3>Representation of coordinates<a class="headerlink" href="#representation-of-coordinates" title="Link to this heading">¶</a></h3>
+<p>Coordinates have a name and unit, both described by a string. Standard names are ‘Channel name’, ‘Channel number’, ‘Signal name’, ‘Time’, ‘Sample’, ‘Device x’, ‘Device y’, ‘Device z’, ‘Device R’, ‘Device Z’, ‘Device phi’, ‘Flux r’, ‘Flux Theta’, ‘Flux phi’, ‘Image x’, ‘Image y’, ‘Frequency’, ‘Time lag’. Any other names and units can be used, but it is preferred to use the above where possible. The names are case sensitive as usual in Python. The type of the coordinate values is dependent on the coordinate type. E.g. ‘Sample’ is integer, ‘Time’ is either float or Decimal, ‘Signal name’ is string.</p>
+<p>The following variables are defined in the <code class="docutils literal notranslate"><span class="pre">Coordinate</span></code> class, but not all of them are used in all definitions: <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">unit</span></code>, <code class="docutils literal notranslate"><span class="pre">mode</span></code>, <code class="docutils literal notranslate"><span class="pre">shape</span></code>, <code class="docutils literal notranslate"><span class="pre">step</span></code>, <code class="docutils literal notranslate"><span class="pre">start</span></code>, <code class="docutils literal notranslate"><span class="pre">values</span></code>, <code class="docutils literal notranslate"><span class="pre">value_index</span></code>, <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code>, <code class="docutils literal notranslate"><span class="pre">dimension_list</span></code>. Unused variables are set to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+<p>Coordinates are not stored in the data matrix but each coordinate description is contained in a <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> class object. Such an object describes the coordinate values in a d-dimensional rectangular <em>coordinate sample space</em> described by the shape variable what is a tuple of sample numbers <span class="math notranslate nohighlight">\((s_1,s_2,\ldots, s_d)\)</span> in each dimension, similarly to shape in numpy arrays. If shape has 0 elements it means that the coordinate value is constant and described by the <code class="docutils literal notranslate"><span class="pre">values</span></code> and <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code> variables. The coordinate sample space is a subarray of the data sample space. As an example consider measurements on a 2D spatial mesh. At each measurement point a time signal is collected, thus the data sample space is 3D. If the 2D mesh is rotated relative to physical x,y coordinates then these physical coordinates will change on the 2D mesh. This way the coordinate sample space of x and y will be 2D, while the coordinate samples space for the time coordinate will be 1D.</p>
+<p>The coordinate values are described in the coordinate sample space <span class="math notranslate nohighlight">\([0 \ldots s_1-1, 0 \ldots s_2-1, \ldots, 0 \ldots s_d-1]\)</span> in one of two ways.</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">flap.Coordinate.mode.equidistant</span></code> is False samples of the coordinate value are given on a regular or irregular grid in the coordinate sample space. The following cases are considered:</p>
+<ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">value_index</span></code> is None and the shape of the coordinate sample space is identical to the corresponding subspace of the data sample space, then there is a one-to-one correspondence between data samples and coordinate samples. The coordinate values do not change along dimensions which are not in <code class="docutils literal notranslate"><span class="pre">flap.Coordinate.dimension_list</span></code>.</p></li>
+<li><p>If the two above shapes are different but <code class="docutils literal notranslate"><span class="pre">value_index</span></code> is None interpolation is done in the directions with different number of elements assuming that first and last samples match.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">value_index</span></code> is not None than coordinate samples are on an irregular grid. The coordinate sample locations are given in the <code class="docutils literal notranslate"><span class="pre">value_index</span></code> (<span class="math notranslate nohighlight">\(d\)</span> by <span class="math notranslate nohighlight">\(N_{\mathrm{samp}}\)</span>) array where <span class="math notranslate nohighlight">\(N_{\mathrm{samp}}\)</span> is he number of coordinate samples. The coordinates in the sample space are between 0 and <span class="math notranslate nohighlight">\(s_i\)</span> in the <span class="math notranslate nohighlight">\(i\)</span>-th dimension. The coordinate values are given in the 1D <code class="docutils literal notranslate"><span class="pre">values</span></code> array which has <span class="math notranslate nohighlight">\(N_{\mathrm{samp}}\)</span> elements. To calculate the coordinate value for the data array points a (multi-dimensional) interpolation is done between the sample coordinate system and the data sample coordinates.</p></li>
+</ul>
+</li>
+</ul>
+<p>When defining a non-equidistant coordinate giving the <code class="docutils literal notranslate"><span class="pre">values</span></code> attribute is not sufficient, the <code class="docutils literal notranslate"><span class="pre">shape</span></code> attribute also must be set. This tells whether the coordinate values can be directly mapped to the data samples or interpolation should be done. At present interpolating coordinates are not supported.</p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">flap.Coordinate.mode.equidistant</span></code> is True then the coordinate sample space is assumed to be identical to the subspace of the data sample space selected by <code class="docutils literal notranslate"><span class="pre">dimension_list</span></code>. (<code class="docutils literal notranslate"><span class="pre">flap.Coordinate.shape</span></code> is not used.) The coordinates change linearly in each dimension: <span class="math notranslate nohighlight">\(c=b+s_1 x_1 + \ldots s_d x_d\)</span>, where <span class="math notranslate nohighlight">\(b\)</span> is the <code class="docutils literal notranslate"><span class="pre">start</span></code> element of <code class="docutils literal notranslate"><span class="pre">flap.Coordinate</span></code> and <span class="math notranslate nohighlight">\(s_i\)</span> is the step size in dimension <span class="math notranslate nohighlight">\(i\)</span> of the data sample space. The <span class="math notranslate nohighlight">\(s_i\)</span> values are stored in the <code class="docutils literal notranslate"><span class="pre">step</span></code> element which is a <span class="math notranslate nohighlight">\(d\)</span> long 1D array.</p></li>
+</ul>
+<p>The coordinate values may have a range which is either symmetric or asymmetric around the values. This can be considered either as an error of the coordinate or measurement range, and it is described by a <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code> variable. If <code class="docutils literal notranslate"><span class="pre">flap.Coordinate.mode.range_symmetric</span></code> is True the range is symmetric around the coordinate values, otherwise there is a low and high range. For the equidistant coordinate description <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code> is either a scalar or 2-element array depending whether the range is symmetric or asymmetric. For the non-equidistant coordinate description in the symmetric case <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code> has the same shape as <code class="docutils literal notranslate"><span class="pre">values</span></code>, for the asymmteric case it is a dictionary with <code class="docutils literal notranslate"><span class="pre">low</span></code> and <code class="docutils literal notranslate"><span class="pre">high</span></code> keys. Each dictionary element has the same shape as values.</p>
+</section>
+<section id="mapping-to-data-samples-the-dimension-list-attribute">
+<h3>Mapping to data samples: the dimension_list attribute<a class="headerlink" href="#mapping-to-data-samples-the-dimension-list-attribute" title="Link to this heading">¶</a></h3>
+<p>The link between the coordinate sample space and the data sample space is established by the <code class="docutils literal notranslate"><span class="pre">dimension_list</span></code> element of <code class="docutils literal notranslate"><span class="pre">flap.Coordinate</span></code>. This has number of elements equal to the dimension of the coordinate sample space and each element contains the index of the related data sample space.</p>
+</section>
+<section id="getting-coordinate-values">
+<h3>Getting coordinate values<a class="headerlink" href="#getting-coordinate-values" title="Link to this heading">¶</a></h3>
+<p>The <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> class has a <code class="docutils literal notranslate"><span class="pre">data</span></code> method which can be used to return the coordinate values for certain data array elements. As the data array shape is not know for the coordinate object a <code class="docutils literal notranslate"><span class="pre">data_shape</span></code> argument is needed. An optional index argument can be used to limit the calculation to certain elements. If the ‘Change only’ option is set only the coordinates along the changing data dimensions are returned.</p>
+<p>The method returns three numpy arrays: the coordinate values and the coordinates at the lower and upper ranges. The shape of the arrays is set by the <code class="docutils literal notranslate"><span class="pre">data_shape</span></code> and <code class="docutils literal notranslate"><span class="pre">index</span></code> arguments and reflects the shape of the selected data array.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">flap.DataObject.coordinate('cname')</span></code> method calls the <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate.data" title="flap.coordinate.Coordinate.data"><span class="xref myst py py-meth">flap.Coordinate.data</span></a> method of the coordinate ‘cname’ by setting its <code class="docutils literal notranslate"><span class="pre">data_shape</span></code> argument to the data shape of the data object. Otherwise it is identical to the data method of <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a>.</p>
+</section>
+<section id="converting-coordinates">
+<h3>Converting coordinates<a class="headerlink" href="#converting-coordinates" title="Link to this heading">¶</a></h3>
+<p>Each data source may name a function in the registration process in the <code class="docutils literal notranslate"><span class="pre">add_coord_func</span></code> keyword variable. The <code class="docutils literal notranslate"><span class="pre">add_coordinate()</span></code> method of <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> gets coordinate name(s) (string, or string list) and options dictionary. It calls the function registered for the given data source with the data object, the new coordinate name(s) and options arguments. The function should add the named coordinate(s) to the data object or raise a ValueError. The function knows the experiment ID and other information about the data, therefore it should be possible to calculate the new coordinate.</p>
+</section>
+<section id="explanations-and-examples">
+<h3>Explanations and examples<a class="headerlink" href="#explanations-and-examples" title="Link to this heading">¶</a></h3>
+<p>The above definition is complex but it has a reason. It contains all possibilities from the most simple to the most complex. The coordinate descriptions are usually prepared in the data read module and the coordinate values accessed by the <code class="docutils literal notranslate"><span class="pre">data()</span></code> method of the <code class="docutils literal notranslate"><span class="pre">Coordinate</span></code> class, therefore the user should not take care of details of the coordinate description. Additionally, the most often encountered cases are very simple, difficulty arises only e.g. when random points are measured in time dependent flux coordinates at random time samples.</p>
+<p>In the examples below we do not indicate the coordinate ranges, it can be simply added as described above.</p>
+<p>Some typical situations:</p>
+<ul>
+<li><p><strong>Constant coordinate.</strong></p>
+<p>This is useful where e.g. a measurement is done with all measuring points in the Device z=const. coordinate. This constant can be entered in the <code class="docutils literal notranslate"><span class="pre">DataObject</span></code> description to be used later when e.g. mapping is done from device to flux coordinates.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shape</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">values</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">z</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Independent equally spaced coordinates along each dimension of the data array.</strong></p>
+<p>In this case a coordinate is defined for each dimension of the data array. The definition of each coordinate contains a scalar start and a step value. The shape variable is one number, only the number of elements of shape is used showing that the coordinate description is 1D.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shape</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">mode</span><span class="o">.</span><span class="n">equidistant</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">start</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">start</span><span class="o">&gt;</span>
+<span class="n">step</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">step</span><span class="o">&gt;</span>
+<span class="n">dimension_list</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In the above example the coordinate changes along the first dimension of the data array.</p>
+</li>
+<li><p><strong>Array of N temporal signals measured at N different points in the device coordinate space.</strong></p>
+<p>The data is stored in a 2D array, one dimension (0) is time, the other is channel. In this case a ‘Time’ coordinate is described with equidistant spacing as shown in the previous example. To describe the measurement spatial coordinates additionally to ‘Time’ 3 coordinates are entered in the coordinates list of the DataObject: ‘Device x’, ‘Device y’ and ‘Device z’. The description for the x coordinate is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">shape</span> <span class="o">=</span> <span class="n">N</span>
+<span class="n">mode</span><span class="o">.</span><span class="n">equidistant</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">values</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">array</span> <span class="k">with</span> <span class="n">N</span> <span class="n">elements</span> <span class="n">of</span> <span class="n">coordinate</span> <span class="n">values</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>The other two coordinates are entered similarly. The time vector and <span class="math notranslate nohighlight">\(x,y,z\)</span> coordinates of measuring channel <code class="docutils literal notranslate"><span class="pre">i</span></code> can be obtained from the <code class="docutils literal notranslate"><span class="pre">d</span></code> DataObject as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">time</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">,(</span><span class="o">...</span><span class="p">,</span><span class="n">i</span><span class="p">))</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Device x&#39;</span><span class="p">,(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Device y&#39;</span><span class="p">,(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">z</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Device z&#39;</span><span class="p">,(</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In this example it is also useful to additionally define a ‘Signal
+name’ and maybe a ‘Channel’ coordinate. Signal has normally string
+values (that is non-equidistant array, values is a list of strings).</p>
+</li>
+<li><p><strong>Fast measurement signals at an array of spatial points mapped to a temporally slowly variable flux coordinate system.</strong></p>
+<p>The data are stored in a 2D array, 1-st dimension is channel, second is time. The data read routine enters the device coordinates into the DataObject. From this the flux coordinate calculation method generates the flux coordinates of the measurement points at a few time points (<span class="math notranslate nohighlight">\(N_t\)</span>) during the measurement time. 3 coordinates are added to <code class="docutils literal notranslate"><span class="pre">DataObject</span></code>, the three flux coordinates. For each coordinate the calculated values are put into a 1D array. The value_index will be a 2x<span class="math notranslate nohighlight">\(N_t\)</span> array, at each time point the channel number and the flux coordinate calculation time will be entered. The time is normalized to <span class="math notranslate nohighlight">\((t-t_{start})/(t_{end}-t_{start}) (N_t-1)\)</span>. The shape variable is (<span class="math notranslate nohighlight">\(N_{\mathrm{ch}}\)</span>, <span class="math notranslate nohighlight">\(N_t\)</span>), where <span class="math notranslate nohighlight">\(N_{\mathrm{ch}}\)</span> is the number of channels, <code class="docutils literal notranslate"><span class="pre">mode</span></code> is set to <code class="docutils literal notranslate"><span class="pre">0</span></code> and <code class="docutils literal notranslate"><span class="pre">dimension_list</span></code> to <code class="docutils literal notranslate"><span class="pre">[0,1]</span></code>. As in the channel direction the mapping is 1:1 from the coordinate sample coordinate and the data matrix coordinate no interpolation will occur. In the time direction interpolation will be done and the flux coordinates of each measurement channel will be interpolated values between the sparsely known flux coordinates. The ‘Time’ coordinate is entered as an equidistant coordinate description.</p>
+</li>
+</ul>
+</section>
+</section>
+<section id="data-storage">
+<h2>Data storage<a class="headerlink" href="#data-storage" title="Link to this heading">¶</a></h2>
+<p>Data object variables can be passed between functions in a program as any other variable. However, additionally to this FLAP contains a memory storage facility where data objects can be stored under a name and experiment ID. This enables loading and processing various data without the need of passing around a large number of variables. Data can be entered into the storage by the <a class="reference internal" href="../flap.data_object.html#flap.data_object.add_data_object" title="flap.data_object.add_data_object"><span class="xref myst py py-func">flap.add_data_object</span></a> function and retrieved by <a class="reference internal" href="../flap.data_object.html#flap.data_object.get_data_object" title="flap.data_object.get_data_object"><span class="xref myst py py-func">flap.get_data_object</span></a>. It is also possible to directly enter a data object from the <a class="reference internal" href="../flap.data_object.html#flap.data_object.get_data" title="flap.data_object.get_data"><span class="xref myst py py-func">flap.get_data</span></a> function or all of the data processing functions.</p>
+<section id="listing-the-content-of-flap-storage">
+<h3>Listing the content of FLAP storage<a class="headerlink" href="#listing-the-content-of-flap-storage" title="Link to this heading">¶</a></h3>
+<p>Function <a class="reference internal" href="../flap.data_object.html#flap.data_object.list_data_objects" title="flap.data_object.list_data_objects"><span class="xref myst py py-func">flap.list_data_objects</span></a> can be used to list properties of the data objects in FLAP storage or in variable. From the storage data can be selected by name and <code class="docutils literal notranslate"><span class="pre">exp_id</span></code> (wildcards can be used). Data objects in variables can be listed by providing a list of the variables to the input of <a class="reference internal" href="../flap.data_object.html#flap.data_object.list_data_objects" title="flap.data_object.list_data_objects"><span class="xref myst py py-func">flap.list_data_objects</span></a>. The data shape, properties and properties of coordinates are listed. The output string is returned by the function and printed on the screen unless the screen keyword argument is set to False.</p>
+</section>
+<section id="save-load">
+<h3>Save/Load<a class="headerlink" href="#save-load" title="Link to this heading">¶</a></h3>
+<p>Data objects can be saved to a file either from the FLAP data storage or from variables using the <a class="reference internal" href="../flap.data_object.html#flap.data_object.save" title="flap.data_object.save"><span class="xref myst py py-func">flap.save</span></a> function. It can take a list of data objects or other variables or a list of strings and experiment IDs. In the latter case the data objects named by the strings and experiment IDs are loaded from FLAP storage before saving them. The save routine uses the pickle Python module to encode data. The file contains information whether data originates from FLAP storage or from variables. When data are loaded using the <a class="reference internal" href="../flap.data_object.html#flap.data_object.load" title="flap.data_object.load"><span class="xref myst py py-func">flap.load</span></a> function they are returned as list of variables. If the data were saved from FLAP storage it can be entered there with the same names as well.</p>
+</section>
+</section>
+<section id="data-processing">
+<h2>Data processing<a class="headerlink" href="#data-processing" title="Link to this heading">¶</a></h2>
+<p>The data processing routines are always available in two versions:</p>
+<ul class="simple">
+<li><p>A method of the <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> class. The method does not change the original data object, rather returns the processed object.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">flap.&lt;xxx&gt;</span></code> function, where <code class="docutils literal notranslate"><span class="pre">&lt;xxx&gt;</span></code> is the same name as the respective method in the <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> class. These functions read a data object from FLAP storage, call the method on them and store the result either the same or new name.</p></li>
+</ul>
+<p>The function always have the same arguments as the method plus a few additional ones:</p>
+<ul class="simple">
+<li><p>The first positional argument is the object name.</p></li>
+<li><p>An <code class="docutils literal notranslate"><span class="pre">exp_id</span></code> keyword argument sets the <code class="docutils literal notranslate"><span class="pre">exp_id</span></code> of the data object. Default is <code class="docutils literal notranslate"><span class="pre">'*'</span></code>, therefore <code class="docutils literal notranslate"><span class="pre">exp_id</span></code> need not be set unless there are data objects with the same name and different <code class="docutils literal notranslate"><span class="pre">exp_id</span></code> in the storage.</p></li>
+<li><p>an <code class="docutils literal notranslate"><span class="pre">output_name</span></code> keyword sets the name of the resulting data object. If it is not set the result will be stored under the same name as the input.</p></li>
+</ul>
+<p>Each processing function/method returns the resulting data object, therefore operations can be chained:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">.</span><span class="n">filter_data</span><span class="p">()</span><span class="o">.</span><span class="n">apsd</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Setting defaults for the processing method (see section <a class="reference internal" href="#options-and-defaults"><span class="std std-ref">Options and defaults</span></a>) the exact parameters of the processing need not be written out in the most often used cases.</p>
+<section id="slicing">
+<h3>Slicing<a class="headerlink" href="#slicing" title="Link to this heading">¶</a></h3>
+<p>Slicing means selecting certain elements in the data matrix and optionally taking their sum, minimum, maximum, or doing some other operation on them. Description of the slicing operation is based on coordinates. (Although originally it was foreseen to do slicing along data dimensions, this is not considered useful now.)</p>
+<p>Slicing is performed with the <a class="reference internal" href="../flap.data_object.html#flap.data_object.slice_data" title="flap.data_object.slice_data"><span class="xref myst py py-func">slice_data</span></a> method. In the <code class="docutils literal notranslate"><span class="pre">slicing</span></code> argument it takes a dictionary with keys referring to coordinates. The values describe how slicing is done. If the slicing dictionary has multiple keys the slicing operations are done sequentially, except a special case, see below. Summing is done after slicing. (If the slicing argument is omitted only summing is done.) Summing again defined by a dictionary where keys refer to coordinate names.</p>
+<p>If the slicing coordinate changes only along one dimension of the data array slicing is done on the data along the associated dimension (see <code class="docutils literal notranslate"><span class="pre">dimension_list</span></code>). Other coordinates changing along this dimension are adjusted. It has to be noted that coordinate changes might result in changing from equidistant to non-equidistant type, which can cause more data in the data object. If only one data remains in the sliced dimension that dimension is dropped from the data and also coordinate dimension lists are adjusted correspondingly.</p>
+<p>If the slicing coordinate changes along multiple dimensions the situation is more complex as shown in the 2D example below. Here <span class="math notranslate nohighlight">\(x\)</span>,<span class="math notranslate nohighlight">\(y\)</span> are the original coordinates in a 2D array and <span class="math notranslate nohighlight">\(R\)</span> is some coordinate derived from them. The points are arranged in an <span class="math notranslate nohighlight">\(x\)</span>-<span class="math notranslate nohighlight">\(y\)</span> coordinate system. The orange lines indicate constant <span class="math notranslate nohighlight">\(R\)</span> contours. The two solid lines indicate slicing in the <span class="math notranslate nohighlight">\(R\)</span> coordinate, the red filled dots are the selected points. Selecting elements in the data in the range of a coordinate which changes in multiple dimensions means that the selected sub-array becomes non-rectangular. In this case the data along these dimensions will be flattened to 1D before slicing and the slicing operation will be done on the flattened dimensions.</p>
+<figure class="align-default" id="id5" style="width: 50%">
+<img alt="../_images/slicing_figure.png" src="../_images/slicing_figure.png" />
+<figcaption>
+<p><span class="caption-text">Illustration of slicing example. Data in the original <span class="math notranslate nohighlight">\(x\)</span>-<span class="math notranslate nohighlight">\(y\)</span> coordinates, with constant-<span class="math notranslate nohighlight">\(R\)</span> contours.</span><a class="headerlink" href="#id5" title="Link to this image">¶</a></p>
+</figcaption>
+</figure>
+<p>To illustrate this further let us consider a 2D image. A polar coordinate system with origin in the center of the image is introduced and slicing is done in the radial coordinate. Selecting one radial area results in a 1D array. The angle coordinate will change non-monotonically on this. However, coordinates are corrected accordingly and it is still possible to plot as a function e.g. of polar angle.</p>
+<p>Two basic slice types are distinguished:</p>
+<ul class="simple">
+<li><p>Simple slice is an operation when a single interval or individual elements are selected along a coordinate. This is described above.</p></li>
+<li><p>Multi-slice is an operation when multiple intervals are selected from the data. In this case the dimensions along which the slicing coordinate changes are flattened as described at simple slice and the intervals are selected. Two new dimensions are added to the data matrix. Along one the interval number, along the other the data index inside the intervals change. The interval data are distributed into these new dimensions and the original flattened dimension is removed. With this procedure it becomes possible to plot/sum data in individual intervals or across intervals.</p></li>
+</ul>
+<p>Multi-slice is a complicated procedure and the above described scheme breaks down when multi-slice is intended on two coordinates which change on (partly) common dimensions. E.g. in the above described case of multi-slicing the data on an <span class="math notranslate nohighlight">\(x\)</span>-<span class="math notranslate nohighlight">\(y\)</span> grid to an <span class="math notranslate nohighlight">\(r\)</span>-<span class="math notranslate nohighlight">\(φ\)</span> grid poses problems. After multi-slicing with <span class="math notranslate nohighlight">\(r\)</span> one gets the two dimensions along and across the intervals. However, the multi-slicing along <span class="math notranslate nohighlight">\(φ\)</span> would flatten these into one dimension and create new intervals in <span class="math notranslate nohighlight">\(φ\)</span>. To avoid this multi-slicing along multiple coordinates with common dimensions is done in one step and data are distributed into boxes arranged along each dimension. In case of <span class="math notranslate nohighlight">\(n\)</span> such slicing operations <span class="math notranslate nohighlight">\(n+1\)</span> dimensions are added with one dimension where the interval number changes along each coordinate and a single dimension where the sample index in one interval box changes. This case is not implemented yet.</p>
+<p>After a multi-slice operation coordinates changing along the flattened dimensions are split into two coordinates: “Rel. &lt;coord&gt; in int(&lt;sl_coord&gt;)” and “Start &lt;coord&gt; in int(&lt;sl_coord&gt;)”. (Except for string coordinates where this is not possible and the original coordinate shape will be changed.) Here &lt;coord&gt; is the name of the coordinate and &lt;sl_coord&gt; is the name off the slicing coordinate. Also coordinates with names “Interval(&lt;sl_coord&gt;)” and “Interval(&lt;sl_coord&gt; index)” are added storing the interval number (along one coordinate) and the sample index in one interval.</p>
+<p>If multi-slice operation results in different interval length, the dimension along the samples in the intervals will be set to the longest. Where data is shorter in one interval <code class="docutils literal notranslate"><span class="pre">np.nan</span></code> values will be filled in case of float data and 0 for <code class="docutils literal notranslate"><span class="pre">int</span></code>. (There is no integer Not-a-number value in Python.) In the coordinate matrix missing elements will be filled similarly to data.</p>
+<p>Slicing can be described with the following objects:</p>
+<ol class="arabic">
+<li><p>For simple slice:</p>
+<p>a.  A Python <code class="docutils literal notranslate"><span class="pre">slice</span></code> or <code class="docutils literal notranslate"><span class="pre">range</span></code> object, to select a sequence of regularly spaced elements.</p>
+<p>b.  A scalar value or a list of scalars to select random elements.</p>
+<p>c.  A numpy array to select random elements.</p>
+<p>d.  <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> without error and with data <code class="docutils literal notranslate"><span class="pre">unit.name</span></code> equal to the slicing coordinate name.</p>
+<p>e.  <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> with the data <code class="docutils literal notranslate"><span class="pre">unit.name</span></code> not equal to the slicing coordinate, but one of the coordinate names equal to the slicing coordinate and the coordinate has no <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code>.</p>
+<p>f.  <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Intervals" title="flap.coordinate.Intervals"><span class="xref myst py py-class">flap.Intervals</span></a> object with one interval.</p>
+</li>
+</ol>
+<p>Slicing can be one either by selecting the closest value or by linearly interpolating. The mode is set by the ‘Interpolation’ option (‘Closest value’ or ‘Linear’). Both the option name and option values can be abbreviated. If error is present for the data then it will also be interpolated the save way as data.</p>
+<p>In cases <em>1a-e</em> the data elements with closest or interpolated coordinates will be selected, while in case 1f all elements in the interval will be selected. In case a string type slicing coordinate matching between the slicing and the coordinate value is required instead of close match. (There is no sense in close match for strings.) However, extended wildcards can also be used, e.g. <code class="docutils literal notranslate"><span class="pre">slicing='{Signal</span> <span class="pre">name':'TEST-*-3'}</span></code> is a valid slicing expression.</p>
+<ol class="arabic" start="2">
+<li><p>For multi-slice:</p>
+<p>a.  <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Intervals" title="flap.coordinate.Intervals"><span class="xref myst py py-class">flap.Intervals</span></a> object with more than one interval.</p>
+<p>b.  <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> with data <code class="docutils literal notranslate"><span class="pre">unit.name</span></code> equal to the slicing coordinate. The error values give the intervals.</p>
+<p>c.  <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> with the data unit.name not equal to the slicing coordinate name but name of one coordinates equal to the slicing coordinate. The <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code> select the intervals.</p>
+</li>
+</ol>
+<p>In the above cases automatically multi-slice mode is selected. This can be overridden by option ‘Slice type’ (values: ‘Simple’ or ‘Multi’). In this case the selected intervals will not be put into a new dimension but will be put in the same dimension one after the other. If a coordinate changed equidistantly along this dimension it will be modified to non-equidistant.</p>
+<p>The summing input argument to the <code class="docutils literal notranslate"><span class="pre">slice_data</span></code> method can be used for processing the sliced data. This is also a dictionary with coordinate names as keys. Before processing the dimensions where the summing coordinate changes will be flattened. The values of the dictionary can be the following:</p>
+<ul class="simple">
+<li><p>‘Sum’: Add all elements.</p></li>
+<li><p>‘Mean’: Take the mean of all elements</p></li>
+<li><p>‘Min’: Take the minimum of all elements</p></li>
+<li><p>‘Max’: Take the maximum of all elements</p></li>
+</ul>
+<p>As the result of the processing is a single value along the summing coordinate, this dimension will be removed from the data. After processing the data the coordinate changes will be done. In the case of ‘Sum’ and ‘Mean’ the mean of the coordinates of the summed data will be taken, while in the case of ‘Min’ and ‘Max’ the coordinate of the minimum or maximum value will be selected.</p>
+<section id="examples">
+<h4>Examples<a class="headerlink" href="#examples" title="Link to this heading">¶</a></h4>
+<p>As an example we read all signals from the TESTDATA module for a 1 ms piece and store under name TESTDATA in flap storage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">=</span><span class="n">flap</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Scaling&#39;</span><span class="p">:</span><span class="s1">&#39;Volt&#39;</span><span class="p">},</span>
+                <span class="n">object_name</span><span class="o">=</span><span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span>
+                <span class="n">coordinates</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Time&#39;</span><span class="p">:[</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.001</span><span class="p">]})</span>
+</pre></div>
+</div>
+<p>This results in a 3D data object where signals are arranged in row and column and the third dimension is time. ‘Time’, ‘Sample’, ‘Row’, ‘Column’ and ‘Signal name’ coordinates are supplied by the data read routine. Then we add spatial coordinates:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flap</span><span class="o">.</span><span class="n">add_coordinate</span><span class="p">(</span><span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span>
+                    <span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Device x&#39;</span><span class="p">,</span><span class="s1">&#39;Device z&#39;</span><span class="p">,</span><span class="s1">&#39;Device y&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>We can list the content of the data object using the <a class="reference internal" href="../flap.data_object.html#flap.data_object.list_data_objects" title="flap.data_object.list_data_objects"><span class="xref myst py py-func">flap.list_data_objects</span></a> call, yielding the following ouput:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>TESTDATA(exp_id:None) &quot;Test data&quot; shape:[15,10,1001]
+Coords:
+    &#39;Sample&#39;[n.a.](Dims:2) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E+00
+    &#39;Time&#39;[Second](Dims:2) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E-06
+    &#39;Signal name&#39;[n.a.](Dims:0,1, Shape:15,10) [&lt;R. symm.&gt;] Val:TEST-1-1, TEST-1-2, TEST-1-3, TEST-1-4, TEST-1-5, TEST-1-6, TEST-1-7, TEST-1-8, TEST-1-9, TEST-1-10, ...
+    &#39;Column&#39;[n.a.](Dims:0, Shape:15) [&lt;R. symm.&gt;] Val. range:  1.000E+00 -  1.500E+01
+    &#39;Row&#39;[n.a.](Dims:1, Shape:10) [&lt;R. symm.&gt;] Val:1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+    &#39;Device x&#39;[cm](Dims:0,1, Shape:15,10) [&lt;R. symm.&gt;] Val. range: -1.112E+00 -  6.657E+00
+    &#39;Device z&#39;[cm](Dims:0,1, Shape:15,10) [&lt;R. symm.&gt;] Val. range:  0.000E+00 -  5.587E+00
+    &#39;Device y&#39;[cm](Dims:, Shape:) [&lt;R. symm.&gt;] Val: 0.000E+00
+</pre></div>
+</div>
+<p>The above list shows that Sample and Time changes along dimension 2 (3-rd dimension), Signal names change on the first tow dimensions, Column and Row changes on dimension 0 and 1, respectively. Device y does not change at all (emply dimension list) as the measurement channels are in the y=0 plane. Device x and y both change on dimensions 0,1 as the measurement matrix is inclined in the <span class="math notranslate nohighlight">\(x\)</span>-<span class="math notranslate nohighlight">\(y\)</span> plane.</p>
+<p>A simple slice to select one signal looks like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flap</span><span class="o">.</span><span class="n">slice_data</span><span class="p">(</span><span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span> <span class="n">slicing</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Signal name&#39;</span><span class="p">:</span> <span class="s1">&#39;TEST-1-3&#39;</span><span class="p">},</span>
+                <span class="n">output_name</span><span class="o">=</span><span class="s1">&#39;TESTDATA_slice&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The result is a 1D array:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>TESTDATA_slice(exp_id:None) &quot;Test data&quot; shape:[1001]
+Coords:
+    &#39;Sample&#39;[n.a.](Dims:0) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E+00
+    &#39;Time&#39;[Second](Dims:0) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E-06
+    &#39;Signal name&#39;[n.a.](Dims:, Shape:1) [&lt;R. symm.&gt;] Val:TEST-1-3
+    &#39;Column&#39;[n.a.](Dims:, Shape:1) [&lt;R. symm.&gt;] Val:1
+    &#39;Row&#39;[n.a.](Dims:, Shape:1) [&lt;R. symm.&gt;] Val:3
+    &#39;Device x&#39;[cm](Dims:, Shape:1) [&lt;R. symm.&gt;] Val:-2.472E-01
+    &#39;Device z&#39;[cm](Dims:, Shape:1) [&lt;R. symm.&gt;] Val: 7.608E-01
+    &#39;Device y&#39;[cm](Dims:, Shape:) [&lt;R. symm.&gt;] Val: 0.000E+00
+</pre></div>
+</div>
+<p>Extended regular expressions can also be used. In the following
+expression 3 signals are selected, resulting in a 3x1001 data array:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>TESTDATA_slice(exp_id:None) &quot;Test data&quot; shape:[3,1001]
+Coords:
+    &#39;Sample&#39;[n.a.](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E+00
+    &#39;Time&#39;[Second](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E-06
+    &#39;Signal name&#39;[n.a.](Dims:0, Shape:3) [&lt;R. symm.&gt;] Val:TEST-1-8, TEST-1-9, TEST-1-10
+    &#39;Column&#39;[n.a.](Dims:0, Shape:3) [&lt;R. symm.&gt;] Val:1, 1, 1
+    &#39;Row&#39;[n.a.](Dims:0, Shape:3) [&lt;R. symm.&gt;] Val:8, 9, 10
+    &#39;Device x&#39;[cm](Dims:0, Shape:3) [&lt;R. symm.&gt;] Val:-8.652E-01, -9.889E-01, -1.112E+00
+    &#39;Device z&#39;[cm](Dims:0, Shape:3) [&lt;R. symm.&gt;] Val: 2.663E+00,  3.043E+00,  3.424E+00
+    &#39;Device y&#39;[cm](Dims:, Shape:) [&lt;R. symm.&gt;] Val: 0.000E+00
+</pre></div>
+</div>
+</section>
+</section>
+<section id="arithmetic-operations-on-data-objects">
+<h3>Arithmetic operations on data objects<a class="headerlink" href="#arithmetic-operations-on-data-objects" title="Link to this heading">¶</a></h3>
+<p>Currently simple addition and multiplication is implemented between data objects and between data objects and scalar values. In case of operations between two data objects the resulting object will have only those coordinates which are identical in the two input objects.</p>
+<section id="addition-subtraction">
+<h4>Addition, subtraction<a class="headerlink" href="#addition-subtraction" title="Link to this heading">¶</a></h4>
+<p>Data objects can be multiplied if their data geometry, and data name is identical. The error of the resulting data object identical to one of the inputs if the other has no error. If both have errors the resulting error is the square root of the squared errors. In case of asymmetric error the two error values are handled separately. If only one of the objects has Adding or subtracting a constant does not change the error</p>
+</section>
+<section id="multiplication">
+<h4>Multiplication<a class="headerlink" href="#multiplication" title="Link to this heading">¶</a></h4>
+<p>Data objects can be multiplied if their data geometry is identical. The data name and unit of the resulting data object will be the product of the two names/units or squared if the names/unit are identical. E.g. multiplying two data objects with ‘Volt’ units will result in ‘Volt^2’ unit.</p>
+<p>If any of the data objects has no error the resulting data object will also have no error. For asymmetric errors the two value squares are added and square root taken to yield a symmetric error for the input object. The output (symmetric) error will be: <span class="math notranslate nohighlight">\(\sqrt{\sigma_{1}^{2}\sigma_{2}^{2} + \sigma_{1}^{2}\mu_{2}^{2}{+ \sigma}_{2}^{2}\mu_{1}^{2}}\)</span>, where <span class="math notranslate nohighlight">\(\sigma\)</span> and <span class="math notranslate nohighlight">\(\mu\)</span> are the error and data value, respectively.</p>
+<p>When multiplying with scalar the errors will be multiplied.</p>
+</section>
+</section>
+<section id="data-object-conversions">
+<h3>Data object conversions<a class="headerlink" href="#data-object-conversions" title="Link to this heading">¶</a></h3>
+<p>The following methods of data object result in a modified object.</p>
+<section id="real">
+<h4><code class="docutils literal notranslate"><span class="pre">real</span></code><a class="headerlink" href="#real" title="Link to this heading">¶</a></h4>
+<p>Returns a new data object with the data the real part of the original data. Coordinates and other properties are not modified.</p>
+</section>
+<section id="imag">
+<h4><code class="docutils literal notranslate"><span class="pre">imag</span></code><a class="headerlink" href="#imag" title="Link to this heading">¶</a></h4>
+<p>Returns a new data object with the data the imaginary part of the original data. Coordinates and other properties are not modified.</p>
+</section>
+<section id="abs-value">
+<h4><code class="docutils literal notranslate"><span class="pre">abs_value</span></code><a class="headerlink" href="#abs-value" title="Link to this heading">¶</a></h4>
+<p>Returns a new data object with the absolute value of the data. For complex data this is the amplitude.</p>
+</section>
+<section id="error-value">
+<h4><code class="docutils literal notranslate"><span class="pre">error_value</span></code><a class="headerlink" href="#error-value" title="Link to this heading">¶</a></h4>
+<p>Returns a new data object where the data is a copy of the error of the original data object and error is None.</p>
+</section>
+</section>
+<section id="signal-processing-methods">
+<h3>Signal processing methods<a class="headerlink" href="#signal-processing-methods" title="Link to this heading">¶</a></h3>
+<p>Most signal processing methods/functions have a similar logic and interface. They operate on one or more “signals” which change along one coordinate, e.g. time. However, they can also be used to perform processing along any other coordinate, e.g. some spatial coordinate. The processing of these methods can be limited to a set of intervals in a coordinate. Two coordinates are distinguished. The processing coordinate is the one along which the processing is done, the selection coordinate is in which the intervals are defined. The common input arguments are the following:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">coordinate</span></code>: name of a coordinate along which the processing is done.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intervals</span></code>: description of the intervals to which the operation is
+restricted. There are multiple possibilities:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">intervals</span></code> is None. In this case no intervals are used, all data are processed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intervals</span></code> is a dictionary. In this case only one key is expected to be present and the key is a coordinate name. The intervals are taken in this coordinate, which is not necessarily the same as the coordinate argument. The value of the dictionary is the interval description (see below).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">intervals</span></code> is neither None, nor dictionary. In this case the intervals are selected along the processing coordinate and the intervals argument is the interval description.</p></li>
+</ul>
+<p>The interval description can be any of the following:</p>
+<ul class="simple">
+<li><p>List of two numbers: describes a single interval between these tow
+coordinate values.</p></li>
+<li><p><a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Intervals" title="flap.coordinate.Intervals"><span class="xref myst py py-class">flap.Intervals</span></a> object. Can describe regular or irregular intervals.</p></li>
+<li><p><a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a>. There are two cases similarly to <code class="docutils literal notranslate"><span class="pre">slice_data</span></code>. If the data name equals the selection coordinate then the data and errors are used as intervals. If the data name is different than the selection coordinate but one of the coordinates in the data object is identical to the selection coordinate then the coordinate values an value ranges are used as intervals.</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">options</span></code>: any other parameter for processing.</p></li>
+</ul>
+<p>Signal processing methods are the following:</p>
+<section id="detrend">
+<h4><code class="docutils literal notranslate"><span class="pre">detrend</span></code><a class="headerlink" href="#detrend" title="Link to this heading">¶</a></h4>
+<p>This method subtracts a trend from the data along a given coordinate. If the coordinate is not set ‘Time’ is used.</p>
+</section>
+<section id="filter-data">
+<h4><code class="docutils literal notranslate"><span class="pre">filter_data</span></code><a class="headerlink" href="#filter-data" title="Link to this heading">¶</a></h4>
+<p>Filters the signals along a certain axis with one of numpy’s filters. For defining the filter it has a simplified interface capturing the important aspects.</p>
+</section>
+<section id="select">
+<h4><code class="docutils literal notranslate"><span class="pre">select</span></code><a class="headerlink" href="#select" title="Link to this heading">¶</a></h4>
+<p>Selects intervals from a signal either manually with the mouse or automatically based on some events. The selection can be limited to a set of intervals as in all signal processing methods. The intervals are saved in a data object. This can be used in other functions which use intervals, e.g. most of the data evaluation methods and <code class="docutils literal notranslate"><span class="pre">slice_data</span></code>. With <code class="docutils literal notranslate"><span class="pre">slice_data</span></code>, conditional averaging can be implemented.</p>
+</section>
+</section>
+<section id="spectral-and-correlation-analysis">
+<h3>Spectral and correlation analysis<a class="headerlink" href="#spectral-and-correlation-analysis" title="Link to this heading">¶</a></h3>
+<p>These functions are somewhat similar to signal processing methods but processing can be done along multiple dimensions and interval selection has different meaning. The calculations can be done along coordinates, but only coordinates can be used which are equidistant and change along one dimension. This way there is one-to-one correspondence between coordinate values and array indices and we will use coordinate and dimension in the same way.</p>
+<p>In the above subsections various methods are presented generally for multi-dimensional cases. At the end of the section a few practical examples will be shown to illustrate typical applications.</p>
+<section id="auto-power-spectral-density-apsd">
+<h4>Auto Power Spectral Density (<code class="docutils literal notranslate"><span class="pre">apsd</span></code>)<a class="headerlink" href="#auto-power-spectral-density-apsd" title="Link to this heading">¶</a></h4>
+<p>The simplest spectrum calculation is Auto Spectral Power Density (power spectrum). Let us assume we have an <span class="math notranslate nohighlight">\(N\)</span>-dimensional data set <span class="math notranslate nohighlight">\(D(x_{1},\ldots, x_{N})\)</span> in which the time coordinate is changing along dimension <span class="math notranslate nohighlight">\(n\)</span>. The power spectrum calculation is done with the apsd method which converts the time coordinate to frequency:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+F\left( x_{1},x_{n - 1},f,x_{n + 1},\ldots, x_{N} \right) = \int_{}^{}{D\left( x_{1},\ldots x_{N} \right)\mathrm{e}^{2\pi f x_{n}}}\,\mathrm{d} x_{n},\\
+P\left( x_{1},x_{n - 1},f,x_{n + 1},\ldots, x_{N} \right) = F\left( x_{1},x_{n - 1},f,x_{n + 1},\ldots, x_{N} \right) {F\left( x_{1},x_{n - 1},f,x_{n + 1}\ldots, x_{N} \right)}^{*},
+\end{split}\]</div>
+</div>
+<p>where <span class="math notranslate nohighlight">\(F()\)</span> is the Fourier transform of <span class="math notranslate nohighlight">\(D\)</span> along dimension <span class="math notranslate nohighlight">\(n\)</span> and <span class="math notranslate nohighlight">\(*\)</span> means complex conjugate.</p>
+<p>The apsd calculation of a multidimensional dataset can be interpreted as we have a multi-dimensional collection of time signals and the power spectrum is calculated for all of them in one step. This calculation assumes that statistically the signal is the same in the whole <span class="math notranslate nohighlight">\(x_n\)</span> coordinate. (It can be different in other dimensions, that is the power spectra can be different at different <span class="math notranslate nohighlight">\(x_i\)</span>.) Sometimes this is not true and one intends to process only certain intervals or one would like to calculate an error for the correlations, thus intends to sample different regions and test the variability of the power spectrum. These processing regions in <span class="math notranslate nohighlight">\(x_n\)</span> can be selected with the <code class="docutils literal notranslate"><span class="pre">interval</span></code> keyword. The spectral calculation routines will limit calculation to these intervals and place identical length <em>processing intervals</em> into them for error calculation. The minimum number of processing intervals is set with the <code class="docutils literal notranslate"><span class="pre">Interval_n</span></code> option. The processing interval selection algorithm ensures that at least the required number of identical length intervals are selected. If <code class="docutils literal notranslate"><span class="pre">Interval_n</span></code> is large the algorithm will select smaller processing intervals but the number is fulfilled. If <code class="docutils literal notranslate"><span class="pre">Interval_n</span></code> is 1 and the <code class="docutils literal notranslate"><span class="pre">intervals</span></code> keyword is not set all data in the <span class="math notranslate nohighlight">\(x_n\)</span> dimension will be used. If <code class="docutils literal notranslate"><span class="pre">Interval_n</span></code> is not 1 the spectral calculation is done on all processing intervals separately and the final power spectrum will be the mean of the spectrum in the processing intervals. The error estimate of the spectral values will be the scatter of the values through the processing intervals divided by the square root of the number of processing intervals. The default value for <code class="docutils literal notranslate"><span class="pre">Interval_n</span></code> is 8, thus by default an error estimation will be obtained for the power spectrum. Selection of intervals in other than the calculation coordinates does not make sense as it would be identical to slicing. If that is intended the data should be sliced before calculation.</p>
+<p>Spectral calculations can also be done in multiple dimensions. An
+example for two- dimensional power spectrum is the wavenumber spectrum.
+Assuming that <span class="math notranslate nohighlight">\(x_i\)</span> and <span class="math notranslate nohighlight">\(x_j\)</span> are two spatial coordinates in the data set
+the <span class="math notranslate nohighlight">\(k\)</span>-spectrum is</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[
+P\left( x_{1},x_{i - 1},k_{1},x_{i + 1},\ldots, x_{j - 1} k_{2}, x_{j + 1}, x_{N} \right) = \int_{}^{}{D(x_{1},\ldots, x_{N})\mathrm{e}^{2\pi k_{1} x_{i}}} e^{2\pi k_{2} x_{j}}\,\mathrm{d}x_{i}\mathrm{d}x_{j}.
+\]</div>
+</div>
+<p>Again the wavenumber spectra (also called <span class="math notranslate nohighlight">\(k\)</span>-spectrum) is calculated in one step using the apsd function by specifying two coordinates <span class="math notranslate nohighlight">\((x_i,x_j)\)</span> for the calculation.</p>
+<p>The coordinate after the apsd calculation can be wavenumber or frequency depending on the calculation coordinate. By default the result will be “Frequency” of the calculation coordinate is “Time” and “Wavenumber” if the calculation coordinate is not “Time”. This behaviour can be modified using the “Wavenumber” option.</p>
+<p>It has to be noted that the cpsd method with a reference dataset does
+not calculate cross-power spectra within <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(D_{\mathrm{ref}}\)</span> only between functions in <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(D_{\mathrm{ref}}\)</span>. To calculate cross-spectra within <span class="math notranslate nohighlight">\(D\)</span> no reference dataset has to be set.</p>
+</section>
+<section id="cross-power-spectral-density-cpsd">
+<h4>Cross Power Spectral Density (<code class="docutils literal notranslate"><span class="pre">cpsd</span></code>)<a class="headerlink" href="#cross-power-spectral-density-cpsd" title="Link to this heading">¶</a></h4>
+<p>Cross-power spectra are similar to auto power spectra but in the power calculation the Fourier transform of two different datasets are used. The second dataset is called the reference and set using the reference keyword argument. The calculation is done along one or more common coordinates. The number of elements and the coordinate values of the two datasets in the calculation dimensions should be identical. In this case the dimension of the resulting dataset will be the sum of the dimensions of the two original datasets minus the number of calculation dimensions.
+Let us consider two datasets <span class="math notranslate nohighlight">\(D\)</span> (with <span class="math notranslate nohighlight">\(N\)</span> dimensions) and <span class="math notranslate nohighlight">\(D_{\mathrm{ref}}\)</span> with <span class="math notranslate nohighlight">\(M\)</span>
+dimensions. We calculate the one-dimensional cross power spectral
+density along dimension <span class="math notranslate nohighlight">\(x_i\)</span> in <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(y_j\)</span> in <span class="math notranslate nohighlight">\(D_{\mathrm{ref}}\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+F\left( x_{1},x_{i - 1},f,x_{i + 1},\ldots,x_{N} \right) = \int_{}^{}{D\left( x_{1},\ldots, x_{N} \right)\mathrm{e}^{2\pi fx_{i}}}\, \mathrm{d}x_{i},\\
+F_{\mathrm{ref}}\left( y,y_{j - 1},f,y_{j + 1},\ldots, y_{M} \right) = \int_{}^{}{D_{\mathrm{ref}}\left( x_{1},\ldots, x_{M} \right)\mathrm{e}^{2\pi f y_{j}}}dy_{j},\end{split}\]</div>
+</div>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+P\left( x_{1},x_{i - 1},x_{n + 1},\ldots, x_{N},y_{1},y_{j - 1},y_{j + 1},\ldots, y_{M}, f \right) =
+\\
+= F\left( x_{1}, x_{i - 1}, f, x_{i + 1}, \ldots, x_{N} \right){F_{\mathrm{ref}}\left( y, y_{j - 1}, f, y_{j + 1}, \ldots, y_{M} \right)}^{*}.
+\end{split}\]</div>
+</div>
+<p>The number of dimensions of <span class="math notranslate nohighlight">\(P\)</span> is <span class="math notranslate nohighlight">\(N+M-1\)</span> and it contains the cross-power spectral density at all combinations of the <span class="math notranslate nohighlight">\((x_k, k \neq i ; x_l, l \neq j)\)</span> coordinate pairs. The reference dataset can also be identical to the first dataset, in this case the autopower spectra will be present in the diagonal of the cross-power spectrum dataset. Selection of processing intervals in the calculation coordinate and error calculation can be done similary to <code class="docutils literal notranslate"><span class="pre">apsd</span></code>.</p>
+</section>
+<section id="cross-correlation-ccf">
+<h4>Cross-correlation (<code class="docutils literal notranslate"><span class="pre">ccf</span></code>)<a class="headerlink" href="#cross-correlation-ccf" title="Link to this heading">¶</a></h4>
+<p>This method calculates cross-covariance or correlation between two datasets along one or more dimensions. Let us consider two datasets <span class="math notranslate nohighlight">\(D\)</span> (with <span class="math notranslate nohighlight">\(N\)</span> dimensions) and <span class="math notranslate nohighlight">\(D_{\mathrm{ref}}\)</span> with <span class="math notranslate nohighlight">\(M\)</span> dimensions. We calculate the one-dimensional cross-covariance along dimension <span class="math notranslate nohighlight">\(x_i\)</span> in <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(y_j\)</span> in <span class="math notranslate nohighlight">\(D_{\mathrm{ref}}\)</span>:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+K\left( x_{1},x_{i - 1},x_{n + 1},\ldots, x_{N},y_{1},y_{j - 1},y_{j + 1}\ldots, y_{M},\Delta \right) = \\
+= \int_{}^{}{D\left( x_{1},x_{i - 1},x_{i},x_{i + 1},\ldots, x_{N} \right)}{D_{\mathrm{ref}}\left( y,y_{j - 1},x_{i} + \Delta,y_{j + 1},\ldots, y_{M} \right)}^{*} \, \mathrm{d} x_{i}.
+\end{split}\]</div>
+</div>
+<p>Similary to <code class="docutils literal notranslate"><span class="pre">cpsd</span></code> the number of dimension of the result will be <span class="math notranslate nohighlight">\(N+M-1\)</span>. If <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(D_{\mathrm{ref}}\)</span> is one-dimensional than the result is a single cross-covariance function.</p>
+<p>If the “Norm” option is set to True the calculated values are normalized with the autocorrelations to get the correlation function:</p>
+<div class="math-wrapper docutils container">
+<div class="math notranslate nohighlight">
+\[\begin{split}
+C\left( x_{1},x_{i - 1},x_{n + 1},\ldots, x_{N},y_{1},y_{j - 1},y_{j + 1}\ldots, y_{M}, \Delta \right) =
+\\
+= \frac{K\left( x_{1},x_{i - 1},x_{n + 1}\ldots,x_{N},y_{1},y_{j - 1},y_{j + 1},\ldots,y_{M},\Delta \right)}{\sqrt{\int_{}^{}{D\left(\overline{x} \right){D\left( \overline{x} \right)}^{*}} \, \mathrm{d}x_{i} \int_{}^{}{D_{\mathrm{ref}}\left( \overline{y} \right){D_{\mathrm{ref}}\left( \overline{y} \right)}^{*}}\, \mathrm{d}y_{j}}}
+\end{split}\]</div>
+</div>
+<p>between all signals in two data objects. It does not calculate correlations in one object, to do this the second (reference) data object can be omitted. The number of dimensions of the resulting data object is the sum of the dimension number of the two data objects minus 1. The correlation function lag range and lag resolution can be set.</p>
+</section>
+<section id="typical-applications">
+<h4>Typical applications<a class="headerlink" href="#typical-applications" title="Link to this heading">¶</a></h4>
+<p>If <code class="docutils literal notranslate"><span class="pre">d</span></code> is a onedimensional dataset describing a signal <em>vs</em> time then <code class="docutils literal notranslate"><span class="pre">d.apsd()</span></code> (or <code class="docutils literal notranslate"><span class="pre">flap.apsd(d)</span></code>) returns the power spectrum. It is a one-dimensional dataset containing power as as function of frequency. The result is the same using the <code class="docutils literal notranslate"><span class="pre">cpsd</span></code> method and <code class="docutils literal notranslate"><span class="pre">ccf</span></code> returns the autocorrelation function.</p>
+<p>In the second example we have temporal measurements at multiple spatial locations <span class="math notranslate nohighlight">\(x\)</span> and the data are stored in a two-dimensional dataset <span class="math notranslate nohighlight">\(D(x,t)\)</span>. In this case <code class="docutils literal notranslate"><span class="pre">apsd</span></code> returns a two-dimensional dataset <span class="math notranslate nohighlight">\(D(x,f)\)</span>, the power spectra at all spatial locations. <code class="docutils literal notranslate"><span class="pre">cpsd</span></code> will have 3 dimensions and will contain all cross-power spectra between various measurement locations. The <code class="docutils literal notranslate"><span class="pre">ccf</span></code> method will also return a 3-dimensional dataset containing the cross-correlation (or cross-covariance) functions between all signals.</p>
+<p>In the third example we have an image stored in a two-dimensional
+dataset <span class="math notranslate nohighlight">\(D(x,y)\)</span>. Applying <code class="docutils literal notranslate"><span class="pre">apsd</span></code> in 2D will result in <span class="math notranslate nohighlight">\(P(k_x, k_y)\)</span>, the power density in the two-dimensional wavenumber vector space.</p>
+<p>If we extend the image with a temporal dimension to 3D: <span class="math notranslate nohighlight">\(D(x,y,t)\)</span> (video
+data) we can calculate the power spectrum in each pixel by doing <code class="docutils literal notranslate"><span class="pre">apsd</span></code>
+along the time coordinate: <span class="math notranslate nohighlight">\(P(x,y,f)\)</span>. Doing <code class="docutils literal notranslate"><span class="pre">ccf</span></code> in 2D along <span class="math notranslate nohighlight">\(x\)</span> and <span class="math notranslate nohighlight">\(y\)</span> results in <span class="math notranslate nohighlight">\(C(\Delta_x, \Delta_y,t)\)</span>. This video shows the temporal evolution of the spatial correlation function.</p>
+</section>
+</section>
+</section>
+<section id="plotting">
+<h2>Plotting<a class="headerlink" href="#plotting" title="Link to this heading">¶</a></h2>
+<p>FLAP can generate various plots from data objects in a simple way using the <code class="docutils literal notranslate"><span class="pre">plot</span></code> method of <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> or the <a class="reference internal" href="../flap.plot.html#module-flap.plot" title="flap.plot"><span class="xref myst py py-mod">flap.plot</span></a> function. A slicing and summing keyword argument allows to call the <code class="docutils literal notranslate"><span class="pre">slice_data</span></code> function from within the plot call so as a plot can be made of a slice of the data without the need to store the slice.</p>
+<p>The following plot types are available:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>plot_type</p></th>
+<th class="head"><p>Data dimension</p></th>
+<th class="head"><p>Data type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘xy’</p></td>
+<td><p>1D</p></td>
+<td><p>real</p></td>
+<td><p>Plots data or coordinates as a curve.</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘xy’</p></td>
+<td><p>1D</p></td>
+<td><p>complex</p></td>
+<td><p>Plots the real-imaginary or amplitude-phase as two separate curves.</p></td>
+</tr>
+<tr class="row-even"><td><p>‘scatter’</p></td>
+<td><p>1D</p></td>
+<td><p>real</p></td>
+<td><p>Plots data as points.</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘scatter’</p></td>
+<td><p>1D</p></td>
+<td><p>complex</p></td>
+<td><p>Plots the real-imaginary or amplitude-phase points as two separate plots.</p></td>
+</tr>
+<tr class="row-even"><td><p>‘multi xy’</p></td>
+<td><p>2D</p></td>
+<td><p>real</p></td>
+<td><p>Plots each curve of the 2D data object above each other</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘grid xy’, ‘grid scatter’</p></td>
+<td><p>3D</p></td>
+<td><p>real</p></td>
+<td><p>Plots xy plots on a 2D grid</p></td>
+</tr>
+<tr class="row-even"><td><p>‘image’</p></td>
+<td><p>2D</p></td>
+<td><p>real</p></td>
+<td><p>Plots 2D data as image. Data on regular mesh is plotted as interpolated image, irregular as boxes around coordinate values.</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘contour’</p></td>
+<td><p>2D</p></td>
+<td><p>real</p></td>
+<td><p>Contour plot.</p></td>
+</tr>
+<tr class="row-even"><td><p>‘anim-image’</p></td>
+<td><p>3D</p></td>
+<td><p>real</p></td>
+<td><p>A series of ‘image’ plots, the third coordinate as time. It can also write an AVI file as output.</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘anim-contour’</p></td>
+<td><p>3D</p></td>
+<td><p>real</p></td>
+<td><p>A series of ‘contour’ plots, the third coordinate is time. It can also write an AVI file as output.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Graphics are created using the matplotlib package but a FLAP plot may consist of multiple matplotlib plots. Each FLAP plot is identified by a <a class="reference internal" href="../flap.plot.html#flap.plot.PlotID" title="flap.plot.PlotID"><span class="xref myst py py-class">flap.PlotID</span></a> class variable returned by the plot function/method. It is possible to set the actual plot ID to a previously created one and thus add more data to an already existing plot.</p>
+<p>The hierarchy and handling of graphics is the following:</p>
+<ul class="simple">
+<li><p>Matplotlib may use multiple “figures”, each figure is a separate window in the computer.</p></li>
+<li><p>A figure may contain multiple subplots created by the Matplotlib <code class="docutils literal notranslate"><span class="pre">subplot</span></code>, <code class="docutils literal notranslate"><span class="pre">GridSpec</span></code> and similar functions.</p></li>
+<li><p>When the FLAP plot function/method is called it uses the current subplot setting and places its (possibly multiple) plots into the subplot area.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">PlotID</span></code> of the last plot is remembered by flap, the next plot will be overplotted into the existing one. This is also true for multi-axis flap plots.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">plot_id</span></code> keyword can be used in plot to specify an existing plot ID where the new one has to be overplotted. After the plot this plot ID becomes the current one.</p></li>
+<li><p>The current plot ID can be changed with the <a class="reference internal" href="../flap.plot.html#flap.plot.set_plot_id" title="flap.plot.set_plot_id"><span class="xref myst py py-func">flap.set_plot_id</span></a> function as well.</p></li>
+<li><p>If the plot destination area is changed by the Matplotlib subplot function overlapping plots will be erased. If the new area agrees with an existing one no erase will happen. This latter behaviour will be changed in new versions of Matplotlib.</p></li>
+<li><p>If the plot type at an existing place is different from the requested new plot and error message will be raised. Setting the ‘Clear’ option in the plot call to True erases the previous plot.</p></li>
+</ul>
+<p>FLAP uses the coordinate information in the data objects to create plots. The axes of the plots can be specified as <code class="docutils literal notranslate"><span class="pre">axes=[ax1,ax2,...]</span></code> where the list elements can be the following:</p>
+<ul class="simple">
+<li><p>The string <code class="docutils literal notranslate"><span class="pre">__Data__</span></code> means the data in the data object.</p></li>
+<li><p>Any other string refers to a coordinate in the data object.</p></li>
+<li><p>A data object means the data on that data object is used. This enables plotting as a function of another data object.</p></li>
+<li><p>A constant means constant value for that coordinate.</p></li>
+</ul>
+<p>The FLAP plot function/method has default plot types and plot axes for various types of data objects, therefore in many cases it is enough to use <code class="docutils literal notranslate"><span class="pre">d.plot()</span></code> to prepare a reasonable plot of the data object. If no axes are specified the first few coordinates in the data object and the data are used as default. E.g. for simple x-y plot the first coordinate and data are the default axes. When overplotting the default axes become the ones in the plot. This way if a signal is plotted as a function of sample number instead of time the next signal will be automatically overplotted as a function of sample. This also means that when overplotting a data object onto an existing plot where the <code class="docutils literal notranslate"><span class="pre">data_name</span></code> of the new data object does not match any axis on the plot all axes should be explicitly specified and forced (see below).</p>
+<p>Axes and units are automatically placed on the plots. The language of the axes can be set in the call to plot in the ‘Language’ option. When overplotting the following rules apply for the axis title and unit:</p>
+<ul class="simple">
+<li><p>Axes of the old and new plot are considered to be identical when both the names and units are identical.</p></li>
+<li><p>If and old and new axis is not identical an error message is raised unless the ‘Force axes’ option is set to True.</p></li>
+<li><p>When forced the following rules apply:</p>
+<ul>
+<li><p>If names or units are identical they will be preserved.</p></li>
+<li><p>If one of the names or units is not known (<code class="docutils literal notranslate"><span class="pre">''</span></code> or None) the other will be used</p></li>
+<li><p>If none of the above applies the axis will have no name and/or unit.</p></li>
+</ul>
+</li>
+</ul>
+<p>The link to the data from which the plots were created is saved in plotID and this in following versions on FLAP it should be possible to regenerate the plot, erase one of the data objects from it and possibly increase plot resolution when the ‘All points’ option is not set.</p>
+</section>
+<section id="writing-a-data-source-module">
+<h2>Writing a data source module<a class="headerlink" href="#writing-a-data-source-module" title="Link to this heading">¶</a></h2>
+<p>A data source module differs from a normal Python module in the in that it can provide a few functions for the FLAP framework. These are the following.</p>
+<section id="reading-data-into-flap">
+<h3>Reading data into FLAP<a class="headerlink" href="#reading-data-into-flap" title="Link to this heading">¶</a></h3>
+<p>In order to implement data read into FLAP the module should provide a function with the following input arguments:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="n">exp_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">data_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">data_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">no_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The name of the function is irrelevant. The input arguments are the following:</p>
+<section id="exp-id">
+<h4><code class="docutils literal notranslate"><span class="pre">exp_id</span></code><a class="headerlink" href="#exp-id" title="Link to this heading">¶</a></h4>
+<p>The experiment ID that is shot number or any other numeric or string describing the particular experiment from which the data is requested.</p>
+</section>
+<section id="data-source">
+<h4><code class="docutils literal notranslate"><span class="pre">data_source</span></code><a class="headerlink" href="#data-source" title="Link to this heading">¶</a></h4>
+<p>The data source name. This is forwarded from the general <a class="reference internal" href="../flap.data_object.html#flap.data_object.get_data" title="flap.data_object.get_data"><span class="xref myst py py-func">flap.get_data()</span></a> function. It can be used by the module <code class="docutils literal notranslate"><span class="pre">get_data</span></code> function to identify various subtypes of the same module.</p>
+</section>
+<section id="data-name">
+<h4><code class="docutils literal notranslate"><span class="pre">data_name</span></code><a class="headerlink" href="#data-name" title="Link to this heading">¶</a></h4>
+<p>Name of the data requested. This is a string or list of strings. The
+strings may contain Unix-style wildcards like <code class="docutils literal notranslate"><span class="pre">CH[1-8]</span></code> but also an
+extended wildcards can be used like <code class="docutils literal notranslate"><span class="pre">CH[1-23]</span></code>. This allows reading an
+arbitrary number and configuration of measurement channels. At present
+only one <code class="docutils literal notranslate"><span class="pre">[...]</span></code> wildcard can be used in a name.</p>
+</section>
+<section id="no-data">
+<h4><code class="docutils literal notranslate"><span class="pre">no_data</span></code><a class="headerlink" href="#no-data" title="Link to this heading">¶</a></h4>
+<p>If False then no data should be returned, only the coordinates filled. In this case it is necessary to set the <code class="docutils literal notranslate"><span class="pre">data_source</span></code> argument in <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> to indicate what the shape of the data would be. If this is not set the coordinate ranges cannot be determined. If the <code class="docutils literal notranslate"><span class="pre">data_array</span></code> is set in <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> the <code class="docutils literal notranslate"><span class="pre">data_shape</span></code> need not be set it will be determined from the shape of the data array.</p>
+</section>
+<section id="options">
+<h4><code class="docutils literal notranslate"><span class="pre">options</span></code><a class="headerlink" href="#options" title="Link to this heading">¶</a></h4>
+<p>A dictionary of options. No make use of options in the configuration file and abbreviation of options follow the description below.</p>
+</section>
+<section id="coordinates">
+<h4><code class="docutils literal notranslate"><span class="pre">coordinates</span></code><a class="headerlink" href="#coordinates" title="Link to this heading">¶</a></h4>
+<p>This dictionary may contain names of coordinates as keys and <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> objects as values which can precisely define the coordinate ranges from which the data should be read through the <code class="docutils literal notranslate"><span class="pre">values</span></code> and <code class="docutils literal notranslate"><span class="pre">value_ranges</span></code> in the <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> object. As a simplification the <code class="docutils literal notranslate"><span class="pre">c_range</span></code> element of the <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> object gives a simple range.</p>
+<p>Any number of coordinates can be added to the <code class="docutils literal notranslate"><span class="pre">flap.DataObject.coordinates</span></code> list. However, there should be at least as many coordinates as data dimensions otherwise the data object might be unusable for processing. In a standard case there is a coordinate describing each dimension of the data object, e.g. ‘Image x’, ‘Image y’, ‘Time’ for a series of images. More coordinates can be added, e.g. a ‘Sample’ coordinate with integer step and start value is often useful additionally to a ‘Time’ coordinate for long data sequences where the float representation of the Time data is not exact enough. The returned data object is checked for consistency by the <a class="reference internal" href="../flap.data_object.html#flap.data_object.get_data" title="flap.data_object.get_data"><span class="xref myst py py-func">flap.get_data()</span></a> function.</p>
+<p>The order of coordinates is arbitrary, but for default plotting the first few coordinates are selected, therefore is useful to check which are the default coordinates for the given dimensional data object.</p>
+</section>
+<section id="return-value">
+<h4>Return value<a class="headerlink" href="#return-value" title="Link to this heading">¶</a></h4>
+<p>The <strong>return value</strong> should be a <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a>.</p>
+</section>
+<section id="using-options">
+<h4>Using options<a class="headerlink" href="#using-options" title="Link to this heading">¶</a></h4>
+<p>To make use of options in the configuration file and option abbreviation the following should be provided in the data read function:</p>
+<ul>
+<li><p>A dictionary should be created with all possible options and their default values.</p></li>
+<li><p>The <a class="reference internal" href="../flap.config.html#flap.config.merge_options" title="flap.config.merge_options"><span class="xref myst py py-func">flap.config.merge_options()</span></a> function should be called the following way:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">_options</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">merge_options</span><span class="p">(</span><span class="n">default_options</span><span class="p">,</span>
+                                     <span class="n">options</span><span class="p">,</span>
+                                     <span class="n">data_source</span><span class="o">=</span><span class="s1">&#39;DATASOURCE&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>In the above call ‘DATASOURCE’ should be replaced with the data source name used in registering the data read function (see below). <code class="docutils literal notranslate"><span class="pre">default_options</span></code> is the default options dictionary and <code class="docutils literal notranslate"><span class="pre">options</span></code> is the options dictionary received by the get data function. In the above example the merge_options function reads entries from the configuration file section ‘Module DATASOURCE’ and all the entries which has no <code class="docutils literal notranslate"><span class="pre">{xxx}</span></code> at their beginning are added (or replaced) to the options list received in the default options argument. This means function defaults are replaced by configuration defaults. Finally the dictionary keys in the options arguments are checked whether they can be interpreted as abbreviation of only one option and if is fulfilled their value is entered into that options. This overwrites both function and configuration file defaults with input options. The resulting options dictionary is returned by the function. It should be named differently then the options input to the data read function to avoid overwriting the input argument. The <code class="docutils literal notranslate"><span class="pre">_options</span></code> dictionary should be used in the data read function after merging all options. This procedure is not compulsory but it should be done if configuration file options and option abbreviations are to be used.</p>
+</section>
+</section>
+<section id="adding-coordinates">
+<h3>Adding coordinates<a class="headerlink" href="#adding-coordinates" title="Link to this heading">¶</a></h3>
+<p>An optional function can also be provided by the module if it is capable
+of calculating additional coordinates to the ones returned in the data
+read function. For e.g. some derived spatial coordinates or flux
+coordinates can be added to an already existing data object with the
+following function:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">add_coordinate</span><span class="p">(</span><span class="n">data_object</span><span class="p">,</span>
+                   <span class="n">coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">exp_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                   <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This function takes a <a class="reference internal" href="../flap.data_object.html#flap.data_object.DataObject" title="flap.data_object.DataObject"><span class="xref myst py py-class">flap.DataObject</span></a> and adds new coordinates named in the string list “coordinates”. The arguments:</p>
+<section id="data-object">
+<h4><code class="docutils literal notranslate"><span class="pre">data_object</span></code><a class="headerlink" href="#data-object" title="Link to this heading">¶</a></h4>
+<p>The input data object.</p>
+</section>
+<section id="id2">
+<h4><code class="docutils literal notranslate"><span class="pre">coordinates</span></code><a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<p>A list of strings describing the requested new coordinates. In response the function should add these coordinates to the data object or raise an error.</p>
+</section>
+<section id="id3">
+<h4><code class="docutils literal notranslate"><span class="pre">exp_id</span></code><a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<p>If for the coordinate calculation another experiment ID should be used this argument is set and used instead of the <code class="docutils literal notranslate"><span class="pre">exp_id</span></code> in the data object. This can be the situation e.g. when no calibration data is available for the original experiment.</p>
+</section>
+<section id="id4">
+<h4><code class="docutils literal notranslate"><span class="pre">options</span></code><a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<p>A dictionary of options.</p>
+<p>To make use of these tow functions in the flap environment the module should register them. The module should define a function named <code class="docutils literal notranslate"><span class="pre">register</span></code> the following way:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">data_source</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">data_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">data_source</span> <span class="o">=</span> <span class="s1">&#39;DATA_SOURCE_NAME&#39;</span>
+    <span class="n">flap</span><span class="o">.</span><span class="n">register_data_source</span><span class="p">(</span><span class="n">data_source</span><span class="p">,</span>
+                              <span class="n">get_data_func</span><span class="o">=</span><span class="n">get_data</span><span class="p">,</span>
+                              <span class="n">add_coord_func</span><span class="o">=</span><span class="n">add_coordinate</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The two functions in the <code class="docutils literal notranslate"><span class="pre">get_data_func</span></code> and <code class="docutils literal notranslate"><span class="pre">add_coord_func</span></code> are the two
+functions described above. This register function will be called when
+the module is used. (See in the next section.)</p>
+<p>The ‘DATA_SOURCE_NAME’ string should be replaced by the desired data source name in FLAP. If the data_source input is not given the data source will be registered under the default name ‘DATA_SOURCE_NAME’, otherwise the calling program can register under a different name. This is useful if the same module is used for different data sources, e.g. a generic mds+ module for different experiments.</p>
+</section>
+</section>
+</section>
+<section id="using-data-source-modules">
+<h2>Using data source modules<a class="headerlink" href="#using-data-source-modules" title="Link to this heading">¶</a></h2>
+<p>To make use of a data source module it should be first imported in the user program as any other module. The data read and coordinate add functions are integrated into FLAP by calling the <code class="docutils literal notranslate"><span class="pre">register</span></code> function of the data source. In the example below we will use module name <code class="docutils literal notranslate"><span class="pre">testdata</span></code> and data source name ‘TESTDATA’.</p>
+<section id="reading-data">
+<h3>Reading data<a class="headerlink" href="#reading-data" title="Link to this heading">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">testdata</span>
+<span class="n">testdata</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">flap</span><span class="o">.</span><span class="n">list_data_sources</span><span class="p">())</span>
+
+<span class="n">d</span><span class="o">=</span><span class="n">flap</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span>
+                <span class="n">exp_id</span><span class="o">=</span><span class="mi">12345</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Signal-1&#39;</span><span class="p">,</span><span class="s1">&#39;Signal-[20-23]&#39;</span><span class="p">],</span>
+                <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Scaling&#39;</span><span class="p">:</span><span class="s1">&#39;Volt&#39;</span><span class="p">},</span>\
+                <span class="n">coordinates</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Time&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]},</span>
+                <span class="n">object_name</span><span class="o">=</span><span class="s1">&#39;TESTDATA_SIGNALS&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The above example code imports the testdata module and registers it in
+FLAP. The <a class="reference internal" href="../flap.data_object.html#flap.data_object.list_data_sources" title="flap.data_object.list_data_sources"><span class="xref myst py py-func">flap.list_data_sources</span></a> function lists all actually registered data sources. The <a class="reference internal" href="../flap.data_object.html#flap.data_object.get_data" title="flap.data_object.get_data"><span class="xref myst py py-func">flap.get_data()</span></a> function is the general data read interface in FLAP. In the example it reads from the ‘TESTDATA’ data source the data named ‘Signal-1’, ‘Signal-20’, … ‘Signal-23’ in the time interval 1-3s. The resulting data object will be stored in FLAP storage under name ‘TESTDATA_SIGNALS’ and also returned by the function. In the <code class="docutils literal notranslate"><span class="pre">options</span></code> it is requested to scale the data to volts.</p>
+<p>When the <a class="reference internal" href="../flap.data_object.html#flap.data_object.get_data" title="flap.data_object.get_data"><span class="xref myst py py-func">flap.get_data()</span></a> function is called it first determines whether the requested data source is registered. If it is then the data read function of the module is called with the <code class="docutils literal notranslate"><span class="pre">exp_id</span></code>, <code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">options</span></code>, <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> arguments. If the <code class="docutils literal notranslate"><span class="pre">coordinates</span></code> argument is a dictionary as in the above example then it is converted to a <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> object and the range (<code class="docutils literal notranslate"><span class="pre">[1,3]</span></code> in the example) is entered in the <code class="docutils literal notranslate"><span class="pre">c_range</span></code> field of it. This coordinate is passed to the module data read function. If in the coordinates arguments already <a class="reference internal" href="../flap.coordinate.html#flap.coordinate.Coordinate" title="flap.coordinate.Coordinate"><span class="xref myst py py-class">flap.Coordinate</span></a> objects are listed then they are passed without modification. When the module data read function returns the data object it is stored in FLAP storage if an object name is named. The shape, contents, coordinates of the data object is fully determined by the module data read function.</p>
+</section>
+<section id="requesting-new-coordinates">
+<h3>Requesting new coordinates<a class="headerlink" href="#requesting-new-coordinates" title="Link to this heading">¶</a></h3>
+<p>In the simplest form new coordinates can be requested for data object <code class="docutils literal notranslate"><span class="pre">d</span></code> the following way:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">.</span><span class="n">add_coordinate</span><span class="p">(</span><span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Device x&#39;</span><span class="p">,</span><span class="s1">&#39;Device y&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>This call requests the module which created the <code class="docutils literal notranslate"><span class="pre">d</span></code> data object to add new
+coordinates named ‘Device x’ and ‘Device y’. The <code class="docutils literal notranslate"><span class="pre">add_coordinate</span></code> method also has a <code class="docutils literal notranslate"><span class="pre">data_source</span></code>, <code class="docutils literal notranslate"><span class="pre">exp_id</span> <span class="pre">argument</span></code> so as different data source or experiment can be used for coordinate calculation than the ones used for reading the data. This is useful e.g. when a separate flux coordinate mapping module is defined. It is also possible to add coordinates directly to a data object in FLAP storage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">flap</span><span class="o">.</span><span class="n">add_coordinate</span><span class="p">(</span><span class="s1">&#39;TESTDATA_SIGNALS&#39;</span><span class="p">,</span>
+                    <span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Device x&#39;</span><span class="p">,</span><span class="s1">&#39;Device y&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../extensions.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Extensions</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="../auto_examples/basic_examples/using_data_sources.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Using data source modules</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2019-2024, FLAP contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">FLAP Version 1.12 User’s Guide</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#obtaining-and-installing-flap">Obtaining and installing FLAP</a></li>
+<li><a class="reference internal" href="#configuration">Configuration</a></li>
+<li><a class="reference internal" href="#options-and-defaults">Options and defaults</a></li>
+<li><a class="reference internal" href="#data-objects">Data objects</a></li>
+<li><a class="reference internal" href="#data-sources">Data sources</a></li>
+<li><a class="reference internal" href="#coordinates-in-flap">Coordinates in FLAP</a><ul>
+<li><a class="reference internal" href="#data-storage-and-coordinates">Data storage and coordinates</a></li>
+<li><a class="reference internal" href="#representation-of-coordinates">Representation of coordinates</a></li>
+<li><a class="reference internal" href="#mapping-to-data-samples-the-dimension-list-attribute">Mapping to data samples: the dimension_list attribute</a></li>
+<li><a class="reference internal" href="#getting-coordinate-values">Getting coordinate values</a></li>
+<li><a class="reference internal" href="#converting-coordinates">Converting coordinates</a></li>
+<li><a class="reference internal" href="#explanations-and-examples">Explanations and examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#data-storage">Data storage</a><ul>
+<li><a class="reference internal" href="#listing-the-content-of-flap-storage">Listing the content of FLAP storage</a></li>
+<li><a class="reference internal" href="#save-load">Save/Load</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#data-processing">Data processing</a><ul>
+<li><a class="reference internal" href="#slicing">Slicing</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#arithmetic-operations-on-data-objects">Arithmetic operations on data objects</a><ul>
+<li><a class="reference internal" href="#addition-subtraction">Addition, subtraction</a></li>
+<li><a class="reference internal" href="#multiplication">Multiplication</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#data-object-conversions">Data object conversions</a><ul>
+<li><a class="reference internal" href="#real"><code class="docutils literal notranslate"><span class="pre">real</span></code></a></li>
+<li><a class="reference internal" href="#imag"><code class="docutils literal notranslate"><span class="pre">imag</span></code></a></li>
+<li><a class="reference internal" href="#abs-value"><code class="docutils literal notranslate"><span class="pre">abs_value</span></code></a></li>
+<li><a class="reference internal" href="#error-value"><code class="docutils literal notranslate"><span class="pre">error_value</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#signal-processing-methods">Signal processing methods</a><ul>
+<li><a class="reference internal" href="#detrend"><code class="docutils literal notranslate"><span class="pre">detrend</span></code></a></li>
+<li><a class="reference internal" href="#filter-data"><code class="docutils literal notranslate"><span class="pre">filter_data</span></code></a></li>
+<li><a class="reference internal" href="#select"><code class="docutils literal notranslate"><span class="pre">select</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#spectral-and-correlation-analysis">Spectral and correlation analysis</a><ul>
+<li><a class="reference internal" href="#auto-power-spectral-density-apsd">Auto Power Spectral Density (<code class="docutils literal notranslate"><span class="pre">apsd</span></code>)</a></li>
+<li><a class="reference internal" href="#cross-power-spectral-density-cpsd">Cross Power Spectral Density (<code class="docutils literal notranslate"><span class="pre">cpsd</span></code>)</a></li>
+<li><a class="reference internal" href="#cross-correlation-ccf">Cross-correlation (<code class="docutils literal notranslate"><span class="pre">ccf</span></code>)</a></li>
+<li><a class="reference internal" href="#typical-applications">Typical applications</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#plotting">Plotting</a></li>
+<li><a class="reference internal" href="#writing-a-data-source-module">Writing a data source module</a><ul>
+<li><a class="reference internal" href="#reading-data-into-flap">Reading data into FLAP</a><ul>
+<li><a class="reference internal" href="#exp-id"><code class="docutils literal notranslate"><span class="pre">exp_id</span></code></a></li>
+<li><a class="reference internal" href="#data-source"><code class="docutils literal notranslate"><span class="pre">data_source</span></code></a></li>
+<li><a class="reference internal" href="#data-name"><code class="docutils literal notranslate"><span class="pre">data_name</span></code></a></li>
+<li><a class="reference internal" href="#no-data"><code class="docutils literal notranslate"><span class="pre">no_data</span></code></a></li>
+<li><a class="reference internal" href="#options"><code class="docutils literal notranslate"><span class="pre">options</span></code></a></li>
+<li><a class="reference internal" href="#coordinates"><code class="docutils literal notranslate"><span class="pre">coordinates</span></code></a></li>
+<li><a class="reference internal" href="#return-value">Return value</a></li>
+<li><a class="reference internal" href="#using-options">Using options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#adding-coordinates">Adding coordinates</a><ul>
+<li><a class="reference internal" href="#data-object"><code class="docutils literal notranslate"><span class="pre">data_object</span></code></a></li>
+<li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">coordinates</span></code></a></li>
+<li><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">exp_id</span></code></a></li>
+<li><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">options</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-data-source-modules">Using data source modules</a><ul>
+<li><a class="reference internal" href="#reading-data">Reading data</a></li>
+<li><a class="reference internal" href="#requesting-new-coordinates">Requesting new coordinates</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    </body>
+</html>
