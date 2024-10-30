@@ -17,61 +17,109 @@ import numpy as np
 import flap.coordinate
 import flap.data_object
 
-def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, options=None, plot_options=None, output_name=None):
-    """
-    Select intervals from data interactively.
-    INPUT:
-        object_descr: If a data object: Plot this data object to select.
-           String: Will be interpreted as a data object name in flap storage.
-        exp_id: The exp_id if dobject_descr is a string
-                intervals: Information of processing intervals.
-                           If dictionary with a single key: {selection coordinate: description})
-                               Key is a coordinate name which can be different from the calculation
-                               coordinate.
-                               Description can be flap.Intervals, flap.DataObject or
-                               a list of two numbers. If it is a data object with data name identical to
-                               the coordinate the error ranges of the data object will be used for
-                               interval. If the data name is not the same as coordinate a coordinate with the
-                               same name will be searched for in the data object and the value_ranges
-                               will be used fromm it to set the intervals.
-                           If not a dictionary and not None it is interpreted as the interval
-                               description, the selection coordinate is taken the same as
-                               coordinate.
-                           If None, the whole data interval will be used as a single interval.
-        coordinate: The name of the coordinate to use for x axis. (string) This will be the
-                    coordinate of the selection.
-        plot_options: Passed to plot().
-        options: Dictionary of options:
-                 'Select': 'Start': Select start of intervals. (Needs Lenght to be set.)
-                           'End': Select end of intervals. (Needs Lenght to be set.)
-                           'Full': Select start and end of interval.
-                           'Center': Select center of interval.
-                           None: No interactive selection
-                 'Length': Length of intervals.
-                 'Event' : Dictionary describing events to search for. A reference time will be
-                           determined for each event and a Length interval will be selected
-                           symmetrically around it. Trend removal and/or filtering should be done
-                           before calling this function.
-                           'Type': 'Maximum' or 'Minimum':
-                                     Will look for signal pieces above/below threshold
-                                     and calculate maximum place of signal in this piece.
-                                   'Max-weight' or 'Min-weight':
-                                     Same as Maximum and Minimum but selects center of gravity
-                                     for signal piece.
-                                   In each of the above cases the interval will be 'Length' long around the event.
-                                   'Above', 'Below':
-                                     The intervals will be where the signal is above or below the threshold. 
-                           'Start delay', 'End delay': For the Above and Below events the start and end delay of the interval
-                                                       in the coordinate units.
-                           'Threshold': The threshold for the event.
-                           'Thr-type' Threshold type:
-                                         'Absolute': Absolute signal value
-                                         'Sigma': Threshold times sigma
+def select_intervals(object_descr,
+                     coordinate=None,
+                     exp_id='*',
+                     intervals=None,
+                     options=None,
+                     plot_options=None,
+                     output_name=None):
+    """Select intervals from data interactively.
 
-        output_name: Output object name in flap storage.
+    Parameters
+    ----------
+    object_descr : flap.DataObject | str
+        Object to operate on.
 
-    Return value:
-        A data object. Data name is the coordinate name. The error gives the intervals.
+        - If a data object: Plot this data object to select.
+        - String: Will be interpreted as a data object name in flap storage.
+
+    coordinate : str, optional, default=None
+        The name of the coordinate to use for x axis. This will be the
+        coordinate of the selection.
+    exp_id : str, optional, default='*'
+        The experiment ID, if `object_descr` is a string.
+    intervals : dict | str, optional, default=None
+        Information of processing intervals.
+
+        - If dictionary with a single key: {selection coordinate:
+          description}). Key is a coordinate name which can be different from
+          the calculation coordinate.  Description can be `flap.Intervals`,
+          `flap.DataObject` or a list of two numbers. If it is a data object
+          with data name identical to the coordinate, the error ranges of the
+          data object will be used for interval. If the data name is not the
+          same as coordinate, a coordinate with the same name will be searched
+          for in the data object and the `value_ranges` will be used from it to
+          set the intervals.
+        - If not a dictionary and not None, it is interpreted as the
+          interval description, the selection coordinate is taken the same as
+          `coordinate`.
+        - If None, the whole data interval will be used as a single
+          interval.
+
+    options : dict, optional, default=None
+        Possible keys and values:
+
+            - 'Select' (default='Full'):
+
+              - 'Start': Select start of intervals. (Needs Length to be set.)
+              - 'End': Select end of intervals. (Needs Length to be set.)
+              - 'Full': Select start and end of interval.
+              - 'Center': Select center of interval.
+              - None: No interactive selection.
+
+            - 'Length' (default=None): 
+
+                - float: Length of intervals.
+
+            - 'Event' (default=None):
+
+                - dict: Dictionary describing events to search for. A reference
+                  time will be determined for each event and a Length interval
+                  will be selected symmetrically around it. Trend removal and/or
+                  filtering should be done before calling this function.
+
+                  Possible keys and values:
+
+                  - 'Type': 
+
+                    - 'Maximum' or 'Minimum': Will look for signal pieces
+                      above/below threshold and calculate maximum place of signal in
+                      this piece.
+                    - 'Max-weight' or 'Min-weight': Same as Maximum and Minimum
+                      but selects center of gravity for signal piece.
+                
+                    In each of the above cases the interval will be 'Length' long
+                    around the event.
+
+                    - 'Above', 'Below': The intervals will be where the signal is
+                      above or below the threshold. 
+
+                  - 'Start delay', 'End delay': 
+
+                    - For the Above and Below events the start and end delay of
+                      the interval in the coordinate units.
+
+                  - 'Threshold':
+
+                    - The threshold for the event.
+
+                  - 'Thr-type':
+
+                    Threshold type:
+
+                    - 'Absolute': Absolute signal value.
+                    - 'Sigma': Threshold times sigma.
+
+    plot_options : dict, optional, default=None
+        Passed to `plot()`.
+    output_name : str, optional, default=None
+        Output object name in `flap_storage`.
+
+    Returns
+    -------
+    flap.DataObject
+        Data name is the coordinate name. The error gives the intervals.
     """
 
     global stop_select, start_coord, end_coord, y_coord, _options, length
@@ -139,7 +187,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
         try:
             length = float(_options['Length'])
         except ValueError:
-            raise ValueError("Invalid value to Lenght.")
+            raise ValueError("Invalid value to Length.")
     else:
         length = None
 

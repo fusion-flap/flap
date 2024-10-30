@@ -2,7 +2,7 @@
 """
 Created on Wed Jan 23 21:45:43 2019
 
-Configuration hangling for FLAP
+Configuration handling for FLAP
 
 @author: Sandor Zoletnik  (zoletnik.sandor@ek-cer.hu)
 Centre for Energy Research
@@ -12,21 +12,59 @@ import copy
 import flap.tools
 
 class Config:
+    """Class containing configuration for FLAP.
+
+    Attributes
+    ----------
+    config: flap.ConfigParser
+        The configuration itself.
+    file_name: str
+        The configuration filename.
+    """
     def __init__(self):
         self.config = configparser.ConfigParser()
         self.config.optionxform = str
         self.file_name = None
 
-def read(file_name=None):
-    if (file_name is None):
-        __flap_config.file_name = "flap_defaults.cfg"
-    else:
-        __flap_config.file_name = file_name
+def read(file_name='flap_defaults.cfg'):
+    """Read configuration file.
+
+    Parameters
+    ----------
+    file_name : str, optional
+        File name of configuration file, by default 'flap_defaults.cfg'.
+    """
+    __flap_config.file_name = file_name
+
     read_ok = __flap_config.config.read(__flap_config.file_name)
     if (read_ok == []):
         raise OSError("Error reading configuration file "+__flap_config.file_name)
 
 def get(section, element, datatype=str, default=None, evaluate=False):
+    """Get the value of an element of a specified section
+    from the configuration.
+
+    Parameters
+    ----------
+    section : str
+        Section of the configuration to get.
+    element : str
+        Element (of section specified) of the configuration to get.
+    datatype : optional, default=str
+        Type to cast configuration value of the element into.  Only applied if
+        `evaluate` is False.
+    default : optional, default=None
+        Default value to use if `section` or `element` does not exist in the
+        configuration.
+    evaluate : bool, optional, default=False
+        Whether to evaluate the value obtained instead of type casting it.
+
+    Returns
+    -------
+    object
+        The value of the element `element` of section `section` 
+        in the configuration, type-cast or evaluated.
+    """
     if (__flap_config.file_name is None):
         raise ValueError("Configuration has not been read.")
     try:
@@ -49,6 +87,17 @@ def get(section, element, datatype=str, default=None, evaluate=False):
                              + __flap_config.file_name)
 
 def get_all_section(section):
+    """Get all configuration elements from a section of the configuration.
+
+    Parameters
+    ----------
+    section : str
+
+    Returns
+    -------
+    dict
+        Dictionary containing the configuration elements and associated values.
+    """
     if (__flap_config.file_name is None):
         raise ValueError("Configuration has not been read.")
     try:
@@ -64,14 +113,26 @@ def get_all_section(section):
         return {}
 
 def interpret_config_value(value_str):
-    """ Determine the data type from the input string and convert.
+    """Determine the data type from the input string and convert.
+
+    Parameters
+    ----------
+    value_str : str
+        The value string to convert.
+
         Conversions:
-        'True', 'Yes' --> True
-        'False', 'No' --> False
-        Starting and ending with ' or " --> string
-        If can be converted to int, float or complex --> converted numeric value
-        Starting and ending with [] --> list
-        If all the above fails keep as string
+        - 'True', 'Yes' converts to True
+        - 'False', 'No' converts to False
+        - Starting and ending with ``'`` or ``"`` converts to str
+        - If can be converted to int, float or complex, it is converted to the
+        corresponding converted numeric value
+        - Starting and ending with ``[]`` converts to list
+        - If all the above fails, keep as str
+
+    Returns
+    -------
+    bool | str | int | float | complex | list
+        Converted value.
     """
     if ((value_str == 'True') or (value_str == 'Yes')):
         return True
@@ -79,7 +140,7 @@ def interpret_config_value(value_str):
         return False
     if ((value_str[0] == "'") and (value_str[-1] == "'")
         or (value_str[0] == '"') and (value_str[-1] == '"')):
-            return value_str[1:-1]
+        return value_str[1:-1]
     convert_types = [int, float, complex]
     if ((value_str[0] == '[') and (value_str[-1] == ']')):
         values = value_str[1:-1].split(',')
@@ -114,19 +175,34 @@ def interpret_config_value(value_str):
     return value_str
 
 def merge_options(default_options, input_options, data_source=None, section=None):
-    """
-    Merges options dictionaries. Uses default options of function, input options of function and
-    options read from config file from <section> section. If exp_id is set will also look for options
-    in section Module exp_id for options starting with {section}.
-    The precedence of options is:
-        default_options < section options < module options < input_options
-      INPUT:
-        default_options: Default options in a function. This should contain all the possible options.
-        input_options: Contents of options argument of function. Option keys can also be abbreviated.
-        data_source: The data source of the measurement. (May be None)
-        section: Name of the section in the config file related to the function. (May be None.)
-      Return value:
-          The merged options dictionary. Abbreviated keys are expanded to full name.
+    """Merge options dictionaries.
+
+    Uses default options of function, input options of function and options read
+    from config file from section `section`. If `exp_id` is set, will also look
+    for options in section Module `exp_id` for options starting with `section`.
+    
+    The precedence of options is: default_options < section options < module
+    options < input_options.
+
+    Parameters
+    ----------
+    default_options : dict
+        Default options in a function. This should contain all the possible
+        options.
+    input_options : dict
+        Contents of options argument of function. Option keys can also be
+        abbreviated.
+    data_source : dict, optional, default=None
+        The data source of the measurement. (May be None.)
+    section : dict, optional, default=None
+        Name of the section in the config file related to the function. (May be
+        None.)
+
+    Returns
+    -------
+    dict
+        The merged options dictionary. Abbreviated keys are expanded to full
+        name.
     """
     if (default_options is None):
         return {}
@@ -144,9 +220,10 @@ def merge_options(default_options, input_options, data_source=None, section=None
     module_sep = '{}'
 
     if (section is not None):
-        options.update(section_options)        
+        options.update(section_options)
     if ((section is not None) and (data_source is not None)):
-        # Looking for options in the data source which refer to this section, that is start with {section}
+        # Looking for options in the data source which refer to this section,
+        # that is start with {section}
         module_selected_options = {}
         for module_key in module_options.keys():
             if ((module_key[0] == module_sep[0]) and (module_key.find(module_sep[1]) != 0)):
@@ -187,6 +264,8 @@ def merge_options(default_options, input_options, data_source=None, section=None
     return options
 
 def test_select_signals():
+    """Test signal selection.
+    """
 #    signals = chlist(chrange=[1,20],prefix='ABC-',postfix='-SD')
     signals = ['ABC-3-SD','ABC-3-SD-3','ABC-4-SD-5']
     try:
