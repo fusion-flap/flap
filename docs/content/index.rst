@@ -23,7 +23,19 @@ This package is intended for analysing large multidimensional datasets.
 
 Install
 -------
-After downloading FLAP from `GitHub <http://github.com/fusion-flap/flap>`_, set up an Anaconda environment using the appropriate, platform-specific ``.yml`` file provided for either Linux or Windows.
+First, clone the FLAP repository from `GitHub <http://github.com/fusion-flap/flap>`_:
+
+.. code:: bash
+
+   $ git clone https://github.com/fusion-flap/flap.git
+
+Navigate to the newly created ``flap`` folder:
+
+.. code:: bash
+
+   $ cd flap
+
+Before installing FLAP, first set up an Anaconda environment using the appropriate, platform-specific ``.yml`` file provided for either Linux or Windows.
 
 For example, on Windows, from the Anaconda Prompt run:
 
@@ -41,7 +53,17 @@ Install the package:
 
 .. code:: bash
 
-   $ python setup.py install
+   $ python -m pip install .
+
+.. tip::
+
+   To install FLAP in editable mode (e.g. for development), use the ``-e`` flag:
+
+   .. code:: bash
+
+      $ python -m pip install -e .
+
+   This installs FLAP in such a way that any changes made in the source code are instantly reflected in any software using it. (This is similar to adding the package directory to your ``$PATH``, but more robust.)
 
 FLAP is now ready to use!
 

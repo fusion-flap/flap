@@ -739,7 +739,7 @@ When the [flap.get_data()](#flap.data_object.get_data) function is called it fir
 
 ### Requesting new coordinates
 
-In the simplest form new coordinates can be requested for data object d the following way:
+In the simplest form new coordinates can be requested for data object `d` the following way:
 
 ```
 d.add_coordinate(coordinates=['Device x','Device y'])
