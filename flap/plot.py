@@ -1223,6 +1223,7 @@ def _plot(data_object,
             raise TypeError("Option 'All points' should be boolean.")
     else:
         all_points = True
+
     plot_error = _options['Error']
     if (type(plot_error) is not bool):
         try:
@@ -1308,6 +1309,7 @@ def _plot(data_object,
                                                     force=_options['Force axes'])
         except ValueError as e:
             raise e
+
         # Preparing data
         plotdata = [0]*2
         plotdata_low = [0]*2                                                    #UNUSED
@@ -1319,11 +1321,11 @@ def _plot(data_object,
             _options['Log x'] = _plot_id.options[-1]['Log x']
             _options['Log y'] = _plot_id.options[-1]['Log y']
 
-
         xdata = plotdata[0]
         xerror = ploterror[0]
 
         if (subtype == 0):
+            # Real x-y plot
             yrange = _options['Y range']
             if (yrange is not None):
                 if ((type(yrange) is not list) or (len(yrange) != 2)):
