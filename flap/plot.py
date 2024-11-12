@@ -345,7 +345,8 @@ class PlotAnimation:  # numpydoc ignore=GL08
 
         self.ax_act = plt.subplot(self.gs[0,0])
 
-#The following lines set the axes to be equal if the units of the axes-to-be-plotted are the same
+        # The following lines set the axes to be equal if the units of the
+        # axes-to-be-plotted are the same
 
         axes_coordinate_decrypt=[0] * len(self.axes)
         for i_axes in range(len(self.axes)):
@@ -373,12 +374,12 @@ class PlotAnimation:  # numpydoc ignore=GL08
         self.vmin = self.zrange[0]
         self.vmax = self.zrange[1]
 
-#        if (self.zrange is None):
-#            self.vmin = np.nanmin(self.d.data[time_index])
-#            self.vmax = np.nanmax(self.d.data[time_index])
-#        else:
-#            self.vmin = self.zrange[0]
-#            self.vmax = self.zrange[1]
+        # if (self.zrange is None):
+        #     self.vmin = np.nanmin(self.d.data[time_index])
+        #     self.vmax = np.nanmax(self.d.data[time_index])
+        # else:
+        #     self.vmin = self.zrange[0]
+        #     self.vmax = self.zrange[1]
 
 
         if (self.vmax <= self.vmin):
@@ -437,9 +438,11 @@ class PlotAnimation:  # numpydoc ignore=GL08
                 unit_name = ''
             cbar.set_label(self.data_unit.name+' '+unit_name)
 
-#EFIT overplot feature implementation:
-            #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
-            #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.
+            # EFIT overplot feature implementation:
+            # It needs to be more generalied in the future as the coordinates
+            # are not necessarily in this order: [time_index,spat_index]
+            # This needs to be cross-checked with the time array's dimensions
+            # wherever there is a call for a certain index.
         if ('EFIT options' in self.options and self.options['EFIT options'] is not None):
 
             default_efit_options={'Plot limiter': None,
@@ -673,7 +676,7 @@ class PlotAnimation:  # numpydoc ignore=GL08
 
         if (self.image_like):
             try:
-#                if (self.coord_x.dimension_list[0] == 0):
+                # if (self.coord_x.dimension_list[0] == 0):
                 if (self.coord_x.dimension_list[0] < self.coord_y.dimension_list[0]):
                     im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
                 else:
@@ -1174,16 +1177,17 @@ def _plot(data_object,
                     _plot_id.figure = plt.gcf().number
                     _plot_id.base_subplot = plt.gca()
                     plt.cla()
+
     if (_options['Clear'] ):
         _plot_id = PlotID()
-#        _plot_id.clear()
+        #  _plot_id.clear()
         if (_plot_id.figure is not None):
             plt.figure(_plot_id.figure)
         else:
             _plot_id.figure = plt.gcf().number
         if (_plot_id.base_subplot is not None):
             plt.sca(_plot_id.base_subplot)
-#            plt.subplot(_plot_id.base_subplot)  Changed on 6 March, 2022
+            # plt.subplot(_plot_id.base_subplot)  Changed on 6 March, 2022
         else:
             _plot_id.base_subplot = plt.gca()
         plt.cla()
@@ -1225,12 +1229,15 @@ def _plot(data_object,
             raise ValueError("Invalid 'Error' option.") from exc
     else:
         errorbars = -1
-    # The maximum number of points expected in the horizontal dimension of a plot
+
+    # The maximum number of points expected in the
+    # horizontal dimension of a plot
     try:
         maxpoints = int(_options['Maxpoints'])
     except ValueError as exc:
         raise ValueError("Invalid maxpoints setting.") from exc
 
+    # Determine the complex plot type
     try:
         compt = flap.tools.find_str_match(_options['Complex mode'], ['Amp-phase','Real-imag'])
     except Exception as exc:
@@ -1243,16 +1250,18 @@ def _plot(data_object,
         if (_plot_id.options[-1]['Complex mode'] != _options['Complex mode']):
             raise ValueError("Different complex plot mode in overplot.")
 
+    # Language of the plot
     language = _options['Language']
 
+    # Set video settings
     if (_options['Video file'] is not None):
         if (_options['Video format'] == 'avi'):
             video_codec_code = 'XVID'
         else:
             raise ValueError("Cannot write video in format '"+_options['Video format']+"'.")
 
-
-    # X range and Z range is processed here, but Y range not as it might have multiple entries for some plots
+    # X range and Z range is processed here, but Y range is not,
+    # as it might have multiple entries for some plots
     xrange = _options['X range']
     if (xrange is not None):
         if ((type(xrange) is not list) or (len(xrange) != 2)):
@@ -1266,9 +1275,13 @@ def _plot(data_object,
     if ((cmap is not None) and (type(cmap) is not str)):
         raise ValueError("Colormap should be a string.")
 
+    # Contour levels
     contour_levels = _options['Levels']
-    # Here _plot_id is a valid (maybe empty) PlotID
 
+    ######
+
+    # x-y or scatter plots
+    # Here _plot_id is a valid (maybe empty) PlotID
     if ((_plot_type == 'xy') or (_plot_type == 'scatter')):
         # 1D plots: xy, scatter and complex versions
         # Checking whether oveplotting into the same plot type
@@ -1536,6 +1549,9 @@ def _plot(data_object,
             _plot_id.plot_subtype = 1
             # End of complex xy and scatter plot
 
+    ######
+
+    # grid x-y or grid scatter plots
     elif ((_plot_type == 'grid xy') or (_plot_type == 'grid scatter')):
         if (not _options['Clear']):
             if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'grid xy') and (_plot_id.plot_type != 'grid scatter'))
@@ -1679,7 +1695,9 @@ def _plot(data_object,
                 #         ax.axes.yaxis.set_ticklabels([])
         #plt.tight_layout()  Fails
 
+    ######
 
+    # multi x-y plot
     elif (_plot_type == 'multi xy'):
         if (len(d.shape) > 2):
             raise TypeError("multi x-y plot is applicable to 2D data only. Use slicing.")
@@ -1881,6 +1899,9 @@ def _plot(data_object,
                 ax.set_title(title)
         _plot_id.plot_subtype = 0 # real multi xy plot
 
+    ######
+
+    # image or contour plot
     elif ((_plot_type == 'image') or (_plot_type == 'contour')):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
@@ -1914,7 +1935,7 @@ def _plot(data_object,
         # No overplotting is possible for this type of plot, erasing and restarting a Plot_ID
         if (not _options['Clear']):
             plt.sca(_plot_id.base_subplot)
-#            plt.subplot(_plot_id.base_subplot)  Changed 6 March, 2022
+            # plt.subplot(_plot_id.base_subplot)  Changed 6 March, 2022
             plt.cla()
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
         _plot_id.plt_axis_list = []
@@ -2000,7 +2021,7 @@ def _plot(data_object,
 
         if (image_like):
             try:
-#                if (coord_x.dimension_list[0] == 0):
+                # if (coord_x.dimension_list[0] == 0):
                 if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
                     im=np.clip(np.transpose(d.data),vmin,vmax)
                 else:
@@ -2063,6 +2084,9 @@ def _plot(data_object,
                     title += ',...'
         ax.set_title(title)
 
+    ######
+
+    # anim-image or anim-contour plot
     elif ((_plot_type == 'anim-image') or (_plot_type == 'anim-contour')):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
@@ -2169,20 +2193,20 @@ def _plot(data_object,
             raise ValueError("Invalid color map.") from exc
 
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
-#        ax=plt.plot()
+        # ax=plt.plot()
         _plot_id.plt_axis_list = []
-#        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        # _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
         _plot_id.plt_axis_list.append(_plot_id.base_subplot)
-#        plt.subplot(_plot_id.base_subplot)
-#        plt.plot()
-#        plt.cla()
-#        ax=plt.gca()
+        # plt.subplot(_plot_id.base_subplot)
+        # plt.plot()
+        # plt.cla()
+        # ax=plt.gca()
         for it in range(len(tdata)):
             # This is a hack here. The problem is, that the colorbar() call reduces the axes size
             del gs
             gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
-#            plt.subplot(_plot_id.base_subplot)
-#            ax_act = _plot_id.base_subplot
+            # plt.subplot(_plot_id.base_subplot)
+            # ax_act = _plot_id.base_subplot
             ax_act = plt.subplot(gs[0,0])
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
@@ -2297,6 +2321,7 @@ def _plot(data_object,
             video.release()
             del video
 
+    # animation
     elif (_plot_type == 'animation'):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
@@ -2409,18 +2434,20 @@ def _plot(data_object,
         anim = PlotAnimation(*oargs)
         anim.animate()
 
+    #####
 
-#    print("------ plot finished, show() ----")
+    # print("------ plot finished, show() ----")
     plt.show(block=False)
 
-#    if (_options['Clear']):
-#        _plot_id.number_of_plots = 0
-#        _plot_id.plot_data = []
-#        _plot_id.plt_axis_list = None
-#    _plot_id.number_of_plots += 1
+    # if (_options['Clear']):
+    #     _plot_id.number_of_plots = 0
+    #     _plot_id.plot_data = []
+    #     _plot_id.plt_axis_list = None
+    # _plot_id.number_of_plots += 1
     _plot_id.axes = ax_list
     _plot_id.plot_data.append(pdd_list)
-    #Setting this one the default plot ID
+
+    # Setting this one the default plot ID
     _plot_id.options.append(_options)
     _plot_id.plot_type = _plot_type
     set_plot_id(_plot_id)
