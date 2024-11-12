@@ -221,8 +221,8 @@ def axes_to_pdd_list(d, axes):
         else:
             try:
                 val = float(ax)
-            except ValueError:
-                raise ValueError("Invalid axis description.")
+            except ValueError as exc:
+                raise ValueError("Invalid axis description.") from exc
             pdd = PlotDataDescription(data_type=PddType.Constant,
                                       value=val
                                       )
@@ -471,12 +471,12 @@ class PlotAnimation:  # numpydoc ignore=GL08
                             (self.efit_options[setting.capitalize()+' Y'])):
                             try:
                                 R_object=flap.get_data_object(self.efit_options[setting.capitalize()+' X'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' X']+" cannot be read.")
+                            except Exception as exc:
+                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' X']+" cannot be read.") from exc
                             try:
                                 Z_object=flap.get_data_object(self.efit_options[setting.capitalize()+' Y'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' Y']+" cannot be read.")
+                            except Exception as exc:
+                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' Y']+" cannot be read.") from exc
                             if (len(R_object.data.shape) != 2 or len(Z_object.data.shape) != 2):
                                 raise ValueError("The "+setting.capitalize()+' Y'+" data is not 1D. Use 2D or modify data reading.")
                             self.efit_data[setting]['Data']=np.asarray([R_object.data,Z_object.data])
@@ -484,8 +484,8 @@ class PlotAnimation:  # numpydoc ignore=GL08
                         elif (self.efit_options[setting.capitalize()+' XY']):
                             try:
                                 R_object=flap.get_data_object(self.efit_options[setting.capitalize()+' 2D'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError(setting.capitalize()+'  2D data is not available. FLAP data object needs to be read first.')
+                            except Exception as exc:
+                                raise ValueError(setting.capitalize()+'  2D data is not available. FLAP data object needs to be read first.') from exc
                             if R_object.data.shape[2] == 2:
                                 self.efit_data[setting]['Data']=np.asarray([R_object.data[:,:,0],R_object.data[:,:,1]])
                             else:
@@ -504,12 +504,12 @@ class PlotAnimation:  # numpydoc ignore=GL08
                         if (R_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
                             try:
                                 coeff_efit_spatial=flap.tools.spatial_unit_translation(R_object.data_unit.unit)
-                            except:
-                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            except Exception as exc:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                             try:
                                 coeff_data_spatial=flap.tools.spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
-                            except:
-                                raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
+                            except Exception as exc:
+                                raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.") from exc
                             #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
                             self.efit_data[setting]['Data'] *= coeff_efit_spatial/coeff_data_spatial
                         #Time translation (usually ms vs s)
@@ -524,12 +524,12 @@ class PlotAnimation:  # numpydoc ignore=GL08
                         if (R_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
                             try:
                                 coeff_efit_time=flap.tools.time_unit_translation(R_object.coordinates[time_index_efit].unit.unit)
-                            except:
-                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            except Exception as exc:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                             try:
                                 coeff_data_time=flap.tools.time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
-                            except:
-                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            except Exception as exc:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                             self.efit_data[setting]['Time'] *= coeff_efit_time/coeff_data_time
                     else:
                         raise ValueError(setting.capitalize()+' keywords are not set for the data objects.')
@@ -545,8 +545,8 @@ class PlotAnimation:  # numpydoc ignore=GL08
             if (self.efit_options['Plot flux']):
                 try:
                     flux_object=flap.get_data_object(self.efit_options['Flux XY'],exp_id=self.d.exp_id)
-                except:
-                    raise ValueError('Flux  XY data is not available. FLAP data object needs to be read first.')
+                except Exception as exc:
+                    raise ValueError('Flux  XY data is not available. FLAP data object needs to be read first.') from exc
                 if len(flux_object.data.shape) != 3:
                     raise ValueError('Flux XY data needs to be a 3D matrix (r,z,t), not necessarily in this order.')
                 if (flux_object.coordinates[0].unit.name != 'Time'):
@@ -564,12 +564,12 @@ class PlotAnimation:  # numpydoc ignore=GL08
                 if (flux_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
                     try:
                         coeff_efit_spatial=flap.tools.spatial_unit_translation(flux_object.data_unit.unit)
-                    except:
-                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    except Exception as exc:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                     try:
                         coeff_data_spatial=flap.tools.spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
-                    except:
-                        raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
+                    except Exception as exc:
+                        raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.") from exc
                     #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
                     self.efit_data['flux']['X coord'] *= coeff_efit_spatial/coeff_data_spatial
                     self.efit_data['flux']['Y coord'] *= coeff_efit_spatial/coeff_data_spatial
@@ -586,12 +586,12 @@ class PlotAnimation:  # numpydoc ignore=GL08
                 if (flux_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
                     try:
                         coeff_efit_time=flap.tools.time_unit_translation(flux_object.coordinates[time_index_efit].unit.unit)
-                    except:
-                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    except Exception as exc:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                     try:
                         coeff_data_time=flap.tools.time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
-                    except:
-                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    except Exception as exc:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                     self.efit_data['flux']['Time'] *= coeff_efit_time/coeff_data_time
 
                 #Interpolating EFIT data for the time vector of the data
@@ -907,7 +907,7 @@ class PlotID:
                 except ValueError as e:
                     for axname in plot_axes:
                         if (axname in str(e)):
-                            raise ValueError("Plot coordinate '"+axname+"' not found neither as coordinate nor data name. Must specifiy axes and use option={'Force axes':True} to overplot.")
+                            raise ValueError("Plot coordinate '"+axname+"' not found neither as coordinate nor data name. Must specifiy axes and use option={'Force axes':True} to overplot.") from e
             else:
                 # If overplotting or no plot is available then using the default
                 try:
@@ -1202,10 +1202,10 @@ def _plot(data_object,
     else:
         try:
             _plot_type = flap.tools.find_str_match(plot_type,known_plot_types)
-        except TypeError:
-            raise TypeError("Invalid type for plot_type. String is expected.")
-        except ValueError:
-            raise ValueError("Unknown plot type or too short abbreviation")
+        except TypeError as exc:
+            raise TypeError("Invalid type for plot_type. String is expected.") from exc
+        except ValueError as exc:
+            raise ValueError("Unknown plot type or too short abbreviation") from exc
 
     # Processing some options
     if ((_plot_type == 'xy') or (_plot_type == 'multi xy') or (_plot_type == 'xy grid') or (_plot_type == 'xy scatter')):
@@ -1221,20 +1221,20 @@ def _plot(data_object,
                 raise ValueError("Invalid number of error bars in plot (option: Error).")
             errorbars = int(plot_error)
             plot_error = True
-        except:
-            raise ValueError("Invalid 'Error' option.")
+        except Exception as exc:
+            raise ValueError("Invalid 'Error' option.") from exc
     else:
         errorbars = -1
     # The maximum number of points expected in the horizontal dimension of a plot
     try:
         maxpoints = int(_options['Maxpoints'])
-    except ValueError:
-        raise ValueError("Invalid maxpoints setting.")
+    except ValueError as exc:
+        raise ValueError("Invalid maxpoints setting.") from exc
 
     try:
         compt = flap.tools.find_str_match(_options['Complex mode'], ['Amp-phase','Real-imag'])
-    except:
-        raise ValueError("Invalid 'Complex mode' option:" +_options['Complex mode'])
+    except Exception as exc:
+        raise ValueError("Invalid 'Complex mode' option:" +_options['Complex mode']) from exc
     if (compt == 'Amp-phase'):
         comptype = 0
     elif (compt == 'Real-imag'):
@@ -1403,8 +1403,8 @@ def _plot(data_object,
                 else:
                     try:
                         yrange = [float(yrange[0]), float(yrange[1])]
-                    except ValueError:
-                        raise ValueError("Invalid Y range setting. For complex xy plot either a list or list of two lists can be used.")
+                    except ValueError as exc:
+                        raise ValueError("Invalid Y range setting. For complex xy plot either a list or list of two lists can be used.") from exc
                     yrange = [yrange,yrange]
 
             # Complex xy and scatter plot
@@ -1787,8 +1787,8 @@ def _plot(data_object,
         else:
             try:
                 ysep = float(ysep)
-            except ValueError:
-                raise ValueError("Invalid Y separation option.")
+            except ValueError as exc:
+                raise ValueError("Invalid Y separation option.") from exc
         _options['Y separation'] = ysep
 
         # Determining Y range
@@ -1891,8 +1891,8 @@ def _plot(data_object,
         # Checking for numeric type
         try:
             testdat = d.data[0,0] + 1
-        except TypeError:
-            raise TypeError("Image plot is applicable only to numeric data.")
+        except TypeError as exc:
+            raise TypeError("Image plot is applicable only to numeric data.") from exc
 
         yrange = _options['Y range']
         if (yrange is not None):
@@ -1995,8 +1995,8 @@ def _plot(data_object,
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
                 cmap_obj.set_bad(_options['Nan color'])
-        except ValueError:
-            raise ValueError("Invalid color map.")
+        except ValueError as exc:
+            raise ValueError("Invalid color map.") from exc
 
         if (image_like):
             try:
@@ -2073,8 +2073,8 @@ def _plot(data_object,
         # Checking for numeric type
         try:
             d.data[0,0] + 1
-        except TypeError:
-            raise TypeError("Animated image plot is applicable only to numeric data.")
+        except TypeError as exc:
+            raise TypeError("Animated image plot is applicable only to numeric data.") from exc
 
         yrange = _options['Y range']
         if (yrange is not None):
@@ -2165,8 +2165,8 @@ def _plot(data_object,
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
                 cmap_obj.set_bad(_options['Nan color'])
-        except ValueError:
-            raise ValueError("Invalid color map.")
+        except ValueError as exc:
+            raise ValueError("Invalid color map.") from exc
 
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
 #        ax=plt.plot()
@@ -2307,8 +2307,8 @@ def _plot(data_object,
         # Checking for numeric type
         try:
             d.data[0,0] += 1
-        except TypeError:
-            raise TypeError("Animated image plot is applicable only to numeric data.")
+        except TypeError as exc:
+            raise TypeError("Animated image plot is applicable only to numeric data.") from exc
 
         yrange = _options['Y range']
         if (yrange is not None):
@@ -2392,8 +2392,8 @@ def _plot(data_object,
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
                 cmap_obj.set_bad(_options['Nan color'])
-        except ValueError:
-            raise ValueError("Invalid color map.")
+        except ValueError as exc:
+            raise ValueError("Invalid color map.") from exc
 
         gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
 
