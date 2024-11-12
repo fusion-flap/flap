@@ -972,10 +972,15 @@ def set_plot_id(plot_id):
         if (plot_id.plt_axis_list is None):
             gca_invalid = False
         else:
-            if (plt.gca() != plot_id.plt_axis_list[-1]):
-                gca_invalid = True
+            if ((len(plt.get_fignums()) == 0) or (len(plot_id.figure.axes) == 0)):
+                # gca would create a new figure if there are no figures or axes,
+                # so we avoid calling it in that case
+                gca_invalid == True
             else:
-                gca_invalid = False
+                if (plt.gca() != plot_id.plt_axis_list[-1]):
+                    gca_invalid = True
+                else:
+                    gca_invalid = False
 
 def get_plot_id():
     """
