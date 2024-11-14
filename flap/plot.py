@@ -1849,12 +1849,6 @@ def _plot(data_object,
             ax_max += 1
         ax.set_ylim(ax_min, ax_max)
 
-        legend = []
-        if (signal_names is not None):
-            for i in range(d.shape[signal_index]):
-                legend.append(signal_names[i])
-            ax.legend(legend)
-
         _plot_opt = _plot_options[0]
         for i in range(d.shape[signal_index]):
             index = [...] * 2
@@ -1879,10 +1873,26 @@ def _plot(data_object,
                 errorevery = int(round(len(x)/errorbars))
                 if (errorevery < 1):
                     errorevery = 1
-            if (plot_error):
-                ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,**_plot_opt)
+
+            if (signal_names is not None):
+                label = signal_names[i]
             else:
-                ax.plot(x,y,**_plot_opt)
+                label = None
+
+            if (plot_error):
+                ax.errorbar(x,
+                            y,
+                            xerr=xerr,
+                            yerr=yerr,
+                            errorevery=errorevery,
+                            label=label,
+                            **_plot_opt)
+            else:
+                ax.plot(x, y, label=label, **_plot_opt)
+
+
+        if (signal_names is not None):
+            ax.legend()
 
         if (xrange is not None):
             ax.set_xlim(xrange[0],xrange[1])
