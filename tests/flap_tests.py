@@ -716,12 +716,13 @@ def test_image():
     print("***** Showing one image")
     plt.figure()
     flap.plot('TEST_VIDEO',slicing={'Time':30e-3/4},plot_type='image',axes=['Image x','Image y'],options={'Clear':True})
-    plt.figure()
+    plt.show(block=False)
     print("**** Showing a sequence of images and saving to test_video.avi")
+    plt.figure()
     flap.plot('TEST_VIDEO',plot_type='anim-image',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video.avi','Colorbar':True,'Aspect ratio':'equal'})
-    plt.figure()
     print("*** Showing the same images as contour plots and saving to test_video_contour.avi")
+    plt.figure()
     flap.plot('TEST_VIDEO',plot_type='anim-contour',axes=['Image x','Image y','Time'],
               options={'Z range':[0,4095],'Wait':0.01,'Clear':True,'Video file':'test_video_contour.avi','Colorbar':False})
     print("*** Converting data object x, y coordinates to non-equidistant.")
@@ -856,6 +857,7 @@ if (False or test_all):
     wait_press()
 if (True or test_all):
     test_plot()
+    show_plot()
     wait_for_key()
 if (False or test_all):
     test_plot_xy()
@@ -907,7 +909,6 @@ if (False or test_all):
     wait_for_key()
 if (False or test_all):
     test_image()
-    show_plot()
     wait_for_key()
 if (False or test_all):
     test_pdf()
