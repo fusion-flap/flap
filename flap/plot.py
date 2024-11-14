@@ -972,12 +972,13 @@ def set_plot_id(plot_id):
         if (plot_id.plt_axis_list is None):
             gca_invalid = False
         else:
-            if ((len(plt.get_fignums()) == 0) or (len(plot_id.figure.axes) == 0)):
+            # Note: if plot_id.figure has already been closed, plt.figure will reopen it
+            if ((len(plt.get_fignums()) == 0) or (len(plt.figure(plot_id.figure).axes) == 0)):
                 # gca would create a new figure if there are no figures or axes,
                 # so we avoid calling it in that case
                 gca_invalid == True
             else:
-                if (plt.gca() != plot_id.plt_axis_list[-1]):
+                if (plt.figure(plot_id.figure).axes != plot_id.plt_axis_list[-1]):
                     gca_invalid = True
                 else:
                     gca_invalid = False
@@ -1162,6 +1163,7 @@ def _plot(data_object,
 
     # Determining a PlotID:
     # argument, actual or a new one
+    # Note: plt.gcf()/plt.gca() creates a new figure/axes if none is active
     if (type(plot_id) is PlotID):
         _plot_id = plot_id
     else:
@@ -1430,6 +1432,12 @@ def _plot(data_object,
             # Complex xy and scatter plot
             # Creating two sublots if this is a new plot
             if (_plot_id.number_of_plots == 0):
+                # We won't use the underlying axes (created by plt.gca()),
+                # adding subplots instead.
+                # Deleting them, however, would break the overall
+                # subplot/gridspec reference chain, so we just turn the visible
+                # parts off
+                _plot_id.base_subplot.axis('off')
                 gs = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
                 _plot_id.plt_axis_list = []
                 _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
@@ -1618,7 +1626,7 @@ def _plot(data_object,
 
         # Creating the sublots if this is a new plot
         if (_plot_id.number_of_plots == 0):
-            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot,hspace=0.4,wspace=0.3)
+            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot.get_subplotpec(),hspace=0.4,wspace=0.3)
             _plot_id.plt_axis_list = []
             sharex = None
             sharey = None
@@ -1944,9 +1952,10 @@ def _plot(data_object,
             plt.sca(_plot_id.base_subplot)
             # plt.subplot(_plot_id.base_subplot)  Changed 6 March, 2022
             plt.cla()
-        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
+        # gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
         _plot_id.plt_axis_list = []
-        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        # _plot_id.plt_axis_list.append(plt.figure(_plot_id.figure).add_subplot(gs[0,0]))
+        _plot_id.plt_axis_list.append(_plot_id.base_subplot)
         ax = _plot_id.plt_axis_list[0]
         # Interestingly figure is set to None, we regenerate it.
         _plot_id.base_subplot.figure = _plot_id.plt_axis_list[-1].figure
@@ -2208,13 +2217,12 @@ def _plot(data_object,
         # plt.plot()
         # plt.cla()
         # ax=plt.gca()
+        _plot_id.base_subplot.axis('off')
+
+        fig = plt.figure(_plot_id.figure)
+        ax_act = fig.add_subplot(gs[0,0])
+
         for it in range(len(tdata)):
-            # This is a hack here. The problem is, that the colorbar() call reduces the axes size
-            del gs
-            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
-            # plt.subplot(_plot_id.base_subplot)
-            # ax_act = _plot_id.base_subplot
-            ax_act = plt.subplot(gs[0,0])
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
             time_index = tuple(time_index)
@@ -2278,8 +2286,9 @@ def _plot(data_object,
                     except Exception as e:
                         raise e
 
-            if (_options['Colorbar']):
-                cbar = plt.colorbar(img,ax=ax_act)
+            if (it==0) and (_options['Colorbar']):
+                # Only add the colorbar once
+                cbar = fig.colorbar(img)
                 if (d.data_unit.unit is not None) and (d.data_unit.unit != ''):
                     unit_name = '['+d.data_unit.unit+']'
                 else:
@@ -2287,20 +2296,20 @@ def _plot(data_object,
                 cbar.set_label(d.data_unit.name+' '+unit_name)
 
             if (xrange is not None):
-                plt.xlim(xrange[0],xrange[1])
+                ax_act.set_xlim(xrange[0],xrange[1])
             if (yrange is not None):
-                plt.ylim(yrange[0],yrange[1])
-            plt.xlabel(ax_list[0].title(language=language))
-            plt.ylabel(ax_list[1].title(language=language))
+                ax_act.set_ylim(yrange[0],yrange[1])
+            ax_act.set_xlabel(ax_list[0].title(language=language))
+            ax_act.set_ylabel(ax_list[1].title(language=language))
             if (_options['Log x']):
-                plt.xscale('log')
+                ax_act.set_xscale('log')
             if (_options['Log y']):
-                plt.yscale('log')
+                ax_act.set_yscale('log')
             if (d.exp_id is not None):
                 title =  str(d.exp_id)+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
             else:
                 title =  d.data_title+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
-            plt.title(title)
+            ax_act.set_title(title)
             plt.show(block=False)
             time.sleep(_options['Waittime'])
             plt.pause(0.001)
@@ -2323,10 +2332,15 @@ def _plot(data_object,
                                             (width,height),
                                             isColor=True)
                 video.write(buf)
+            ax_act.clear()
+
         if ((_options['Video file'] is not None) and (cv2_presence is not False)):
             cv2.destroyAllWindows()
             video.release()
             del video
+
+
+    ######
 
     # animation
     elif (_plot_type == 'animation'):
@@ -2444,7 +2458,7 @@ def _plot(data_object,
     #####
 
     # print("------ plot finished, show() ----")
-    plt.show(block=False)
+    # plt.show(block=False)
 
     # if (_options['Clear']):
     #     _plot_id.number_of_plots = 0
@@ -2458,5 +2472,10 @@ def _plot(data_object,
     _plot_id.options.append(_options)
     _plot_id.plot_type = _plot_type
     set_plot_id(_plot_id)
+
+
+    # Don't leave the animation figure open
+    if ((_plot_type == 'anim-image') or (_plot_type == 'anim-contour')):
+        plt.close(fig)
 
     return _plot_id
