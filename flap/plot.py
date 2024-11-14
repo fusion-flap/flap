@@ -1430,7 +1430,7 @@ def _plot(data_object,
                     yrange = [yrange,yrange]
 
             # Complex xy and scatter plot
-            # Creating two sublots if this is a new plot
+            # Creating two subplots if this is a new plot
             if (_plot_id.number_of_plots == 0):
                 # We won't use the underlying axes (created by plt.gca()),
                 # adding subplots instead.
@@ -1442,6 +1442,10 @@ def _plot(data_object,
                 _plot_id.plt_axis_list = []
                 _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
                 _plot_id.plt_axis_list.append(plt.subplot(gs[1,0],sharex=_plot_id.plt_axis_list[0]))
+
+                # Indicate that we added two new subplots, so we can reuse them later
+                _plot_id.number_of_plots += 2
+
             # Taking the mean of the complex errors
             if (ploterror[1] is not None):
                 if (type(ploterror[1]) is list):
