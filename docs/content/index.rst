@@ -11,6 +11,7 @@
    Developer's Guide <developers_guide>
    Presentations <presentations>
    API reference <flap>
+   UML diagrams <uml_diagrams>
    GitHub <http://github.com/fusion-flap/flap>
 
 
