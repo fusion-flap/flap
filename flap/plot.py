@@ -231,7 +231,7 @@ def axes_to_pdd_list(d, axes):
         ax_list.append(axx)
     return pdd_list,ax_list
 
-class PlotAnimation:
+class PlotAnimation:  # numpydoc ignore=GL08
     def __init__(self,
                  ax_list,
                  axes,
@@ -291,8 +291,8 @@ class PlotAnimation:
         
         if (self.contour_levels is None):
             self.contour_levels = 255
-            
-    def animate(self):
+
+    def animate(self):  # numpydoc ignore=GL08
         #These lines do the coordinate unit conversion
         self.axes_unit_conversion=np.zeros(len(self.axes))
         self.axes_unit_conversion[:]=1.
@@ -656,8 +656,8 @@ class PlotAnimation:
         self.anim = animation.FuncAnimation(self.fig, self.animate_plot, 
                                             len(self.tdata),
                                             interval=self.speed,blit=False)
-        
-    def animate_plot(self, it):
+
+    def animate_plot(self, it):  # numpydoc ignore=GL08
         time_index = [slice(0,dim) for dim in self.d.data.shape]
         time_index[self.coord_t.dimension_list[0]] = it
         time_index = tuple(time_index)
