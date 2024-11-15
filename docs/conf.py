@@ -80,6 +80,16 @@ exclude_patterns = []
 #
 html_theme = 'furo'
 
+html_theme_options = {
+    "navigation_with_keys": True,
+    "sidebar_hide_name": True,
+    "source_repository": "https://github.com/fusion-flap/flap/",
+    "source_branch": "master",
+    "source_directory": "docs/",
+}
+
+html_logo = "static/FLAP_logo.png"
+
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".

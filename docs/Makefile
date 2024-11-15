@@ -13,7 +13,7 @@ STATICDIR     = static
 TEMPLATESDIR  = templates
 
 html: flap.rst .deps
-	cp -R "$(STATICDIR)" "$(GENDIR)/static"
+	cp -R "$(STATICDIR)" "$(GENDIR)"
 	@$(SPHINXBUILD) -M html "$(GENDIR)" "$(BUILDDIR)" $(SPHINXOPTS)
 
 .deps:
