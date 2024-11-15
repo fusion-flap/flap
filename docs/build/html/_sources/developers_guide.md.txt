@@ -20,6 +20,21 @@ The docstrings follow the [NumPy convention](https://numpydoc.readthedocs.io/en/
 Including bullet lists and similar enumeration constructs in a NumPy-style docstring requires the use of ReST syntax. This is slightly different from the Markdown/MyST syntax, [some care](https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#bullet-lists) must be taken with whitespaces for those not familiar with it.
 :::
 
+### Validating docstrings
+Two scripts are supplied for checking the status of the docstrings.
+
+To check for missing docstrings, run:
+```bash
+$ ./check_missing_docstrings.sh
+```
+This will yield a list of missing docstrings (also neglecting the numpydoc-ignore comments).
+
+To validate the docstrings of an object (e.g. of the class `flap.data_object.DataObject`), run:
+```bash
+$ ./validate_single_docstring.sh flap.data_object.DataObject
+```
+which will print a list of issues with the docstring.
+
 ### Editing the documentation
 
 The files describing the documentation structure and contents are in `docs/content`. The file `index.rst` is the main file describing the overall structure, other parts of the documentation are imported to or linked from this file. While most parts of the documentation are written in [MyST](https://myst-parser.readthedocs.io/) format (an extended form of Markdown), `index.rst` is in [ReStructuredText](https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html) format, as the Sphinx core uses this format. Both MyST and ReST can be used for any other parts of the documentation: see the respective links for the syntax and other details.

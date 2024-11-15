@@ -294,6 +294,20 @@
 <p>Including bullet lists and similar enumeration constructs in a NumPy-style docstring requires the use of ReST syntax. This is slightly different from the Markdown/MyST syntax, <a class="reference external" href="https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#bullet-lists">some care</a> must be taken with whitespaces for those not familiar with it.</p>
 </div>
 </section>
+<section id="validating-docstrings">
+<h3>Validating docstrings<a class="headerlink" href="#validating-docstrings" title="Link to this heading">¶</a></h3>
+<p>Two scripts are supplied for checking the status of the docstrings.</p>
+<p>To check for missing docstrings, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>./check_missing_docstrings.sh
+</pre></div>
+</div>
+<p>This will yield a list of missing docstrings (also neglecting the numpydoc-ignore comments).</p>
+<p>To validate the docstrings of an object (e.g. of the class <code class="docutils literal notranslate"><span class="pre">flap.data_object.DataObject</span></code>), run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>./validate_single_docstring.sh<span class="w"> </span>flap.data_object.DataObject
+</pre></div>
+</div>
+<p>which will print a list of issues with the docstring.</p>
+</section>
 <section id="editing-the-documentation">
 <h3>Editing the documentation<a class="headerlink" href="#editing-the-documentation" title="Link to this heading">¶</a></h3>
 <p>The files describing the documentation structure and contents are in <code class="docutils literal notranslate"><span class="pre">docs/content</span></code>. The file <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> is the main file describing the overall structure, other parts of the documentation are imported to or linked from this file. While most parts of the documentation are written in <a class="reference external" href="https://myst-parser.readthedocs.io/">MyST</a> format (an extended form of Markdown), <code class="docutils literal notranslate"><span class="pre">index.rst</span></code> is in <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">ReStructuredText</a> format, as the Sphinx core uses this format. Both MyST and ReST can be used for any other parts of the documentation: see the respective links for the syntax and other details.</p>
@@ -604,6 +618,7 @@ datefmt=
 <li><a class="reference internal" href="#">Developer’s Guide</a><ul>
 <li><a class="reference internal" href="#notes-on-writing-documentation">Notes on writing documentation</a><ul>
 <li><a class="reference internal" href="#writing-docstrings">Writing docstrings</a></li>
+<li><a class="reference internal" href="#validating-docstrings">Validating docstrings</a></li>
 <li><a class="reference internal" href="#editing-the-documentation">Editing the documentation</a></li>
 <li><a class="reference internal" href="#generating-the-documentation">Generating the documentation</a></li>
 <li><a class="reference internal" href="#adding-examples">Adding examples</a></li>
