@@ -36,9 +36,9 @@ Navigate to the newly created ``flap`` folder:
 
    $ cd flap
 
-Before installing FLAP, first set up an Anaconda environment using the appropriate, platform-specific ``.yml`` file provided for either Linux or Windows.
+Before installing FLAP, first set up an Anaconda/Mamba environment using the appropriate, platform-specific ``.yml`` file provided for either Linux or Windows.
 
-For example, on Windows, from the Anaconda Prompt run:
+For example, on Windows, from the Anaconda Prompt/Miniforge Prompt run(``mamba`` should be substituted for ``conda`` if Mamba is used):
 
 .. code:: bash
 
