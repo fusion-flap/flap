@@ -298,12 +298,12 @@
 <h3>Validating docstrings<a class="headerlink" href="#validating-docstrings" title="Link to this heading">¶</a></h3>
 <p>Two scripts are supplied for checking the status of the docstrings.</p>
 <p>To check for missing docstrings, run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>./check_missing_docstrings.sh
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tools/check_missing_docstrings.sh
 </pre></div>
 </div>
 <p>This will yield a list of missing docstrings (also neglecting the numpydoc-ignore comments).</p>
 <p>To validate the docstrings of an object (e.g. of the class <code class="docutils literal notranslate"><span class="pre">flap.data_object.DataObject</span></code>), run:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>./validate_single_docstring.sh<span class="w"> </span>flap.data_object.DataObject
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tools/validate_single_docstring.sh<span class="w"> </span>flap.data_object.DataObject
 </pre></div>
 </div>
 <p>which will print a list of issues with the docstring.</p>

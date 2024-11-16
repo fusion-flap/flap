@@ -2,7 +2,7 @@
 
 Below are two UML diagrams showing the structure of the package and the classes.
 
-New diagrams can be generated using the supplied `generate_clean_puml.sh` bash script.
+New diagrams can be generated using the supplied `tools/generate_clean_puml.sh` bash script.
 
 :::{Tip}
 Click on the images to open them in a larger size.
