@@ -1,4 +1,4 @@
-# FLAP Version 1.12 User's Guide
+# FLAP Version 1.21 User's Guide
 
 S. Zoletnik, M. Vécsei, Centre for Energy Research
 
