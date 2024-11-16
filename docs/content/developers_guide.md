@@ -25,13 +25,13 @@ Two scripts are supplied for checking the status of the docstrings.
 
 To check for missing docstrings, run:
 ```bash
-$ ./check_missing_docstrings.sh
+$ tools/check_missing_docstrings.sh
 ```
 This will yield a list of missing docstrings (also neglecting the numpydoc-ignore comments).
 
 To validate the docstrings of an object (e.g. of the class `flap.data_object.DataObject`), run:
 ```bash
-$ ./validate_single_docstring.sh flap.data_object.DataObject
+$ tools/validate_single_docstring.sh flap.data_object.DataObject
 ```
 which will print a list of issues with the docstring.
 
