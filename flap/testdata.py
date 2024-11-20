@@ -58,7 +58,7 @@ def testdata_get_data(exp_id=None,
     Channel names:
         - 'TEST-<col>-<row>': Signals on a 15x5 spatial matrix
         - 'VIDEO': A test image with timescale as for the signals.
-    
+
     Parameters
     ----------
     exp_id : str, optional, default=None
@@ -69,7 +69,7 @@ def testdata_get_data(exp_id=None,
         If True, do not read the data itself.
     options : dict, optional, default=None
         Options for test data.
-        
+
         Possible keys and values:
 
         - 'Scaling' (default=Volt):
@@ -84,7 +84,7 @@ def testdata_get_data(exp_id=None,
           - 'Complex-Sin': Same as Sine, but a cosine imaginary part is added.
           - 'Random': Random (normal dist.) signal in all channels.
 
-        - 'Row number' (default=10): 
+        - 'Row number' (default=10):
 
           - int: Number of rows for signal matrix.
 
@@ -126,7 +126,7 @@ def testdata_get_data(exp_id=None,
             If multiple signals (coordinate 'Signal' name describes signals),
             describes frequency vs. time per channel. Should have the same
             number of channels as for the generation.
-                                      
+
         -  'Length' (default=0.1):
 
           - float: Length in seconds. The sample rate is 1 MHz.
@@ -139,6 +139,10 @@ def testdata_get_data(exp_id=None,
         Coordinates for 'Time' or 'Sample' axes.
     data_source : src, optional, default=None
         Data source description.
+
+    Returns
+    -------
+    flap.DataObject
     """
     if (data_source is None ):
         data_source = 'TESTDATA'
@@ -187,7 +191,7 @@ def testdata_get_data(exp_id=None,
     meas_timerange = [0, _options['Length']]
     meas_sampletime = 1./_options['Samplerate']
     meas_sample = int(np.rint(float((meas_timerange[1]-meas_timerange[0])/meas_sampletime))+1)
-    
+
     read_range = None
     read_samplerange = None
     # Checking whether time or sample range selection == present
@@ -263,7 +267,7 @@ def testdata_get_data(exp_id=None,
             column_list.append(c)
             rows_act[r-1] += 1
             columns_act[c-1] += 1
-    
+
         if (len(signal_select) == 1):
             twodim = False
         else:
@@ -278,9 +282,9 @@ def testdata_get_data(exp_id=None,
             if ((len(ind_rows_act_n0)*len(ind_columns_act_n0) != len(signal_select)) \
                 or (len(ind_rows_act_n0) == 1) or (len(ind_columns_act_n0) == 1)):
                 twodim = False
-    
+
         data_arr = None
-    
+
         if (len(signal_select) != 1):
             if (twodim):
                 row_coords = np.arange(ROW_NUMBER, dtype=int)[ind_rows_act_n0]+1
@@ -297,7 +301,7 @@ def testdata_get_data(exp_id=None,
         else:
             data_shape = [ndata]
         # Reading the signals
-    
+
         for i in range(len(row_list)):
             # Determining row and column numbers
             r = row_list[i]
@@ -308,7 +312,7 @@ def testdata_get_data(exp_id=None,
                        * (c-float(COLUMN_NUMBER)/2)**2 / (2*(float(COLUMN_NUMBER)/4)**2)
                 amp = math.exp(-amp)
                 n_sample = round(_options['Samplerate'] * _options['Length'])
-                # Sample times for all signal 
+                # Sample times for all signal
                 t = np.arange(meas_sample) * meas_sampletime
                 if (type(_options['Frequency']) == list):
                     flist = _options['Frequency']
@@ -324,7 +328,7 @@ def testdata_get_data(exp_id=None,
                         ph = np.cumsum(2 * math.pi * fi /_options['Samplerate'])
                     else:
                         raise NotImplementedError("Variable frequency for multiple channels not supported yet.")
-                    
+
                 else:
                     f = float(_options['Frequency'])
                     ph = t * 2 * math.pi * f
@@ -345,7 +349,7 @@ def testdata_get_data(exp_id=None,
                 signal = np.random.randn(int(meas_sample)) + 10.
             else:
                 raise ValueError("Signal type '"+signal_type+"' is not understood.")
-    
+
             if (len(signal_select) == 1):
                 if (no_data == False):
                     data_arr = signal[int(read_samplerange[0]):int(read_samplerange[1])+1]
@@ -365,14 +369,14 @@ def testdata_get_data(exp_id=None,
                         if (data_arr is None ):
                             data_arr = np.empty(data_shape, dtype=d.dtype)
                         data_arr[i, :] = d
-        
+
         if (scale_to_volts):
             if (no_data == False):
                 data_arr = data_arr*meas_ADC_step
-    
+
         # Adding coordinates: Sample, Time, Signal name, Column, Row
         coord = [None]*5
-    
+
         # Sample and Time
         c_mode = flap.CoordinateMode(equidistant=True)
         if (twodim):
@@ -417,7 +421,7 @@ def testdata_get_data(exp_id=None,
                                                  shape=shape,
                                                  values=np.array(value),
                                                  dimension_list=dimension_list))
-    
+
         # Column
         c_mode = flap.CoordinateMode(equidistant=False)
         if (twodim):
@@ -458,14 +462,14 @@ def testdata_get_data(exp_id=None,
                                                  shape=shape,
                                                  values=values,
                                                  dimension_list=dimension_list))
-    
+
         data_title = "Test data"
         if (len(signal_select) == 1):
             data_title += " ("+signal_select[0]+")"
         d = flap.DataObject(data_array=data_arr, data_unit=data_unit,
                             coordinates=coord, exp_id=exp_id,
                             data_title=data_title, data_shape=data_shape)
-    
+
     else:
         # VIDEO
         image_xsize = _options['Width']
@@ -484,7 +488,7 @@ def testdata_get_data(exp_id=None,
                     data_arr[:,:,it] = (np.exp(-((x - center_x[it]) ** 2 + (y - center_y[it]) ** 2)
                                        /2/(spotwidth ** 2 + spotwidth  ** 2)) * amp[it]).astype(np.int16)
             elif(_options['Image'] == 'Random'):
-                data_arr = np.random.randint(0,high=4095,size=(image_xsize,image_ysize,ndata),dtype=np.int16)                
+                data_arr = np.random.randint(0,high=4095,size=(image_xsize,image_ysize,ndata),dtype=np.int16)
         coord = [None]*4
         coord[0] = copy.deepcopy(flap.Coordinate(name='Time',
                                                  unit='Second',

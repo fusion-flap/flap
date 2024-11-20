@@ -1,0 +1,45 @@
+@startuml packages
+set namespaceSeparator none
+package "flap" as flap {
+}
+package "flap.config" as flap.config {
+}
+package "flap.coordinate" as flap.coordinate {
+}
+package "flap.data_object" as flap.data_object {
+}
+package "flap.flap_xml" as flap.flap_xml {
+}
+package "flap.plot" as flap.plot {
+}
+package "flap.select" as flap.select {
+}
+package "flap.spectral_analysis" as flap.spectral_analysis {
+}
+package "flap.testdata" as flap.testdata {
+}
+package "flap.time_frequency_analysis" as flap.time_frequency_analysis {
+}
+package "flap.tools" as flap.tools {
+}
+flap --> flap.coordinate
+flap --> flap.data_object
+flap --> flap.flap_xml
+flap --> flap.plot
+flap --> flap.select
+flap --> flap.spectral_analysis
+flap --> flap.tools
+flap.config --> flap.tools
+flap.coordinate --> flap.config
+flap.coordinate --> flap.tools
+flap.data_object --> flap.plot
+flap.data_object --> flap.spectral_analysis
+flap.data_object --> flap.time_frequency_analysis
+flap.data_object --> flap.tools
+flap.plot --> flap.config
+flap.select --> flap.coordinate
+flap.spectral_analysis --> flap.config
+flap.testdata --> flap
+flap.time_frequency_analysis --> flap.config
+flap.tools --> flap
+@enduml

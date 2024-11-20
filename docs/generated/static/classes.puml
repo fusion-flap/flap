@@ -1,0 +1,183 @@
+@startuml classes
+set namespaceSeparator none
+class "Config" as flap.config.Config {
+  config : ConfigParser
+  file_name : str
+}
+class "Coordinate" as flap.coordinate.Coordinate {
+  c_range
+  dimension_list
+  mode
+  shape
+  start
+  step
+  unit
+  value_index
+  value_ranges : list, ndarray
+  values : ndarray
+  change_dimensions()
+  data(data_shape, index, options)
+  data_range(data_shape)
+  dtype()
+  isnumeric()
+  nochange_dimensions(data_shape)
+  non_interpol(data_shape)
+  string_subtype()
+}
+class "CoordinateMode" as flap.coordinate.CoordinateMode {
+  equidistant : bool
+  range_symmetric : bool
+}
+class "DataObject" as flap.data_object.DataObject {
+  coordinates
+  data : ndarray
+  data_source
+  data_title
+  data_unit
+  error : list, ndarray
+  exp_id
+  history
+  info
+  shape : ndarray
+  abs_value()
+  add_coordinate(coordinates, data_source, exp_id, options)
+  add_coordinate_object(coordinate, index)
+  apsd(coordinate, intervals, options)
+  ccf(ref, coordinate, intervals, options)
+  check()
+  coordinate(name, index, options)
+  coordinate_change_dimensions(name)
+  coordinate_change_indices(name)
+  coordinate_names()
+  coordinate_nochange_dimensions(name)
+  coordinate_range(name, index)
+  cpsd(ref, coordinate, intervals, options)
+  del_coordinate(name)
+  detrend(coordinate, intervals, options)
+  error_value(options)
+  filter_data(coordinate, intervals, options)
+  get_coordinate_object(name)
+  imag()
+  index_from_coordinate(name, coord_values)
+  pdf(coordinate, intervals, options)
+  phase()
+  plot(axes, slicing, slicing_options, summing, options, plot_type, plot_options, plot_id)
+  proc_interval_limits(coordinate, intervals)
+  real()
+  regenerate_coordinates()
+  save(filename, protocol)
+  slice_data(slicing, summing, options)
+  slicing_to_intervals(slicing)
+  stft(coordinate, options)
+  to_intervals(coordinate)
+}
+class "FlapStorage" as flap.data_object.FlapStorage {
+  add_coord_functions()
+  add_data_object(d, name)
+  add_data_source(data_source, get_data_func, add_coord_func)
+  data_objects()
+  data_sources()
+  delete_data_object(name, exp_id)
+  find_data_objects(name, exp_id)
+  get_data_functions()
+  get_data_object(name, exp_id)
+  get_data_object_ref(name, exp_id)
+  list_data_objects(name, exp_id)
+}
+class "FlapXml" as flap.flap_xml.FlapXml {
+  head : Element
+  section_elements : list
+  sections : list
+  top : Element
+  add_element(section, element, value, unit, comment, value_type)
+  create_head(head_name, attrib)
+  get_element(section, element)
+  read_file(filename)
+  write_file(filename)
+}
+class "Intervals" as flap.coordinate.Intervals {
+  number
+  start
+  step
+  stop
+  interval_limits(limits, partial_intervals)
+  interval_number(limits, partial_intervals)
+  regular()
+}
+class "PddType" as flap.plot.PddType {
+  name
+}
+class "PlotAnimation" as flap.plot.PlotAnimation {
+  anim : FuncAnimation
+  ax_act
+  ax_list
+  axes
+  axes_unit_conversion : ndarray
+  cmap
+  cmap_obj
+  contour_levels : int
+  coord_t
+  coord_x
+  coord_y
+  current_frame : float
+  d
+  efit_data : dict
+  efit_options : dict
+  fig
+  gs
+  image_like
+  language
+  locator : LogLocator
+  norm : Norm
+  options
+  pause : bool
+  pause_button : Button
+  plot_id
+  plot_options
+  slow_button : Button
+  speed : float
+  speed_button : Button
+  tdata
+  time_slider : Slider
+  vmax
+  vmin
+  xdata
+  xdata_range
+  xrange
+  ydata
+  ydata_range
+  yrange
+  zrange : list
+  animate()
+  animate_plot(it)
+}
+class "PlotDataDescription" as flap.plot.PlotDataDescription {
+  data_object
+  data_type
+  value
+  axis_label()
+  get_data(plot_error, data_index)
+}
+class "PlotID" as flap.plot.PlotID {
+  axes
+  base_subplot
+  figure
+  number_of_plots : int
+  options : list
+  plot_data : list
+  plot_subtype : int, list
+  plot_type : str
+  plt_axis_list : list
+  check_axes(d, axes, clear, default_axes, force)
+  clear()
+}
+class "Unit" as flap.coordinate.Unit {
+  name : str
+  unit : str
+  title(language, complex_txt, new_unit)
+}
+flap.coordinate.CoordinateMode --* flap.coordinate.Coordinate : mode
+flap.coordinate.Unit --* flap.coordinate.Coordinate : unit
+flap.coordinate.Unit --* flap.data_object.DataObject : data_unit
+flap.coordinate.Unit --* flap.data_object.DataObject : data_unit
+@enduml

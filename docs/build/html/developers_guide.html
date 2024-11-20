@@ -229,6 +229,7 @@
 <li class="toctree-l2"><a class="reference internal" href="flap.time_frequency_analysis.html">flap.time_frequency_analysis</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="uml_diagrams.html">UML diagrams</a></li>
 <li class="toctree-l1"><a class="reference external" href="http://github.com/fusion-flap/flap">GitHub</a></li>
 </ul>
 
@@ -283,7 +284,7 @@
 <p>A few useful notes regarding development and documentation are collected here for reference.</p>
 <section id="notes-on-writing-documentation">
 <h2>Notes on writing documentation<a class="headerlink" href="#notes-on-writing-documentation" title="Link to this heading">¶</a></h2>
-<p>FLAP uses the <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> package for generating its documentation. The documentation can be divided into two main parts: the <a class="reference internal" href="flap.html"><span class="std std-doc">API documentation</span></a>, which is generated from the docstrings included in the code itself, and all other parts of the documentation that are written separately, such as the <a class="reference internal" href="users_guide/index.html"><span class="std std-doc">FLAP Version 1.12 User’s Guide</span></a> or the present Developer’s Guide.</p>
+<p>FLAP uses the <a class="reference external" href="https://www.sphinx-doc.org/">Sphinx</a> package for generating its documentation. The documentation can be divided into two main parts: the <a class="reference internal" href="flap.html"><span class="std std-doc">API documentation</span></a>, which is generated from the docstrings included in the code itself, and all other parts of the documentation that are written separately, such as the <a class="reference internal" href="users_guide/index.html"><span class="std std-doc">FLAP Version 1.21 User’s Guide</span></a> or the present Developer’s Guide.</p>
 <section id="writing-docstrings">
 <h3>Writing docstrings<a class="headerlink" href="#writing-docstrings" title="Link to this heading">¶</a></h3>
 <p>The <a class="reference internal" href="flap.html"><span class="std std-doc">API documentation</span></a> is automatically generated from the docstrings in the Python files of the library itself using the <a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html">autodoc</a> Sphinx extension. This way, developer documentation can be written simultaneously with the code, embodying the <em>Documentation as Code</em> principle.</p>
@@ -292,6 +293,20 @@
 <p class="admonition-title">Tip</p>
 <p>Including bullet lists and similar enumeration constructs in a NumPy-style docstring requires the use of ReST syntax. This is slightly different from the Markdown/MyST syntax, <a class="reference external" href="https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#bullet-lists">some care</a> must be taken with whitespaces for those not familiar with it.</p>
 </div>
+</section>
+<section id="validating-docstrings">
+<h3>Validating docstrings<a class="headerlink" href="#validating-docstrings" title="Link to this heading">¶</a></h3>
+<p>Two scripts are supplied for checking the status of the docstrings.</p>
+<p>To check for missing docstrings, run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tools/check_missing_docstrings.sh
+</pre></div>
+</div>
+<p>This will yield a list of missing docstrings (also neglecting the numpydoc-ignore comments).</p>
+<p>To validate the docstrings of an object (e.g. of the class <code class="docutils literal notranslate"><span class="pre">flap.data_object.DataObject</span></code>), run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>tools/validate_single_docstring.sh<span class="w"> </span>flap.data_object.DataObject
+</pre></div>
+</div>
+<p>which will print a list of issues with the docstring.</p>
 </section>
 <section id="editing-the-documentation">
 <h3>Editing the documentation<a class="headerlink" href="#editing-the-documentation" title="Link to this heading">¶</a></h3>
@@ -603,6 +618,7 @@ datefmt=
 <li><a class="reference internal" href="#">Developer’s Guide</a><ul>
 <li><a class="reference internal" href="#notes-on-writing-documentation">Notes on writing documentation</a><ul>
 <li><a class="reference internal" href="#writing-docstrings">Writing docstrings</a></li>
+<li><a class="reference internal" href="#validating-docstrings">Validating docstrings</a></li>
 <li><a class="reference internal" href="#editing-the-documentation">Editing the documentation</a></li>
 <li><a class="reference internal" href="#generating-the-documentation">Generating the documentation</a></li>
 <li><a class="reference internal" href="#adding-examples">Adding examples</a></li>

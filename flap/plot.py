@@ -12,21 +12,21 @@ Created on Sat May 18 18:37:06 2019
     Then create the figures (axes):
         ax1 = plt.subplot(gs[0, :])
     Use ax1.plot and other calls to plot onto the figure.
-    
+
     Note on FLAP plotting mechanism.
     - The axes paramater of plot() can be the following:
         string: Name of a coordinate or __Data__. This latter means the data in the data object is on the axis.
         float value: Constant
         data object: Enables plotting one data object as a function of another
     - When a plot is made parameters are recorded in PlotID. This later enables overplotting
-      using the same axes. When the axis are incompatble in overplotting they can be forced. As 
+      using the same axes. When the axis are incompatble in overplotting they can be forced. As
       a link to the data objects involved in the plot are also recorded it is also possible
-      to regenerate the plot when megnified and 'All points' is False. 
+      to regenerate the plot when megnified and 'All points' is False.
     - If axis are forced or no axis name and unit is avalilable (like in constant) overplotting is possible
       without forcing. If forced the name and unit of the incompatible axes will be set to ''.
     - Constants are considered as unit-less, therefore they don't need forcing.
-    
-"""    
+
+"""
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -56,7 +56,7 @@ import flap.coordinate
 
 global act_plot_id, gca_invalid
 
-class PddType(Enum):
+class PddType(Enum):  # numpydoc ignore=PR01
     """Enum class for identifying the plot data type.
 
     Possible values:
@@ -72,17 +72,17 @@ class PddType(Enum):
     Data = 2
 
 class PlotDataDescription:
-    """Plot axis description for use in `flap.PlotID()` and `flap.plot()`.
+    """Plot axis description for use in :func:`.PlotID()` and :func:`.plot()`.
 
     Parameters
     ----------
     data_type : flap.PddType, optional, default=None
 
-        - PddType.Coordinate: A coordinate in `data_object`. 
+        - PddType.Coordinate: A coordinate in `data_object`.
 
         - PddType.Constant: A float constant, stored in `value`.
 
-        - PddType.Data: The data in `self.data_object`. 
+        - PddType.Data: The data in `self.data_object`.
 
     data_object : flap.DataObject, optional, default=None
         The data object from which the data for this coordinate originates. This
@@ -94,10 +94,10 @@ class PlotDataDescription:
         self.data_type = data_type
         self.data_object = data_object
         self.value = value
-    
+
     def get_data(self, plot_error, data_index=None):
         """Get data for plot.
-        
+
         Parameters
         ----------
         plot_error : bool
@@ -110,9 +110,9 @@ class PlotDataDescription:
         plot_data : np.ndarray
             The data to plot.
         plot_error : np.ndarray
-            If `plot_error`is true, the calculated error.
+            If `plot_error` is True, the calculated error.
         """
-            
+
         if (self.data_type == PddType.Data):
             if (data_index is not None):
                 d = self.data_object.data[tuple(data_index)]
@@ -137,8 +137,8 @@ class PlotDataDescription:
                 pdata_high = pdata_high.flatten()
             if (plot_error):
                 ploterror  = self.data_object._plot_coord_ranges(self.value,
-                                                                 pdata, 
-                                                                 pdata_low, 
+                                                                 pdata,
+                                                                 pdata_low,
                                                                  pdata_high
                                                                  )
             else:
@@ -149,7 +149,7 @@ class PlotDataDescription:
         else:
             raise RuntimeError("Internal error, invalid PlotDataDescription.")
         return plotdata,ploterror
-    
+
     def axis_label(self):
         """Generate label for axis based on the plot data type.
 
@@ -164,7 +164,7 @@ class PlotDataDescription:
             return self.value.unit.name +' ['+self.value.unit.unit+']'
         elif (self.data_type == PddType.Constant):
             return ""
-        
+
 def axes_to_pdd_list(d, axes):
     """Convert a `plot()` axes parameter to a list of `PlotAxisDescription` and
     axes list for `PlotID`.
@@ -175,7 +175,7 @@ def axes_to_pdd_list(d, axes):
         The data object.
     axes : list of str
         Axes parameter of `plot()`.
-    
+
     Returns
     -------
     pdd_list : list of flap.PlotAxisDescription
@@ -189,7 +189,7 @@ def axes_to_pdd_list(d, axes):
         _axes = [axes]
     else:
         _axes = axes
-    
+
     pdd_list = []
     ax_list = []
     for ax in _axes:
@@ -216,13 +216,13 @@ def axes_to_pdd_list(d, axes):
                 raise ValueError("No data available for axis.")
             pdd = PlotDataDescription(data_type=PddType.Data,
                                       data_object=ax
-                                      )  
+                                      )
             axx = ax.data_unit
         else:
             try:
                 val = float(ax)
-            except ValueError:
-                raise ValueError("Invalid axis description.")
+            except ValueError as exc:
+                raise ValueError("Invalid axis description.") from exc
             pdd = PlotDataDescription(data_type=PddType.Constant,
                                       value=val
                                       )
@@ -231,7 +231,7 @@ def axes_to_pdd_list(d, axes):
         ax_list.append(axx)
     return pdd_list,ax_list
 
-class PlotAnimation:
+class PlotAnimation:  # numpydoc ignore=GL08
     def __init__(self,
                  ax_list,
                  axes,
@@ -258,45 +258,45 @@ class PlotAnimation:
                  gs):
 
         self.ax_list = ax_list
-        self.axes = axes        
-        self.contour_levels = contour_levels        
+        self.axes = axes
+        self.contour_levels = contour_levels
         self.cmap = cmap
         self.cmap_obj = cmap_obj
-        self.coord_t = coord_t  
+        self.coord_t = coord_t
         self.coord_x = coord_x
-        self.coord_y = coord_y        
+        self.coord_y = coord_y
         self.current_frame = 0.
         self.d = d
-        self.fig = plt.figure(plot_id.figure) 
+        self.fig = plt.figure(plot_id.figure)
         self.gs = gs
         self.image_like = image_like
         self.language = language
         self.options = options
         self.pause = False
         self.plot_id = plot_id
-        self.plot_options = plot_options        
+        self.plot_options = plot_options
         self.speed = 40.
-        
+
         self.tdata = tdata
         self.xdata = xdata
         self.ydata = ydata
-        
+
         self.xdata_range = xdata_range
         self.ydata_range = ydata_range
-        
+
         self.xrange = xrange
         self.yrange = yrange
         self.zrange = zrange
 
-        
+
         if (self.contour_levels is None):
             self.contour_levels = 255
-            
-    def animate(self):
+
+    def animate(self):  # numpydoc ignore=GL08
         #These lines do the coordinate unit conversion
         self.axes_unit_conversion=np.zeros(len(self.axes))
         self.axes_unit_conversion[:]=1.
-        
+
         if self.options['Plot units'] is not None:
             unit_length=len(self.options['Plot units'])
             if unit_length > 3:
@@ -312,40 +312,41 @@ class PlotAnimation:
             for index_axes in range(len(self.axes)):
                 if self.axes[index_axes] in self.options['Plot units']:
                     self.axes_unit_conversion[index_axes]=unit_conversion_coeff[self.axes[index_axes]]
-        
+
         pause_ax = plt.figure(self.plot_id.figure).add_axes((0.78, 0.94, 0.1, 0.04))
         self.pause_button = Button(pause_ax, 'Pause', hovercolor='0.975')
         self.pause_button.on_clicked(self._pause_animation)
         pause_ax._button=self.pause_button
-        
+
         reset_ax = plt.figure(self.plot_id.figure).add_axes((0.78, 0.89, 0.1, 0.04))
         reset_button = Button(reset_ax, 'Reset', hovercolor='0.975')
         reset_button.on_clicked(self._reset_animation)
         reset_ax._button=reset_button
-        
+
         slow_ax = plt.figure(self.plot_id.figure).add_axes((0.88, 0.94, 0.1, 0.04))
         self.slow_button = Button(slow_ax, str(int(1000./(self.speed/0.8)))+'fps', hovercolor='0.975')
         self.slow_button.on_clicked(self._slow_animation)
         slow_ax._button=self.slow_button
-        
+
         speed_ax = plt.figure(self.plot_id.figure).add_axes((0.88, 0.89, 0.1, 0.04))
         self.speed_button = Button(speed_ax, str(int(1000./(self.speed*0.8)))+'fps', hovercolor='0.975')
         self.speed_button.on_clicked(self._speed_animation)
         speed_ax._button=self.speed_button
-        
-        
+
+
         slider_ax = plt.figure(self.plot_id.figure).add_axes((0.1, 0.94, 0.5, 0.04))
         self.time_slider = Slider(slider_ax, label=self.axes[2],
-                                  valmin=self.tdata[0]*self.axes_unit_conversion[2], 
+                                  valmin=self.tdata[0]*self.axes_unit_conversion[2],
                                   valmax=self.tdata[-1]*self.axes_unit_conversion[2],
                                   valinit=self.tdata[0]*self.axes_unit_conversion[2])
         self.time_slider.on_changed(self._set_animation)
 
         plt.subplot(self.plot_id.base_subplot)
-        
+
         self.ax_act = plt.subplot(self.gs[0,0])
 
-#The following lines set the axes to be equal if the units of the axes-to-be-plotted are the same
+        # The following lines set the axes to be equal if the units of the
+        # axes-to-be-plotted are the same
 
         axes_coordinate_decrypt=[0] * len(self.axes)
         for i_axes in range(len(self.axes)):
@@ -357,13 +358,13 @@ class PlotAnimation:
                 if (self.d.coordinates[axes_coordinate_decrypt[i_check]].unit.unit ==
                     self.d.coordinates[axes_coordinate_decrypt[j_check]].unit.unit):
                     self.ax_act.axis('equal')
-                    
-            
-        
+
+
+
         time_index = [slice(0,dim) for dim in self.d.data.shape]
         time_index[self.coord_t.dimension_list[0]] = 0
         time_index = tuple(time_index)
-        
+
         act_ax_pos=self.ax_act.get_position()
         slider_ax.set_position([act_ax_pos.x0,0.94,0.5,0.04])
 
@@ -372,18 +373,18 @@ class PlotAnimation:
                          np.nanmax(self.d.data)]
         self.vmin = self.zrange[0]
         self.vmax = self.zrange[1]
-        
-#        if (self.zrange is None):
-#            self.vmin = np.nanmin(self.d.data[time_index])
-#            self.vmax = np.nanmax(self.d.data[time_index])
-#        else:
-#            self.vmin = self.zrange[0]
-#            self.vmax = self.zrange[1]
+
+        # if (self.zrange is None):
+        #     self.vmin = np.nanmin(self.d.data[time_index])
+        #     self.vmax = np.nanmax(self.d.data[time_index])
+        # else:
+        #     self.vmin = self.zrange[0]
+        #     self.vmax = self.zrange[1]
 
 
         if (self.vmax <= self.vmin):
             raise ValueError("Invalid z range.")
-            
+
         if (self.options['Log z']):
             if (self.vmin <= 0):
                 raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
@@ -392,12 +393,12 @@ class PlotAnimation:
         else:
             self.norm = None
             self.locator = None
-                
-            
+
+
         _plot_opt = self.plot_options[0]
 
         if (self.image_like):
-            try: 
+            try:
                 #There is a problem here, but I cant find it. Image is rotated with 90degree here, but not in anim-image.
                 #if (self.coord_x.dimension_list[0] == 0):
                 if (self.coord_x.dimension_list[0] < self.coord_y.dimension_list[0]):
@@ -406,7 +407,7 @@ class PlotAnimation:
                     im = np.clip(self.d.data[time_index],self.vmin,self.vmax)
                 img = plt.imshow(im,extent=self.xdata_range + self.ydata_range,norm=self.norm,
                                 cmap=self.cmap_obj,vmin=self.vmin,aspect=self.options['Aspect ratio'],interpolation=self.options['Interpolation'],
-                                vmax=self.vmax,origin='lower',**_plot_opt)            
+                                vmax=self.vmax,origin='lower',**_plot_opt)
                 del im
             except Exception as e:
                 raise e
@@ -417,7 +418,7 @@ class PlotAnimation:
             else:
                 xgrid, ygrid = flap.tools.grid_to_box(self.xdata*self.axes_unit_conversion[0],
                                                       self.ydata*self.axes_unit_conversion[1])
-                
+
             im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
             try:
                 img = plt.pcolormesh(xgrid,ygrid,im,norm=self.norm,cmap=self.cmap,vmin=self.vmin,
@@ -425,7 +426,7 @@ class PlotAnimation:
             except Exception as e:
                 raise e
             del im
-            
+
             self.xdata_range=None
             self.ydata_range=None
 
@@ -437,11 +438,13 @@ class PlotAnimation:
                 unit_name = ''
             cbar.set_label(self.data_unit.name+' '+unit_name)
 
-#EFIT overplot feature implementation:
-            #It needs to be more generalied in the future as the coordinates are not necessarily in this order: [time_index,spat_index]
-            #This needs to be cross-checked with the time array's dimensions wherever there is a call for a certain index.
+            # EFIT overplot feature implementation:
+            # It needs to be more generalied in the future as the coordinates
+            # are not necessarily in this order: [time_index,spat_index]
+            # This needs to be cross-checked with the time array's dimensions
+            # wherever there is a call for a certain index.
         if ('EFIT options' in self.options and self.options['EFIT options'] is not None):
-            
+
             default_efit_options={'Plot limiter': None,
                                   'Limiter X': None,
                                   'Limiter Y': None,
@@ -455,28 +458,28 @@ class PlotAnimation:
                                   'Plot flux': None,
                                   'Flux XY': None,
                                   'Flux nlevel': 51}
-            
+
             self.efit_options=flap.config.merge_options(default_efit_options,self.options['EFIT options'],data_source=self.d.data_source)
             self.efit_data={'limiter':   {'Time':[],'Data':[]},
                             'separatrix':{'Time':[],'Data':[]},
                             'flux':      {'Time':[],'Data':[]}}
-            
+
             for setting in ['limiter','separatrix']:
                 if (self.efit_options['Plot '+setting]):
                     if (((self.efit_options[setting.capitalize()+' X']) and
                          (self.efit_options[setting.capitalize()+' Y' ])) or
                          (self.efit_options[setting.capitalize()+' 2D'])):
-                    
+
                         if ((self.efit_options[setting.capitalize()+' X']) and
                             (self.efit_options[setting.capitalize()+' Y'])):
                             try:
                                 R_object=flap.get_data_object(self.efit_options[setting.capitalize()+' X'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' X']+" cannot be read.")
+                            except Exception as exc:
+                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' X']+" cannot be read.") from exc
                             try:
                                 Z_object=flap.get_data_object(self.efit_options[setting.capitalize()+' Y'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' Y']+" cannot be read.")
+                            except Exception as exc:
+                                raise ValueError("The objects "+self.efit_options[setting.capitalize()+' Y']+" cannot be read.") from exc
                             if (len(R_object.data.shape) != 2 or len(Z_object.data.shape) != 2):
                                 raise ValueError("The "+setting.capitalize()+' Y'+" data is not 1D. Use 2D or modify data reading.")
                             self.efit_data[setting]['Data']=np.asarray([R_object.data,Z_object.data])
@@ -484,8 +487,8 @@ class PlotAnimation:
                         elif (self.efit_options[setting.capitalize()+' XY']):
                             try:
                                 R_object=flap.get_data_object(self.efit_options[setting.capitalize()+' 2D'],exp_id=self.d.exp_id)
-                            except:
-                                raise ValueError(setting.capitalize()+'  2D data is not available. FLAP data object needs to be read first.')  
+                            except Exception as exc:
+                                raise ValueError(setting.capitalize()+'  2D data is not available. FLAP data object needs to be read first.') from exc
                             if R_object.data.shape[2] == 2:
                                 self.efit_data[setting]['Data']=np.asarray([R_object.data[:,:,0],R_object.data[:,:,1]])
                             else:
@@ -495,7 +498,7 @@ class PlotAnimation:
                             raise ValueError('Both '+setting.capitalize()+' X and'+
                                              setting.capitalize()+' Y or '+
                                              setting.capitalize()+' 2D need to be set.')
-                        
+
                         for index_coordinate in range(len(self.d.coordinates)):
                             if ((self.d.coordinates[index_coordinate].unit.name in self.axes) and
                                 (self.d.coordinates[index_coordinate].unit.name != 'Time')):
@@ -504,49 +507,49 @@ class PlotAnimation:
                         if (R_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
                             try:
                                 coeff_efit_spatial=flap.tools.spatial_unit_translation(R_object.data_unit.unit)
-                            except:
-                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            except Exception as exc:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                             try:
                                 coeff_data_spatial=flap.tools.spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
-                            except:
-                                raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
+                            except Exception as exc:
+                                raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.") from exc
                             #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
                             self.efit_data[setting]['Data'] *= coeff_efit_spatial/coeff_data_spatial
                         #Time translation (usually ms vs s)
                         for index_time in range(len(self.d.coordinates)):
                             if (self.d.coordinates[index_time].unit.name == 'Time'):
                                 time_index_data=index_time
-                                
+
                         for index_time in range(len(R_object.coordinates)):
                             if (self.d.coordinates[index_time].unit.name == 'Time'):
-                                time_index_efit=index_time      
-                        
+                                time_index_efit=index_time
+
                         if (R_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
                             try:
                                 coeff_efit_time=flap.tools.time_unit_translation(R_object.coordinates[time_index_efit].unit.unit)
-                            except:
-                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                            except Exception as exc:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                             try:
                                 coeff_data_time=flap.tools.time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
-                            except:
-                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
-                            self.efit_data[setting]['Time'] *= coeff_efit_time/coeff_data_time         
+                            except Exception as exc:
+                                raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
+                            self.efit_data[setting]['Time'] *= coeff_efit_time/coeff_data_time
                     else:
                         raise ValueError(setting.capitalize()+' keywords are not set for the data objects.')
-                        
-                    #Interpolating EFIT data for the time vector of the data    
+
+                    #Interpolating EFIT data for the time vector of the data
                     if ((self.efit_data[setting]['Data'] != []) and (self.efit_data[setting]['Time'] != [])):
                         self.efit_data[setting]['Data resampled']=np.zeros([2,self.tdata.shape[0],self.efit_data[setting]['Data'].shape[2]])
                         for index_xy in range(0,2):
                             for index_coordinate in range(0,self.efit_data[setting]['Data'].shape[2]):
                                 self.efit_data[setting]['Data resampled'][index_xy,:,index_coordinate]=np.interp(self.tdata,self.efit_data[setting]['Time'],
                                                                                                                  self.efit_data[setting]['Data'][index_xy,:,index_coordinate])
-                                
+
             if (self.efit_options['Plot flux']):
                 try:
                     flux_object=flap.get_data_object(self.efit_options['Flux XY'],exp_id=self.d.exp_id)
-                except:
-                    raise ValueError('Flux  XY data is not available. FLAP data object needs to be read first.')  
+                except Exception as exc:
+                    raise ValueError('Flux  XY data is not available. FLAP data object needs to be read first.') from exc
                 if len(flux_object.data.shape) != 3:
                     raise ValueError('Flux XY data needs to be a 3D matrix (r,z,t), not necessarily in this order.')
                 if (flux_object.coordinates[0].unit.name != 'Time'):
@@ -555,7 +558,7 @@ class PlotAnimation:
                 self.efit_data['flux']['Time']=flux_object.coordinate('Time')[0][:,0,0] #TIME IS NOT ALWAYS THE FIRST COORDINATE, ELLIPSIS CHANGE SHOULD BE IMPLEMENTED
                 self.efit_data['flux']['X coord']=flux_object.coordinate(flux_object.coordinates[1].unit.name)[0]
                 self.efit_data['flux']['Y coord']=flux_object.coordinate(flux_object.coordinates[2].unit.name)[0]
-                
+
                 for index_coordinate in range(len(self.d.coordinates)):
                     if ((self.d.coordinates[index_coordinate].unit.name in self.axes) and
                         (self.d.coordinates[index_coordinate].unit.name != 'Time')):
@@ -564,37 +567,37 @@ class PlotAnimation:
                 if (flux_object.data_unit.unit != self.d.coordinates[coordinate_index].unit.unit):
                     try:
                         coeff_efit_spatial=flap.tools.spatial_unit_translation(flux_object.data_unit.unit)
-                    except:
-                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    except Exception as exc:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                     try:
                         coeff_data_spatial=flap.tools.spatial_unit_translation(self.d.coordinates[coordinate_index].unit.unit)
-                    except:
-                        raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.")
+                    except Exception as exc:
+                        raise ValueError("Spatial unit translation cannot be made. Check the time unit of the object.") from exc
                     #print('Spatial unit translation factor: '+str(coeff_efit_spatial/coeff_data_spatial))
                     self.efit_data['flux']['X coord'] *= coeff_efit_spatial/coeff_data_spatial
                     self.efit_data['flux']['Y coord'] *= coeff_efit_spatial/coeff_data_spatial
-                
+
                 #Time translation (usually ms vs s)
                 for index_time in range(len(self.d.coordinates)):
                     if (self.d.coordinates[index_time].unit.name == 'Time'):
                         time_index_data=index_time
-                        
+
                 for index_time in range(len(flux_object.coordinates)):
                     if (flux_object.coordinates[index_time].unit.name == 'Time'):
-                        time_index_efit=index_time      
-                
+                        time_index_efit=index_time
+
                 if (flux_object.coordinates[time_index_efit].unit.unit != self.d.coordinates[time_index_data].unit.unit):
                     try:
                         coeff_efit_time=flap.tools.time_unit_translation(flux_object.coordinates[time_index_efit].unit.unit)
-                    except:
-                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
+                    except Exception as exc:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
                     try:
                         coeff_data_time=flap.tools.time_unit_translation(self.d.coordinates[time_index_data].unit.unit)
-                    except:
-                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.")
-                    self.efit_data['flux']['Time'] *= coeff_efit_time/coeff_data_time         
-                
-                #Interpolating EFIT data for the time vector of the data    
+                    except Exception as exc:
+                        raise ValueError("Time unit translation cannot be made. Check the time unit of the object.") from exc
+                    self.efit_data['flux']['Time'] *= coeff_efit_time/coeff_data_time
+
+                #Interpolating EFIT data for the time vector of the data
                 if ((self.efit_data['flux']['Data'] != []) and (self.efit_data['flux']['Time'] != [])):
                     self.efit_data['flux']['Data resampled']=np.zeros([self.tdata.shape[0],
                                                                        self.efit_data['flux']['Data'].shape[1],
@@ -605,7 +608,7 @@ class PlotAnimation:
                     self.efit_data['flux']['Y coord resampled']=np.zeros([self.tdata.shape[0],
                                                                           self.efit_data['flux']['Y coord'].shape[1],
                                                                           self.efit_data['flux']['Y coord'].shape[2]])
-                    
+
                     for index_x in range(0,self.efit_data['flux']['Data'].shape[1]):
                         for index_y in range(0,self.efit_data['flux']['Data'].shape[2]):
                             self.efit_data['flux']['Data resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
@@ -614,29 +617,29 @@ class PlotAnimation:
                                                                                                      self.efit_data['flux']['X coord'][:,index_x,index_y])
                             self.efit_data['flux']['Y coord resampled'][:,index_x,index_y]=np.interp(self.tdata,self.efit_data['flux']['Time'],
                                                                                                      self.efit_data['flux']['Y coord'][:,index_x,index_y])
-                            
-            
+
+
         if (self.xrange is not None):
             plt.xlim(self.xrange[0]*self.axes_unit_conversion[0],self.xrange[1]*self.axes_unit_conversion[0])
-            
+
         if (self.yrange is not None):
-            plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],self.yrange[1]*self.axes_unit_conversion[1])        
-            
+            plt.ylim(self.yrange[0]*self.axes_unit_conversion[1],self.yrange[1]*self.axes_unit_conversion[1])
+
         if self.axes_unit_conversion[0] == 1.:
             plt.xlabel(self.ax_list[0].title(language=self.language))
         else:
             plt.xlabel(self.ax_list[0].title(language=self.language, new_unit=self.options['Plot units'][self.axes[0]]))
-            
+
         if self.axes_unit_conversion[1] == 1.:
             plt.ylabel(self.ax_list[1].title(language=self.language))
         else:
             plt.ylabel(self.ax_list[1].title(language=self.language, new_unit=self.options['Plot units'][self.axes[1]]))
-            
+
         if (self.options['Log x']):
             plt.xscale('log')
         if (self.options['Log y']):
             plt.yscale('log')
-        
+
         if self.options['Plot units'] is not None:
             if self.axes[2] in self.options['Plot units']:
                 time_unit=self.options['Plot units'][self.axes[2]]
@@ -649,31 +652,31 @@ class PlotAnimation:
             time_coeff=1.
         title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[0]*time_coeff)+\
                 ' ['+time_unit+']'
-                              
+
         plt.title(title)
 
-        plt.show(block=False)        
-        self.anim = animation.FuncAnimation(self.fig, self.animate_plot, 
+        plt.show(block=False)
+        self.anim = animation.FuncAnimation(self.fig, self.animate_plot,
                                             len(self.tdata),
                                             interval=self.speed,blit=False)
-        
-    def animate_plot(self, it):
+
+    def animate_plot(self, it):  # numpydoc ignore=GL08
         time_index = [slice(0,dim) for dim in self.d.data.shape]
         time_index[self.coord_t.dimension_list[0]] = it
         time_index = tuple(time_index)
-        
+
         self.time_slider.eventson = False
         self.time_slider.set_val(self.tdata[it]*self.axes_unit_conversion[2])
-        self.time_slider.eventson = True       
-        
+        self.time_slider.eventson = True
+
         self.current_frame = it
-            
+
         plot_opt = copy.deepcopy(self.plot_options[0])
         self.ax_act.clear()
-        
+
         if (self.image_like):
-            try: 
-#                if (self.coord_x.dimension_list[0] == 0):
+            try:
+                # if (self.coord_x.dimension_list[0] == 0):
                 if (self.coord_x.dimension_list[0] < self.coord_y.dimension_list[0]):
                     im = np.clip(np.transpose(self.d.data[time_index]),self.vmin,self.vmax)
                 else:
@@ -682,7 +685,7 @@ class PlotAnimation:
                            cmap=self.cmap_obj,vmin=self.vmin,
                            aspect=self.options['Aspect ratio'],
                            interpolation=self.options['Interpolation'],
-                           vmax=self.vmax,origin='lower',**plot_opt)            
+                           vmax=self.vmax,origin='lower',**plot_opt)
                 del im
             except Exception as e:
                 raise e
@@ -698,7 +701,7 @@ class PlotAnimation:
             except Exception as e:
                 raise e
             del im
-        if ('EFIT options' in self.options and self.options['EFIT options'] is not None):        
+        if ('EFIT options' in self.options and self.options['EFIT options'] is not None):
             for setting in ['limiter','separatrix']:
                 if (self.efit_options['Plot '+setting]):
                     self.ax_act.set_autoscale_on(False)
@@ -717,22 +720,22 @@ class PlotAnimation:
                                  self.efit_data['flux']['Y coord resampled'][it,:,:].transpose(),
                                  self.efit_data['flux']['Data resampled'][it,:,:],
                                  levels=self.efit_options['Flux nlevel'])
-                
+
         if (self.xrange is not None):
             self.ax_act.set_xlim(self.xrange[0],self.xrange[1])
         if (self.yrange is not None):
-            self.ax_act.set_ylim(self.yrange[0],self.yrange[1])        
-            
+            self.ax_act.set_ylim(self.yrange[0],self.yrange[1])
+
         if self.axes_unit_conversion[0] == 1.:
             plt.xlabel(self.ax_list[0].title(language=self.language))
         else:
             plt.xlabel(self.ax_list[0].title(language=self.language, new_unit=self.options['Plot units'][self.axes[0]]))
-            
+
         if self.axes_unit_conversion[1] == 1.:
             plt.ylabel(self.ax_list[1].title(language=self.language))
         else:
             plt.ylabel(self.ax_list[1].title(language=self.language, new_unit=self.options['Plot units'][self.axes[1]]))
-        
+
         if self.options['Plot units'] is not None:
             if self.axes[2] in self.options['Plot units']:
                 time_unit=self.options['Plot units'][self.axes[2]]
@@ -740,20 +743,20 @@ class PlotAnimation:
         else:
             time_unit=self.coord_t.unit.unit
             time_coeff=1.
-            
+
         title = str(self.d.exp_id)+' @ '+self.coord_t.unit.name+'='+"{:10.5f}".format(self.tdata[it]*time_coeff)+\
                 ' ['+time_unit+']'
-        
+
         self.ax_act.set_title(title)
-    
+
     def _reset_animation(self, event):
         self.anim.event_source.stop()
         self.speed = 40.
-        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot,
                                        len(self.tdata),interval=self.speed,blit=False)
         self.anim.event_source.start()
         self.pause = False
-        
+
     def _pause_animation(self, event):
         if self.pause:
             self.anim.event_source.start()
@@ -763,38 +766,38 @@ class PlotAnimation:
             self.anim.event_source.stop()
             self.pause = True
             self.pause_button.label.set_text("Start")
-        
+
     def _set_animation(self, time):
         self.anim.event_source.stop()
         frame=(np.abs(self.tdata*self.axes_unit_conversion[2]-time)).argmin()
-        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot,
                                             frames=np.arange(frame,len(self.tdata)-1),
                                             interval=self.speed,blit=False)
         self.anim.event_source.start()
         self.pause = False
-        
+
     def _slow_animation(self, event):
         self.anim.event_source.stop()
         self.speed=self.speed/0.8
-        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot,
                                             frames=np.arange(self.current_frame,len(self.tdata)-1),
                                             interval=self.speed,blit=False)
         self.speed_button.label.set_text(str(int(1000./(self.speed*0.8)))+'fps')
         self.slow_button.label.set_text(str(int(1000./(self.speed/0.8)))+'fps')
         self.anim.event_source.start()
         self.pause = False
-        
-    def _speed_animation(self, event):  
+
+    def _speed_animation(self, event):
         self.anim.event_source.stop()
         self.speed=self.speed*0.8
-        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot, 
+        self.anim = animation.FuncAnimation(plt.figure(self.plot_id.figure), self.animate_plot,
                                             frames=np.arange(self.current_frame,len(self.tdata)-1),
                                             interval=self.speed,blit=False)
         self.speed_button.label.set_text(str(int(1000./(self.speed*0.8)))+'fps')
         self.slow_button.label.set_text(str(int(1000./(self.speed/0.8)))+'fps')
         self.anim.event_source.start()
         self.pause = False
-            
+
 class PlotID:
     """Class for storing identifying and other information about the plot.
 
@@ -812,12 +815,12 @@ class PlotID:
     number_of_plots : int
         Number of plot calls which generated this.
     axes : list
-        The axes list. Each element is a `flap.Unit` and describes one axis of the
+        The axes list. Each element is a :class:`~flap.coordinate.Unit` and describes one axis of the
         plot.
     plot_data : list
         The description of the axis data. This is a list of
         `self.number_of_plots` lists. Each inner list is a list of
-        PlotDataDescriptions. 
+        PlotDataDescriptions.
     plt_axis_list : list
         The list of Axes which can be used for plotting into the individual
         plots. If there is only a single plot, `base_subplot` is the same as
@@ -837,8 +840,8 @@ class PlotID:
         self.options = []
 
     def clear(self):
-        """Clears the parameters of the plot, but does not clear the
-        base_subplot and figure.
+        """Clear the parameters of the plot, but do not clear the base_subplot
+        and figure.
         """
         self.plot_type = None
         self.plot_subtype = None
@@ -847,21 +850,10 @@ class PlotID:
         self.plot_data = []
         self.plt_axis_list = None
         self.options = []
-        
 
-#    def __del__(self):
-#        if (self.plt_axis_list is not None):
-#            for ax in self.plt_axis_list:
-#                ax.remove()
-                
-    def check_axes(self,
-                   d,
-                   axes,
-                   clear=True,
-                   default_axes=None,
-                   force=False):
+    def check_axes(self, d, axes, clear=True, default_axes=None, force=False):
         """Check whether the required plot axes are correct, present and
-        compatible with the self PlotID. 
+        compatible with the self PlotID.
 
         Parameters
         ----------
@@ -879,10 +871,10 @@ class PlotID:
 
         Returns
         -------
-        pdd_list : list of flap.PlotDataDescription 
+        pdd_list : list of flap.PlotDataDescription
             List of objects which can be used to generate the plot.
         ax_list : list of flap.Unit
-            Axis list which can be put into axes in self.  
+            Axis list which can be put into axes in self.
         """
         if (axes is not None):
             if (type(axes) is not list):
@@ -891,14 +883,14 @@ class PlotID:
                 _axes = axes
         else:
             _axes = []
-        
+
         # Converting to PDD and axes list
         try:
             pdd_list,ax_list = axes_to_pdd_list(d,_axes)
         except ValueError as e:
             raise e
-        # Adding default axes if not all are specified   
-        if (len(_axes) < len(default_axes)):    
+        # Adding default axes if not all are specified
+        if (len(_axes) < len(default_axes)):
             # Determining default axes for the ones which are not in _axes:
             #  either the ones in the plot or defaults
             if (not clear and (self.axes is not None)):
@@ -913,45 +905,45 @@ class PlotID:
                             plot_axes[i] = '__Data__'
                         else:
                             plot_axes[i] = ax.name
-                try:            
+                try:
                     pdd_def,plot_def_axes = axes_to_pdd_list(d,plot_axes)
                 except ValueError as e:
                     for axname in plot_axes:
                         if (axname in str(e)):
-                            raise ValueError("Plot coordinate '"+axname+"' not found neither as coordinate nor data name. Must specifiy axes and use option={'Force axes':True} to overplot.")
+                            raise ValueError("Plot coordinate '"+axname+"' not found neither as coordinate nor data name. Must specifiy axes and use option={'Force axes':True} to overplot.") from e
             else:
                 # If overplotting or no plot is available then using the default
                 try:
-                    pdd_def, plot_def_axes = axes_to_pdd_list(d,default_axes[len(_axes):])   
+                    pdd_def, plot_def_axes = axes_to_pdd_list(d,default_axes[len(_axes):])
                 except ValueError as e:
                     raise e
             ax_list += plot_def_axes
             pdd_list += pdd_def
-                     
-                    
+
+
         ax_out_list = []
-        # Checking whether the units of this plot are consistent with the present axes                            
+        # Checking whether the units of this plot are consistent with the present axes
         if (not clear and (self.axes is not None)):
             for ax_in,ax_plot in zip(ax_list, self.axes):
                 # If none of the plot and the new axis has name and ot unit, the new axis will not have it either
-#                if ((ax_plot.name == '') or (ax_plot.unit == '') or 
-#                    (ax_in.name == '') or (ax_in.unit == '')):
-#                    ax_out_list.append(Unit())
+                # if ((ax_plot.name == '') or (ax_plot.unit == '') or
+                #     (ax_in.name == '') or (ax_in.unit == '')):
+                #     ax_out_list.append(Unit())
                 if ((ax_in.name != ax_plot.name) or (ax_in.unit != ax_plot.unit)):
                     if (force):
                         u = flap.coordinate.Unit()
                         if (ax_in.name == ax_plot.name):
                             u.name = ax_in.name
                         elif ((ax_in.name is None) or (ax_in.name == '')):
-                            u.name = ax_plot.name 
+                            u.name = ax_plot.name
                         elif ((ax_plot.name is None) or (ax_plot.name == '')):
-                            u.name = ax_in.name    
+                            u.name = ax_in.name
                         if (ax_in.unit == ax_plot.unit):
                             u.unit = ax_in.unit
                         elif ((ax_in.unit is None) or (ax_in.unit == '')):
-                            u.unit = ax_plot.unit 
+                            u.unit = ax_plot.unit
                         elif ((ax_plot.unit is None) or (ax_plot.unit == '')):
-                            u.unit = ax_in.unit        
+                            u.unit = ax_in.unit
                         ax_out_list.append(u)
                         continue
                     raise ValueError("Axis '"+ax_in.name+"' is incompatible with plot. Use option={'Force axes':True}")
@@ -960,7 +952,7 @@ class PlotID:
         else:
             ax_out_list = ax_list
         return pdd_list, ax_out_list
-    
+
 def set_plot_id(plot_id):
     """Set the current plot.
 
@@ -980,14 +972,24 @@ def set_plot_id(plot_id):
         if (plot_id.plt_axis_list is None):
             gca_invalid = False
         else:
-            if (plt.gca() != plot_id.plt_axis_list[-1]):
-                gca_invalid = True
+            # Note: if plot_id.figure has already been closed, plt.figure will reopen it
+            if ((len(plt.get_fignums()) == 0) or (len(plt.figure(plot_id.figure).axes) == 0)):
+                # gca would create a new figure if there are no figures or axes,
+                # so we avoid calling it in that case
+                gca_invalid == True
             else:
-                gca_invalid = False
-            
+                if (plt.figure(plot_id.figure).axes != plot_id.plt_axis_list[-1]):
+                    gca_invalid = True
+                else:
+                    gca_invalid = False
+
 def get_plot_id():
     """
     Return the current PlotID or None if no act plot.
+
+    Returns
+    -------
+    flap.PlotID
     """
     global act_plot_id, gca_invalid
     try:
@@ -995,7 +997,7 @@ def get_plot_id():
     except NameError:
         gca_invalid = False
         return None
-    
+
 def __get_gca_invalid():
     """ This returns the global gca_invalid flag.
         This flag is set invalid when set_plot changes the default plot and this way
@@ -1006,14 +1008,14 @@ def __get_gca_invalid():
     except NameError:
         gca_invalid = False
     return gca_invalid
-        
-   
-def sample_for_plot(x, y, x_error, y_error, n_points):
-    """Resamples the function before plotting for better performance.
 
-    Resamples the y(x) function to `n_points` points for plotting. This is
-    useful for plotting large arrays in a way that short outlier pulses are
-    still indicated.
+
+def sample_for_plot(x, y, x_error, y_error, n_points):
+    """Resample the function before plotting for better performance.
+
+    Resample the y(x) function to `n_points` points for plotting. This is useful
+    for plotting large arrays in a way that short outlier pulses are still
+    indicated.
 
     The original function is divided into `n_points` equal size blocks in `x`
     and in each block, the minimum and maximum is determined. The output will
@@ -1027,6 +1029,10 @@ def sample_for_plot(x, y, x_error, y_error, n_points):
         Input 'x' array.
     y : np.ndarray
         Input 'y' array.
+    x_error : np.ndarray
+        Input errors corresponding to the 'x' array.
+    y_error : np.ndarray
+        Input errors corresponding to the 'y' array.
     n_points : int
         Desired number of blocks. This would be a number larger than the number
         of pixels in the plot in the horizontal direction.
@@ -1103,7 +1109,7 @@ def _plot(data_object,
           plot_id=None):
     """Plot a data object.
 
-    Description of parameters has been moved to `flap.DataObject.plot`.
+    Description of parameters has been moved to :func:`flap.data_object.DataObject.plot()`.
     """
 
     default_options = {
@@ -1136,7 +1142,7 @@ def _plot(data_object,
         'Plot units':None,
         }
     _options = flap.config.merge_options(default_options, options, data_source=data_object.data_source, section='Plot')
-    
+
     if (plot_options is None):
         _plot_options = {}
     else:
@@ -1148,49 +1154,51 @@ def _plot(data_object,
     if (type(_options['Clear']) is not bool):
         raise TypeError("Invalid type for option Clear. Should be boolean.")
     if (type(_options['Force axes']) is not bool):
-        raise TypeError("Invalid type for option 'Force axes'. Should be boolean.")    
-    
+        raise TypeError("Invalid type for option 'Force axes'. Should be boolean.")
+
     if ((slicing is not None) or (summing is not None)):
         d = data_object.slice_data(slicing=slicing, summing=summing, options=slicing_options)
     else:
-        d = data_object        
-        
+        d = data_object
+
     # Determining a PlotID:
     # argument, actual or a new one
+    # Note: plt.gcf()/plt.gca() creates a new figure/axes if none is active
     if (type(plot_id) is PlotID):
         _plot_id = plot_id
     else:
         _plot_id = get_plot_id()
-        if (_plot_id is None): 
-            # If there is no actual plot we create a new one 
+        if (_plot_id is None):
+            # If there is no actual plot we create a new one
             _plot_id = PlotID()
             _plot_id.figure = plt.gcf().number
             _plot_id.base_subplot = plt.gca()
-        if (_plot_id.plt_axis_list is not None):    
+        if (_plot_id.plt_axis_list is not None):
             if ((_plot_id.plt_axis_list[-1] != plt.gca()) or (_plot_id.figure != plt.gcf().number)):
                 # If the actual subplot is not the one in the plot ID then either the subplot was
-                # changed to a new one or the plot_ID changed with set_plot. 
+                # changed to a new one or the plot_ID changed with set_plot.
                 if (not __get_gca_invalid()):
                     # This means the plot ID was not changed, the actual plot or axis was changed.
-                    # Therefore we need to use the actual values         
+                    # Therefore we need to use the actual values
                     _plot_id = PlotID()
                     _plot_id.figure = plt.gcf().number
-                    _plot_id.base_subplot = plt.gca()  
+                    _plot_id.base_subplot = plt.gca()
                     plt.cla()
+
     if (_options['Clear'] ):
         _plot_id = PlotID()
-#        _plot_id.clear()
+        #  _plot_id.clear()
         if (_plot_id.figure is not None):
             plt.figure(_plot_id.figure)
         else:
             _plot_id.figure = plt.gcf().number
         if (_plot_id.base_subplot is not None):
             plt.sca(_plot_id.base_subplot)
-#            plt.subplot(_plot_id.base_subplot)  Changed on 6 March, 2022
+            # plt.subplot(_plot_id.base_subplot)  Changed on 6 March, 2022
         else:
-            _plot_id.base_subplot = plt.gca()          
+            _plot_id.base_subplot = plt.gca()
         plt.cla()
-            
+
     # Setting plot type
     known_plot_types = ['xy','scatter','multi xy', 'image', 'anim-image','contour','anim-contour','animation','grid xy','grid scatter']
     if (plot_type is None):
@@ -1205,10 +1213,10 @@ def _plot(data_object,
     else:
         try:
             _plot_type = flap.tools.find_str_match(plot_type,known_plot_types)
-        except TypeError:
-            raise TypeError("Invalid type for plot_type. String is expected.")
-        except ValueError:
-            raise ValueError("Unknown plot type or too short abbreviation")    
+        except TypeError as exc:
+            raise TypeError("Invalid type for plot_type. String is expected.") from exc
+        except ValueError as exc:
+            raise ValueError("Unknown plot type or too short abbreviation") from exc
 
     # Processing some options
     if ((_plot_type == 'xy') or (_plot_type == 'multi xy') or (_plot_type == 'xy grid') or (_plot_type == 'xy scatter')):
@@ -1217,6 +1225,7 @@ def _plot(data_object,
             raise TypeError("Option 'All points' should be boolean.")
     else:
         all_points = True
+
     plot_error = _options['Error']
     if (type(plot_error) is not bool):
         try:
@@ -1224,38 +1233,43 @@ def _plot(data_object,
                 raise ValueError("Invalid number of error bars in plot (option: Error).")
             errorbars = int(plot_error)
             plot_error = True
-        except:
-            raise ValueError("Invalid 'Error' option.")
+        except Exception as exc:
+            raise ValueError("Invalid 'Error' option.") from exc
     else:
         errorbars = -1
-    # The maximum number of points expected in the horizontal dimension of a plot
+
+    # The maximum number of points expected in the
+    # horizontal dimension of a plot
     try:
         maxpoints = int(_options['Maxpoints'])
-    except ValueError:
-        raise ValueError("Invalid maxpoints setting.")
+    except ValueError as exc:
+        raise ValueError("Invalid maxpoints setting.") from exc
 
+    # Determine the complex plot type
     try:
         compt = flap.tools.find_str_match(_options['Complex mode'], ['Amp-phase','Real-imag'])
-    except:
-        raise ValueError("Invalid 'Complex mode' option:" +_options['Complex mode'])
+    except Exception as exc:
+        raise ValueError("Invalid 'Complex mode' option:" +_options['Complex mode']) from exc
     if (compt == 'Amp-phase'):
         comptype = 0
-    elif (compt == 'Real-imag'):    
+    elif (compt == 'Real-imag'):
         comptype = 1
     if (_plot_id.number_of_plots > 0):
         if (_plot_id.options[-1]['Complex mode'] != _options['Complex mode']):
             raise ValueError("Different complex plot mode in overplot.")
 
+    # Language of the plot
     language = _options['Language']
-    
+
+    # Set video settings
     if (_options['Video file'] is not None):
         if (_options['Video format'] == 'avi'):
             video_codec_code = 'XVID'
         else:
             raise ValueError("Cannot write video in format '"+_options['Video format']+"'.")
-        
-       
-    # X range and Z range is processed here, but Y range not as it might have multiple entries for some plots
+
+    # X range and Z range is processed here, but Y range is not,
+    # as it might have multiple entries for some plots
     xrange = _options['X range']
     if (xrange is not None):
         if ((type(xrange) is not list) or (len(xrange) != 2)):
@@ -1264,36 +1278,41 @@ def _plot(data_object,
     if (zrange is not None):
         if ((type(zrange) is not list) or (len(zrange) != 2)):
             raise ValueError("Invalid Z range setting.")
-     
+
     cmap = _options['Colormap']
     if ((cmap is not None) and (type(cmap) is not str)):
         raise ValueError("Colormap should be a string.")
-    
-    contour_levels = _options['Levels']    
-    # Here _plot_id is a valid (maybe empty) PlotID
 
+    # Contour levels
+    contour_levels = _options['Levels']
+
+    ######
+
+    # x-y or scatter plots
+    # Here _plot_id is a valid (maybe empty) PlotID
     if ((_plot_type == 'xy') or (_plot_type == 'scatter')):
         # 1D plots: xy, scatter and complex versions
         # Checking whether oveplotting into the same plot type
-        if ((d.data is not None) and (d.data.dtype.kind == 'c')): 
+        if ((d.data is not None) and (d.data.dtype.kind == 'c')):
             subtype = 1
         else:
             subtype = 0
         if (not _options['Clear']):
-            if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'xy') and (_plot_id.plot_type != 'scatter')) 
+            if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'xy') and (_plot_id.plot_type != 'scatter'))
                 or (_plot_id.plot_subtype is not None) and (_plot_id.plot_subtype != subtype)):
                 raise ValueError("Overplotting into different plot type. Use option={'Clear':True} to erase first.")
         # Processing axes
         default_axes = [d.coordinates[0].unit.name, '__Data__']
         try:
-            pdd_list, ax_list = _plot_id.check_axes(d, 
-                                                    axes, 
-                                                    clear=_options['Clear'], 
-                                                    default_axes=default_axes, 
+            pdd_list, ax_list = _plot_id.check_axes(d,
+                                                    axes,
+                                                    clear=_options['Clear'],
+                                                    default_axes=default_axes,
                                                     force=_options['Force axes'])
         except ValueError as e:
             raise e
-        # Preparing data    
+
+        # Preparing data
         plotdata = [0]*2
         plotdata_low = [0]*2                                                    #UNUSED
         plotdata_high = [0]*2                                                   #UNUSED
@@ -1303,12 +1322,12 @@ def _plot(data_object,
         if (_plot_id.number_of_plots != 0):
             _options['Log x'] = _plot_id.options[-1]['Log x']
             _options['Log y'] = _plot_id.options[-1]['Log y']
-            
 
         xdata = plotdata[0]
         xerror = ploterror[0]
 
-        if (subtype == 0):     
+        if (subtype == 0):
+            # Real x-y plot
             yrange = _options['Y range']
             if (yrange is not None):
                 if ((type(yrange) is not list) or (len(yrange) != 2)):
@@ -1316,7 +1335,7 @@ def _plot(data_object,
 
             ax = _plot_id.base_subplot
             _plot_id.plt_axis_list = [ax]
-    
+
             ydata = plotdata[1]
             yerror = ploterror[1]
             # Checking for constants, converting to numpy array
@@ -1332,7 +1351,7 @@ def _plot(data_object,
                 else:
                     xdata = np.full(ydata.size, xdata)
                 xerror = None
-    
+
             if (all_points is True):
                 x = xdata
                 y = ydata
@@ -1350,8 +1369,8 @@ def _plot(data_object,
             _plot_opt = _plot_options[0]
             if (type(_plot_opt) is not dict):
                 raise ValueError("Plot options should be a dictionary or list of dictionaries.")
-   
-            if (_plot_type == 'xy'):                
+
+            if (_plot_type == 'xy'):
                 if (plot_error):
                     ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,**_plot_opt)
                 else:
@@ -1361,7 +1380,7 @@ def _plot(data_object,
                     ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,fmt='o',**_plot_opt)
                 else:
                     ax.scatter(x,y,**_plot_opt)
-                    
+
             ax.set_xlabel(ax_list[0].title(language=language))
             ax.set_ylabel(ax_list[1].title(language=language))
             if (_options['Log x']):
@@ -1372,7 +1391,7 @@ def _plot(data_object,
                 ax.set_xlim(xrange[0],xrange[1])
             if (yrange is not None):
                 ax.set_ylim(yrange[0],yrange[1])
-                
+
             title = ax.get_title()
             if (title is None):
                 title = ''
@@ -1392,7 +1411,7 @@ def _plot(data_object,
                         title += ',...'
             ax.set_title(title)
 
-            _plot_id.plot_subtype = 0 # real xy plot 
+            _plot_id.plot_subtype = 0 # real xy plot
             # End of real xy and scatter plot
         else:
             # Complex xy plot
@@ -1406,26 +1425,36 @@ def _plot(data_object,
                 else:
                     try:
                         yrange = [float(yrange[0]), float(yrange[1])]
-                    except ValueError:
-                        raise ValueError("Invalid Y range setting. For complex xy plot either a list or list of two lists can be used.")
+                    except ValueError as exc:
+                        raise ValueError("Invalid Y range setting. For complex xy plot either a list or list of two lists can be used.") from exc
                     yrange = [yrange,yrange]
 
             # Complex xy and scatter plot
-            # Creating two sublots if this is a new plot
+            # Creating two subplots if this is a new plot
             if (_plot_id.number_of_plots == 0):
-                gs = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=_plot_id.base_subplot)
+                # We won't use the underlying axes (created by plt.gca()),
+                # adding subplots instead.
+                # Deleting them, however, would break the overall
+                # subplot/gridspec reference chain, so we just turn the visible
+                # parts off
+                _plot_id.base_subplot.axis('off')
+                gs = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
                 _plot_id.plt_axis_list = []
                 _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
                 _plot_id.plt_axis_list.append(plt.subplot(gs[1,0],sharex=_plot_id.plt_axis_list[0]))
+
+                # Indicate that we added two new subplots, so we can reuse them later
+                _plot_id.number_of_plots += 2
+
             # Taking the mean of the complex errors
             if (ploterror[1] is not None):
                 if (type(ploterror[1]) is list):
                     yerror_abs = (np.abs(ploterror[1][0]) + np.abs(ploterror[1][1]))  / 2
                 else:
-                    yerror_abs = np.abs(ploterror[1]) 
+                    yerror_abs = np.abs(ploterror[1])
             else:
                 yerror_abs = None
-            for i_comp in range(2):            
+            for i_comp in range(2):
                 ax = _plot_id.plt_axis_list[i_comp]
                 if (comptype == 0):
                     # amp-phase
@@ -1450,7 +1479,7 @@ def _plot(data_object,
                     if (i_comp == 0):
                         ydata = np.real(plotdata[1])
                         yerror = yerror_abs
-                    else:    
+                    else:
                         ydata = np.imag(plotdata[1])
                         yerror = yerror_abs
 
@@ -1473,7 +1502,7 @@ def _plot(data_object,
                         xerror = d._plot_coord_ranges(c, xdata, xdata_low, xdata_high) #THESE ARE UNDEFINED
                     else:
                         xerror = None
-        
+
                 if (all_points is True):
                     x = xdata
                     y = ydata
@@ -1493,8 +1522,8 @@ def _plot(data_object,
                     _plot_opt[i_comp]
                 if (type(_plot_opt) is not dict):
                     raise ValueError("Plot options should be a dictionary or list of dictionaries.")
-       
-                if (_plot_type == 'xy'):                
+
+                if (_plot_type == 'xy'):
                     if (plot_error):
                         ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,**_plot_opt)
                     else:
@@ -1507,8 +1536,8 @@ def _plot(data_object,
 
                 # Setting axis labels
                 ax.set_xlabel(ax_list[0].title(language=language))
-                ax.set_ylabel(ax_list[1].title(language=language,complex_txt=[comptype,i_comp])) 
-    
+                ax.set_ylabel(ax_list[1].title(language=language,complex_txt=[comptype,i_comp]))
+
                 if (_options['Log x']):
                     ax.set_xscale('log')
                 if (_options['Log y']):
@@ -1538,10 +1567,13 @@ def _plot(data_object,
 
             _plot_id.plot_subtype = 1
             # End of complex xy and scatter plot
-            
+
+    ######
+
+    # grid x-y or grid scatter plots
     elif ((_plot_type == 'grid xy') or (_plot_type == 'grid scatter')):
         if (not _options['Clear']):
-            if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'grid xy') and (_plot_id.plot_type != 'grid scatter')) 
+            if ((_plot_id.plot_type is not None) and ((_plot_id.plot_type != 'grid xy') and (_plot_id.plot_type != 'grid scatter'))
                 ):
                 raise ValueError("Overplotting into different plot type. Use option={'Clear':True} to erase first.")
         if (axes is None):
@@ -1554,17 +1586,17 @@ def _plot(data_object,
         else:
             default_axes = [None,None,None,None]
         try:
-            pdd_list, ax_list = _plot_id.check_axes(d, 
-                                                    axes, 
-                                                    clear=_options['Clear'], 
-                                                    default_axes=default_axes, 
+            pdd_list, ax_list = _plot_id.check_axes(d,
+                                                    axes,
+                                                    clear=_options['Clear'],
+                                                    default_axes=default_axes,
                                                     force=_options['Force axes'])
         except ValueError as e:
             raise e
-     
+
         # Determining grid
         grid_dimensions = [0,0]
-        
+
         for i_grid in range(2):
             if (pdd_list[i_grid].data_object != d):
                 raise ValueError("Grid coordinates for xy grid plot should be from the same data object.")
@@ -1575,17 +1607,17 @@ def _plot(data_object,
             grid_dimensions[i_grid] = pdd_list[i_grid].value.dimension_list[0]
         if (grid_dimensions[0] == grid_dimensions[1]):
             raise ValueError("The two grid dimensions should be different.")
-        plot_rows = d.shape[grid_dimensions[0]] 
-        plot_columns = d.shape[grid_dimensions[1]] 
+        plot_rows = d.shape[grid_dimensions[0]]
+        plot_columns = d.shape[grid_dimensions[1]]
         if ((plot_columns > 30) or (plot_rows > 30)):
             raise ValueError("Too many plots in a row or column.")
-        
-        if ((_plot_id.plot_type is not None) 
+
+        if ((_plot_id.plot_type is not None)
             and ((_plot_id.plot_subtype[0] != plot_rows) or (_plot_id.plot_subtype[1] != plot_columns))
             ):
             raise ValueError("Row/column number for grid plot is different from existing plot. Can not overplot.")
         _plot_id.plot_subtype = [plot_rows,plot_columns]
-       
+
         if (pdd_list[2].data_object != d):
             raise ValueError("X coordinate for xy grid plot should be from the same data object.")
         if ((pdd_list[2].data_type != PddType.Coordinate)
@@ -1593,12 +1625,12 @@ def _plot(data_object,
             ):
             raise ValueError("X axis of  xy grid plot should be a coordinate changing along one data dimension.")
         plot_x_dimension = pdd_list[2].value.dimension_list[0]
-        
+
         yrange = _options['Y range']
 
         # Creating the sublots if this is a new plot
         if (_plot_id.number_of_plots == 0):
-            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot,hspace=0.4,wspace=0.3)
+            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot.get_subplotpec(),hspace=0.4,wspace=0.3)
             _plot_id.plt_axis_list = []
             sharex = None
             sharey = None
@@ -1611,11 +1643,11 @@ def _plot(data_object,
                         sharex = _plot_id.plt_axis_list[0]
                     _plot_id.number_of_plots += 1
 
-        # Getting row, columnm and x data        
+        # Getting row, columnm and x data
         row_data, row_data_err = pdd_list[0].get_data(plot_error)
         column_data, column_data_err = pdd_list[1].get_data(plot_error)
         # The x coordinate data is read when the first plot is made.
-        
+
         # Plotting data
         _plot_opt = _plot_options[0]
         for i_row in range(plot_rows):
@@ -1625,7 +1657,7 @@ def _plot(data_object,
                 ind[grid_dimensions[1]] = i_col
                 ind[plot_x_dimension] = ...
                 if ((i_row == 0) and (i_col == 0)):
-                   plotdata_x, ploterror_x = pdd_list[2].get_data(plot_error,data_index=ind) 
+                   plotdata_x, ploterror_x = pdd_list[2].get_data(plot_error,data_index=ind)
                 plotdata_y, ploterror_y = pdd_list[3].get_data(plot_error,data_index=ind)
                 if (all_points is True):
                     x = plotdata_x
@@ -1681,8 +1713,10 @@ def _plot(data_object,
                 #     if (yrange is not None):
                 #         ax.axes.yaxis.set_ticklabels([])
         #plt.tight_layout()  Fails
-    
-     
+
+    ######
+
+    # multi x-y plot
     elif (_plot_type == 'multi xy'):
         if (len(d.shape) > 2):
             raise TypeError("multi x-y plot is applicable to 2D data only. Use slicing.")
@@ -1701,14 +1735,14 @@ def _plot(data_object,
         # Processing axes
         default_axes = [d.coordinates[0].unit.name, '__Data__']
         try:
-            pdd_list, ax_list = _plot_id.check_axes(d, 
-                                                    axes, 
-                                                    clear=_options['Clear'], 
-                                                    default_axes=default_axes, 
+            pdd_list, ax_list = _plot_id.check_axes(d,
+                                                    axes,
+                                                    clear=_options['Clear'],
+                                                    default_axes=default_axes,
                                                     force=_options['Force axes'])
         except ValueError as e:
             raise e
-        
+
         if (pdd_list[0].data_type == PddType.Coordinate):
             coord = pdd_list[0].value
             if (len(coord.dimension_list) != 1):
@@ -1716,7 +1750,7 @@ def _plot(data_object,
         axis_index = coord.dimension_list[0]
         if (not ((pdd_list[1].data_type == PddType.Data) and (pdd_list[1].data_object == d))):
             raise ValueError("For multi xy plot only data can be plotted on the y axis.")
-            
+
         # Trying to get signal names
         try:
             signals_coord = d.get_coordinate_object('Signal name')
@@ -1733,7 +1767,7 @@ def _plot(data_object,
         else:
             signal_names = None
 
-        # Getting x data    
+        # Getting x data
         if (pdd_list[0].data_type == PddType.Data):
             xdata = pdd_list[0].data_object.data.flatten()
             if (plot_error):
@@ -1754,8 +1788,8 @@ def _plot(data_object,
                 xdata_high = xdata_high.flatten()
             if (plot_error):
                 xerror  = pdd_list[0].data_object._plot_coord_ranges(pdd_list[0].value,
-                                                                     xdata, 
-                                                                     xdata_low, 
+                                                                     xdata,
+                                                                     xdata_low,
                                                                      xdata_high
                                                                      )
             else:
@@ -1769,10 +1803,10 @@ def _plot(data_object,
         if (_plot_id.number_of_plots != 0):
             _options['Log x'] = _plot_id.options[-1]['Log x']
             _options['Log y'] = _plot_id.options[-1]['Log y']
-            
+
         ax = _plot_id.base_subplot
         _plot_id.plt_axis_list = [ax]
-        
+
         ysep = _options['Y separation']
         if (ysep is None):
             if (_plot_id.number_of_plots != 0):
@@ -1790,10 +1824,10 @@ def _plot(data_object,
         else:
             try:
                 ysep = float(ysep)
-            except ValueError:
-                raise ValueError("Invalid Y separation option.") 
+            except ValueError as exc:
+                raise ValueError("Invalid Y separation option.") from exc
         _options['Y separation'] = ysep
-                
+
         # Determining Y range
         if (axis_index == 0):
             if (_options['Log y']):
@@ -1811,7 +1845,7 @@ def _plot(data_object,
                 ax_min = np.nanmin(d.data[0,:])
                 ax_max = np.nanmax(d.data[-1,:]) + ysep * (d.data.shape[0]-1)
             signal_index = 0
-        # If overplot then taking min and max of this and previous plots    
+        # If overplot then taking min and max of this and previous plots
         if (_plot_id.number_of_plots != 0):
             ax_min = min(ax.get_ylim()[0], ax_min)
             ax_max = max(ax.get_ylim()[1], ax_max)
@@ -1819,12 +1853,6 @@ def _plot(data_object,
             ax_max += 1
         ax.set_ylim(ax_min, ax_max)
 
-        legend = []
-        if (signal_names is not None):
-            for i in range(d.shape[signal_index]):
-                legend.append(signal_names[i])
-            ax.legend(legend)
-         
         _plot_opt = _plot_options[0]
         for i in range(d.shape[signal_index]):
             index = [...] * 2
@@ -1849,15 +1877,31 @@ def _plot(data_object,
                 errorevery = int(round(len(x)/errorbars))
                 if (errorevery < 1):
                     errorevery = 1
-            if (plot_error):
-                ax.errorbar(x,y,xerr=xerr,yerr=yerr,errorevery=errorevery,**_plot_opt)
+
+            if (signal_names is not None):
+                label = signal_names[i]
             else:
-                ax.plot(x,y,**_plot_opt)
+                label = None
+
+            if (plot_error):
+                ax.errorbar(x,
+                            y,
+                            xerr=xerr,
+                            yerr=yerr,
+                            errorevery=errorevery,
+                            label=label,
+                            **_plot_opt)
+            else:
+                ax.plot(x, y, label=label, **_plot_opt)
+
+
+        if (signal_names is not None):
+            ax.legend()
 
         if (xrange is not None):
             ax.set_xlim(xrange[0],xrange[1])
         if (yrange is not None):
-            ax.set_ylim(yrange[0],yrange[1])        
+            ax.set_ylim(yrange[0],yrange[1])
         ax.set_xlabel(ax_list[0].title(language=language))
         ax.set_ylabel(ax_list[1].title(language=language))
         if (_options['Log x']):
@@ -1881,9 +1925,12 @@ def _plot(data_object,
                         title = newtitle
                 else:
                     title += ',...'
-                ax.set_title(title)        
-        _plot_id.plot_subtype = 0 # real multi xy plot 
+                ax.set_title(title)
+        _plot_id.plot_subtype = 0 # real multi xy plot
 
+    ######
+
+    # image or contour plot
     elif ((_plot_type == 'image') or (_plot_type == 'contour')):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
@@ -1894,9 +1941,9 @@ def _plot(data_object,
         # Checking for numeric type
         try:
             testdat = d.data[0,0] + 1
-        except TypeError:
-            raise TypeError("Image plot is applicable only to numeric data.")
-        
+        except TypeError as exc:
+            raise TypeError("Image plot is applicable only to numeric data.") from exc
+
         yrange = _options['Y range']
         if (yrange is not None):
             if ((type(yrange) is not list) or (len(yrange) != 2)):
@@ -1906,10 +1953,10 @@ def _plot(data_object,
         # Although the plot will be cleared the existing plot axes will be considered
         default_axes = [d.coordinates[0].unit.name, d.coordinates[1].unit.name, '__Data__']
         try:
-            pdd_list, ax_list = _plot_id.check_axes(d, 
-                                                    axes, 
-                                                    clear=_options['Clear'], 
-                                                    default_axes=default_axes, 
+            pdd_list, ax_list = _plot_id.check_axes(d,
+                                                    axes,
+                                                    clear=_options['Clear'],
+                                                    default_axes=default_axes,
                                                     force=_options['Force axes'])
         except ValueError as e:
             raise e
@@ -1917,15 +1964,16 @@ def _plot(data_object,
         # No overplotting is possible for this type of plot, erasing and restarting a Plot_ID
         if (not _options['Clear']):
             plt.sca(_plot_id.base_subplot)
-#            plt.subplot(_plot_id.base_subplot)  Changed 6 March, 2022
+            # plt.subplot(_plot_id.base_subplot)  Changed 6 March, 2022
             plt.cla()
-        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+        # gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
         _plot_id.plt_axis_list = []
-        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        # _plot_id.plt_axis_list.append(plt.figure(_plot_id.figure).add_subplot(gs[0,0]))
+        _plot_id.plt_axis_list.append(_plot_id.base_subplot)
         ax = _plot_id.plt_axis_list[0]
         # Interestingly figure is set to None, we regenerate it.
         _plot_id.base_subplot.figure = _plot_id.plt_axis_list[-1].figure
-        
+
         pdd_list[2].data_type = PddType.Data
         pdd_list[2].data_object = d
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
@@ -1963,13 +2011,13 @@ def _plot(data_object,
                 image_like = False
         else:
             image_like = False
-        if (image_like):        
-            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
-            ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
+        if (image_like):
+            xdata_range = coord_x.data_range(data_shape=d.shape)[0]
+            ydata_range = coord_y.data_range(data_shape=d.shape)[0]
         else:
             ydata,ydata_low,ydata_high = coord_y.data(data_shape=d.shape)
             xdata,xdata_low,xdata_high = coord_x.data(data_shape=d.shape)
-            
+
         if (zrange is None):
             vmin = np.nanmin(d.data)
             vmax = np.nanmax(d.data)
@@ -1979,7 +2027,7 @@ def _plot(data_object,
 
         if (vmax <= vmin):
             raise ValueError("Invalid z range.")
-            
+
         if (_options['Log z']):
             if (vmin <= 0):
                 raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
@@ -1988,22 +2036,22 @@ def _plot(data_object,
         else:
             norm = None
             locator = None
-                
+
         if (contour_levels is None):
             contour_levels = 255
-            
+
         _plot_opt = _plot_options[0]
 
         try:
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
                 cmap_obj.set_bad(_options['Nan color'])
-        except ValueError:
-            raise ValueError("Invalid color map.")
+        except ValueError as exc:
+            raise ValueError("Invalid color map.") from exc
 
         if (image_like):
-            try: 
-#                if (coord_x.dimension_list[0] == 0):
+            try:
+                # if (coord_x.dimension_list[0] == 0):
                 if (coord_x.dimension_list[0] < coord_y.dimension_list[0]):
                     im=np.clip(np.transpose(d.data),vmin,vmax)
                 else:
@@ -2011,7 +2059,7 @@ def _plot(data_object,
                 img = ax.imshow(im,extent=xdata_range + ydata_range,norm=norm,
                                 cmap=cmap_obj,vmin=vmin,aspect=_options['Aspect ratio'],interpolation=_options['Interpolation'],
                                 vmax=vmax,origin='lower',**_plot_opt)
-                del im                    
+                del im
             except Exception as e:
                 raise e
         else:
@@ -2028,7 +2076,7 @@ def _plot(data_object,
                                       origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
                 except Exception as e:
                     raise e
-                
+
         if (_options['Colorbar']):
             cbar = plt.colorbar(img,ax=ax)
             if (d.data_unit.unit is not None) and (d.data_unit.unit != ''):
@@ -2036,11 +2084,11 @@ def _plot(data_object,
             else:
                 unit_name = ''
             cbar.set_label(d.data_unit.name+' '+unit_name)
-        
+
         if (xrange is not None):
             ax.set_xlim(xrange[0],xrange[1])
         if (yrange is not None):
-            ax.set_ylim(yrange[0],yrange[1])        
+            ax.set_ylim(yrange[0],yrange[1])
         ax.set_xlabel(ax_list[0].title(language=language))
         ax.set_ylabel(ax_list[1].title(language=language))
         if (_options['Log x']):
@@ -2064,8 +2112,11 @@ def _plot(data_object,
                         title = newtitle
                 else:
                     title += ',...'
-        ax.set_title(title)   
-                
+        ax.set_title(title)
+
+    ######
+
+    # anim-image or anim-contour plot
     elif ((_plot_type == 'anim-image') or (_plot_type == 'anim-contour')):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
@@ -2076,9 +2127,9 @@ def _plot(data_object,
         # Checking for numeric type
         try:
             d.data[0,0] + 1
-        except TypeError:
-            raise TypeError("Animated image plot is applicable only to numeric data.")
-        
+        except TypeError as exc:
+            raise TypeError("Animated image plot is applicable only to numeric data.") from exc
+
         yrange = _options['Y range']
         if (yrange is not None):
             if ((type(yrange) is not list) or (len(yrange) != 2)):
@@ -2088,14 +2139,14 @@ def _plot(data_object,
         # Although the plot will be cleared the existing plot axes will be considered
         default_axes = [d.coordinates[0].unit.name, d.coordinates[1].unit.name,d.coordinates[2].unit.name,'__Data__']
         try:
-            pdd_list, ax_list = _plot_id.check_axes(d, 
-                                                    axes, 
-                                                    clear=_options['Clear'], 
-                                                    default_axes=default_axes, 
+            pdd_list, ax_list = _plot_id.check_axes(d,
+                                                    axes,
+                                                    clear=_options['Clear'],
+                                                    default_axes=default_axes,
                                                     force=_options['Force axes'])
         except ValueError as e:
             raise e
-        
+
         if (not ((pdd_list[3].data_type == PddType.Data) and (pdd_list[3].data_object == d))):
             raise ValueError("For anim-image/anim-contour plot only data can be plotted on the z axis.")
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
@@ -2106,7 +2157,7 @@ def _plot(data_object,
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
         coord_t = pdd_list[2].value
-        
+
         if (len(coord_t.dimension_list) != 1):
             raise ValueError("Time coordinate for anim-image/anim-contour plot should be changing only along one dimension.")
         try:
@@ -2121,7 +2172,7 @@ def _plot(data_object,
             bady = False
         if (badx or bady):
             raise ValueError("X and y coordinate for anim-image plot should not change in time dimension.")
-            
+
         index = [0] * 3
         index[coord_t.dimension_list[0]] = ...
         tdata = coord_t.data(data_shape=d.shape,index=index)[0].flatten()
@@ -2155,53 +2206,51 @@ def _plot(data_object,
                 image_like = False
         else:
             image_like = False
-        if (image_like and (_plot_type == 'anim-image')):        
-            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
-            ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
+        if (image_like and (_plot_type == 'anim-image')):
+            xdata_range = coord_x.data_range(data_shape=d.shape)[0]
+            ydata_range = coord_y.data_range(data_shape=d.shape)[0]
         else:
             index = [...]*3
             index[coord_t.dimension_list[0]] = 0
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
-            
+
         try:
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
                 cmap_obj.set_bad(_options['Nan color'])
-        except ValueError:
-            raise ValueError("Invalid color map.")
+        except ValueError as exc:
+            raise ValueError("Invalid color map.") from exc
 
-        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
-#        ax=plt.plot()
+        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
+        # ax=plt.plot()
         _plot_id.plt_axis_list = []
-#        _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
+        # _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
         _plot_id.plt_axis_list.append(_plot_id.base_subplot)
-#        plt.subplot(_plot_id.base_subplot)
-#        plt.plot()
-#        plt.cla()
-#        ax=plt.gca()
+        # plt.subplot(_plot_id.base_subplot)
+        # plt.plot()
+        # plt.cla()
+        # ax=plt.gca()
+        _plot_id.base_subplot.axis('off')
+
+        fig = plt.figure(_plot_id.figure)
+        ax_act = fig.add_subplot(gs[0,0])
+
         for it in range(len(tdata)):
-            # This is a hack here. The problem is, that the colorbar() call reduces the axes size
-            del gs
-            gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
-            plt.subplot(gs[0,0])
-#            plt.subplot(_plot_id.base_subplot)
-#            ax_act = _plot_id.base_subplot
-            ax_act = plt.subplot(gs[0,0])
             time_index = [slice(0,dim) for dim in d.data.shape]
             time_index[coord_t.dimension_list[0]] = it
             time_index = tuple(time_index)
-    
+
             if (zrange is None):
                 vmin = np.nanmin(d.data[time_index])
                 vmax = np.nanmax(d.data[time_index])
             else:
                 vmin = zrange[0]
                 vmax = zrange[1]
-    
+
             if (vmax <= vmin):
                 raise ValueError("Invalid z range.")
-                
+
             if (_options['Log z']):
                 if (vmin <= 0):
                     raise ValueError("z range[0] cannot be negative or zero for logarithmic scale.")
@@ -2210,12 +2259,12 @@ def _plot(data_object,
             else:
                 norm = None
                 locator = None                                                  #UNUSED
-                    
+
             if (contour_levels is None):
                 contour_levels = 255
-                
+
             _plot_opt = _plot_options[0]
-    
+
             if (image_like and (_plot_type == 'anim-image')):
                 try:
                     #if (coord_x.dimension_list[0] == 0):
@@ -2223,12 +2272,12 @@ def _plot(data_object,
                         im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     else:
                         im = np.clip(d.data[time_index],vmin,vmax)
-                        
-                    img = plt.imshow(im,extent=xdata_range + ydata_range,norm=norm,
-                                     cmap=cmap_obj,vmin=vmin,vmax=vmax,
-                                     aspect=_options['Aspect ratio'],
-                                     interpolation=_options['Interpolation'],
-                                     origin='lower',**_plot_opt)            
+
+                    img = ax_act.imshow(im,extent=xdata_range + ydata_range,norm=norm,
+                                        cmap=cmap_obj,vmin=vmin,vmax=vmax,
+                                        aspect=_options['Aspect ratio'],
+                                        interpolation=_options['Interpolation'],
+                                        origin='lower',**_plot_opt)
                     del im
                 except Exception as e:
                     raise e
@@ -2237,43 +2286,44 @@ def _plot(data_object,
                     xgrid, ygrid = flap.tools.grid_to_box(xdata,ydata)
                     im = np.clip(np.transpose(d.data[time_index]),vmin,vmax)
                     try:
-                        img = plt.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
-                                             vmax=vmax,**_plot_opt)
+                        img = ax_act.pcolormesh(xgrid,ygrid,im,norm=norm,cmap=cmap,vmin=vmin,
+                                                vmax=vmax,**_plot_opt)
                     except Exception as e:
                         raise e
                     del im
                 else:
                     try:
                         im = np.clip(d.data[time_index],vmin,vmax)
-                        img = plt.contourf(xdata,ydata,im,contour_levels,norm=norm,
-                                           origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
+                        img = ax_act.contourf(xdata,ydata,im,contour_levels,norm=norm,
+                                              origin='lower',cmap=cmap,vmin=vmin,vmax=vmax,**_plot_opt)
                         del im
                     except Exception as e:
                         raise e
-    
-            if (_options['Colorbar']):
-                cbar = plt.colorbar(img,ax=ax_act)
+
+            if (it==0) and (_options['Colorbar']):
+                # Only add the colorbar once
+                cbar = fig.colorbar(img)
                 if (d.data_unit.unit is not None) and (d.data_unit.unit != ''):
                     unit_name = '['+d.data_unit.unit+']'
                 else:
                     unit_name = ''
                 cbar.set_label(d.data_unit.name+' '+unit_name)
-            
+
             if (xrange is not None):
-                plt.xlim(xrange[0],xrange[1])
+                ax_act.set_xlim(xrange[0],xrange[1])
             if (yrange is not None):
-                plt.ylim(yrange[0],yrange[1])        
-            plt.xlabel(ax_list[0].title(language=language))
-            plt.ylabel(ax_list[1].title(language=language))
+                ax_act.set_ylim(yrange[0],yrange[1])
+            ax_act.set_xlabel(ax_list[0].title(language=language))
+            ax_act.set_ylabel(ax_list[1].title(language=language))
             if (_options['Log x']):
-                plt.xscale('log')
+                ax_act.set_xscale('log')
             if (_options['Log y']):
-                plt.yscale('log')
+                ax_act.set_yscale('log')
             if (d.exp_id is not None):
                 title =  str(d.exp_id)+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
             else:
                 title =  d.data_title+' @ '+coord_t.unit.name+'='+"{:10.5f}".format(tdata[it])+' ['+coord_t.unit.unit+']'
-            plt.title(title)
+            ax_act.set_title(title)
             plt.show(block=False)
             time.sleep(_options['Waittime'])
             plt.pause(0.001)
@@ -2290,17 +2340,23 @@ def _plot(data_object,
                 except NameError:
                     height = buf.shape[0]
                     width = buf.shape[1]
-                    video = cv2.VideoWriter(_options['Video file'],  
-                                            cv2.VideoWriter_fourcc(*video_codec_code), 
-                                            float(_options['Video framerate']), 
+                    video = cv2.VideoWriter(_options['Video file'],
+                                            cv2.VideoWriter_fourcc(*video_codec_code),
+                                            float(_options['Video framerate']),
                                             (width,height),
                                             isColor=True)
                 video.write(buf)
+            ax_act.clear()
+
         if ((_options['Video file'] is not None) and (cv2_presence is not False)):
             cv2.destroyAllWindows()
-            video.release()  
+            video.release()
             del video
-            
+
+
+    ######
+
+    # animation
     elif (_plot_type == 'animation'):
         if (d.data is None):
             raise ValueError("Cannot plot DataObject without data.")
@@ -2311,9 +2367,9 @@ def _plot(data_object,
         # Checking for numeric type
         try:
             d.data[0,0] += 1
-        except TypeError:
-            raise TypeError("Animated image plot is applicable only to numeric data.")
-        
+        except TypeError as exc:
+            raise TypeError("Animated image plot is applicable only to numeric data.") from exc
+
         yrange = _options['Y range']
         if (yrange is not None):
             if ((type(yrange) is not list) or (len(yrange) != 2)):
@@ -2324,14 +2380,14 @@ def _plot(data_object,
         # Although the plot will be cleared the existing plot axes will be considered
         default_axes = [d.coordinates[0].unit.name, d.coordinates[1].unit.name,d.coordinates[2].unit.name,'__Data__']
         try:
-            pdd_list, ax_list = _plot_id.check_axes(d, 
-                                                    axes, 
-                                                    clear=_options['Clear'], 
-                                                    default_axes=default_axes, 
+            pdd_list, ax_list = _plot_id.check_axes(d,
+                                                    axes,
+                                                    clear=_options['Clear'],
+                                                    default_axes=default_axes,
                                                     force=_options['Force axes'])
         except ValueError as e:
             raise e
-        
+
         if (not ((pdd_list[3].data_type == PddType.Data) and (pdd_list[3].data_object == d))):
             raise ValueError("For the animation plot only data can be plotted on the z axis.")
         if ((pdd_list[0].data_type != PddType.Coordinate) or (pdd_list[1].data_type != PddType.Coordinate)) :
@@ -2342,10 +2398,10 @@ def _plot(data_object,
         coord_x = pdd_list[0].value
         coord_y = pdd_list[1].value
         coord_t = pdd_list[2].value
-        
+
         if (len(coord_t.dimension_list) != 1):
             raise ValueError("Time coordinate for anim-image/anim-contour plot should be changing only along one dimension.")
-            
+
         index = [0] * 3
         index[coord_t.dimension_list[0]] = ...
         tdata = coord_t.data(data_shape=d.shape,index=index)[0].flatten()
@@ -2379,9 +2435,9 @@ def _plot(data_object,
                 image_like = False
         else:
             image_like = False
-        if (image_like):        
-            xdata_range = coord_x.data_range(data_shape=d.shape)[0]   
-            ydata_range = coord_y.data_range(data_shape=d.shape)[0]   
+        if (image_like):
+            xdata_range = coord_x.data_range(data_shape=d.shape)[0]
+            ydata_range = coord_y.data_range(data_shape=d.shape)[0]
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
         else:
@@ -2391,42 +2447,49 @@ def _plot(data_object,
             ydata_range = None
             ydata = np.squeeze(coord_y.data(data_shape=d.shape,index=index)[0])
             xdata = np.squeeze(coord_x.data(data_shape=d.shape,index=index)[0])
-            
+
         try:
             cmap_obj = plt.cm.get_cmap(cmap)
             if (_options['Nan color'] is not None):
                 cmap_obj.set_bad(_options['Nan color'])
-        except ValueError:
-            raise ValueError("Invalid color map.")
+        except ValueError as exc:
+            raise ValueError("Invalid color map.") from exc
 
-        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot)
+        gs = gridspec.GridSpecFromSubplotSpec(1, 1, subplot_spec=_plot_id.base_subplot.get_subplotspec())
 
         _plot_id.plt_axis_list = []
         _plot_id.plt_axis_list.append(plt.subplot(gs[0,0]))
 
         oargs=(ax_list, axes, d, xdata, ydata, tdata, xdata_range, ydata_range,
-               cmap_obj, contour_levels, 
-               coord_t, coord_x, coord_y, cmap, _options, 
-               xrange, yrange, zrange, image_like, 
+               cmap_obj, contour_levels,
+               coord_t, coord_x, coord_y, cmap, _options,
+               xrange, yrange, zrange, image_like,
                _plot_options, language, _plot_id, gs)
-        
+
         anim = PlotAnimation(*oargs)
         anim.animate()
-        
 
-#    print("------ plot finished, show() ----")
-    plt.show(block=False)       
- 
-#    if (_options['Clear']):
-#        _plot_id.number_of_plots = 0
-#        _plot_id.plot_data = []
-#        _plot_id.plt_axis_list = None            
-#    _plot_id.number_of_plots += 1
+    #####
+
+    # print("------ plot finished, show() ----")
+    # plt.show(block=False)
+
+    # if (_options['Clear']):
+    #     _plot_id.number_of_plots = 0
+    #     _plot_id.plot_data = []
+    #     _plot_id.plt_axis_list = None
+    # _plot_id.number_of_plots += 1
     _plot_id.axes = ax_list
     _plot_id.plot_data.append(pdd_list)
-    #Setting this one the default plot ID
+
+    # Setting this one the default plot ID
     _plot_id.options.append(_options)
     _plot_id.plot_type = _plot_type
     set_plot_id(_plot_id)
+
+
+    # Don't leave the animation figure open
+    if ((_plot_type == 'anim-image') or (_plot_type == 'anim-contour')):
+        plt.close(fig)
 
     return _plot_id

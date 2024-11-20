@@ -12,9 +12,9 @@ import flap.config
 import flap.coordinate
 
 
-def _stft(d, coordinate=None, options=None):
-    """Calculates the short-time Fourier transform of data `d`. See
-    `flap.DataObject.stft()` for more details.
+def _stft(d, coordinate=None, options=None):  # numpydoc ignore=SS05,PR01,RT01
+    """Calculate the short-time Fourier transform of data `d`. See
+    :func:`flap.data_object.DataObject.stft()` for more details.
     """
     default_options = {'window': 'hann',
                        'nperseg': 256,

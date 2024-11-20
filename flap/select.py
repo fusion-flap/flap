@@ -44,8 +44,8 @@ def select_intervals(object_descr,
 
         - If dictionary with a single key: {selection coordinate:
           description}). Key is a coordinate name which can be different from
-          the calculation coordinate.  Description can be `flap.Intervals`,
-          `flap.DataObject` or a list of two numbers. If it is a data object
+          the calculation coordinate.  Description can be :class:`.Intervals`,
+          :class:`.DataObject` or a list of two numbers. If it is a data object
           with data name identical to the coordinate, the error ranges of the
           data object will be used for interval. If the data name is not the
           same as coordinate, a coordinate with the same name will be searched
@@ -68,7 +68,7 @@ def select_intervals(object_descr,
               - 'Center': Select center of interval.
               - None: No interactive selection.
 
-            - 'Length' (default=None): 
+            - 'Length' (default=None):
 
                 - float: Length of intervals.
 
@@ -81,21 +81,21 @@ def select_intervals(object_descr,
 
                   Possible keys and values:
 
-                  - 'Type': 
+                  - 'Type':
 
                     - 'Maximum' or 'Minimum': Will look for signal pieces
                       above/below threshold and calculate maximum place of signal in
                       this piece.
                     - 'Max-weight' or 'Min-weight': Same as Maximum and Minimum
                       but selects center of gravity for signal piece.
-                
+
                     In each of the above cases the interval will be 'Length' long
                     around the event.
 
                     - 'Above', 'Below': The intervals will be where the signal is
-                      above or below the threshold. 
+                      above or below the threshold.
 
-                  - 'Start delay', 'End delay': 
+                  - 'Start delay', 'End delay':
 
                     - For the Above and Below events the start and end delay of
                       the interval in the coordinate units.
@@ -345,7 +345,7 @@ def select_intervals(object_descr,
                 end_coord += list(coord_act[ind_off] + end_delay)
                 selected_n += len(ind_on)
                 y_coord += [ev_thr]*len(ind_on)
-            else:    
+            else:
                 for i_event in range(len(ind_on)):
                     if (ev_type == 'Maximum'):
                         act_ev_coord = coord_act[np.argmax(data_act[ind_on[i_event]

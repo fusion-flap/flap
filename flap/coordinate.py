@@ -87,7 +87,7 @@ class Intervals:
                 raise ValueError("Non-numeric type in selection interval.")
 
     def regular(self):
-        """Returns True if the interval is regular, otherwise returns False.
+        """Return True if the interval is regular, otherwise returns False.
 
         Returns
         -------
@@ -101,7 +101,7 @@ class Intervals:
     def interval_limits(self,limits=None,partial_intervals=False):
         """Return the range lower and upper limits as two numpy arrays. Limit
         the ranges within argument limits.
-        
+
         Parameters
         ----------
         limits : array_like, optional, default=None
@@ -243,7 +243,7 @@ class Unit:
         self.unit = unit
 
     def title(self,language='EN',complex_txt=None,new_unit=None):
-        """Returns a title string to be used in plotting.
+        """Return a title string to be used in plotting.
 
         Parameters
         ----------
@@ -265,7 +265,7 @@ class Unit:
         -------
         str
             The title string.
-        """        
+        """
         if (language == 'EN'):
             if ((self.unit is None) or (self.unit == '')):
                 unit_txt = ' [a.u.]'
@@ -278,12 +278,12 @@ class Unit:
                 if (complex_txt == [0,0]):
                     if (self.name is None or (self.name == '')):
                         txt = 'Amplitude ' + unit_txt
-                    else:    
+                    else:
                         txt = 'Amplitude of ' + self.name + unit_txt
                 elif (complex_txt == [0,1]):
                     if (self.name is None or (self.name == '')):
                         txt = 'Phase [rad]'
-                    else:    
+                    else:
                         txt = 'Phase of ' + self.name + ' [rad]'
                 elif (complex_txt == [1,0]):
                     if (self.name is None or (self.name == '')):
@@ -340,17 +340,17 @@ class Coordinate:
     The coordinate sample space is a rectangular equidistant point matrix, with
     equal steps in each dimension.  For dimension ``i``, the sample index spans
     ``0 ... n-1`` if ``shape[i] == n``.
-    
+
     The sample space in this coordinate description does not necessarily match
     the shape of any sub-matrix of the data object. If the shape is different
     then interpolation is done assuming the coordinate of the first(last) point
     of the coordinate matrix is the coordinate of the first(last) data point.
-    
+
     A coordinate can be anything described by name and unit.  Standard
     coordinates: 'Time', 'Channel', 'Channel number', 'Device_x', 'Device_y',
     'Device_z', 'Device_R', 'Device_Z', 'Device_phi', 'Flux_r', 'Flux_theta',
     'Flux_phi', 'Frequency', 'Time lag'.
-    
+
     The ranges and start-step pair of parameters are alternatives.
 
     Parameters
@@ -373,7 +373,7 @@ class Coordinate:
     step : list of float, optional, default=None
         Steps of the coordinate mapping. One-dimensional list with the same
         number of elements as `dimension_list`. Only valid if the coordinate
-        mode is equidistant.  
+        mode is equidistant.
     c_range : array_like, optional, default=None
         Used for specifying a range when reading data.
     values, value_index : array_like, optional, default=None
@@ -464,12 +464,12 @@ class Coordinate:
         kind = np.array([_start]).dtype.kind
         if ((kind != 'u') and (kind != 'i') and (kind != 'f') and (kind != 'c')):
             raise TypeError("Invalid coordinate start value.")
-        self.__start = _start       
+        self.__start = _start
 
     @property
     def step(self):
         """Steps of the coordinate mapping. Only valid if the coordinate mode is
-        equidistant.  
+        equidistant.
 
         Returns
         -------
@@ -576,7 +576,7 @@ class Coordinate:
                 c1_step = [c1.step]
             else:
                 c1_step = c1.step
-            minstep = math.fabs(self_step[0])    
+            minstep = math.fabs(self_step[0])
             for i in range(len(self_step)):
                 if (math.fabs(self_step[i] - c1_step[i]) / math.fabs(self_step[i]) > 0.001):
                     return False
@@ -612,7 +612,7 @@ class Coordinate:
                         if (np.nonzero(self.value_ranges[1].flatten() != c1.value_ranges[1].flatten())[0].size != 0):
                             return False
         return True
-                    
+
     def non_interpol(self, data_shape):
         """Return True if the shape of the coordinate description is the same as
         the sub-data-array for which it applies and `self.value_index` is None.
@@ -623,7 +623,7 @@ class Coordinate:
         ----------
         data_shape : array_like
             The shape of the sub-data-array.
-        
+
         Returns
         -------
         bool
@@ -648,8 +648,8 @@ class Coordinate:
 
     def dtype(self):
         """Return the data type of the coordinate.
-        
-        Returns standard Python types: str, int, float, complex, boolean or object.
+
+        Return standard Python types: str, int, float, complex, boolean or object.
 
         Returns
         -------
@@ -692,7 +692,7 @@ class Coordinate:
                 return type(self.values)
 
     def isnumeric(self):
-        """Returns whether the data type is numeric.
+        """Return whether the data type is numeric.
 
         Returns
         -------
@@ -705,7 +705,7 @@ class Coordinate:
             return False
 
     def string_subtype(self):
-        """Returns the type of the values if the coordinate type is str.
+        """Return the type of the values if the coordinate type is str.
         Otherwise returns None.
 
         Returns
@@ -755,31 +755,39 @@ class Coordinate:
         return nochange_list
 
     def data(self, data_shape=None, index=None, options=None):
-        """Returns the coordinates, low and high limits for a sub-array of the
+        """Return the coordinates, low and high limits for a sub-array of the
         data array in a DataObject.
 
         Parameters
         ----------
+        data_shape : array_like, optional, default=None
+            The shape of the data array (without slicing) for which coordinates
+            are requested.
         index : list | tuple of int, optional, default=None
             Describes the elements in `DataObject.data` for which the
             coordinates are required. The length of the array should be
             identical to the number of dimensions of the data array. Elements
             can be a mixture of numbers, slice objects, lists, numpy arrays,
             integer iterators and ellipses.
+
             Examples for 3D array:
+
             - ``(...,0,0)``: coordinates of the elements in the first row of the
               data array
+
             - ``(slice(2,5),2,...)``
-        data_shape : array_like, optional, default=None
-            The shape of the data array (without slicing) for which coordinates
-            are requested.
+
         options : dict, optional, default=None
             Dictionary with options for processing:
+
             - 'Interpolation' (default='Linear'):
-                - 'Linear': For non-equidistant axis, when
-                  values shape is different from data shape)
-            - 'Change only' (default=False): 
-                - True (return only the data for those dimensions where this
+
+              - 'Linear': For non-equidistant axis, when
+                values shape is different from data shape)
+
+            - 'Change only' (default=False):
+
+              - True (return only the data for those dimensions where this
                 coordinate changes. E.g. if it changes only along one dimension
                 the output array will have 1 element in all other dimensions.)
 
@@ -789,8 +797,7 @@ class Coordinate:
             Values and the respective low and high range values. The low and
             high values are the absolute values not, the difference from values.
         """
-        default_options = {'Interpolation': 'Linear',
-                           'Change only': False}
+        default_options = {'Interpolation': 'Linear', 'Change only': False}
 
         _options = flap.config.merge_options(default_options, options)
 
@@ -806,10 +813,10 @@ class Coordinate:
         if (_options['Change only']):
             if (self.change_dimensions() is []):
                 index = ...
-            else:    
+            else:
                 index = [0] * len(data_shape)
                 for i in self.change_dimensions():
-                    index[i] = ...            
+                    index[i] = ...
         if (index is None) or (index is Ellipsis):
             _index = [...] * len(data_shape)
         else:
@@ -818,8 +825,7 @@ class Coordinate:
             _index = [_index]
 
         if (len(_index) != len(_data_shape)):
-            raise \
-                ValueError("Incompatible data_shape and index arguments in flap.Coordinate.data()")
+            raise ValueError("Incompatible data_shape and index arguments in flap.Coordinate.data()")
 
         # Determining the shape of the output array and the indices for selecting the output elements
         # from the data array (This will be needed for selecting the coordinates.)
@@ -889,9 +895,9 @@ class Coordinate:
         # Selecting those dimensions in _index where the coordinate changes
         # This is an index into the value array of the coordinate
         value_index = [out_index[di] for di in self.dimension_list]
-#        value_index = []
-#        for di in self.dimension_list:
-#            value_index.append(out_index[di])
+        #  value_index = []
+        #  for di in self.dimension_list:
+        #      value_index.append(out_index[di])
         # This will be the shape of the coordinate value matrix in the dimension_list
         # subspace of the output array with out_shape
         value_mx_shape = tuple([out_shape[i] for i in self.dimension_list])
@@ -916,8 +922,8 @@ class Coordinate:
                 value_mx_tmp = np.zeros(tuple(shape),dtype=value_mx.dtype)
                 # Creating the coordinate dependency and putting it into value_mx_tmp
                 x = value_index[i]
-#                if (x.dtype is not np.dtype(np.float64)):
-#                    x = x.astype(float)
+                # if (x.dtype is not np.dtype(np.float64)):
+                #     x = x.astype(float)
                 try:
                     st = self.step[i]
                 except (TypeError, IndexError):
@@ -989,7 +995,7 @@ class Coordinate:
         return out_coord, out_coord_low, out_coord_high
 
     def data_range(self, data_shape=None):
-        """Returns the data range and the data range with errors for the
+        """Return the data range and the data range with errors for the
         coordinate.
 
         Parameters
