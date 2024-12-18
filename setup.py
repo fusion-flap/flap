@@ -8,7 +8,7 @@ setup(
     license='MIT',
     description='Fusion Library of Analysis Programs. This package is intended for analysing large multidimensional datasets.',
     author='Sándor Zoletnik',
-    author_email='sandor.zoletnik@ek-cer.hu',
+    author_email='sandor.zoletnik@ek.hun-ren.hu',
     url='https://github.com/fusion-flap/flap',
     keywords=[
         'fusion',

@@ -1,10 +1,8 @@
 # FLAP Version 1.21 User's Guide
 
-S. Zoletnik, M. Vécsei, Centre for Energy Research
+S. Zoletnik, D. Takács, HUN-REN Centre for Energy Research (<https://www.ek.hun-ren.hu/en/home/>)
 
-M. Vavrik, BME NTI
-
-zoletnik.sandor@ek-cer.hu
+zoletnik.sandor@ek.hun-ren.hu
 
 Document version 1.72, 28 October, 2024
 

@@ -809,8 +809,9 @@ def key_pressed():
     if (keypressed is not None):
         return True
 
-def wait_press(flag=False):
+def wait_press(flag=True):
     if (flag):
+        show_plot()
         input("Press Enter to continue...")
 
 def wait_for_key(flag=False):

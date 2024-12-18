@@ -319,7 +319,7 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>make<span class="w"> </span>html
 </pre></div>
 </div>
-<p>from the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder under Linux, or using the <code class="docutils literal notranslate"><span class="pre">make.bat</span></code> file under Windows.</p>
+<p>from the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder under Linux, or using the <code class="docutils literal notranslate"><span class="pre">make.bat</span></code> file under Windows. To generate the documentatation on windows run <code class="docutils literal notranslate"><span class="pre">Miniforge</span> <span class="pre">prompt</span></code> go the the <code class="docutils literal notranslate"><span class="pre">docs</span></code> directory and switch to the flap environment.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>There is no <code class="docutils literal notranslate"><span class="pre">make</span></code> by default on Windows, so the <code class="docutils literal notranslate"><span class="pre">make.bat</span></code> implements the functions of both <code class="docutils literal notranslate"><span class="pre">make</span></code> and <code class="docutils literal notranslate"><span class="pre">Makefile</span></code> in a rudimentary way. The <code class="docutils literal notranslate"><span class="pre">make.bat</span></code> must be edited parallel to the <code class="docutils literal notranslate"><span class="pre">Makefile</span></code>, as they are completely independent.</p>
@@ -327,6 +327,10 @@
 <p>The <code class="docutils literal notranslate"><span class="pre">make</span></code> script generates the API reference using the <code class="docutils literal notranslate"><span class="pre">sphinx-apidoc</span></code> extension, copies this, the <code class="docutils literal notranslate"><span class="pre">docs/content/</span></code> and the <code class="docutils literal notranslate"><span class="pre">examples/</span></code> folder to the <code class="docutils literal notranslate"><span class="pre">docs/generated/</span></code> folder, and then runs <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> to get the HTML output which is placed in <code class="docutils literal notranslate"><span class="pre">docs/build/</span></code>. For more details, see <code class="docutils literal notranslate"><span class="pre">docs/Makefile</span></code>.</p>
 <p>To clean the already generated files, run</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>make<span class="w"> </span>clean
+</pre></div>
+</div>
+<p>To generate the html documentation, run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>make<span class="w"> </span>html
 </pre></div>
 </div>
 <p>which will delete everything in the <code class="docutils literal notranslate"><span class="pre">docs/generated</span></code> and <code class="docutils literal notranslate"><span class="pre">docs/build</span></code> folder.</p>

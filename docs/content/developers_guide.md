@@ -49,7 +49,7 @@ Generating the documentation is done by running
 $ make html
 ```
 
-from the `docs/` folder under Linux, or using the `make.bat` file under Windows. 
+from the `docs/` folder under Linux, or using the `make.bat` file under Windows. To generate the documentatation on windows run `Miniforge prompt` go the the `docs` directory and switch to the flap environment.
 
 :::{Note}
 There is no `make` by default on Windows, so the `make.bat` implements the functions of both `make` and `Makefile` in a rudimentary way. The `make.bat` must be edited parallel to the `Makefile`, as they are completely independent.
@@ -63,6 +63,10 @@ To clean the already generated files, run
 $ make clean
 ```
 
+To generate the html documentation, run
+```bash
+$ make html
+```
 which will delete everything in the `docs/generated` and `docs/build` folder.
 
 When the documentation is generated, Sphinx calls the `numpydoc` extension to check the docstrings\' syntax, and raises warnings appropriately.

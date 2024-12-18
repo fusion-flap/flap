@@ -38,6 +38,19 @@ Navigate to the newly created ``flap`` folder:
 
 Before installing FLAP, first set up an Anaconda/Mamba environment using the appropriate, platform-specific ``.yml`` file provided for either Linux or Windows.
 
+.. note:: 
+
+   **Conda and Mamba**
+   
+   Conda is the environment handling tool in `Anaconda  <https://anaconda.org/>`_. From 2024 conda is free only for enterprises below 200 staff. Mamba is a free
+   alternative providing the same functionality. 
+   
+   Conda can be downloaded and installed from `anaconda.org <https://anaconda.org/>`_.
+   
+   Mamba is contained in Miniforge, which can be downloaded from `conda-forge <https://conda-forge.org/download/>`_. Download the package for your operating system and 
+   follow the instructions for installation.
+   
+
 For example, on Windows, from the Anaconda Prompt/Miniforge Prompt run(``mamba`` should be substituted for ``conda`` if Mamba is used):
 
 .. code:: bash
