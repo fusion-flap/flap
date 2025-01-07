@@ -19,7 +19,7 @@ setup(
         'ipykernel >= 6.29.5',
         'lxml >= 5.3.0',
         'matplotlib >= 3.9.2',
-        'numpy >= 2.1.3',
+        'numpy',
         'numpydoc >= 1.8.0',
         'opencv-python >= 4.10.0',
         'pandas >= 2.2.3',
