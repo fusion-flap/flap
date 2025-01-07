@@ -79,6 +79,9 @@ Install the package:
 
    This installs FLAP in such a way that any changes made in the source code are instantly reflected in any software using it. (This is similar to adding the package directory to your ``$PATH``, but more robust.)
 
+.. tip::
+   The default environment uses ``numpy >= 2.0``. In case this is incompatible with some additional library needed, ``*_oldnumpy.yml`` files are also available in the ``docs/`` folder, which can be used to create environments with an older version of numpy.
+
 FLAP is now ready to use!
 
 
