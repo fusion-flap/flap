@@ -9,7 +9,7 @@
         <title>Developer’s Guide - FLAP documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/myst_sphinx_gallery.css?v=92de7a9e" />
@@ -279,7 +279,7 @@
 <h1>Developer’s Guide<a class="headerlink" href="#developer-s-guide" title="Link to this heading">¶</a></h1>
 <blockquote>
 <div><p>G. Cseh, D. M. Takács, Centre for Energy Research</p>
-<p>2024 October</p>
+<p>2025 January</p>
 </div></blockquote>
 <p>A few useful notes regarding development and documentation are collected here for reference.</p>
 <section id="notes-on-writing-documentation">
@@ -363,6 +363,11 @@
 </div>
 </div>
 </section>
+</section>
+<section id="publishing-documentation">
+<h2>Publishing documentation<a class="headerlink" href="#publishing-documentation" title="Link to this heading">¶</a></h2>
+<p>After the documentation has been generated, and it is committed into the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch on GitHub, the HTML site is published on GitHub Pages automatically by a GitHub Action defined in <code class="docutils literal notranslate"><span class="pre">.github/workflows/static.yml</span></code>.</p>
+<p>The published site is available at: <a class="reference external" href="https://fusion-flap.github.io/flap/index.html">https://fusion-flap.github.io/flap/index.html</a></p>
 </section>
 <section id="style-guide">
 <h2>Style guide<a class="headerlink" href="#style-guide" title="Link to this heading">¶</a></h2>
@@ -628,6 +633,7 @@ datefmt=
 <li><a class="reference internal" href="#adding-examples">Adding examples</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#publishing-documentation">Publishing documentation</a></li>
 <li><a class="reference internal" href="#style-guide">Style guide</a><ul>
 <li><a class="reference internal" href="#extensions-packages-for-style-checking">Extensions/packages for style checking</a><ul>
 <li><a class="reference internal" href="#python-extension-for-visual-studio-code">Python extension for Visual Studio Code</a></li>
