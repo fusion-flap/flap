@@ -6015,7 +6015,7 @@ def ccf(object_name,
     object_name : str
         Name identifying the data object in `flap_storage`.
     ref : flap.DataObject, optional, default=None
-        Reference to use for CPSD calculation. If None, `object_name` is used as
+        Reference to use for CCF calculation. If None, `object_name` is used as
         reference.
     exp_id : str, optional, default='*'
         Experiment ID. Supports extended Unix regular expressions.
