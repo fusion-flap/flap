@@ -2,7 +2,7 @@
 
 > G. Cseh, D. M. Takács, Centre for Energy Research
 >
-> 2024 October
+> 2025 January
 
 A few useful notes regarding development and documentation are collected here for reference.
 
@@ -102,6 +102,11 @@ Introduction text of the example.[^download]
 [^download]This notebook can be downloaded as **{nb-download}`name_of_notebook.ipynb`**.
 ```
 :::
+
+## Publishing documentation
+After the documentation has been generated, and it is committed into the ``master`` branch on GitHub, the HTML site is published on GitHub Pages automatically by a GitHub Action defined in ``.github/workflows/static.yml``.
+
+The published site is available at: <https://fusion-flap.github.io/flap/index.html>
 
 ## Style guide
 
