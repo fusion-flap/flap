@@ -3,13 +3,8 @@
 # FLAP - Fusion Library of Analysis Programs
 This package is intended for analysing large multidimensional datasets.
 
-## Table of Contents
-- [Install](#install)
-- [Resources](#resources)
+## Installation
+Installation instructions: [https://fusion-flap.github.io/flap/#install](https://fusion-flap.github.io/flap/#install)
 
-## Install
-```bash
-$ python setup.py install
-```
-## Resources
-[Link to User's Guide](https://github.com/fusion-flap/flap/blob/master/docs/FLAP_V1.11_Users_Guide_v1.71.pdf)
+## Additional resources
+Documentation is available at: [https://fusion-flap.github.io/flap/](https://fusion-flap.github.io/flap/)
