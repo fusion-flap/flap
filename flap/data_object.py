@@ -4159,8 +4159,12 @@ class DataObject:
         else:
             if peak_width_samples.shape == (1,):
                 peak_width_samples = peak_width_samples[0]
+            elif peak_width_samples.ndim > 1:
+                peak_width_samples = np.squeeze(peak_width_samples, d_i)
             if peak_amplitudes.shape == (1,):
                 peak_amplitudes = peak_amplitudes[0]
+            elif peak_amplitudes.ndim > 1:
+                peak_amplitudes = np.squeeze(peak_amplitudes, d_i)
 
             return d, peak_width_samples, peak_amplitudes
 
