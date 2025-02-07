@@ -15,6 +15,7 @@ import copy
 import math
 import io
 import pickle
+import itertools
 #import time
 #from .tools import *
 #from .coordinate import *
@@ -25,6 +26,7 @@ import flap.config
 from .spectral_analysis import _apsd, _cpsd, _trend_removal, _ccf
 from .plot import _plot
 from .time_frequency_analysis import _stft
+from .denoising import remove_sharp_peaks_func
 
 PICKLE_PROTOCOL = 3
 
@@ -3917,6 +3919,255 @@ class DataObject:
                                                 )
         return d
 
+    def remove_sharp_peaks(self, coordinate=None, options=None):
+        """Remove sharp peaks with only a few samples of duration from the data,
+        e.g. due to neutron/gamma noise affecting APDCAM.
+
+        Peaks are detected by looking for sharp (as specified by the
+        `diff_limit` option) rising and falling edges in the signal, within a
+        window of maximum `max_width_samples` samples. Detected peaks can be
+        removed from the signal by interpolation (see `remove_peaks` below).
+
+        By default, only a single data object is returned, with the number of
+        removed/detected peaks and number of samples belonging to peaks added to
+        the `info` field of the data object if `return_num_detected_peaks` is
+        True. The keys added are: 'num_peak_samples_detected',
+        'num_peaks_detected', 'num_peak_samples_removed', 'num_peaks_removed'.
+        
+        If `return_loc_detected_samples` is set to True, an additional
+        coordinate named 'Peak detected' is added to the data object, indicating
+        whether a sample belongs to a detected peak.
+
+        If `return_peak_shapes` is set to True, the center times and the shapes
+        (width, amplitude) of the detected peaks are also returned as two
+        additional data objects (separately for each time series, if
+        applicable). These data objects contain the center times of the peaks as
+        a non-equidistant coordinate axis, with the width/amplitude of the peaks
+        as the data.
+
+        Parameters
+        ----------
+        coordinate : str, optional, default=None
+            The name of the coordinate along which to remove peaks. If not set,
+            a coordinate named 'Time' in the DataObject will be used, if there
+            is one. Must be equidistant and change along one dimension only. If
+            the data changes along other dimensions as well, the peaks will be
+            detected/removed separately for each slice along the other
+            dimensions.
+
+        options : dict, optional, default=None
+            Options for peak removal. Possible keys and values:
+
+            - 'max_width_samples':
+
+              - int: Maximum width of a peak in samples.
+
+            - 'diff_limit':
+
+              - The derivative limit for the detection of sharp rising/falling
+                edges of peaks. Calculated in units of (signal units) / (time
+                units).
+
+            - 'return_loc_detected_samples' (default=False):
+
+              - bool: Whether to return an additional coordinate axis
+                indicating if a sample belongs to a detected/removed peak.
+
+            - 'return_num_detected_peaks' (default=False):
+
+              - bool: Whether to return the number of detected peaks.
+
+            - 'return_peak_shapes' (default=False):
+
+              - bool: Whether to return the widths and amplitudes of detected
+                peaks as two additional data objects.
+
+            - 'remove_peaks' (default=True):
+
+              - bool: Whether to remove the detected peaks.
+
+            - 'interpolation' (default='linear'):
+
+              - 'linear' : Interpolation method for removing peaks.
+        
+        Returns
+        -------
+        flap.DataObject | (flap.DataObject, array of flap.DataObject, array of flap.DataObject)
+            If `return_peak_shapes` is False, a single data object is returned
+            (with the peaks removed, if requested).
+            If `return_peak_shapes` is True, a tuple of three data objects is
+            returned: besides the one returned by default, the second containing
+            the peak widths, and the third containing the peak amplitudes.
+        """
+        default_options = {
+            'max_width_samples': None,
+            'diff_limit': None,
+            'return_loc_detected_samples': False,
+            'return_num_detected_peaks': False,
+            'return_peak_shapes': False,
+            'remove_peaks': True,
+            'interpolation': 'linear'
+        }
+
+        _options = flap.config.merge_options(
+            default_options,
+            options,
+            data_source=self.data_source,
+            section='Denoising'
+        )
+
+        if (coordinate is None):
+            try:
+                d_time, _, _ = self.coordinate('Time')
+                coordinate = 'Time'
+            except ValueError:
+                raise ValueError("No coordinate is given and no Time coordinate found.")
+        else:
+            d_time, _, _ = self.coordinate(coordinate)
+        
+        coord_obj = self.get_coordinate_object(coordinate)
+
+        if (len(coord_obj.dimension_list) != 1):
+            raise ValueError("Peak removal is possible only along coordinates changing along one dimension.")
+        
+        if (not coord_obj.mode.equidistant):
+            raise ValueError("Peak removal is possible only along equidistant coordinates.")
+        
+        dt = coord_obj.step[0]
+
+        # All dimensions except the one defined by `coordinate` must be iterated
+        # over to remove peaks separately for each slice.
+
+        terms = []
+
+        shape_along_collapsed = tuple()
+
+        d_i = coord_obj.dimension_list[0]
+
+        for s_i, s in enumerate(self.data.shape):
+            if s_i == d_i:
+                terms.append([slice(None)])
+                shape_along_collapsed += (1, )
+            else:
+                terms.append(range(s))
+                shape_along_collapsed += (s, )
+
+        processed_signal = np.copy(self.data)
+
+        num_peak_samples_detected = np.full(shape_along_collapsed, -1, dtype='int')
+        num_peaks_detected = np.full(shape_along_collapsed, -1, dtype='int')
+        num_peak_samples_removed = np.full(shape_along_collapsed, -1, dtype='int')
+        num_peaks_removed = np.full(shape_along_collapsed, -1, dtype='int')
+
+        if _options['return_loc_detected_samples']:
+            peak_detected = np.full_like(self.data, 0, dtype=np.int8)
+
+        if _options['return_peak_shapes']:
+            peak_width_samples = np.zeros(shape_along_collapsed, object)
+            peak_amplitudes = np.zeros(shape_along_collapsed, object)
+
+        for sl in itertools.product(*terms):
+            returned_data = remove_sharp_peaks_func(
+                signal=self.data[sl],
+                time=d_time[sl],
+                max_width_samples=_options['max_width_samples'],
+                diff_limit=_options['diff_limit'],
+                dt=dt,
+                return_peak_center_times=_options['return_peak_shapes'],
+                return_peak_width_samples=_options['return_peak_shapes'] or _options['return_num_detected_peaks'],  # cheapest to calculate
+                return_peak_amplitudes=_options['return_peak_shapes'],
+                remove_peaks=_options['remove_peaks'],
+                interpolation=_options['interpolation']
+            )
+
+            if _options['remove_peaks']:
+                if isinstance(returned_data, tuple):
+                    processed_signal[sl] = returned_data[0]
+                else:
+                    processed_signal[sl] = returned_data
+
+            if _options['return_num_detected_peaks']:
+                num_peak_samples_detected[sl] = returned_data[1]
+                num_peaks_detected[sl] = len(returned_data[3])
+                if _options['remove_peaks']:
+                    num_peak_samples_removed[sl] = returned_data[1]
+                    num_peaks_removed[sl] = len(returned_data[3])
+
+            if _options['return_loc_detected_samples']:
+                peak_detected[sl] = returned_data[2]
+
+            if _options['return_peak_shapes']:
+                peak_shape_coords = flap.Coordinate(
+                    name=coord_obj.unit.name,
+                    unit=coord_obj.unit.unit,
+                    mode=flap.CoordinateMode(equidistant=False),
+                    shape=[len(returned_data[3])],
+                    values=returned_data[3],
+                    dimension_list=[0],
+                )
+
+                peak_width_samples_i = returned_data[4]
+                peak_amplitudes_i = returned_data[5]
+
+                peak_width_samples[sl] = flap.DataObject(
+                    data_array=peak_width_samples_i,
+                    data_unit=flap.coordinate.Unit(name='Samples', unit='[n.a.]'),
+                    coordinates=peak_shape_coords,
+                    exp_id=self.exp_id
+                )
+
+                peak_amplitudes[sl] = flap.DataObject(
+                    data_array=peak_amplitudes_i,
+                    data_unit=self.data_unit,
+                    coordinates=peak_shape_coords,
+                    exp_id=self.exp_id
+                )
+
+        d = copy.deepcopy(self)
+
+        if _options['remove_peaks']:
+            d.data = processed_signal
+
+        if self.info is None:
+            new_info = {}
+        else:
+            new_info = dict(self.info) # not a reference!
+
+        if _options['return_num_detected_peaks']:
+            new_info['num_peak_samples_detected'] = np.atleast_1d(np.squeeze(num_peak_samples_detected, d_i))
+            new_info['num_peaks_detected'] = np.atleast_1d(np.squeeze(num_peaks_detected, d_i))
+            if _options['remove_peaks']:
+                new_info['num_peak_samples_removed'] = np.atleast_1d(np.squeeze(num_peak_samples_removed, d_i))
+                new_info['num_peaks_removed'] = np.atleast_1d(np.squeeze(num_peaks_removed, d_i))
+
+        d.info = new_info
+
+        if _options['return_loc_detected_samples']:
+            pd_coord = flap.Coordinate(
+                name='Peak detected',
+                unit='Bool',
+                mode=flap.CoordinateMode(equidistant=False),
+                shape=peak_detected.shape,
+                values=np.asarray(peak_detected, np.int8),
+                dimension_list=list(range(len(peak_detected.shape)))
+            )
+            d.coordinates.append(pd_coord)
+        
+
+        if not _options['return_peak_shapes']:
+            return d
+        else:
+            if peak_width_samples.shape == (1,):
+                peak_width_samples = peak_width_samples[0]
+            elif peak_width_samples.ndim > 1:
+                peak_width_samples = np.squeeze(peak_width_samples, d_i)
+            if peak_amplitudes.shape == (1,):
+                peak_amplitudes = peak_amplitudes[0]
+            elif peak_amplitudes.ndim > 1:
+                peak_amplitudes = np.squeeze(peak_amplitudes, d_i)
+
+            return d, peak_width_samples, peak_amplitudes
+
     def pdf(self, coordinate=None, intervals=None, options=None):
         """
         Amplitude distribution function (PDF) of data.
@@ -6325,6 +6576,117 @@ def filter_data(object_name,
         except Exception as e:
             raise e
     return ds
+
+def remove_sharp_peaks(object_name,
+                       exp_id='*',
+                       coordinate=None,
+                       options=None,
+                       output_name=None):
+    """Remove sharp peaks with only a few samples of duration from the data,
+    e.g. due to neutron/gamma noise affecting APDCAM.
+
+    Peaks are detected by looking for sharp (as specified by the
+    `diff_limit` option) rising and falling edges in the signal, within a
+    window of maximum `max_width_samples` samples. Detected peaks can be
+    removed from the signal by interpolation (see `remove_peaks` below).
+
+    By default, only a single data object is returned, with the number of
+    removed/detected peaks and number of samples belonging to peaks added
+    to the `info` field of the data object if `return_num_detected_peaks` is
+    True. The keys added are: 'num_peak_samples_detected', 'num_peaks_detected',
+    'num_peak_samples_removed', 'num_peaks_removed'.
+    
+    If `return_loc_detected_samples` is set to True, an additional coordinate
+    named 'Peak detected' is added to the data object, indicating whether a
+    sample belongs to a detected peak.
+
+    If `return_peak_shapes` is set to True, the center times and the shapes
+    (width, amplitude) of the detected peaks are also returned as two
+    additional data objects (separately for each time series, if
+    applicable). These data objects contain the center times of the peaks as
+    a non-equidistant coordinate axis, with the width/amplitude of the peaks
+    as the data.
+
+    Parameters
+    ----------
+    object_name : str
+        Name identifying the data object in `flap_storage`.
+    exp_id : str, optional, default='*'
+        Experiment ID. Supports extended Unix regular expressions.
+    coordinate : str, optional, default=None
+        The name of the coordinate along which to remove peaks. If not set,
+        a coordinate named 'Time' in the DataObject will be used, if there
+        is one. Must be equidistant and change along one dimension only. If
+        the data changes along other dimensions as well, the peaks will be
+        detected/removed separately for each slice along the other
+        dimensions.
+
+    options : dict, optional, default=None
+        Options for peak removal. Possible keys and values:
+
+        - 'max_width_samples':
+
+          - int: Maximum width of a peak in samples.
+
+        - 'diff_limit':
+
+          - The derivative limit for the detection of sharp rising/falling
+            edges of peaks. Calculated in units of (signal units) / (time
+            units).
+
+        - 'return_loc_detected_samples' (default=False):
+
+          - bool: Whether to return an additional coordinate axis
+            kindicating if a sample belongs to a detected/removed peak.
+
+        - 'return_num_detected_peaks' (default=False):
+
+          - bool: Whether to return the number of detected peaks.
+
+        - 'return_peak_shapes' (default=False):
+
+          - bool: Whether to return the widths and amplitudes of detected
+            peaks as two additional data objects.
+
+        - 'remove_peaks' (default=True):
+
+          - bool: Whether to remove the detected peaks.
+
+        - 'interpolation' (default='linear'):
+
+          - 'linear' : Interpolation method for removing peaks.
+
+    output_name : str, optional, default=None
+        Name of the new data object added to `flap_storage`.
+
+    Returns
+    -------
+    flap.DataObject | (flap.DataObject, array of flap.DataObject, array of flap.DataObject)
+        If `return_peak_shapes` is False, a single data object is returned
+        (with the peaks removed, if requested).
+        If `return_peak_shapes` is True, a tuple of three data objects is
+        returned: besides the one returned by default, the second containing
+        the peak widths, and the third containing the peak amplitudes.
+    """
+    try:
+        d = get_data_object(object_name,exp_id=exp_id)
+    except Exception as e:
+        raise e
+    try:
+        out = d.remove_sharp_peaks(coordinate=coordinate, options=options)
+    except Exception as e:
+        raise e
+    if (output_name is not None):
+        if isinstance(out, tuple):
+            d_out = out[0]
+        else:
+            d_out = out
+
+        try:
+            add_data_object(d_out,output_name)
+        except Exception as e:
+            raise e
+    return out
 
 def pdf(object_name,
         exp_id='*',

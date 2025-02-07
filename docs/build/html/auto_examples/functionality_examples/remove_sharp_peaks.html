@@ -1,0 +1,1028 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="FLAP Version 1.21 User’s Guide" href="../../users_guide/index.html" /><link rel="prev" title="Functionality examples" href="index.html" />
+
+    <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>Removing sharp peaks - FLAP documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/myst_sphinx_gallery.css?v=92de7a9e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">FLAP  documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../../_static/FLAP_logo.png" alt="Logo"/>
+  </div>
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">FLAP - Fusion Library of Analysis Programs</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Examples Gallery</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples Gallery</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../basic_examples/index.html">Basic examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Basic examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../basic_examples/using_data_sources.html">Using data source modules</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Functionality examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Removing sharp peaks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../users_guide/index.html">User's Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../extensions.html">Extensions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../developers_guide.html">Developer's Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../presentations.html">Presentations</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../flap.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.config.html">flap.config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.coordinate.html">flap.coordinate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.data_object.html">flap.data_object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.denoising.html">flap.denoising</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.flap_xml.html">flap.flap_xml</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.plot.html">flap.plot</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.select.html">flap.select</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.spectral_analysis.html">flap.spectral_analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.testdata.html">flap.testdata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../flap.time_frequency_analysis.html">flap.time_frequency_analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../uml_diagrams.html">UML diagrams</a></li>
+<li class="toctree-l1"><a class="reference external" href="http://github.com/fusion-flap/flap">GitHub</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/blob/master/docs/auto_examples/functionality_examples/remove_sharp_peaks.ipynb?plain=true" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div><div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/edit/master/docs/auto_examples/functionality_examples/remove_sharp_peaks.ipynb" title="Edit this page">
+    <svg><use href="#svg-pencil"></use></svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section class="tex2jax_ignore mathjax_ignore" id="removing-sharp-peaks">
+<span id="example-remove-sharp-peaks"></span><h1>Removing sharp peaks<a class="headerlink" href="#removing-sharp-peaks" title="Link to this heading">¶</a></h1>
+<p>This example shows how the peak removal function can be used to remove sharp, short peaks from a signal, e.g. from neutron/gamma noise in an APDCAM signal.<a class="footnote-reference brackets" href="#download" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<p>Note that the implemented peak removal algorithm assumes that the duration (~ 5x time constant) of the peaks is a few dozen samples, their total duration is at most a few percent of the signal duration and their height is always positive and such that the resulting signal derivative is significantly larger than that of anything important in the underlying signal.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">flap</span>
+<span class="kn">import</span> <span class="nn">flap.testdata</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning: could not read configuration file &#39;flap_defaults.cfg&#39;.
+Default location of configuration file is working directory.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INIT flap storage
+</pre></div>
+</div>
+</div>
+</div>
+<section id="generating-the-test-data">
+<h2>Generating the test data<a class="headerlink" href="#generating-the-test-data" title="Link to this heading">¶</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flap</span><span class="o">.</span><span class="n">testdata</span><span class="o">.</span><span class="n">register</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="pure-signals">
+<h3>Pure signals<a class="headerlink" href="#pure-signals" title="Link to this heading">¶</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="s1">&#39;TESTDATA&#39;</span><span class="p">,</span>
+                  <span class="n">name</span><span class="o">=</span><span class="s1">&#39;TEST-[1-3]-1&#39;</span><span class="p">,</span>
+                  <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Scaling&#39;</span><span class="p">:</span><span class="s1">&#39;Volt&#39;</span><span class="p">},</span>
+                  <span class="n">coordinates</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Time&#39;</span><span class="p">:[</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.005</span><span class="p">]},</span>
+                 <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get_coordinate_object</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">step</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-----------------------------
+&lt;1&gt;(data_source:&quot;TESTDATA&quot; exp_id:&quot;&quot;) data_title:&quot;Test data&quot; shape:[3,5001][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E-06
+Sample [a.u.](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E+00
+Signal name [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:TEST-1-1, TEST-2-1, TEST-3-1
+Column [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 2, 3
+Row [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 1, 1
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;\n-----------------------------\n&lt;1&gt;(data_source:&quot;TESTDATA&quot; exp_id:&quot;&quot;) data_title:&quot;Test data&quot; shape:[3,5001][no error]\n  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;\n  Coords:\nTime [Second](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E-06\nSample [a.u.](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E+00\nSignal name [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:TEST-1-1, TEST-2-1, TEST-3-1\nColumn [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 2, 3\nRow [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 1, 1&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="add-noise">
+<h3>Add noise<a class="headerlink" href="#add-noise" title="Link to this heading">¶</a></h3>
+<p>Adding some white noise and the peaks that will be filtered</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">12345</span><span class="p">)</span> <span class="c1"># fix the random seed for this example</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create noisy test dataset</span>
+<span class="n">d_noisy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Add some white noise</span>
+<span class="n">white_noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">*</span><span class="mf">0.025</span>
+<span class="n">d_noisy</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">white_noise</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>In this example, peaks are modelled as an impulse response of a first-order system with randomized amplitude, with additional clipping to model the saturation of a sensor. Their occurrence is also randomized in this example.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">exponential_impulse_response</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">A</span><span class="p">):</span>
+    <span class="c1"># t: time array to use for sampling</span>
+    <span class="c1"># t0: time of impulse (Dirac delta) input</span>
+    <span class="c1"># tau: time constant</span>
+    <span class="c1"># A: amplitude</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float&#39;</span><span class="p">)</span>
+
+    <span class="n">active</span> <span class="o">=</span> <span class="p">(</span><span class="n">t</span> <span class="o">&gt;=</span> <span class="n">t0</span><span class="p">)</span>
+    <span class="n">out</span><span class="p">[</span><span class="n">active</span><span class="p">]</span> <span class="o">=</span> <span class="n">A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="n">t</span><span class="o">-</span><span class="n">t0</span><span class="p">)[</span><span class="n">active</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">peaks</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="n">times</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Number of peaks to generate</span>
+<span class="n">N_peaks</span> <span class="o">=</span> <span class="mi">10</span>
+
+<span class="c1"># Time constant of peaks</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mf">5e5</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_peaks</span><span class="p">):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span><span class="o">*</span><span class="mf">2.0</span><span class="o">+</span><span class="mf">0.5</span>
+        <span class="n">t0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span><span class="o">*</span><span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+        <span class="n">peaks</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">exponential_impulse_response</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">t0</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">A</span><span class="p">),</span> <span class="n">a_min</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">a_max</span><span class="o">=</span><span class="n">A</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Add the sharp peaks</span>
+<span class="n">d_noisy</span><span class="o">.</span><span class="n">data</span> <span class="o">+=</span> <span class="n">peaks</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The signal to be filtered:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">d_noisy</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">],</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;multi xy&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/1ae6fbf1baaf990e5491138eb35eb03da2fcf11dcc7cd46030a35e268f04c263.png" src="../../_images/1ae6fbf1baaf990e5491138eb35eb03da2fcf11dcc7cd46030a35e268f04c263.png" />
+</div>
+</div>
+<p>Zoom in on a single peak:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">d_noisy</span><span class="o">.</span><span class="n">slice_data</span><span class="p">({</span><span class="s1">&#39;Signal name&#39;</span> <span class="p">:</span> <span class="s1">&#39;TEST-1-1&#39;</span><span class="p">,</span> <span class="s1">&#39;Time&#39;</span> <span class="p">:</span> <span class="n">flap</span><span class="o">.</span><span class="n">Intervals</span><span class="p">(</span><span class="mf">0.00015</span><span class="p">,</span> <span class="mf">0.00020</span><span class="p">)})</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/48cb849d8387c34aea994a464972236ba27b352b64df02401c6bce254dbf59cb.png" src="../../_images/48cb849d8387c34aea994a464972236ba27b352b64df02401c6bce254dbf59cb.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="removing-the-peaks">
+<h2>Removing the peaks<a class="headerlink" href="#removing-the-peaks" title="Link to this heading">¶</a></h2>
+<p>With infinitely fast sampling, the peak width would be about 5 time constants:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">int</span><span class="p">(</span><span class="mi">5</span><span class="o">*</span><span class="n">tau</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>10
+</pre></div>
+</div>
+</div>
+</div>
+<p>However, the sampling time and the time constant are close, so <code class="docutils literal notranslate"><span class="pre">max_width_samples</span></code> has to be increased a bit.</p>
+<p>The value of <code class="docutils literal notranslate"><span class="pre">diff_limit</span></code> (measured in units of data unit / time) depends on both the peaks and the underlying value of the noise and the signal as well.</p>
+<p>In a practical situation, these two parameters should be calibrated from measurements.</p>
+<p>Options for peak removal follow the standard FLAP option style (<code class="docutils literal notranslate"><span class="pre">flap_defaults.cfg</span></code> can also be used):</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">peak_removal_options</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;diff_limit&#39;</span> <span class="p">:</span> <span class="mi">25000</span><span class="p">,</span>
+    <span class="s1">&#39;max_width_samples&#39;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+    <span class="s1">&#39;return_num_detected_peaks&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Remove the peaks with the given denoising parameters:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_removed</span> <span class="o">=</span> <span class="n">d_noisy</span><span class="o">.</span><span class="n">remove_sharp_peaks</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">peak_removal_options</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>As <code class="docutils literal notranslate"><span class="pre">return_num_detected_peaks</span></code> is set to True, we can check how many peaks were removed:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">d_removed</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>num_peak_samples_detected: [94 88 89]
+num_peaks_detected: [10 10 10]
+num_peak_samples_removed: [94 88 89]
+num_peaks_removed: [10 10 10]
+</pre></div>
+</div>
+</div>
+</div>
+<p>10 peaks were removed from every signal. (The samples inbetween were interpolated.)</p>
+<p>Check the results:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">d_removed</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">axes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">],</span> <span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;multi xy&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/723c457e78c5464aba7692c1398492a937c2f40424776f9e537584cd7c6abe10.png" src="../../_images/723c457e78c5464aba7692c1398492a937c2f40424776f9e537584cd7c6abe10.png" />
+</div>
+</div>
+</section>
+<section id="advanced-functionality">
+<h2>Advanced functionality<a class="headerlink" href="#advanced-functionality" title="Link to this heading">¶</a></h2>
+<p>Now, we do not want to remove anything, but would like to analyze the detected peaks.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">peak_removal_options2</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;diff_limit&#39;</span> <span class="p">:</span> <span class="mi">25000</span><span class="p">,</span>
+    <span class="s1">&#39;max_width_samples&#39;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+    <span class="s1">&#39;remove_peaks&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s1">&#39;return_num_detected_peaks&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;return_loc_detected_samples&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;return_peak_shapes&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_removed_2</span><span class="p">,</span> <span class="n">peak_widths_array</span><span class="p">,</span> <span class="n">peak_amplitudes_array</span> <span class="o">=</span> <span class="n">d_noisy</span><span class="o">.</span><span class="n">remove_sharp_peaks</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">peak_removal_options2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="peak-locations">
+<h3>Peak locations<a class="headerlink" href="#peak-locations" title="Link to this heading">¶</a></h3>
+<p>As <code class="docutils literal notranslate"><span class="pre">return_loc_detected_samples</span></code> is True, an additional coordinate named ‘Peak detected’ is added to the returned data object, which contains whether the associated sample has been detected to be a part of a sample:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">d_removed_2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-----------------------------
+&lt;1&gt;(data_source:&quot;TESTDATA&quot; exp_id:&quot;&quot;) data_title:&quot;Test data&quot; shape:[3,5001][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E-06
+Sample [a.u.](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E+00
+Signal name [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:TEST-1-1, TEST-2-1, TEST-3-1
+Column [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 2, 3
+Row [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 1, 1
+Peak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  0.000E+00 -  1.000E+00
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;\n-----------------------------\n&lt;1&gt;(data_source:&quot;TESTDATA&quot; exp_id:&quot;&quot;) data_title:&quot;Test data&quot; shape:[3,5001][no error]\n  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;\n  Coords:\nTime [Second](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E-06\nSample [a.u.](Dims:1) [&lt;Equ.&gt;&lt;R. symm.&gt;] Start:  0.000E+00, Steps:  1.000E+00\nSignal name [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:TEST-1-1, TEST-2-1, TEST-3-1\nColumn [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 2, 3\nRow [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 1, 1\nPeak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  0.000E+00 -  1.000E+00&#39;
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">peak_detected_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">d_removed_2</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Peak detected&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">d_removed_2</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">d_removed_2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;noisy signal&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">d_removed_2</span><span class="o">.</span><span class="n">coordinate</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">peak_detected_0</span><span class="p">],</span> <span class="n">d_removed_2</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">peak_detected_0</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;peak samples detected&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time [Second]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Signal [Volt]&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/87c722ac082fa9f8ee05e3d4e5941c36df52a3e8f99647bf547de633cda9b53b.png" src="../../_images/87c722ac082fa9f8ee05e3d4e5941c36df52a3e8f99647bf547de633cda9b53b.png" />
+</div>
+</div>
+</section>
+<section id="peak-shapes">
+<h3>Peak shapes<a class="headerlink" href="#peak-shapes" title="Link to this heading">¶</a></h3>
+<p>The two arrays additional arrays returned due to setting <code class="docutils literal notranslate"><span class="pre">return_peak_shapes</span></code> have a shape similar to the data in the original data object:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(3, 1)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">peak_widths_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(3, 1)
+</pre></div>
+</div>
+</div>
+</div>
+<p>They contain separate data objects for each signal, with the time coordinates being the center times of the detected peaks:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">)):</span>
+    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.745E-04,  6.445E-04,  1.301E-03,  1.326E-03,  1.896E-03,  2.220E-03,  3.079E-03,  3.593E-03,  4.490E-03,  4.586E-03
+
+
+-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 2.935E-04,  9.165E-04,  1.167E-03,  1.396E-03,  1.667E-03,  2.080E-03,  2.535E-03,  2.759E-03,  3.943E-03,  4.784E-03
+
+
+-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.420E-04,  2.875E-04,  3.995E-04,  2.334E-03,  2.515E-03,  2.873E-03,  3.106E-03,  3.363E-03,  3.559E-03,  4.756E-03
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">)):</span>
+    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_widths_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Samples&quot;, unit:&quot;[n.a.]&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.745E-04,  6.445E-04,  1.301E-03,  1.326E-03,  1.896E-03,  2.220E-03,  3.079E-03,  3.593E-03,  4.490E-03,  4.586E-03
+
+
+-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Samples&quot;, unit:&quot;[n.a.]&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 2.935E-04,  9.165E-04,  1.167E-03,  1.396E-03,  1.667E-03,  2.080E-03,  2.535E-03,  2.759E-03,  3.943E-03,  4.784E-03
+
+
+-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Samples&quot;, unit:&quot;[n.a.]&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.420E-04,  2.875E-04,  3.995E-04,  2.334E-03,  2.515E-03,  2.873E-03,  3.106E-03,  3.363E-03,  3.559E-03,  4.756E-03
+</pre></div>
+</div>
+</div>
+</div>
+<p>The amplitude array contains the height of the peaks relative to the underlying signal:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+<span class="n">d_removed_2</span><span class="o">.</span><span class="n">slice_data</span><span class="p">({</span><span class="s1">&#39;Signal name&#39;</span> <span class="p">:</span> <span class="s1">&#39;TEST-1-1&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/28a05c8938b53da0c1c515e95455682e9075722f16226adb62da5a655d388222.png" src="../../_images/28a05c8938b53da0c1c515e95455682e9075722f16226adb62da5a655d388222.png" />
+</div>
+</div>
+<p>These arrays can be used to generate various statistics on the peaks:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">peak_amplitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+<span class="k">for</span> <span class="n">d_i</span> <span class="ow">in</span> <span class="n">peak_amplitudes_array</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+    <span class="n">peak_amplitudes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">peak_amplitudes</span><span class="p">,</span> <span class="n">d_i</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">peak_amplitudes</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Peak amplitude size (data unit)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/e3ba13011bbdb894d890d3d3c3f75ccd1b2ceaa558127001e1bfafd0c46148a2.png" src="../../_images/e3ba13011bbdb894d890d3d3c3f75ccd1b2ceaa558127001e1bfafd0c46148a2.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">peak_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+<span class="k">for</span> <span class="n">d_i</span> <span class="ow">in</span> <span class="n">peak_widths_array</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+    <span class="n">peak_widths</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">peak_widths</span><span class="p">,</span> <span class="n">d_i</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">peak_widths</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Peak width size (samples)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/0e555aea3df02bf54fa75e9eebb4e098bed9c9b97318320072ba741508a191bb.png" src="../../_images/0e555aea3df02bf54fa75e9eebb4e098bed9c9b97318320072ba741508a191bb.png" />
+</div>
+</div>
+<p>Analyze the effect of <code class="docutils literal notranslate"><span class="pre">diff_limit</span></code> on the number of samples removed:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">diff_limits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="mi">50000</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+
+<span class="n">removed_peak_samples_number</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">diff_limit_i</span> <span class="ow">in</span> <span class="n">diff_limits</span><span class="p">:</span>
+    <span class="n">peak_removal_options_i</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;diff_limit&#39;</span> <span class="p">:</span> <span class="n">diff_limit_i</span><span class="p">,</span>
+        <span class="s1">&#39;max_width_samples&#39;</span> <span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+        <span class="s1">&#39;remove_peaks&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;return_num_detected_peaks&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">}</span>
+    
+    <span class="n">d_removed_i</span> <span class="o">=</span> <span class="n">d_noisy</span><span class="o">.</span><span class="n">remove_sharp_peaks</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">peak_removal_options_i</span><span class="p">)</span>
+
+    <span class="n">removed_peak_samples_number</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">d_removed_i</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;num_peak_samples_detected&#39;</span><span class="p">]))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">diff_limits</span><span class="p">,</span> <span class="n">removed_peak_samples_number</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;diff_limit [data unit / time]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Number of samples removed as peak [1]&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/126f81286d9701c727d1edbcf3a3ebe345f80bb34d516e6c7cf76655008311fe.png" src="../../_images/126f81286d9701c727d1edbcf3a3ebe345f80bb34d516e6c7cf76655008311fe.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="effect-of-sampling-and-phase-shift-on-detected-peak-duration">
+<h2>Effect of sampling and phase shift on detected peak duration<a class="headerlink" href="#effect-of-sampling-and-phase-shift-on-detected-peak-duration" title="Link to this heading">¶</a></h2>
+<p>If a an impulse occurs with a phase shift relative to the sampling time instants, the sampled response will have a different observed duration depending on the (sampling time) / (time constant) ratio, as well as the phase shift. The following two graphs illustrate this effect.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">tau</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">dt_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.005</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">phase_shift_over_dt_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">A_test</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">A_limit</span> <span class="o">=</span> <span class="n">A_test</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># 5 time constants exponential decay</span>
+
+<span class="n">num_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">phase_shift_over_dt_n</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">dt_n</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">phase_shift_over_dt_n</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dt_n</span><span class="p">)):</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">dt_n</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+        <span class="n">num_samples</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">exponential_impulse_response</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">phase_shift_over_dt_n</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">A_test</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">A_limit</span><span class="p">)</span> <span class="o">*</span> <span class="n">dt</span> <span class="o">/</span> <span class="n">tau</span>
+
+<span class="c1"># remove upper corner plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span><span class="mi">7</span><span class="p">),</span> <span class="n">constrained_layout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">axcorner</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="n">axcorner</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+
+<span class="n">axmain</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">psodtn_step</span> <span class="o">=</span> <span class="n">phase_shift_over_dt_n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">phase_shift_over_dt_n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">dtn_step</span> <span class="o">=</span> <span class="n">dt_n</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dt_n</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">m</span> <span class="o">=</span> <span class="n">axmain</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span>
+    <span class="n">num_samples</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+    <span class="n">extent</span><span class="o">=</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">phase_shift_over_dt_n</span><span class="p">)</span> <span class="o">-</span> <span class="n">psodtn_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">phase_shift_over_dt_n</span><span class="p">)</span> <span class="o">+</span> <span class="n">psodtn_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dt_n</span><span class="p">)</span> <span class="o">-</span> <span class="n">dtn_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">dt_n</span><span class="p">)</span> <span class="o">+</span> <span class="n">dtn_step</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">),</span>
+    <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span>
+    <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span>
+    <span class="n">interpolation</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">axmain</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;phase shift / sampling time&#39;</span><span class="p">)</span>
+<span class="n">axmain</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;sampling time / time constant&#39;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span>
+    <span class="n">m</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="n">axmain</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Sampled peak duration</span><span class="se">\n</span><span class="s1">(# of sampled peak values * sampling time / time constant)&#39;</span><span class="p">,</span>
+    <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">vertMean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">vertStd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">axtop</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sharex</span><span class="o">=</span><span class="n">axmain</span><span class="p">)</span>
+<span class="n">axtop</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">phase_shift_over_dt_n</span><span class="p">,</span> <span class="n">vertMean</span> <span class="o">-</span> <span class="n">vertStd</span><span class="p">,</span> <span class="n">vertMean</span> <span class="o">+</span> <span class="n">vertStd</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">axtop</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">phase_shift_over_dt_n</span><span class="p">,</span> <span class="n">vertMean</span><span class="p">)</span>
+    
+<span class="n">axtop</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span>
+<span class="n">axtop</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">axtop</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="o">+</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">))</span>
+<span class="n">axtop</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Sampled peak duration&#39;</span><span class="p">)</span>
+<span class="n">axtop</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="n">horzMean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">horzStd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">num_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">axright</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot2grid</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">rowspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="n">axmain</span><span class="p">)</span>
+<span class="n">axright</span><span class="o">.</span><span class="n">fill_betweenx</span><span class="p">(</span><span class="n">dt_n</span><span class="p">,</span> <span class="n">horzMean</span> <span class="o">-</span> <span class="n">horzStd</span><span class="p">,</span> <span class="n">horzMean</span> <span class="o">+</span> <span class="n">horzStd</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">axright</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">horzMean</span><span class="p">,</span> <span class="n">dt_n</span><span class="p">)</span>
+
+<span class="n">axright</span><span class="o">.</span><span class="n">label_outer</span><span class="p">()</span>
+<span class="n">axright</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">axtop</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">())</span>
+<span class="n">axright</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">axtop</span><span class="o">.</span><span class="n">get_yticks</span><span class="p">())</span>
+<span class="n">axright</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Sampled peak duration&#39;</span><span class="p">)</span>
+<span class="n">axright</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s1">&#39;Effect of phase shift and sampling time on sampled peak duration&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/fb83afb8f78d930fb538c1bdaf76b1247b926d47e1a7b754703411530671d541.png" src="../../_images/fb83afb8f78d930fb538c1bdaf76b1247b926d47e1a7b754703411530671d541.png" />
+</div>
+</div>
+<p>An illustrative case corresponding to the top right region of the above map:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">phase_shift_over_dt</span> <span class="o">=</span> <span class="o">+</span><span class="mf">0.3</span>
+
+<span class="n">times</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">dt</span><span class="p">)</span>
+<span class="n">pulse_sampled</span> <span class="o">=</span> <span class="n">exponential_impulse_response</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">phase_shift_over_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">detected</span> <span class="o">=</span> <span class="n">pulse_sampled</span> <span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="n">times_ref</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="n">dt</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pulse_ref</span> <span class="o">=</span> <span class="n">exponential_impulse_response</span><span class="p">(</span><span class="n">times_ref</span><span class="p">,</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">phase_shift_over_dt</span> <span class="o">*</span> <span class="n">dt</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+    <span class="n">times_ref</span><span class="p">,</span>
+    <span class="n">pulse_ref</span><span class="p">,</span>
+    <span class="n">zorder</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">times</span><span class="p">[</span><span class="n">detected</span><span class="p">],</span>
+    <span class="n">pulse_sampled</span><span class="p">[</span><span class="n">detected</span><span class="p">],</span>
+    <span class="n">c</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s1">&#39;sampled values over threshold&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span>
+    <span class="n">times</span><span class="p">[</span><span class="o">~</span><span class="n">detected</span><span class="p">],</span>
+    <span class="n">pulse_sampled</span><span class="p">[</span><span class="o">~</span><span class="n">detected</span><span class="p">],</span>
+    <span class="n">c</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s1">&#39;sampled values below threshold&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">times</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">times</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">ls</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Signal value&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/61ab5f250dff016b3a8b1bc173ebad03833d142001a463f3a928503b3cbc6e8d.png" src="../../_images/61ab5f250dff016b3a8b1bc173ebad03833d142001a463f3a928503b3cbc6e8d.png" />
+</div>
+</div>
+</section>
+</section>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="download" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>This notebook can be downloaded as <strong><a class="reference download internal" download="" href="../../_downloads/e1c11b3cfdbc993ea60cbf195fa9fc4b/remove_sharp_peaks.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">remove_sharp_peaks.ipynb</span></code></a></strong></p>
+</aside>
+</aside>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="../../users_guide/index.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">FLAP Version 1.21 User’s Guide</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Functionality examples</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2019-2024, FLAP contributors
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Removing sharp peaks</a><ul>
+<li><a class="reference internal" href="#generating-the-test-data">Generating the test data</a><ul>
+<li><a class="reference internal" href="#pure-signals">Pure signals</a></li>
+<li><a class="reference internal" href="#add-noise">Add noise</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#removing-the-peaks">Removing the peaks</a></li>
+<li><a class="reference internal" href="#advanced-functionality">Advanced functionality</a><ul>
+<li><a class="reference internal" href="#peak-locations">Peak locations</a></li>
+<li><a class="reference internal" href="#peak-shapes">Peak shapes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#effect-of-sampling-and-phase-shift-on-detected-peak-duration">Effect of sampling and phase shift on detected peak duration</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=8a448e45"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>
