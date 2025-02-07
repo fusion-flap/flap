@@ -38,7 +38,8 @@ def remove_sharp_peaks_func(
         The derivative limit for the detection of sharp rising/falling edges of
         peaks. Calculated in units of signal units / time units.
     dt : float, optional, default=1.0
-        The time difference between consecutive samples.
+        The time difference between consecutive samples. Must be in the same
+        time unit as used for `diff_limit` and `time`.
     return_peak_center_times : bool, optional, default=False
         Return the time coordinates of the center of the detected peaks.
     return_peak_width_samples : bool, optional, default=False
