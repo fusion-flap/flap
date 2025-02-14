@@ -1630,7 +1630,7 @@ def _plot(data_object,
 
         # Creating the sublots if this is a new plot
         if (_plot_id.number_of_plots == 0):
-            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot.get_subplotpec(),hspace=0.4,wspace=0.3)
+            gs = gridspec.GridSpecFromSubplotSpec(plot_rows, plot_columns, subplot_spec=_plot_id.base_subplot.get_subplotspec(),hspace=0.4,wspace=0.3)
             _plot_id.plt_axis_list = []
             sharex = None
             sharey = None
