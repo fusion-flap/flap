@@ -6,6 +6,7 @@ flap
    flap.config
    flap.coordinate
    flap.data_object
+   flap.denoising
    flap.flap_xml
    flap.plot
    flap.select

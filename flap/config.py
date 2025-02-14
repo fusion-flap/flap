@@ -139,6 +139,8 @@ def interpret_config_value(value_str):
         return True
     if ((value_str == 'False') or (value_str == 'No')):
         return False
+    if (value_str =='None'):
+        return None
     if ((value_str[0] == "'") and (value_str[-1] == "'")
         or (value_str[0] == '"') and (value_str[-1] == '"')):
         return value_str[1:-1]
@@ -153,6 +155,9 @@ def interpret_config_value(value_str):
             if ((val == 'False') or (val == 'No')):
                 values_list.append(True)
                 continue
+            if (val == 'None'):
+                values_list.append(None)
+                continue               
             if ((val[0] == "'") and (val[-1] == "'")
                 or (val[0] == '"') and (val[-1] == '"')):
                 values_list.append(val[2:-1])

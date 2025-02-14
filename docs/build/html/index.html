@@ -211,16 +211,21 @@
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/basic_examples/using_data_sources.html">Using data source modules</a></li>
 </ul>
 </li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="auto_examples/functionality_examples/index.html">Functionality examples</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/functionality_examples/remove_sharp_peaks.html">Removing sharp peaks</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="users_guide/index.html">User's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers_guide.html">Developer's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="presentations.html">Presentations</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="flap.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="flap.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="flap.config.html">flap.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.coordinate.html">flap.coordinate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html">flap.data_object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.denoising.html">flap.denoising</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.flap_xml.html">flap.flap_xml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.plot.html">flap.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.select.html">flap.select</a></li>
@@ -319,6 +324,10 @@ follow the instructions for installation.</p>
 </pre></div>
 </div>
 <p>This installs FLAP in such a way that any changes made in the source code are instantly reflected in any software using it. (This is similar to adding the package directory to your <code class="docutils literal notranslate"><span class="pre">$PATH</span></code>, but more robust.)</p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The default environment uses <code class="docutils literal notranslate"><span class="pre">numpy</span> <span class="pre">&gt;=</span> <span class="pre">2.0</span></code>. In case this is incompatible with some additional library needed, <code class="docutils literal notranslate"><span class="pre">*_oldnumpy.yml</span></code> files are also available in the <code class="docutils literal notranslate"><span class="pre">docs/</span></code> folder, which can be used to create environments with an older version of numpy.</p>
 </div>
 <p>FLAP is now ready to use!</p>
 </section>

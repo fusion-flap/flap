@@ -211,16 +211,21 @@
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/basic_examples/using_data_sources.html">Using data source modules</a></li>
 </ul>
 </li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="auto_examples/functionality_examples/index.html">Functionality examples</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/functionality_examples/remove_sharp_peaks.html">Removing sharp peaks</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="users_guide/index.html">User's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers_guide.html">Developer's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="presentations.html">Presentations</a></li>
-<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">API reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 current has-children current-page"><a class="current reference internal" href="#">API reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="flap.config.html">flap.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.coordinate.html">flap.coordinate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html">flap.data_object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.denoising.html">flap.denoising</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.flap_xml.html">flap.flap_xml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.plot.html">flap.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.select.html">flap.select</a></li>
@@ -348,6 +353,7 @@
 <li class="toctree-l3"><a class="reference internal" href="flap.data_object.html#flap.data_object.DataObject.proc_interval_limits"><code class="docutils literal notranslate"><span class="pre">DataObject.proc_interval_limits()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="flap.data_object.html#flap.data_object.DataObject.real"><code class="docutils literal notranslate"><span class="pre">DataObject.real()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="flap.data_object.html#flap.data_object.DataObject.regenerate_coordinates"><code class="docutils literal notranslate"><span class="pre">DataObject.regenerate_coordinates()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="flap.data_object.html#flap.data_object.DataObject.remove_sharp_peaks"><code class="docutils literal notranslate"><span class="pre">DataObject.remove_sharp_peaks()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="flap.data_object.html#flap.data_object.DataObject.save"><code class="docutils literal notranslate"><span class="pre">DataObject.save()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="flap.data_object.html#flap.data_object.DataObject.slice_data"><code class="docutils literal notranslate"><span class="pre">DataObject.slice_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="flap.data_object.html#flap.data_object.DataObject.slicing_to_intervals"><code class="docutils literal notranslate"><span class="pre">DataObject.slicing_to_intervals()</span></code></a></li>
@@ -394,9 +400,14 @@
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html#flap.data_object.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html#flap.data_object.real"><code class="docutils literal notranslate"><span class="pre">real()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html#flap.data_object.register_data_source"><code class="docutils literal notranslate"><span class="pre">register_data_source()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.data_object.html#flap.data_object.remove_sharp_peaks"><code class="docutils literal notranslate"><span class="pre">remove_sharp_peaks()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html#flap.data_object.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html#flap.data_object.slice_data"><code class="docutils literal notranslate"><span class="pre">slice_data()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html#flap.data_object.stft"><code class="docutils literal notranslate"><span class="pre">stft()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="flap.denoising.html">flap.denoising</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="flap.denoising.html#flap.denoising.remove_sharp_peaks_func"><code class="docutils literal notranslate"><span class="pre">remove_sharp_peaks_func()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="flap.flap_xml.html">flap.flap_xml</a><ul>

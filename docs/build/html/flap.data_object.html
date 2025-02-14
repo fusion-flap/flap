@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="flap.flap_xml" href="flap.flap_xml.html" /><link rel="prev" title="flap.coordinate" href="flap.coordinate.html" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="flap.denoising" href="flap.denoising.html" /><link rel="prev" title="flap.coordinate" href="flap.coordinate.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
         <title>flap.data_object - FLAP documentation</title>
@@ -211,16 +211,21 @@
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/basic_examples/using_data_sources.html">Using data source modules</a></li>
 </ul>
 </li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="auto_examples/functionality_examples/index.html">Functionality examples</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/functionality_examples/remove_sharp_peaks.html">Removing sharp peaks</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="users_guide/index.html">User's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="developers_guide.html">Developer's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="presentations.html">Presentations</a></li>
-<li class="toctree-l1 current has-children"><a class="reference internal" href="flap.html">API reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="flap.html">API reference</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="flap.config.html">flap.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.coordinate.html">flap.coordinate</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">flap.data_object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.denoising.html">flap.denoising</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.flap_xml.html">flap.flap_xml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.plot.html">flap.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.select.html">flap.select</a></li>
@@ -1522,6 +1527,97 @@ indices will be always smaller than the end indices.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="flap.data_object.DataObject.remove_sharp_peaks">
+<span class="sig-name descname"><span class="pre">remove_sharp_peaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#flap.data_object.DataObject.remove_sharp_peaks" title="Link to this definition">¶</a></dt>
+<dd><p>Remove sharp peaks with only a few samples of duration from the data,
+e.g. due to neutron/gamma noise affecting APDCAM.</p>
+<p>Peaks are detected by looking for sharp (as specified by the
+<cite>diff_limit</cite> option) rising and falling edges in the signal, within a
+window of maximum <cite>max_width_samples</cite> samples. Detected peaks can be
+removed from the signal by interpolation (see <cite>remove_peaks</cite> below).</p>
+<p>By default, only a single data object is returned, with the number of
+removed/detected peaks and number of samples belonging to peaks added to
+the <cite>info</cite> field of the data object if <cite>return_num_detected_peaks</cite> is
+True. The keys added are: ‘num_peak_samples_detected’,
+‘num_peaks_detected’, ‘num_peak_samples_removed’, ‘num_peaks_removed’.</p>
+<p>If <cite>return_loc_detected_samples</cite> is set to True, an additional
+coordinate named ‘Peak detected’ is added to the data object, indicating
+whether a sample belongs to a detected peak.</p>
+<p>If <cite>return_peak_shapes</cite> is set to True, the center times and the shapes
+(width, amplitude) of the detected peaks are also returned as two
+additional data objects (separately for each time series, if
+applicable). These data objects contain the center times of the peaks as
+a non-equidistant coordinate axis, with the width/amplitude of the peaks
+as the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>coordinate</strong><span class="classifier">str, optional, default=None</span></dt><dd><p>The name of the coordinate along which to remove peaks. If not set,
+a coordinate named ‘Time’ in the DataObject will be used, if there
+is one. Must be equidistant and change along one dimension only. If
+the data changes along other dimensions as well, the peaks will be
+detected/removed separately for each slice along the other
+dimensions.</p>
+</dd>
+<dt><strong>options</strong><span class="classifier">dict, optional, default=None</span></dt><dd><p>Options for peak removal. Possible keys and values:</p>
+<ul class="simple">
+<li><p>‘max_width_samples’:</p>
+<ul>
+<li><p>int: Maximum width of a peak in samples.</p></li>
+</ul>
+</li>
+<li><p>‘diff_limit’:</p>
+<ul>
+<li><p>The derivative limit for the detection of sharp rising/falling
+edges of peaks. Calculated in units of (signal units) / (time
+units).</p></li>
+</ul>
+</li>
+<li><p>‘return_loc_detected_samples’ (default=False):</p>
+<ul>
+<li><p>bool: Whether to return an additional coordinate axis
+indicating if a sample belongs to a detected/removed peak.</p></li>
+</ul>
+</li>
+<li><p>‘return_num_detected_peaks’ (default=False):</p>
+<ul>
+<li><p>bool: Whether to return the number of detected peaks.</p></li>
+</ul>
+</li>
+<li><p>‘return_peak_shapes’ (default=False):</p>
+<ul>
+<li><p>bool: Whether to return the widths and amplitudes of detected
+peaks as two additional data objects.</p></li>
+</ul>
+</li>
+<li><p>‘remove_peaks’ (default=True):</p>
+<ul>
+<li><p>bool: Whether to remove the detected peaks.</p></li>
+</ul>
+</li>
+<li><p>‘interpolation’ (default=’linear’):</p>
+<ul>
+<li><p>‘linear’ : Interpolation method for removing peaks.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>flap.DataObject | (flap.DataObject, array of flap.DataObject, array of flap.DataObject)</dt><dd><p>If <cite>return_peak_shapes</cite> is False, a single data object is returned
+(with the peaks removed, if requested).
+If <cite>return_peak_shapes</cite> is True, a tuple of three data objects is
+returned: besides the one returned by default, the second containing
+the peak widths, and the third containing the peak amplitudes.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="flap.data_object.DataObject.save">
 <span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#flap.data_object.DataObject.save" title="Link to this definition">¶</a></dt>
 <dd><p>Save the data object to a binary file.</p>
@@ -2146,7 +2242,7 @@ input data objects.</p>
 <dd class="field-odd"><dl>
 <dt><strong>object_name</strong><span class="classifier">str</span></dt><dd><p>Name identifying the data object in <cite>flap_storage</cite>.</p>
 </dd>
-<dt><strong>ref</strong><span class="classifier">flap.DataObject, optional, default=None</span></dt><dd><p>Reference to use for CPSD calculation. If None, <cite>object_name</cite> is used as
+<dt><strong>ref</strong><span class="classifier">flap.DataObject, optional, default=None</span></dt><dd><p>Reference to use for CCF calculation. If None, <cite>object_name</cite> is used as
 reference.</p>
 </dd>
 <dt><strong>exp_id</strong><span class="classifier">str, optional, default=’*’</span></dt><dd><p>Experiment ID. Supports extended Unix regular expressions.</p>
@@ -3236,6 +3332,103 @@ overplotting.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="flap.data_object.remove_sharp_peaks">
+<span class="sig-prename descclassname"><span class="pre">flap.data_object.</span></span><span class="sig-name descname"><span class="pre">remove_sharp_peaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#flap.data_object.remove_sharp_peaks" title="Link to this definition">¶</a></dt>
+<dd><p>Remove sharp peaks with only a few samples of duration from the data,
+e.g. due to neutron/gamma noise affecting APDCAM.</p>
+<p>Peaks are detected by looking for sharp (as specified by the
+<cite>diff_limit</cite> option) rising and falling edges in the signal, within a
+window of maximum <cite>max_width_samples</cite> samples. Detected peaks can be
+removed from the signal by interpolation (see <cite>remove_peaks</cite> below).</p>
+<p>By default, only a single data object is returned, with the number of
+removed/detected peaks and number of samples belonging to peaks added
+to the <cite>info</cite> field of the data object if <cite>return_num_detected_peaks</cite> is
+True. The keys added are: ‘num_peak_samples_detected’, ‘num_peaks_detected’,
+‘num_peak_samples_removed’, ‘num_peaks_removed’.</p>
+<p>If <cite>return_loc_detected_samples</cite> is set to True, an additional coordinate
+named ‘Peak detected’ is added to the data object, indicating whether a
+sample belongs to a detected peak.</p>
+<p>If <cite>return_peak_shapes</cite> is set to True, the center times and the shapes
+(width, amplitude) of the detected peaks are also returned as two
+additional data objects (separately for each time series, if
+applicable). These data objects contain the center times of the peaks as
+a non-equidistant coordinate axis, with the width/amplitude of the peaks
+as the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>object_name</strong><span class="classifier">str</span></dt><dd><p>Name identifying the data object in <cite>flap_storage</cite>.</p>
+</dd>
+<dt><strong>exp_id</strong><span class="classifier">str, optional, default=’*’</span></dt><dd><p>Experiment ID. Supports extended Unix regular expressions.</p>
+</dd>
+<dt><strong>coordinate</strong><span class="classifier">str, optional, default=None</span></dt><dd><p>The name of the coordinate along which to remove peaks. If not set,
+a coordinate named ‘Time’ in the DataObject will be used, if there
+is one. Must be equidistant and change along one dimension only. If
+the data changes along other dimensions as well, the peaks will be
+detected/removed separately for each slice along the other
+dimensions.</p>
+</dd>
+<dt><strong>options</strong><span class="classifier">dict, optional, default=None</span></dt><dd><p>Options for peak removal. Possible keys and values:</p>
+<ul class="simple">
+<li><p>‘max_width_samples’:</p>
+<ul>
+<li><p>int: Maximum width of a peak in samples.</p></li>
+</ul>
+</li>
+<li><p>‘diff_limit’:</p>
+<ul>
+<li><p>The derivative limit for the detection of sharp rising/falling
+edges of peaks. Calculated in units of (signal units) / (time
+units).</p></li>
+</ul>
+</li>
+<li><p>‘return_loc_detected_samples’ (default=False):</p>
+<ul>
+<li><p>bool: Whether to return an additional coordinate axis
+kindicating if a sample belongs to a detected/removed peak.</p></li>
+</ul>
+</li>
+<li><p>‘return_num_detected_peaks’ (default=False):</p>
+<ul>
+<li><p>bool: Whether to return the number of detected peaks.</p></li>
+</ul>
+</li>
+<li><p>‘return_peak_shapes’ (default=False):</p>
+<ul>
+<li><p>bool: Whether to return the widths and amplitudes of detected
+peaks as two additional data objects.</p></li>
+</ul>
+</li>
+<li><p>‘remove_peaks’ (default=True):</p>
+<ul>
+<li><p>bool: Whether to remove the detected peaks.</p></li>
+</ul>
+</li>
+<li><p>‘interpolation’ (default=’linear’):</p>
+<ul>
+<li><p>‘linear’ : Interpolation method for removing peaks.</p></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt><strong>output_name</strong><span class="classifier">str, optional, default=None</span></dt><dd><p>Name of the new data object added to <cite>flap_storage</cite>.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt>flap.DataObject | (flap.DataObject, array of flap.DataObject, array of flap.DataObject)</dt><dd><p>If <cite>return_peak_shapes</cite> is False, a single data object is returned
+(with the peaks removed, if requested).
+If <cite>return_peak_shapes</cite> is True, a tuple of three data objects is
+returned: besides the one returned by default, the second containing
+the peak widths, and the third containing the peak amplitudes.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="flap.data_object.save">
 <span class="sig-prename descclassname"><span class="pre">flap.data_object.</span></span><span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'*'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#flap.data_object.save" title="Link to this definition">¶</a></dt>
 <dd><p>Save one or more data objects to a binary file.</p>
@@ -3422,12 +3615,12 @@ None, ‘detrend’: False, ‘return_onesided’: True, ‘boundary’: ‘zero
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="flap.flap_xml.html">
+          <a class="next-page" href="flap.denoising.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">flap.flap_xml</div>
+                <div class="title">flap.denoising</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -3501,6 +3694,7 @@ None, ‘detrend’: False, ‘return_onesided’: True, ‘boundary’: ‘zero
 <li><a class="reference internal" href="#flap.data_object.DataObject.proc_interval_limits"><code class="docutils literal notranslate"><span class="pre">DataObject.proc_interval_limits()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.DataObject.real"><code class="docutils literal notranslate"><span class="pre">DataObject.real()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.DataObject.regenerate_coordinates"><code class="docutils literal notranslate"><span class="pre">DataObject.regenerate_coordinates()</span></code></a></li>
+<li><a class="reference internal" href="#flap.data_object.DataObject.remove_sharp_peaks"><code class="docutils literal notranslate"><span class="pre">DataObject.remove_sharp_peaks()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.DataObject.save"><code class="docutils literal notranslate"><span class="pre">DataObject.save()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.DataObject.slice_data"><code class="docutils literal notranslate"><span class="pre">DataObject.slice_data()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.DataObject.slicing_to_intervals"><code class="docutils literal notranslate"><span class="pre">DataObject.slicing_to_intervals()</span></code></a></li>
@@ -3547,6 +3741,7 @@ None, ‘detrend’: False, ‘return_onesided’: True, ‘boundary’: ‘zero
 <li><a class="reference internal" href="#flap.data_object.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.real"><code class="docutils literal notranslate"><span class="pre">real()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.register_data_source"><code class="docutils literal notranslate"><span class="pre">register_data_source()</span></code></a></li>
+<li><a class="reference internal" href="#flap.data_object.remove_sharp_peaks"><code class="docutils literal notranslate"><span class="pre">remove_sharp_peaks()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.save"><code class="docutils literal notranslate"><span class="pre">save()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.slice_data"><code class="docutils literal notranslate"><span class="pre">slice_data()</span></code></a></li>
 <li><a class="reference internal" href="#flap.data_object.stft"><code class="docutils literal notranslate"><span class="pre">stft()</span></code></a></li>

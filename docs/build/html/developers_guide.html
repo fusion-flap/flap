@@ -211,16 +211,21 @@
 <li class="toctree-l3"><a class="reference internal" href="auto_examples/basic_examples/using_data_sources.html">Using data source modules</a></li>
 </ul>
 </li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="auto_examples/functionality_examples/index.html">Functionality examples</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="auto_examples/functionality_examples/remove_sharp_peaks.html">Removing sharp peaks</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="users_guide/index.html">User's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="extensions.html">Extensions</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Developer's Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="presentations.html">Presentations</a></li>
-<li class="toctree-l1 has-children"><a class="reference internal" href="flap.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="flap.html">API reference</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of API reference</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="flap.config.html">flap.config</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.coordinate.html">flap.coordinate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.data_object.html">flap.data_object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flap.denoising.html">flap.denoising</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.flap_xml.html">flap.flap_xml</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.plot.html">flap.plot</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flap.select.html">flap.select</a></li>
@@ -279,7 +284,7 @@
 <h1>Developer’s Guide<a class="headerlink" href="#developer-s-guide" title="Link to this heading">¶</a></h1>
 <blockquote>
 <div><p>G. Cseh, D. M. Takács, Centre for Energy Research</p>
-<p>2024 October</p>
+<p>2025 January</p>
 </div></blockquote>
 <p>A few useful notes regarding development and documentation are collected here for reference.</p>
 <section id="notes-on-writing-documentation">
@@ -363,6 +368,11 @@
 </div>
 </div>
 </section>
+</section>
+<section id="publishing-documentation">
+<h2>Publishing documentation<a class="headerlink" href="#publishing-documentation" title="Link to this heading">¶</a></h2>
+<p>After the documentation has been generated, and it is committed into the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch on GitHub, the HTML site is published on GitHub Pages automatically by a GitHub Action defined in <code class="docutils literal notranslate"><span class="pre">.github/workflows/static.yml</span></code>.</p>
+<p>The published site is available at: <a class="reference external" href="https://fusion-flap.github.io/flap/index.html">https://fusion-flap.github.io/flap/index.html</a></p>
 </section>
 <section id="style-guide">
 <h2>Style guide<a class="headerlink" href="#style-guide" title="Link to this heading">¶</a></h2>
@@ -628,6 +638,7 @@ datefmt=
 <li><a class="reference internal" href="#adding-examples">Adding examples</a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#publishing-documentation">Publishing documentation</a></li>
 <li><a class="reference internal" href="#style-guide">Style guide</a><ul>
 <li><a class="reference internal" href="#extensions-packages-for-style-checking">Extensions/packages for style checking</a><ul>
 <li><a class="reference internal" href="#python-extension-for-visual-studio-code">Python extension for Visual Studio Code</a></li>
