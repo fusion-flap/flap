@@ -39,17 +39,29 @@ def select_signals(signal_list, signal_spec):
     """
     Selects signals from a signal list following signal specifications.
 
-    signal_list: List of strings of possible signal names
+    Parameters
+    -----------
+    signal_list: list
+        List of strings of possible signal names. The signals will be selected from this. If this is
+        [] on None no selection will be done. Only bracket extension like
+        CH[0-12] will be accepted.
 
-    signal_spec: List of strings with signal specifications including wildcards
-                 Normal Unix file name wildcards are accepted and extended with
-                 [<num>-<num>] type expressions so as e.g. a channel range can be selected.
+    signal_spec: list or str 
+        List of strings with signal specifications including wildcards
+        Normal Unix file name wildcards are accepted and extended with
+        [<num>-<num>] type expressions so as e.g. a channel range can be selected.
 
-    Returs select_list, select_index
-       select_list: List of strings with selected signal names
-       select_index: List of indices to signal list of the selected signals
+    Raises
+    ------
+    ValueError: No signal spec
 
-    Raises ValueError if there is no match for one specification
+    Returns
+    -------
+    list: 
+        List of strings with selected signal names
+    list:
+        List of indices to signal list of the selected signals. If signal_list is None or [] None.
+
     """
 
     if (type(signal_spec) is not list):
@@ -57,75 +69,94 @@ def select_signals(signal_list, signal_spec):
     else:
         _signal_spec = signal_spec
 
-    if ((len(_signal_spec) == 0) or (signal_list == [])):
-        raise ValueError("No signal list or signal specification.")
+    if ((signal_list is None) or signal_list == []):
+        no_signal_list = True
+    else:
+        no_signal_list = False
+    if (len(_signal_spec) == 0):
+        raise ValueError("No signal sspecification.")
 
-    select_list = []
-    select_index = []
-    for ch in _signal_spec:
-        # This will add a list of possible channel names to the _signal_spec while [<num>-<num>} is found
-        startpos = 0
-        extended = False
-        extended_list = []
-        while 1:
-            # Searching for opening and closing []
-            for i1 in range(startpos,len(ch)):
-                if (ch[i1] == '['):
-                    break
-            else:
-                break
-            if (i1 == len(ch)-1):
-                break
-            for i2 in range(i1+1,len(ch)):
-                if (ch[i2] == ']'):
-                    break
-            else:
-                break
-            # found the opening and closing bracket
-            # Trying to interpret the string between the brackets as <int> - <int>
-            try:
-                nums = ch[i1+1:i2].split('-')
-                nums = [int(nums[0]), int(nums[1])]
-                # Extracting the strings before and after the []
-            except Exception:
-                if (i2 >= len(ch)-2):
-                    break
-                startpos = i2+1
-                continue
-            if (i1 == 0):
-                str1 = ""
-            else:
-                str1 = ch[0:i1]
-            if (i2 < len(ch)-1):
-                str2 = ch[i2+1:len(ch)]
-            else:
-                str2 = ""
-            extended = True
-            for i in range(nums[0],nums[1]+1):
-                # Adding all the possible strings
-                extended_list.append(str1+str(i)+str2)
-            startpos = i2+1
-            continue
-
-        ch_match = False
-
-        # if extended list is created not checking original name
-        if (not extended):
-            for i in range(len(signal_list)):
-                if (fnmatch.fnmatch(signal_list[i], ch)):
-                    select_list.append(signal_list[i])
-                    select_index.append(i)
-                    ch_match = True
-        if (extended):
-            for i in range(len(signal_list)):
-                for che in extended_list:
-                    if (fnmatch.fnmatch(signal_list[i], che)):
-                        select_list.append(signal_list[i])
-                        select_index.append(i)
-                        ch_match = True
+    while (True):
+        select_list = []
+        select_index = []
+        for i_ch,ch in enumerate(_signal_spec):
+            # This will add a list of possible channel names to the _signal_spec while [<num>-<num>} is found
+            startpos = 0
+            extended = False
+            extended_list = []
+            while 1:
+                # Searching for opening and closing []
+                for i1 in range(startpos,len(ch)):
+                    if (ch[i1] == '['):
                         break
-        if (not ch_match):
-            raise ValueError("Signal name: " + ch + " is not present.")
+                else:
+                    break
+                if (i1 == len(ch)-1):
+                    break
+                for i2 in range(i1+1,len(ch)):
+                    if (ch[i2] == ']'):
+                        break
+                else:
+                    break
+                # found the opening and closing bracket
+                # Trying to interpret the string between the brackets as <int> - <int>
+                try:
+                    nums = ch[i1+1:i2].split('-')
+                    nums = [int(nums[0]), int(nums[1])]
+                    # Extracting the strings before and after the []
+                except Exception:
+                    if (i2 >= len(ch)-2):
+                        break
+                    startpos = i2+1
+                    continue
+                if (i1 == 0):
+                    str1 = ""
+                else:
+                    str1 = ch[0:i1]
+                if (i2 < len(ch)-1):
+                    str2 = ch[i2+1:len(ch)]
+                else:
+                    str2 = ""
+                extended = True
+                for i in range(nums[0],nums[1]+1):
+                    # Adding all the possible strings
+                    extended_list.append(str1+str(i)+str2)
+                startpos = i2+1
+                break
+            
+            if (extended):
+                del _signal_spec[i_ch]
+                _signal_spec += extended_list
+                break
+                
+            if (no_signal_list):
+                select_index = None
+                if (extended):
+                    select_list += extended_list
+                else:
+                    select_list.append(ch)
+            else:    
+                ch_match = False       
+                # if extended list is created not checking original name
+                if (not extended):
+                    for i in range(len(signal_list)):
+                        if (fnmatch.fnmatch(signal_list[i], ch)):
+                            select_list.append(signal_list[i])
+                            select_index.append(i)
+                            ch_match = True
+                if (extended):
+                    for i in range(len(signal_list)):
+                        for che in extended_list:
+                            if (fnmatch.fnmatch(signal_list[i], che)):
+                                select_list.append(signal_list[i])
+                                select_index.append(i)
+                                ch_match = True
+                                break
+                if (not ch_match):
+                    raise ValueError("Signal name: " + ch + " is not present.")
+        if (not extended):
+            break
+        
 
     return select_list, select_index
 
