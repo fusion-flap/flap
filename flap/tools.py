@@ -44,7 +44,9 @@ def select_signals(signal_list, signal_spec):
     signal_list: list
         List of strings of possible signal names. The signals will be selected from this. If this is
         [] on None no selection will be done. Only bracket extension like
-        CH[0-12] will be accepted.
+        CH[1-12] will be accepted. 
+        [1-4] will result in 1,2,3,4
+        [01-04] will result in 01,02,03,04
 
     signal_spec: list or str 
         List of strings with signal specifications including wildcards
@@ -102,7 +104,15 @@ def select_signals(signal_list, signal_spec):
                 # Trying to interpret the string between the brackets as <int> - <int>
                 try:
                     nums = ch[i1+1:i2].split('-')
+                    numstr1 = nums[0].strip()
+                    numstr2 = nums[1].strip()
                     nums = [int(nums[0]), int(nums[1])]
+                    for zero1 in range(len(numstr1)):
+                        if (numstr1[zero1] != '0'):
+                            break
+                    for zero2 in range(len(numstr2)):
+                        if (numstr2[zero2] != '0'):
+                            break    
                     # Extracting the strings before and after the []
                 except Exception:
                     if (i2 >= len(ch)-2):
@@ -120,7 +130,14 @@ def select_signals(signal_list, signal_spec):
                 extended = True
                 for i in range(nums[0],nums[1]+1):
                     # Adding all the possible strings
-                    extended_list.append(str1+str(i)+str2)
+                    if (zero1 != 0):
+                        strlen = max([len(numstr1),len(numstr2)])
+                        format_str = ":0{:d}d".format(strlen)
+                        format_str = "{" + format_str + "}"
+                        s = format_str.format(i)
+                    else:
+                        s = str(i)
+                    extended_list.append(str1+s+str2)
                 startpos = i2+1
                 break
             
