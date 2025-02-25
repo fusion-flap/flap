@@ -113,3 +113,6 @@ flap_save_test.dat
 
 # scratch folder
 /scratch
+
+# Pickle files
+*.pickle
