@@ -209,6 +209,7 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Examples Gallery</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples Gallery</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="../basic_examples/index.html">Basic examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Basic examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../basic_examples/using_data_sources.html">Using data source modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../basic_examples/flap_dataobject_from_numpy_array.html">Creating FLAP data object directly from <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Functionality examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -615,7 +616,7 @@ Peak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(3, 1)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(3,)
 </pre></div>
 </div>
 </div>
@@ -627,7 +628,7 @@ Peak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(3, 1)
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>(3,)
 </pre></div>
 </div>
 </div>
@@ -636,7 +637,7 @@ Peak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">)):</span>
-    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -668,7 +669,7 @@ Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.420E-04,  2.875E-04
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">)):</span>
-    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_widths_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_widths_array</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -703,7 +704,7 @@ Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.420E-04,  2.875E-04
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 
 <span class="n">d_removed_2</span><span class="o">.</span><span class="n">slice_data</span><span class="p">({</span><span class="s1">&#39;Signal name&#39;</span> <span class="p">:</span> <span class="s1">&#39;TEST-1-1&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-<span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
+<span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>

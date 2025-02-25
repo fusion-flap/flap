@@ -69,6 +69,7 @@ Data objects are normally created by the class constructor by giving the content
 
 FLAP can make use of various data read modules which can be dynamically added to the package. Each package registers its data read and optional coordinate addition function in FLAP so as data are read using a single FLAP function called `get_data`. The parameters are the data source name, data name (interpreted by the data source module), experiment ID and additional coordinate information so as data can be limited to certain ranges or resampled in channels, time, etc. A single `get_data` call can read any number of measurement channels, there is an extended wildcard interpretation method which enables e.g. using `Signal[2-28]` to read signals from 2 to 28 into one data array. The module data read function can add as many coordinates to the data array as it desires to be useful. (See information on FLAP coordinates below.) Standard coordinates are Time, Signal name, Channel, etc. For information on writing a FLAP data source please see the appropriate section below.
 
+(users-guide-coordinates-in-flap)=
 ## Coordinates in FLAP
 
 In the FLAP program package coordinates are stored with the data. This document describes the implementation of this feature.
