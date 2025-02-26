@@ -12,6 +12,7 @@ import copy
 import numpy as np
 import fnmatch
 from flap import VERBOSE
+import configparser
 #from decimal import Decimal                                                    #UNUSED
 
 def del_list_elements(input_list, indices):
@@ -173,9 +174,234 @@ def select_signals(signal_list, signal_spec):
                     raise ValueError("Signal name: " + ch + " is not present.")
         if (not extended):
             break
-        
-
     return select_list, select_index
+
+
+class SignalList():
+    """ Class to contain a list of identical signals names suitable for inclusion in 
+        a DataObject.
+        
+        data_type: str
+           'real': data_list contains a list of valid signal names
+           'complex' : data_list contains a list of 2-element listst.
+                       Each element contains a final webapi name. The two-element lists
+                       are interpreted as complex signals.    
+        signal_list: list 
+                   List of signal names or complex signal descriptions
+                   Complex signal is desribed by a list of two signal names. 
+    """
+    def __init__(self,data_type=None,signal_list=[]):
+        self.data_type = data_type
+        self.signal_list = signal_list
+        
+    def add(self,s,pos=None):
+        """
+        Adds a SignalList to an existging one at a position in the list. The type of the two
+        lists should be identical.
+
+        Parameters
+        ----------
+        s : class SignalDesc
+            The list to add.
+        pos : int, optional
+            The position in the list to add. If None will add to the end of the list.
+            If not None will remove that element in the list and add the new list there.
+            First element is 0.
+
+        Raises
+        ------
+            TypeError: If the two lists have different type.
+            ValueError: Unknown signal type
+            
+        Returns
+        -------
+        None.
+
+        """
+        if ((self.data_type is None) and (len(self.signal_list) == 0)):
+            self.data_type = s.data_type
+            self.signal_list = s.signal_list
+            return
+        if ((s.data_type is None) and (len(s.signal_list) == 0)):
+            return
+        if ((self.data_type is None) or (s.data_type is None)):
+            raise ValueError("Unknown data type for SignalList.")
+        if (((pos is None) or (len(self.signal_list) != 1)) and (self.data_type != s.data_type)):
+            raise TypeError("Cannot combine two signals")
+        if ((pos is None) or (pos >= len(self.signal_list))):
+            # Adding to end
+            self.signal_list += s.signal_list
+            return
+        if ((pos < 0) and ((len(self.signal_list) == 0) or (-pos > len(self.signal_list)))):
+            raise ValueError("Invalid position for inserting SignalList.")   
+        if (pos >= 0):
+            _pos = pos
+        else:
+            _pos = len(self.signal_list) + pos 
+            self.signal_list = self.signal_list[:_pos] + s.signal_list + self.signal_list[_pos+1:]
+            self.data_type = s.data_type
+        return
+        
+        
+def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=None):
+    """ 
+    Interpret a list of signal names by processing regular expressions and interpreting signals
+    using a virtual signal file. The result is a single SignalList class. Possible signal names
+    can be listed in <signal_list>. This function will be called recursively until all names found
+    are interpreted as a valid signal or a complex signal composed of two valid signals.
+    
+    A virtual signal file is a text file with format:
+        [Virtual names]
+        <virtual name>(<start expID> - <end expID) = <description>
+        ...
+        
+        <start expID> and <end expID> set a range of expIDs for which the description applies. 
+        This element is optional, if missing the description is valid for all expIDs.
+        <virtual name> which can be interpreted.
+        <description> can be the following:
+            1. A signal name. It can be real signal name, a virtual name, a signal name containing 
+               extended regular expressions (see select_signals())
+            2. A list of signal names in the form (name1,name3,....)
+               Each name can be any of the one in point 1.
+            3. A complex signal composed of two signals: complex(signal1,signal2)
+               The two signal names should interpret to real signals.
+    
+    Parameters
+    ----------
+    signals : str
+        The signal names to interpret.
+    exp_id : anything convertable to int, optional
+        The experiment ID. The default is None.
+    virtual_signal_file : str, optional
+        The name of the virtual signal file. The default is None, in which case only regular 
+        expressions will be processed.
+    signal_list: list, optional
+        The list of possible signal names. The default is None, in which case only bracked regular 
+        expressions will be processed no *. E.g. CH[1-3] is valid, but CH* is valid only if the signal_list is present.
+
+    Raises
+    ------
+    TypeError
+        exp_id should be sting or int.
+    ValueError
+        Various virtual signal file format problems
+    ValueErrorr
+        DESCRIPTION.
+
+    Returns
+    -------
+    list
+        A SignalList.
+
+    """
+
+    if ((exp_id is not None) and (type(exp_id) is not str) and (type(exp_id) is not int)):
+        raise TypeError("exp_id should be a string or int.")
+    if (type(signals) is not list):
+        _signals = [signals]
+    else:
+        _signals = signals
+
+    # Handling regular expressions, creating a signal list after reguler expression processing
+    proc_signals = []
+    for i in range(len(_signals)):     
+        reg_signals, signal_index = select_signals(signal_list, _signals[i])
+        proc_signals += reg_signals
+    if (len(proc_signals) == 0):
+        return SignalList()
+    
+    if (virtual_signal_file is not None):    
+        # Reading the virtual signal file                
+        config = configparser.ConfigParser()
+        config.optionxform = str
+        read_ok = config.read(virtual_signal_file)
+        if (read_ok == []):
+            raise ValueError("Cannot open virtual signal file "+virtual_signal_file) 
+        try:
+            entries = config.items('Virtual names')
+        except Exception as e:
+            print(str(e))
+            raise ValueError("Invalid virtual signal file "+virtual_signal_file)
+        entry_descr = [e[0] for e in entries]
+        entry_values = [e[1] for e in entries]
+
+        slist = SignalList()    
+        for i_proc,sig in enumerate(proc_signals):
+            # These will contain the selected entry names and values for this signal
+            values = []
+            entry_names = []
+            for e,ev in zip(entry_descr, entry_values):
+                # Searching for an entry for this name
+                start_brace = e.find('(')
+                stop_brace = e.find(')')
+                if (start_brace * stop_brace < 0):
+                    raise ValueError("Invalid entry '{:s}' in virtual signal file: {:s}".format(e, virtual_signal_file))
+                if ((start_brace > 0) and (sig == e[:start_brace]) or ((start_brace < 0) and (sig == e))):
+                    if ((exp_id is None) and (start_brace > 0)):
+                        raise ValueError("Signal entry '{:s}' in virtual name file: {:s} has expID range, but expID is not given.".format(e, virtual_signal_file))                                 
+                    if (start_brace > 0):
+                        # ExpID range given
+                        exp_id_range = e[start_brace+1:stop_brace].split('-')
+                        if (len(exp_id_range) != 2):
+                            raise ValueError("Invalid exp_id range in entry '{:s}' in virtual name file: {:s}".format(e, virtual_signal_file))
+                        if (exp_id_range[0].strip() == ''):
+                            exp_id_start = None
+                        else:
+                            try:
+                                exp_id_start = int(exp_id_range[0])
+                            except ValueError:
+                                raise ValueError("Invalid exp_id start in entry '{:s}' in virtual name file: {:s}".format(e, virtual_signal_file))
+                        if (exp_id_range[1].strip() == ''):
+                            exp_id_stop = None
+                        else:
+                            try:
+                                exp_id_stop = int(exp_id_range[1])
+                            except ValueError:
+                                raise ValueError("Invalid exp_id stop in entry '{:s}' in virtual name file: {:s}".format(e, virtual_signal_file))
+                        if ((exp_id_start is not None) and (int(exp_id) < exp_id_start) or \
+                            (exp_id_stop is not None) and (int(exp_id) > exp_id_stop)) :
+                            continue        
+                        entry_names.append(e[:start_brace])
+                    else:
+                        entry_names.append(e)
+                    values.append(ev)
+            if (len(entry_names) == 0):
+                # This was not interpreted in the virtual signal file
+                slist.add(SignalList(data_type='real',signal_list=[sig]))
+                continue
+            if (len(entry_names) != 1):
+                raise ValueError("Multiple interpretations for signal name '{:s} in file {:s}".format(sig,virtual_signal_file))
+            descr = values[0].strip()
+            start_brace = descr.find('(')
+            stop_brace = descr.find(')')
+            if (start_brace * stop_brace < 0):
+                raise ValueError("Invalid value '{:s}' in virtual signal file: {:s}".format(descr, virtual_signal_file))
+            if (start_brace < 0):
+                # This is a simple name
+                sl = interpret_signals(descr,exp_id=exp_id,virtual_signal_file=virtual_signal_file,signal_list=signal_list)
+                # Replacing this signal name with its interpretation
+                slist.add(sl)
+                continue
+            if (start_brace >= 0):
+                signals_to_interpret = descr[start_brace+1:stop_brace].split(',')
+                data_type = descr[:start_brace].lower().strip()
+                if (data_type == 'complex'):
+                    sl = interpret_signals(signals_to_interpret,exp_id=exp_id,virtual_signal_file=virtual_signal_file,signal_list=signal_list)
+                    if ((len(sl.signal_list) != 2) or (sl.data_type != 'real')):
+                        raise ValueError("Invalid complex signal description for signal '{:s}' in file {:s}".format(sig,virtual_signal_file))
+                    sl.data_type = 'complex'
+                    sl.signal_list = [sl.signal_list]
+                    slist.add(sl)
+                elif (data_type == ''):
+                    # This is a list of names
+                    sl = interpret_signals(signals_to_interpret,exp_id=exp_id,virtual_signal_file=virtual_signal_file,signal_list=signal_list)
+                    slist.add(sl)
+                    continue
+                else:
+                    raise ValueError("Invalid signal description for signal '{:s}' in file {:s}".format(sig,virtual_signal_file))
+                       
+        return slist        
+
 
 def chlist(chlist=None, chrange=None, prefix='', postfix=''):
     """
