@@ -36,7 +36,7 @@ def unify_list(list1, list2):
             unified_list.append(d)
     return sorted(unified_list)
 
-def select_signals(signal_list, signal_spec):
+def select_signals(signal_list, signal_spec, no_check=False):
     """
     Selects signals from a signal list following signal specifications.
 
@@ -53,6 +53,11 @@ def select_signals(signal_list, signal_spec):
         List of strings with signal specifications including wildcards
         Normal Unix file name wildcards are accepted and extended with
         [<num>-<num>] type expressions so as e.g. a channel range can be selected.
+        
+    no_check: bool
+        If True no error is raised when a signal is not present in the signals list.
+        The signal list is used only for * regular expression in this case.
+        If False an error is raised when a signal is not presen in the signal list.
 
     Raises
     ------
@@ -114,12 +119,29 @@ def select_signals(signal_list, signal_spec):
                     for zero2 in range(len(numstr2)):
                         if (numstr2[zero2] != '0'):
                             break    
-                    # Extracting the strings before and after the []
                 except Exception:
+                    # Trying as a list
+                    name_list = ch[i1+1:i2].split(',')
+                    if (len(name_list) > 1):
+                        # Extracting the strings before and after the []
+                        if (i1 == 0):
+                            str1 = ""
+                        else:
+                            str1 = ch[0:i1]
+                        if (i2 < len(ch)-1):
+                            str2 = ch[i2+1:len(ch)]
+                        else:
+                            str2 = ""
+                        extended = True
+                        for s in name_list:
+                            extended_list.append(str1+s+str2)
+                        startpos = i2+1
+                        break                       
                     if (i2 >= len(ch)-2):
                         break
                     startpos = i2+1
                     continue
+                # Extracting the strings before and after the []
                 if (i1 == 0):
                     str1 = ""
                 else:
@@ -171,7 +193,11 @@ def select_signals(signal_list, signal_spec):
                                 ch_match = True
                                 break
                 if (not ch_match):
-                    raise ValueError("Signal name: " + ch + " is not present.")
+                    if (no_check):
+                        select_list.append(ch)
+                        select_index.append(None)
+                    else:
+                        raise ValueError("Signal name: " + ch + " is not present.")
         if (not extended):
             break
     return select_list, select_index
@@ -295,6 +321,17 @@ def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=N
 
     """
 
+    def convert_exp_id(exp_id):
+        """ Convert an exp_id to int or float """
+        try:
+            return int(exp_id)
+        except ValueError:
+            pass
+        try:
+            return float(exp_id)
+        except ValueError:
+            return None
+
     if ((exp_id is not None) and (type(exp_id) is not str) and (type(exp_id) is not int)):
         raise TypeError("exp_id should be a string or int.")
     if (type(signals) is not list):
@@ -305,7 +342,7 @@ def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=N
     # Handling regular expressions, creating a signal list after reguler expression processing
     proc_signals = []
     for i in range(len(_signals)):     
-        reg_signals, signal_index = select_signals(signal_list, _signals[i])
+        reg_signals, signal_index = select_signals(signal_list, _signals[i],no_check=True)
         proc_signals += reg_signals
     if (len(proc_signals) == 0):
         return SignalList()
@@ -347,19 +384,20 @@ def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=N
                         if (exp_id_range[0].strip() == ''):
                             exp_id_start = None
                         else:
-                            try:
-                                exp_id_start = int(exp_id_range[0])
-                            except ValueError:
-                                raise ValueError("Invalid exp_id start in entry '{:s}' in virtual name file: {:s}".format(e, virtual_signal_file))
+                            exp_id_start = convert_exp_id(exp_id_range[0])
+                            if (exp_id_start is None):
+                                 raise ValueError("Invalid exp_id start in entry '{:s}' in virtual name file: {:s}".format(e, virtual_signal_file))
                         if (exp_id_range[1].strip() == ''):
                             exp_id_stop = None
                         else:
-                            try:
-                                exp_id_stop = int(exp_id_range[1])
-                            except ValueError:
+                            exp_id_stop = convert_exp_id(exp_id_range[1])
+                            if (exp_id_stop is None):
                                 raise ValueError("Invalid exp_id stop in entry '{:s}' in virtual name file: {:s}".format(e, virtual_signal_file))
-                        if ((exp_id_start is not None) and (int(exp_id) < exp_id_start) or \
-                            (exp_id_stop is not None) and (int(exp_id) > exp_id_stop)) :
+                        exp_id_num = convert_exp_id(exp_id)
+                        if (exp_id_num is None):
+                            raise ValueError("exp_id is invalid.")
+                        if ((exp_id_start is not None) and (exp_id_num < exp_id_start) or \
+                            (exp_id_stop is not None) and (exp_id_num > exp_id_stop)) :
                             continue        
                         entry_names.append(e[:start_brace])
                     else:
