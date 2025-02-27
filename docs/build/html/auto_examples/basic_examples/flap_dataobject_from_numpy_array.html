@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Using data source modules" href="using_data_sources.html" /><link rel="prev" title="Examples Gallery" href="../index.html" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Functionality examples" href="../functionality_examples/index.html" /><link rel="prev" title="Using data source modules" href="using_data_sources.html" />
 
     <!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
-        <title>Basic examples - FLAP documentation</title>
+        <title>Creating FLAP data object directly from numpy array - FLAP documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
@@ -207,9 +207,9 @@
   <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../index.html">FLAP - Fusion Library of Analysis Programs</a></li>
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Examples Gallery</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples Gallery</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current has-children current-page"><a class="current reference internal" href="#">Basic examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Basic examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Basic examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Basic examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="using_data_sources.html">Using data source modules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="flap_dataobject_from_numpy_array.html">Creating FLAP data object directly from <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Creating FLAP data object directly from <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../functionality_examples/index.html">Functionality examples</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
@@ -257,12 +257,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/fusion-flap/flap/blob/master/docs/auto_examples/basic_examples/index.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/blob/master/docs/auto_examples/basic_examples/flap_dataobject_from_numpy_array.ipynb?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/fusion-flap/flap/edit/master/docs/auto_examples/basic_examples/index.rst" title="Edit this page">
+  <a class="muted-link" href="https://github.com/fusion-flap/flap/edit/master/docs/auto_examples/basic_examples/flap_dataobject_from_numpy_array.ipynb" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -281,56 +281,189 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="basic-examples">
-<span id="example-basic-examples-header"></span><h1>Basic examples<a class="headerlink" href="#basic-examples" title="Link to this heading">¶</a></h1>
-<div class="toctree-wrapper compound">
+          <section class="tex2jax_ignore mathjax_ignore" id="creating-flap-data-object-directly-from-numpy-array">
+<span id="example-flap-dataobject-from-numpy-array"></span><h1>Creating FLAP data object directly from <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array<a class="headerlink" href="#creating-flap-data-object-directly-from-numpy-array" title="Link to this heading">¶</a></h1>
+<p>In most cases, for measurement data from a certain data source or for simple test data, the <a class="reference internal" href="../../flap.data_object.html#flap.data_object.get_data" title="flap.data_object.get_data"><span class="xref myst py py-func">flap.get_data()</span></a> method should be used. However, in some cases, it can be useful to create <code class="docutils literal notranslate"><span class="pre">flap</span></code> data objects directly from a <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array. This example shows a simple example for a one-dimensional dataset with equidistant time coordinates. <a class="footnote-reference brackets" href="#download" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Fix the random seed</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1234</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="sd-container-fluid sd-sphinx-override sd-mb-4 msg-sd-container docutils">
-<div class="sd-row msg-sd-row docutils">
-<div class="sd-col sd-d-flex-row msg-sd-card-hover docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-md sd-card-hover sd-text-center msg-sd-card sd-rounded-2 sd-border-0 docutils">
-<img alt="" class="sd-card-img-top msg-sd-card-img-top" src="../../_images/no_image.webp" />
-<div class="sd-card-body msg-sd-card-body docutils">
-<div class="sd-card-title sd-font-weight-bold msg-sd-card-title docutils">
-<a class="reference internal" href="using_data_sources.html#example-using-data-sources"><span class="std std-ref">Using data source modules</span></a></div>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="using_data_sources.html#example-using-data-sources"><span class="std std-ref">Using data source modules</span></a></div>
 </div>
-<div class="sd-col sd-d-flex-row msg-sd-card-hover docutils">
-<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-md sd-card-hover sd-text-center msg-sd-card sd-rounded-2 sd-border-0 docutils">
-<img alt="" class="sd-card-img-top msg-sd-card-img-top" src="../../_images/02-flap_dataobject_from_numpy_array.webp" />
-<div class="sd-card-body msg-sd-card-body docutils">
-<div class="sd-card-title sd-font-weight-bold msg-sd-card-title docutils">
-<a class="reference internal" href="flap_dataobject_from_numpy_array.html#example-flap-dataobject-from-numpy-array"><span class="std std-ref">Creating FLAP data object directly from numpy array</span></a></div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">flap</span>
+</pre></div>
 </div>
-<a class="sd-stretched-link sd-hide-link-text reference internal" href="flap_dataobject_from_numpy_array.html#example-flap-dataobject-from-numpy-array"><span class="std std-ref">Creating FLAP data object directly from numpy array</span></a></div>
 </div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Warning: could not read configuration file &#39;flap_defaults.cfg&#39;.
+Default location of configuration file is working directory.
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>INIT flap storage
+</pre></div>
+</div>
+</div>
+</div>
+<p>Create time sampling parameters and the time vector</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span> <span class="o">=</span> <span class="mf">0.002</span>
+<span class="n">t_start</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<span class="n">t_end</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">t_start</span><span class="p">,</span> <span class="n">t_end</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The data itself (sum of two sine signals with additive white noise)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">signal1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+<span class="n">signal2</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mf">2.8</span> <span class="o">*</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">t</span><span class="p">)</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">)</span>
+                         
+<span class="n">data_array</span> <span class="o">=</span> <span class="n">signal1</span> <span class="o">+</span> <span class="n">signal2</span> <span class="o">+</span> <span class="n">noise</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Data units for the data must be defined to store it in a <code class="docutils literal notranslate"><span class="pre">flap</span></code> data object.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">data_unit</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">Unit</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Signal&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;Volt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The data must also have coordinates associated. Since here the sampling is uniform (i.e. the coordinate is equidistant), only the start time and the increment is stored instead of storing the entire time vector. This is specified in a <a class="reference internal" href="../../flap.coordinate.html#flap.coordinate.CoordinateMode" title="flap.coordinate.CoordinateMode"><span class="xref myst py py-class">flap.coordinate.CoordinateMode</span></a> object. The <code class="docutils literal notranslate"><span class="pre">dimension_list</span></code> parameter specifies the dimensions of the data associated with these coordinates.</p>
+<p>For more details, see the corresponding sections of the <a class="reference internal" href="../../users_guide/index.html#users-guide-coordinates-in-flap"><span class="std std-ref">User’s Guide</span></a> and the <a class="reference internal" href="../../flap.coordinate.html#module-flap.coordinate" title="flap.coordinate"><span class="xref myst py py-mod">API Reference</span></a>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">coordinate_mode</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">CoordinateMode</span><span class="p">(</span><span class="n">equidistant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">data_coords</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">coordinate</span><span class="o">.</span><span class="n">Coordinate</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span>
+    <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;Second&#39;</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="n">coordinate_mode</span><span class="p">,</span>
+    <span class="n">shape</span><span class="o">=</span><span class="p">[],</span>
+    <span class="n">start</span><span class="o">=</span><span class="n">t_start</span><span class="p">,</span>
+    <span class="n">step</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
+    <span class="n">dimension_list</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Now, the data object can be created with the associated data, data units and coordinates:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">DataObject</span><span class="p">(</span>
+    <span class="n">data_array</span><span class="o">=</span><span class="n">data_array</span><span class="p">,</span>
+    <span class="n">data_unit</span><span class="o">=</span><span class="n">data_unit</span><span class="p">,</span>
+    <span class="n">coordinates</span><span class="o">=</span><span class="n">data_coords</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>All <code class="docutils literal notranslate"><span class="pre">flap</span></code> features can now be used on this data object. Some examples:</p>
+<p>Plotting:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">d</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;All points&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">})</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/403acbfa2bf8749888fb1fa0fae9b0c97c8cc74acb2205875fdc9bff70b93493.png" src="../../_images/403acbfa2bf8749888fb1fa0fae9b0c97c8cc74acb2205875fdc9bff70b93493.png" />
+</div>
+</div>
+<p>Auto-power spectral density:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d_apsd</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">apsd</span><span class="p">()</span>
+
+<span class="c1"># Plot the APSD</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">d_apsd</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/ec521a782eae3f5d7f87da7e4dded8553b8deccfd32e380ffe2ee5f8b11f0cf4.png" src="../../_images/ec521a782eae3f5d7f87da7e4dded8553b8deccfd32e380ffe2ee5f8b11f0cf4.png" />
+</div>
+</div>
+<p>Saving and loading the data object as a pickled object:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s1">&#39;test_save.pickle&#39;</span><span class="p">)</span>
+
+<span class="n">d_loaded</span> <span class="o">=</span> <span class="n">flap</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s1">&#39;test_save.pickle&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">d_loaded</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/7e690d54dac9dd22f7320d88a7047f6dd935545d71b7d0af36c419ed3c476e28.png" src="../../_images/7e690d54dac9dd22f7320d88a7047f6dd935545d71b7d0af36c419ed3c476e28.png" />
 </div>
 </div>
 </section>
+<hr class="footnotes docutils" />
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="download" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>This notebook can be downloaded as <strong><a class="reference download internal" download="" href="../../_downloads/c62a0d04c57036f9de7fce5a3fa31886/flap_dataobject_from_numpy_array.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">flap_dataobject_from_numpy_array.ipynb</span></code></a></strong></p>
+</aside>
+</aside>
 
         </article>
       </div>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="using_data_sources.html">
+          <a class="next-page" href="../functionality_examples/index.html">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Using data source modules</div>
+                <div class="title">Functionality examples</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../index.html">
+          <a class="prev-page" href="using_data_sources.html">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Examples Gallery</div>
+                <div class="title">Using data source modules</div>
                 
               </div>
             </a>

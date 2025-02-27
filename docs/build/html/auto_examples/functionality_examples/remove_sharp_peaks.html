@@ -9,7 +9,7 @@
         <title>Removing sharp peaks - FLAP documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../../_static/myst_sphinx_gallery.css?v=92de7a9e" />
@@ -209,6 +209,7 @@
 <li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Examples Gallery</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Examples Gallery</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
 <li class="toctree-l2 has-children"><a class="reference internal" href="../basic_examples/index.html">Basic examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Basic examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../basic_examples/using_data_sources.html">Using data source modules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../basic_examples/flap_dataobject_from_numpy_array.html">Creating FLAP data object directly from <code class="docutils literal notranslate"><span class="pre">numpy</span></code> array</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Functionality examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Functionality examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
@@ -444,7 +445,7 @@ Row [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 1, 1
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/59a411529ddb5dcf93a886aeb7f4f98a8c50a5c7409561813c06d1b6243b18d5.png" src="../../_images/59a411529ddb5dcf93a886aeb7f4f98a8c50a5c7409561813c06d1b6243b18d5.png" />
+<img alt="../../_images/1ae6fbf1baaf990e5491138eb35eb03da2fcf11dcc7cd46030a35e268f04c263.png" src="../../_images/1ae6fbf1baaf990e5491138eb35eb03da2fcf11dcc7cd46030a35e268f04c263.png" />
 </div>
 </div>
 <p>Zoom in on a single peak:</p>
@@ -457,7 +458,7 @@ Row [a.u.](Dims:0), Shape:[3]) [&lt;R. symm.&gt;] Val:1, 1, 1
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/ad6f8636b448bda74aae028d693a3bd0cf2f942bbd42ce05096a375d9c8518a7.png" src="../../_images/ad6f8636b448bda74aae028d693a3bd0cf2f942bbd42ce05096a375d9c8518a7.png" />
+<img alt="../../_images/48cb849d8387c34aea994a464972236ba27b352b64df02401c6bce254dbf59cb.png" src="../../_images/48cb849d8387c34aea994a464972236ba27b352b64df02401c6bce254dbf59cb.png" />
 </div>
 </div>
 </section>
@@ -528,7 +529,7 @@ num_peaks_removed: [10 10 10]
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/d15f113ea8f55cc31d3073aac7c29bbcad6eda5740a7ebf0d37fdfd351cee7d3.png" src="../../_images/d15f113ea8f55cc31d3073aac7c29bbcad6eda5740a7ebf0d37fdfd351cee7d3.png" />
+<img alt="../../_images/723c457e78c5464aba7692c1398492a937c2f40424776f9e537584cd7c6abe10.png" src="../../_images/723c457e78c5464aba7692c1398492a937c2f40424776f9e537584cd7c6abe10.png" />
 </div>
 </div>
 </section>
@@ -601,7 +602,7 @@ Peak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../../_images/44cfb62480fe496c57b6eab11a17d557ec8d0d1268849889a57c2fd63e684135.png" src="../../_images/44cfb62480fe496c57b6eab11a17d557ec8d0d1268849889a57c2fd63e684135.png" />
+<img alt="../../_images/87c722ac082fa9f8ee05e3d4e5941c36df52a3e8f99647bf547de633cda9b53b.png" src="../../_images/87c722ac082fa9f8ee05e3d4e5941c36df52a3e8f99647bf547de633cda9b53b.png" />
 </div>
 </div>
 </section>
@@ -636,20 +637,31 @@ Peak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">)):</span>
-    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">---------------------------------------------------------------------------</span>
-<span class="ne">IndexError</span><span class="g g-Whitespace">                                </span>Traceback (most recent call last)
-<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">25</span><span class="p">],</span> <span class="n">line</span> <span class="mi">2</span>
-<span class="g g-Whitespace">      </span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">)):</span>
-<span class="ne">----&gt; </span><span class="mi">2</span>     <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-<span class="g g-Whitespace">      </span><span class="mi">3</span>     <span class="nb">print</span><span class="p">()</span>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.745E-04,  6.445E-04,  1.301E-03,  1.326E-03,  1.896E-03,  2.220E-03,  3.079E-03,  3.593E-03,  4.490E-03,  4.586E-03
 
-<span class="ne">IndexError</span>: too many indices for array: array is 1-dimensional, but 2 were indexed
+
+-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 2.935E-04,  9.165E-04,  1.167E-03,  1.396E-03,  1.667E-03,  2.080E-03,  2.535E-03,  2.759E-03,  3.943E-03,  4.784E-03
+
+
+-----------------------------
+&lt;1&gt;(data_source:&quot;&quot; exp_id:&quot;&quot;) data_title:&quot;&quot; shape:[10][no error]
+  Data name:&quot;Signal&quot;, unit:&quot;Volt&quot;
+  Coords:
+Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.420E-04,  2.875E-04,  3.995E-04,  2.334E-03,  2.515E-03,  2.873E-03,  3.106E-03,  3.363E-03,  3.559E-03,  4.756E-03
 </pre></div>
 </div>
 </div>
@@ -657,7 +669,7 @@ Peak detected [Bool](Dims:0,1), Shape:[3,5001]) [&lt;R. symm.&gt;] Val. range:  
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak_amplitudes_array</span><span class="p">)):</span>
-    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_widths_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+    <span class="n">flap</span><span class="o">.</span><span class="n">list_data_objects</span><span class="p">(</span><span class="n">peak_widths_array</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">()</span>
 </pre></div>
 </div>
@@ -692,7 +704,7 @@ Time [Second](Dims:0), Shape:[10]) [&lt;R. symm.&gt;] Val: 1.420E-04,  2.875E-04
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 
 <span class="n">d_removed_2</span><span class="o">.</span><span class="n">slice_data</span><span class="p">({</span><span class="s1">&#39;Signal name&#39;</span> <span class="p">:</span> <span class="s1">&#39;TEST-1-1&#39;</span><span class="p">})</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-<span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
+<span class="n">peak_amplitudes_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">plot_type</span><span class="o">=</span><span class="s1">&#39;scatter&#39;</span><span class="p">)</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
