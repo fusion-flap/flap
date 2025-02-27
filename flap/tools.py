@@ -361,8 +361,8 @@ def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=N
             raise ValueError("Invalid virtual signal file "+virtual_signal_file)
         entry_descr = [e[0] for e in entries]
         entry_values = [e[1] for e in entries]
-
-        slist = SignalList()    
+ 
+        slist = SignalList()   
         for i_proc,sig in enumerate(proc_signals):
             # These will contain the selected entry names and values for this signal
             values = []
@@ -437,8 +437,9 @@ def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=N
                     continue
                 else:
                     raise ValueError("Invalid signal description for signal '{:s}' in file {:s}".format(sig,virtual_signal_file))
-                       
-        return slist        
+    else:
+        slist =  SignalList(data_type='real',signal_list=proc_signals)                
+    return slist        
 
 
 def chlist(chlist=None, chrange=None, prefix='', postfix=''):
