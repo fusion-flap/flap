@@ -88,6 +88,7 @@ In this example reading ALL_SIGNALS will result in a DataObject containing signa
 The signal interpretation is fully recursive, lines in the file can link to other lines, complex signals can be listed to yield a DataObject with multiple complex signals, etc. It is the resonsibility of the programmer of a data source to make use of the above facility which is provided in the interpret_signals function.
 
 
+(users-guide-coordinates-in-flap)=
 ## Coordinates in FLAP
 
 In the FLAP program package coordinates are stored with the data. This document describes the implementation of this feature.
