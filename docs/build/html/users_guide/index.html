@@ -9,7 +9,7 @@
         <title>FLAP Version 1.21 User’s Guide - FLAP documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="../_static/myst_sphinx_gallery.css?v=92de7a9e" />
@@ -334,6 +334,22 @@ Name = &#39;This is a string&#39;
 <section id="data-sources">
 <h2>Data sources<a class="headerlink" href="#data-sources" title="Link to this heading">¶</a></h2>
 <p>FLAP can make use of various data read modules which can be dynamically added to the package. Each package registers its data read and optional coordinate addition function in FLAP so as data are read using a single FLAP function called <code class="docutils literal notranslate"><span class="pre">get_data</span></code>. The parameters are the data source name, data name (interpreted by the data source module), experiment ID and additional coordinate information so as data can be limited to certain ranges or resampled in channels, time, etc. A single <code class="docutils literal notranslate"><span class="pre">get_data</span></code> call can read any number of measurement channels, there is an extended wildcard interpretation method which enables e.g. using <code class="docutils literal notranslate"><span class="pre">Signal[2-28]</span></code> to read signals from 2 to 28 into one data array. The module data read function can add as many coordinates to the data array as it desires to be useful. (See information on FLAP coordinates below.) Standard coordinates are Time, Signal name, Channel, etc. For information on writing a FLAP data source please see the appropriate section below.</p>
+<section id="signal-names">
+<h3>Signal names<a class="headerlink" href="#signal-names" title="Link to this heading">¶</a></h3>
+<p>Signal names depend on the data source. There are data sources (e.g. MDS+) where signal names are arranged in a big tree and difficult to remember. To ease this a virtual signal name translation mechanism is provided. If used by the data source modul it allow setting up a virtual signal table where signals are translated to real signal names, which can be read from the DAQ system. This solution also allows for using extended wildcards in signal names.</p>
+<p>An example virtual signal file is shown here:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[Virtual names]
+ALL_SIGNALS = (S1,S2,S3,S30,S31,S32)
+PART_SIGNALS1 = S[2-3]
+PART_SIGNALS2 = S[30-31]
+COMPLEX_SIGNAL = COMPLEX(S1,S2)
+SIG(1234-2345) = DAC23
+SIG(3455-4566) = DAC44
+</pre></div>
+</div>
+<p>In this example reading ALL_SIGNALS will result in a DataObject containing signals S1…S3,S30,…S32. PART_SIGNALS1 will result in S2 and S3 while PART_SIGNALS2 will yield S30 and S31. COMPLEX_SIGNAL will yield  a complex DataObject composed of two measured signals. The last two lines show examples how the signal name translation can be limited to certain shot number ranges.</p>
+<p>The signal interpretation is fully recursive, lines in the file can link to other lines, complex signals can be listed to yield a DataObject with multiple complex signals, etc. It is the resonsibility of the programmer of a data source to make use of the above facility which is provided in the interpret_signals function.</p>
+</section>
 </section>
 <section id="coordinates-in-flap">
 <h2>Coordinates in FLAP<a class="headerlink" href="#coordinates-in-flap" title="Link to this heading">¶</a></h2>
@@ -1037,7 +1053,10 @@ coordinates named ‘Device x’ and ‘Device y’. The <code class="docutils l
 <li><a class="reference internal" href="#configuration">Configuration</a></li>
 <li><a class="reference internal" href="#options-and-defaults">Options and defaults</a></li>
 <li><a class="reference internal" href="#data-objects">Data objects</a></li>
-<li><a class="reference internal" href="#data-sources">Data sources</a></li>
+<li><a class="reference internal" href="#data-sources">Data sources</a><ul>
+<li><a class="reference internal" href="#signal-names">Signal names</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#coordinates-in-flap">Coordinates in FLAP</a><ul>
 <li><a class="reference internal" href="#data-storage-and-coordinates">Data storage and coordinates</a></li>
 <li><a class="reference internal" href="#representation-of-coordinates">Representation of coordinates</a></li>

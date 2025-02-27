@@ -9,7 +9,7 @@
         <title>flap.denoising - FLAP documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/myst_sphinx_gallery.css?v=92de7a9e" />
@@ -305,7 +305,8 @@ peaks can be removed from the signal by interpolation.</p>
 <dt><strong>diff_limit</strong><span class="classifier">float</span></dt><dd><p>The derivative limit for the detection of sharp rising/falling edges of
 peaks. Calculated in units of signal units / time units.</p>
 </dd>
-<dt><strong>dt</strong><span class="classifier">float, optional, default=1.0</span></dt><dd><p>The time difference between consecutive samples.</p>
+<dt><strong>dt</strong><span class="classifier">float, optional, default=1.0</span></dt><dd><p>The time difference between consecutive samples. Must be in the same
+time unit as used for <cite>diff_limit</cite> and <cite>time</cite>.</p>
 </dd>
 <dt><strong>return_peak_center_times</strong><span class="classifier">bool, optional, default=False</span></dt><dd><p>Return the time coordinates of the center of the detected peaks.</p>
 </dd>

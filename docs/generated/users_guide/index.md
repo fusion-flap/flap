@@ -69,6 +69,25 @@ Data objects are normally created by the class constructor by giving the content
 
 FLAP can make use of various data read modules which can be dynamically added to the package. Each package registers its data read and optional coordinate addition function in FLAP so as data are read using a single FLAP function called `get_data`. The parameters are the data source name, data name (interpreted by the data source module), experiment ID and additional coordinate information so as data can be limited to certain ranges or resampled in channels, time, etc. A single `get_data` call can read any number of measurement channels, there is an extended wildcard interpretation method which enables e.g. using `Signal[2-28]` to read signals from 2 to 28 into one data array. The module data read function can add as many coordinates to the data array as it desires to be useful. (See information on FLAP coordinates below.) Standard coordinates are Time, Signal name, Channel, etc. For information on writing a FLAP data source please see the appropriate section below.
 
+### Signal names
+
+Signal names depend on the data source. There are data sources (e.g. MDS+) where signal names are arranged in a big tree and difficult to remember. To ease this a virtual signal name translation mechanism is provided. If used by the data source modul it allow setting up a virtual signal table where signals are translated to real signal names, which can be read from the DAQ system. This solution also allows for using extended wildcards in signal names.
+
+An example virtual signal file is shown here:
+
+    [Virtual names]
+    ALL_SIGNALS = (S1,S2,S3,S30,S31,S32)
+    PART_SIGNALS1 = S[2-3]
+    PART_SIGNALS2 = S[30-31]
+    COMPLEX_SIGNAL = COMPLEX(S1,S2)
+    SIG(1234-2345) = DAC23
+    SIG(3455-4566) = DAC44
+
+In this example reading ALL_SIGNALS will result in a DataObject containing signals S1...S3,S30,...S32. PART_SIGNALS1 will result in S2 and S3 while PART_SIGNALS2 will yield S30 and S31. COMPLEX_SIGNAL will yield  a complex DataObject composed of two measured signals. The last two lines show examples how the signal name translation can be limited to certain shot number ranges.
+
+The signal interpretation is fully recursive, lines in the file can link to other lines, complex signals can be listed to yield a DataObject with multiple complex signals, etc. It is the resonsibility of the programmer of a data source to make use of the above facility which is provided in the interpret_signals function.
+
+
 ## Coordinates in FLAP
 
 In the FLAP program package coordinates are stored with the data. This document describes the implementation of this feature.
