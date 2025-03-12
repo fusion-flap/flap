@@ -1020,7 +1020,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             if (aps_calc):
                 apsd_interval /= out_data_num.reshape(bs_apsd)
                 apsd_ref_interval /= out_data_num.reshape(bs_apsd_ref)
-            out_data_interval /= interval_sample_n
+        out_data_interval /= interval_sample_n
         out_data += out_data_interval
         if (aps_calc):
             apsd_interval /= interval_sample_n
