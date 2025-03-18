@@ -2,7 +2,7 @@
  "cells": [
   {
    "cell_type": "markdown",
-   "id": "b780bdc1",
+   "id": "14483ef2",
    "metadata": {},
    "source": [
     "(example_remove_sharp_peaks)="

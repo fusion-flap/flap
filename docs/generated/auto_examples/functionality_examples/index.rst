@@ -21,7 +21,7 @@ Functionality examples
         :link: example_remove_sharp_peaks
         :link-type: ref
         :shadow: md
-        :class-card: msg-sd-card sd-rounded-2 sd-border-0
+        :class-card: sd-border-0 sd-rounded-2 msg-sd-card
         :class-item: msg-sd-card-hover
         :class-title: msg-sd-card-title
         :class-img-top: msg-sd-card-img-top

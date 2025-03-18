@@ -82,6 +82,9 @@ Install the package:
 .. tip::
    The default environment uses ``numpy >= 2.0``. In case this is incompatible with some additional library needed, ``*_oldnumpy.yml`` files are also available in the ``docs/`` folder, which can be used to create environments with an older version of numpy.
 
+.. tip::
+   In some cases, the default environment files can conflict with already installed software not managed by conda/mamba, which results in the environment install failing due to dependency problems. In this case, try the ``*_gentle.yml`` files. For example, instead of using ``docs/flap_windows.yml``, try using ``docs/flap_windows_gentle.yml`` and so on.
+
 FLAP is now ready to use!
 
 
