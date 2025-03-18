@@ -315,9 +315,15 @@ def _trend_removal(d, ax, trend, x=None, return_trend=False, return_poly=False):
                     return
             else:
                 p = np.polynomial.polynomial.polyfit(_x,d,order)
-                d -= p[0]
+                if (d.dtype == 'int64'):
+                    d -= int(p[0])
+                else:
+                    d -= p[0]
                 for i in range(order):
-                    d -= p[i + 1] * _x ** (i + 1)
+                    if (d.dtype == 'int64'):
+                        d -= (p[i + 1] * _x ** (i + 1)).astype(d.dtype)
+                    else:
+                        d -= p[i + 1] * _x ** (i + 1)
                 return
     raise ValueError("Unknown trend removal method.")
 
