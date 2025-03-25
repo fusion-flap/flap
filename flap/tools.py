@@ -204,7 +204,7 @@ def select_signals(signal_list, signal_spec, no_check=False):
 
 
 class SignalList():
-    """ Class to contain a list of identical signals names suitable for inclusion in 
+    """ Class to contain a list of identical signal names suitable for inclusion in 
         a DataObject.
         
         data_type: str
@@ -214,15 +214,28 @@ class SignalList():
                        are interpreted as complex signals.    
         signal_list: list 
                    List of signal names or complex signal descriptions
-                   Complex signal is desribed by a list of two signal names. 
+                   Complex signal is desribed by a list of two signal names.
+        invert: list or None
+            If list: It should have the same length as signal_list. 
+                     The elemenets should be boolean. If True the respective signal is inverted after reading from the database or cache.
+            If None: Nothing to do with the signals.
     """
-    def __init__(self,data_type=None,signal_list=[]):
+    def __init__(self,data_type=None,signal_list=[],invert=None):
         self.data_type = data_type
+        if (self.data_type is not None and (self.data_type.lower() == 'complex')):
+            for sig in signal_list:
+                if (len(sig != 2)):
+                    raise ValueError ('Complex signal description should have two elements.')
         self.signal_list = signal_list
+        if (invert is not None):
+            if (len(invert) != len(self.signal_list)):
+                raise ValueError("In invert is given in signal description it should have same lenght as signal list.")
+        self.invert = invert
+        
         
     def add(self,s,pos=None):
         """
-        Adds a SignalList to an existging one at a position in the list. The type of the two
+        Adds a SignalList to an existging one at a position in the list. The type (real,complex) of the two
         lists should be identical.
 
         Parameters
@@ -247,6 +260,7 @@ class SignalList():
         if ((self.data_type is None) and (len(self.signal_list) == 0)):
             self.data_type = s.data_type
             self.signal_list = s.signal_list
+            self.invert = s.invert
             return
         if ((s.data_type is None) and (len(s.signal_list) == 0)):
             return
@@ -257,6 +271,13 @@ class SignalList():
         if ((pos is None) or (pos >= len(self.signal_list))):
             # Adding to end
             self.signal_list += s.signal_list
+            if (self.invert is not None) or (s.invert is not None):
+                if (self.invert is None) and (s.invert is not None):
+                    self.invert = [False] * len(self.signal_list)
+                if (self.invert is not None) and (s.invert is None):
+                    self.invert += [False] * len(s.signal_list)
+                else:
+                    self.invert += s.invert
             return
         if ((pos < 0) and ((len(self.signal_list) == 0) or (-pos > len(self.signal_list)))):
             raise ValueError("Invalid position for inserting SignalList.")   
@@ -266,6 +287,13 @@ class SignalList():
             _pos = len(self.signal_list) + pos 
             self.signal_list = self.signal_list[:_pos] + s.signal_list + self.signal_list[_pos+1:]
             self.data_type = s.data_type
+            if (self.invert is not None) or (s.invert is not None):
+                if (self.invert is None) and (s.invert is not None):
+                    self.invert = [False] * len(self.signal_list)
+                if (self.invert is not None) and (s.invert is None):
+                    self.invert = self.invert[:_pos] + [False] * len(s.signal_list) + self.invert[_pos+1:]
+                else:
+                    self.invert = self.invert[:_pos] + s.invert + self.invert[_pos+1:]         
         return
         
         
@@ -291,7 +319,8 @@ def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=N
                Each name can be any of the one in point 1.
             3. A complex signal composed of two signals: complex(signal1,signal2)
                The two signal names should interpret to real signals.
-    
+            4. An inverted signal: invert(signal description). Signal description is a single signal or list. 
+               After reading data the signals will be inverted.
     Parameters
     ----------
     signals : str
@@ -430,9 +459,11 @@ def interpret_signals(signals,exp_id=None,virtual_signal_file=None,signal_list=N
                     sl.data_type = 'complex'
                     sl.signal_list = [sl.signal_list]
                     slist.add(sl)
-                elif (data_type == ''):
+                if ((data_type == 'invert') or (data_type == '')):
                     # This is a list of names
                     sl = interpret_signals(signals_to_interpret,exp_id=exp_id,virtual_signal_file=virtual_signal_file,signal_list=signal_list)
+                    if (data_type == 'invert'):
+                        sl.invert = [True] * len(sl.signal_list)
                     slist.add(sl)
                     continue
                 else:
