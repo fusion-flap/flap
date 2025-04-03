@@ -521,6 +521,9 @@ def submatrix_index(mx_shape, index):
         ind_ind[i] = ...
         ind[tuple(ind_ind)] = index[i]
         # Expanding this matrix in all other dimensions
+        if (len(index) < mx_dim):
+            print("Bug...needs to be checked.")
+            index = index[0]
         for j in range(mx_dim):
             if (j != i):
                 ind = np.repeat(ind,index[j].size,j)

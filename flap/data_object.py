@@ -2783,10 +2783,10 @@ class DataObject:
             elif ((len(rel_coord_obj.dimension_list) == 1) and (len(start_coord_obj.dimension_list) == 1)
                     and (rel_coord_obj.dimension_list[0] == start_coord_obj.dimension_list[0])):
                 if (not rel_coord_obj.mode.equidistant):
-                    d = start_coord.data(data_shape=self.shape)[0]
-                    dr = rel_coord.data(data_shape=self.shape)[0]
-                    start_coord.mode.equidistant = False
-                    start_coord.values = d + dr
+                    d = start_coord_obj.data(data_shape=self.shape)[0]
+                    dr = rel_coord_obj.data(data_shape=self.shape)[0]
+                    start_coord_obj.mode.equidistant = False
+                    start_coord_obj.values = d + dr
                     start_coord_obj.unit.name = orig_coord
                     del_list.append(rel_coord_obj.unit.name)
                     del_list.append('Interval('+slice_coord+')')
