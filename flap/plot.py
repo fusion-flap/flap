@@ -1828,30 +1828,34 @@ def _plot(data_object,
                 raise ValueError("Invalid Y separation option.") from exc
         _options['Y separation'] = ysep
 
-        # Determining Y range
-        if (axis_index == 0):
-            if (_options['Log y']):
-                ax_min = np.nanmin(d.data[:,0])
-                ax_max = np.nanmax(d.data[:,-1]) * ysep ** (d.data.shape[1]-1)
+
+        signal_index = (axis_index + 1) % 2
+        
+        if (yrange is None):
+            # Determining Y range
+            if (axis_index == 0):
+                if (_options['Log y']):
+                    ax_min = np.nanmin(d.data[:,0])
+                    ax_max = np.nanmax(d.data[:,-1]) * ysep ** (d.data.shape[1]-1)
+                else:
+                    ax_min = np.nanmin(d.data[:,0])
+                    ax_max = np.nanmax(d.data[:,-1]) + ysep * (d.data.shape[1]-1)
             else:
-                ax_min = np.nanmin(d.data[:,0])
-                ax_max = np.nanmax(d.data[:,-1]) + ysep * (d.data.shape[1]-1)
-            signal_index = 1
+                if (_options['Log y']):
+                    ax_min = np.nanmin(d.data[0,:])
+                    ax_max = np.nanmax(d.data[-1,:]) * ysep ** (d.data.shape[0]-1)
+                else:
+                    ax_min = np.nanmin(d.data[0,:])
+                    ax_max = np.nanmax(d.data[-1,:]) + ysep * (d.data.shape[0]-1)
+            # If overplot then taking min and max of this and previous plots
+            if (_plot_id.number_of_plots != 0):
+                ax_min = min(ax.get_ylim()[0], ax_min)
+                ax_max = max(ax.get_ylim()[1], ax_max)
+            if (ax_max <= ax_min):
+                ax_max += 1
+            ax.set_ylim(ax_min, ax_max)
         else:
-            if (_options['Log y']):
-                ax_min = np.nanmin(d.data[0,:])
-                ax_max = np.nanmax(d.data[-1,:]) * ysep ** (d.data.shape[0]-1)
-            else:
-                ax_min = np.nanmin(d.data[0,:])
-                ax_max = np.nanmax(d.data[-1,:]) + ysep * (d.data.shape[0]-1)
-            signal_index = 0
-        # If overplot then taking min and max of this and previous plots
-        if (_plot_id.number_of_plots != 0):
-            ax_min = min(ax.get_ylim()[0], ax_min)
-            ax_max = max(ax.get_ylim()[1], ax_max)
-        if (ax_max <= ax_min):
-            ax_max += 1
-        ax.set_ylim(ax_min, ax_max)
+            ax.set_ylim(*yrange)
 
         _plot_opt = _plot_options[0]
         for i in range(d.shape[signal_index]):
@@ -1927,6 +1931,7 @@ def _plot(data_object,
                     title += ',...'
                 ax.set_title(title)
         _plot_id.plot_subtype = 0 # real multi xy plot
+        _plot_id.number_of_plots = 1
 
     ######
 
