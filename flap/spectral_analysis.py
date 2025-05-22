@@ -774,8 +774,7 @@ def _cpsd(d, ref=None, coordinate=None, intervals=None, options=None):
             raise ValueError("Spectrum calculation is possible only along coordinates changing in one dimension (ref).")
         if (not ref_coord_obj.mode.equidistant):
             raise ValueError("Spectrum calculation is possible only along equidistant coordinates (ref).")
-        if (math.fabs(ref_coord_obj.step[0] - coord_obj.step[0]) * d.shape[coord_obj.dimension_list[0]] \
-            > math.fabs(ref_coord_obj.step[0])):
+        if (math.fabs(ref_coord_obj.step[0] - coord_obj.step[0]) > math.fabs(ref_coord_obj.step[0]) * 1e-2):
                raise ValueError("Incompatible coordinate step sizes." )
         if (math.fabs(ref_coord_obj.start - coord_obj.start) > math.fabs(coord_obj.step[0])):
                    raise ValueError("Incompatible coordinate start values." )
