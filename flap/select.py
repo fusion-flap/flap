@@ -61,8 +61,17 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
                                    In each of the above cases the interval will be 'Length' long around the event.
                                    'Above', 'Below':
                                      The intervals will be where the signal is above or below the threshold. 
+                                   'Correlation':
+                                     Will calculate the correlation between the filtered signal and filtered Gaussians, then
+                                     then perform the same interval selection as above for 'Max-weight' and 'Min-weight'.
+                                     The sign of the treshold determines which one will be: (-) stands for 'Min-weight',
+                                     (+) stands for 'Max-weight'
                            'Start delay', 'End delay': For the Above and Below events the start and end delay of the interval
                                                        in the coordinate units.
+                           'Gaussian sigma': For Correlation events. It can be a float, or an 1D array of floats. It contains 
+                                             the sigma parameters of the Gaussians.
+                           'Int tau': For Correlation events. It is the tau parameter for the integrator filter.
+                           'Diff tau': For Correlation events. It is the tau parameter for the differentiator filter.
                            'Threshold': The threshold for the event.
                            'Thr-type' Threshold type:
                                          'Absolute': Absolute signal value
@@ -152,7 +161,7 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
         try:
             ev_type = event['Type']
         except KeyError:
-            raise ValueError("Event type is not set. Use Maximum, Minimum, Max-weight, Min-weight, Above or Below")
+            raise ValueError("Event type is not set. Use Maximum, Minimum, Max-weight, Min-weight, Above, Below or Correlation")
         try:
             ev_thr = event['Threshold']
         except KeyError:
@@ -169,6 +178,20 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
             end_delay = event['End delay']
         except KeyError:
             end_delay = 0
+        
+        try:
+            gaussian_sigma = event['Gaussian sigma']
+        except KeyError:
+            gaussian_sigma = 0
+        try:
+            int_tau = event['Int tau']
+        except KeyError:
+            int_tau = 0
+        try:
+            diff_tau = event['Diff tau']
+        except KeyError:
+            diff_tau = 0
+        
     else:
         if (((_options['Select'] == 'Start') or (_options['Select'] == 'End')
              or (_options['Select'] == 'Center'))
@@ -219,6 +242,11 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
     start_coord = []
     end_coord = []
     y_coord = []
+    
+    c = d.get_coordinate_object(coordinate)
+    if(c.mode.equidistant == False):
+        print("Warning: non-equidistant coordinates.")
+        print("The program will make them so, using the mean difference between each values.")
 
     for i_int in range(interval_n):
         if (_options['Select'] is not None):
@@ -257,70 +285,207 @@ def select_intervals(object_descr, coordinate=None, exp_id='*', intervals=None, 
             fig.canvas.mpl_disconnect(cid_release)
             time.sleep(0.1)
         else:
-            # Getting the data and the coordinate for this interval
-            ind = [0]*len(d.shape)
-            data_act = d.data[sel_int_ind[0][i_int]:sel_int_ind[1][i_int]]
-            ind[select_coord_obj.dimension_list[0]] = slice(sel_int_ind[0][i_int], sel_int_ind[1][i_int])
-            coord_act, cl, ch = coord_obj.data(data_shape=d.shape, index=ind)
-            if (sel_int[0][i_int] > sel_int[1][i_int]):
-                data_act = np.flip(data_act)
-                coord_act = np.flip(coord_act)
-            # Finding indices where the condition switches on and off
-            if ((ev_type == 'Maximum') or (ev_type == 'Max-weight') or (ev_type == 'Above')):
-                cond_on = np.logical_and(data_act[1:] > ev_thr,
-                                         data_act[0:-1] <= ev_thr)
-                cond_off = np.logical_and(data_act[0:-1] > ev_thr,
-                                         data_act[1:] <= ev_thr)
-            elif ((ev_type == 'Minimum') or (ev_type == 'Min-weight') or (ev_type == 'Below')):
-                cond_on = np.logical_and(data_act[1:] < ev_thr,
-                                         data_act[0:-1] >= ev_thr)
-                cond_off = np.logical_and(data_act[0:-1] < ev_thr,
-                                         data_act[1:] >= ev_thr)
+            if(ev_type == "Correlation"):
+                ind = [0]*len(d.shape)
+                t = d.coordinate(coordinate)[0][:]
+                data_act = d.slice_data(slicing={coordinate: flap.Intervals(start=t[sel_int_ind[0][i_int]],
+                                                                 stop=t[sel_int_ind[1][i_int]-1])})
+                c = data_act.get_coordinate_object(coordinate)
+                if(c.mode.equidistant == False):
+                    timeres = np.mean(c.values[1:(len(c.values)-1)]-c.values[0:(len(c.values)-2)])
+                    t0 = c.values[0]
+                    c.mode.equidistant = True
+                    c.shape = data_act.data.shape
+                    c.start = t0
+                    c.step = timeres
+                    c.dimension_list = [0]
+                    
+                dl = None
+                if(type(gaussian_sigma) == np.ndarray):
+                    dl = max(gaussian_sigma)*10
+                elif(type(gaussian_sigma) == float or type(gaussian_sigma) == int):
+                    dl = gaussian_sigma*10
+                else:
+                    raise TypeError("Gaussian sigma should be a float, int, or numpy array.")
+                
+                t0 = data_act.coordinate(coordinate)[0][0]
+                dg = data_act.slice_data(slicing={coordinate: flap.Intervals(start=t0,stop=t0+dl)})
+                res = data_act.coordinate(coordinate)[0][1] - data_act.coordinate(coordinate)[0][0]
+                t = np.linspace(0,dl,int(round(dl/res))+1)
+                mu = dl/2
+                event_types = None
+                
+                if(type(gaussian_sigma) == np.ndarray):
+                    N = len(gaussian_sigma)
+                    event_types = np.zeros((t.shape[0],N))
+                    for i in range(N):
+                        s = gaussian_sigma[i]
+                        event_types[:,i] = np.e**(-(1/2)*((t-mu)/s)**2)
+                        for j in range(event_types.shape[0]):
+                            if(1e-15 > abs(event_types[j,i])):
+                               event_types[j,i] = 0
+                    filtered_events = np.zeros((event_types.shape))
+                    for i in range(N):
+                        dg.data = event_types[:,i]
+                        dg = dg.filter_data(options={'Type':'Diff','Tau':diff_tau})
+                        dg = dg.filter_data(options={'Type':'Int','Tau':int_tau})
+                        filtered_events[:,i] = dg.data
+                        
+                elif(type(gaussian_sigma) == float or type(gaussian_sigma) == int):
+                    event_types = np.zeros((t.shape[0]))
+                    s = gaussian_sigma
+                    event_types = np.e**(-(1/2)*((t-mu)/s)**2)
+                    for j in range(event_types.shape[0]):
+                        if(1e-15 > abs(event_types[j])):
+                            event_types[j] = 0
+                    filtered_events = np.zeros((event_types.shape))
+                    dg.data = event_types
+                    dg = dg.filter_data(options={'Type':'Diff','Tau':diff_tau})
+                    dg = dg.filter_data(options={'Type':'Int','Tau':int_tau})
+                    filtered_events = dg.data
+                    
+                t = data_act.coordinate(coordinate)[0][:]
+                d_f = data_act.filter_data(options={'Type':'Diff','Tau':diff_tau})
+                d_f = d_f.filter_data(options={'Type':'Int','Tau':int_tau})
+                all_found_event = []
+                condition = np.zeros((d_f.data.shape[0]))
+                starttime = []
+                endtime = []
+                if(type(gaussian_sigma) == np.ndarray):
+                    for j in range(len(gaussian_sigma)):
+                        corr = np.correlate(d_f.data,filtered_events[:,j], mode="same")
+                        s = np.sqrt(corr.var())
+                        if(ev_thr > 0):
+                            cond = corr>ev_thr*s
+                        if(0 > ev_thr):
+                            cond = ev_thr*s > corr
+                        condition = condition + cond
+                        
+                    for j in range(condition.shape[0]-1):
+                        if(condition[j+1] > 0.5):
+                            condition[j+1] = True
+                        if(condition[j] == False and condition[j+1] == True):
+                            starttime.append(j+1)
+                        if(condition[j] == True and condition[j+1] == False):
+                            endtime.append(j)
+                            
+                    if(len(starttime) > 0):
+                        if(starttime[0]>endtime[0]):
+                            endtime.remove(endtime[0])
+                            
+                        if(starttime[len(starttime)-1]>endtime[len(endtime)-1]):
+                            starttime.remove(starttime[len(starttime)-1])
+                                
+                        if(len(starttime) != len(endtime)):
+                            raise ValueError("Number of start and end times not coincide.")
+                                
+                        for j in range(len(endtime)):
+                            all_found_event.append(int(round((endtime[j]+starttime[j])/2)))
+                        
+                elif(type(gaussian_sigma) == float or type(gaussian_sigma) == int):
+                    corr = np.correlate(d_f.data,filtered_events, mode="same")
+                    s = np.sqrt(corr.var())
+                    if(ev_thr > 0):
+                        cond = corr>ev_thr*s
+                    if(0 > ev_thr):
+                        cond = ev_thr*s > corr
+                    condition = condition + cond
+                        
+                    for j in range(condition.shape[0]-1):
+                        if(condition[j+1] > 0.5):
+                            condition[j+1] = True
+                        if(condition[j] == False and condition[j+1] == True):
+                            starttime.append(j+1)
+                        if(condition[j] == True and condition[j+1] == False):
+                            endtime.append(j)
+                            
+                    if(starttime[0]>endtime[0]):
+                        endtime.remove(endtime[0])
+                        
+                    if(starttime[len(starttime)-1]>endtime[len(endtime)-1]):
+                        starttime.remove(starttime[len(starttime)-1])
+                            
+                    if(len(starttime) != len(endtime)):
+                        raise ValueError("Number of start and end times not coincide.")
+                            
+                    for j in range(len(endtime)):
+                        all_found_event.append(int(round((endtime[j]+starttime[j])/2)))
+
+                H = len(all_found_event)
+                H2 = 0
+                if(len(all_found_event) > 0):
+                    for i in range(H):
+                        if(t[all_found_event[i]]-length > t0 and max(t) > t[all_found_event[i]]+length):
+                            start_coord.append(t0+res*(all_found_event[i])-length/2)
+                            end_coord.append(t0+res*(all_found_event[i])+length/2)
+                            H2 += 1
+                selected_n += H2
+                y_coord += [ev_thr*np.sqrt(d_f.data.var())]*H2
             else:
-                raise ValueError("Invalid event condition.")
-            ind_on = np.nonzero(cond_on)[0] + 1
-            ind_off = np.nonzero(cond_off)[0]
-            if (ind_on[0] > ind_off[0]):
-                ind_off = ind_off[1:]
-            if (len(ind_on) > len(ind_off)):
-                if (len(ind_on) == 1):
-                    ind_on = np.array([])
+                # Getting the data and the coordinate for this interval
+                ind = [0]*len(d.shape)
+                data_act = d.data[sel_int_ind[0][i_int]:sel_int_ind[1][i_int]]
+                ind[select_coord_obj.dimension_list[0]] = slice(sel_int_ind[0][i_int], sel_int_ind[1][i_int])
+                coord_act, cl, ch = coord_obj.data(data_shape=d.shape, index=ind)
+                if (sel_int[0][i_int] > sel_int[1][i_int]):
+                    data_act = np.flip(data_act)
+                    coord_act = np.flip(coord_act)
+                # Finding indices where the condition switches on and off
+                if ((ev_type == 'Maximum') or (ev_type == 'Max-weight') or (ev_type == 'Above')):
+                    cond_on = np.logical_and(data_act[1:] > ev_thr,
+                                             data_act[0:-1] <= ev_thr)
+                    cond_off = np.logical_and(data_act[0:-1] > ev_thr,
+                                             data_act[1:] <= ev_thr)
+                elif ((ev_type == 'Minimum') or (ev_type == 'Min-weight') or (ev_type == 'Below')):
+                    cond_on = np.logical_and(data_act[1:] < ev_thr,
+                                             data_act[0:-1] >= ev_thr)
+                    cond_off = np.logical_and(data_act[0:-1] < ev_thr,
+                                             data_act[1:] >= ev_thr)
                 else:
-                    ind_on = ind_on[0:-1]
-            if (len(ind_off) > len(ind_on)):
-                if (len(ind_off) == 1):
-                    ind_off = np.array([])
-                else:
-                    ind_off = ind_on[1:]
-            if ((ev_type == 'Above') or (ev_type == 'Below')):
-                start_coord += list(coord_act[ind_on] + start_delay)
-                end_coord += list(coord_act[ind_off] + end_delay)
-                selected_n += len(ind_on)
-                y_coord += [ev_thr]*len(ind_on)
-            else:    
-                for i_event in range(len(ind_on)):
-                    if (ev_type == 'Maximum'):
-                        act_ev_coord = coord_act[np.argmax(data_act[ind_on[i_event]
-                                                                    : ind_off[i_event] + 1
-                                                                    ]
-                                                           ) + ind_on[i_event]
-                                                 ]
-                    elif (ev_type == 'Minimum'):
-                        act_ev_coord = coord_act[np.argmin(data_act[ind_on[i_event]
-                                                                    : ind_off[i_event] + 1
-                                                                    ]
-                                                           ) + ind_on[i_event]
-                                                 ]
-                    elif ((ev_type == 'Max-weight') or (ev_type == 'Min-weight')):
-                        act_ev_coord = np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1]
-                                              * coord_act[ind_on[i_event] : ind_off[i_event] + 1]
-                                              ) / np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1])
-                    if ((act_ev_coord - length / 2 > coord_act[0])
-                         and (act_ev_coord + length / 2 < coord_act[-1])):
-                        start_coord.append(act_ev_coord - length / 2)
-                        end_coord.append(start_coord[-1] + length)
-                        y_coord.append(ev_thr)
-                        selected_n += 1
+                    raise ValueError("Invalid event condition.")
+                ind_on = np.nonzero(cond_on)[0] + 1
+                ind_off = np.nonzero(cond_off)[0]
+                if (ind_on[0] > ind_off[0]):
+                    ind_off = ind_off[1:]
+                if (len(ind_on) > len(ind_off)):
+                    if (len(ind_on) == 1):
+                        ind_on = np.array([])
+                    else:
+                        ind_on = ind_on[0:-1]
+                if (len(ind_off) > len(ind_on)):
+                    if (len(ind_off) == 1):
+                        ind_off = np.array([])
+                    else:
+                        ind_off = ind_on[1:]
+                if ((ev_type == 'Above') or (ev_type == 'Below')):
+                    start_coord += list(coord_act[ind_on] + start_delay)
+                    end_coord += list(coord_act[ind_off] + end_delay)
+                    selected_n += len(ind_on)
+                    y_coord += [ev_thr]*len(ind_on)
+                else:    
+                    for i_event in range(len(ind_on)):
+                        if (ev_type == 'Maximum'):
+                            act_ev_coord = coord_act[np.argmax(data_act[ind_on[i_event]
+                                                                        : ind_off[i_event] + 1
+                                                                        ]
+                                                               ) + ind_on[i_event]
+                                                     ]
+                        elif (ev_type == 'Minimum'):
+                            act_ev_coord = coord_act[np.argmin(data_act[ind_on[i_event]
+                                                                        : ind_off[i_event] + 1
+                                                                        ]
+                                                               ) + ind_on[i_event]
+                                                     ]
+                        elif ((ev_type == 'Max-weight') or (ev_type == 'Min-weight')):
+                            act_ev_coord = np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1]
+                                                  * coord_act[ind_on[i_event] : ind_off[i_event] + 1]
+                                                  ) / np.sum(data_act[ind_on[i_event] : ind_off[i_event] + 1])
+                        if ((act_ev_coord - length / 2 > coord_act[0])
+                             and (act_ev_coord + length / 2 < coord_act[-1])):
+                            start_coord.append(act_ev_coord - length / 2)
+                            end_coord.append(start_coord[-1] + length)
+                            y_coord.append(ev_thr)
+                            selected_n += 1
 
     print("Selected "+str(selected_n)+" intervals.")
 
