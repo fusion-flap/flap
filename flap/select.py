@@ -381,7 +381,7 @@ def select_intervals(object_descr,
                 event_types = np.zeros((t.shape[0],N))
                 for i in range(N):
                     s = gaussian_sigma[i]
-                    event_types[:,i] = np.e**(-(1/2)*((t-mu)/s)**2)
+                    event_types[:,i] = np.exp(-(1/2)*((t-mu)/s)**2)
                     for j in range(event_types.shape[0]):
                         if(1e-15 > abs(event_types[j,i])):
                             event_types[j,i] = 0
@@ -395,7 +395,7 @@ def select_intervals(object_descr,
             elif(type(gaussian_sigma) == float or type(gaussian_sigma) == int):
                 event_types = np.zeros((t.shape[0]))
                 s = gaussian_sigma
-                event_types = np.e**(-(1/2)*((t-mu)/s)**2)
+                event_types = np.exp(-(1/2)*((t-mu)/s)**2)
                 for j in range(event_types.shape[0]):
                     if(1e-15 > abs(event_types[j])):
                         event_types[j] = 0
