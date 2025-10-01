@@ -28,7 +28,7 @@ Basic examples
         :link: example_using_data_sources
         :link-type: ref
         :shadow: md
-        :class-card: sd-border-0 sd-rounded-2 msg-sd-card
+        :class-card: sd-rounded-2 sd-border-0 msg-sd-card
         :class-item: msg-sd-card-hover
         :class-title: msg-sd-card-title
         :class-img-top: msg-sd-card-img-top
@@ -44,7 +44,7 @@ Basic examples
         :link: example_flap_dataobject_from_numpy_array
         :link-type: ref
         :shadow: md
-        :class-card: sd-border-0 sd-rounded-2 msg-sd-card
+        :class-card: sd-rounded-2 sd-border-0 msg-sd-card
         :class-item: msg-sd-card-hover
         :class-title: msg-sd-card-title
         :class-img-top: msg-sd-card-img-top
@@ -70,7 +70,7 @@ Functionality examples
         :link: example_remove_sharp_peaks
         :link-type: ref
         :shadow: md
-        :class-card: sd-border-0 sd-rounded-2 msg-sd-card
+        :class-card: sd-rounded-2 sd-border-0 msg-sd-card
         :class-item: msg-sd-card-hover
         :class-title: msg-sd-card-title
         :class-img-top: msg-sd-card-img-top
