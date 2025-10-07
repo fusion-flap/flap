@@ -160,7 +160,7 @@ def interpret_config_value(value_str):
                 continue               
             if ((val[0] == "'") and (val[-1] == "'")
                 or (val[0] == '"') and (val[-1] == '"')):
-                values_list.append(val[2:-1])
+                values_list.append(val[1:-1])
                 continue
             for t in convert_types:
                 try:
