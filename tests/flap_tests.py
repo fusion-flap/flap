@@ -22,6 +22,7 @@ import copy
 import time
 import math
 from tkinter import Tk  # Needed for getting the screen size
+import random as ran
 
 # Importing the FLAP
 import flap
@@ -454,6 +455,254 @@ def test_select_multislice():
             flap.plot('TEST-1-1_sliced',
                       slicing={'Interval(Time)':i},
                       axes='Rel. Time in int(Time)')
+            
+def test_select_corr():
+    plt.close('all')
+    print('>>>>>>>> Test select with correlation <<<<<<<<<')
+    flap.delete_data_object('*')
+    
+    # getting a data object with a sin signal
+    d = flap.get_data('TESTDATA',name='TEST-1-1',object_name='TEST-1-1',options={'Length':0.150})
+    d.data = d.data/2 # its intensity was too high, this way the test is more realistic
+    t = d.coordinate("Time")[0][:]
+    
+    print("**** Generating random perturbations.")
+    # parameters of the perturbations:
+    number = 100
+    ts1 = 30
+    ts2 = 60
+    Imax = 0.35
+    Imin = 0.20
+    
+    # adding events
+    timeres = t[1]-t[0]
+    ti = np.zeros((number))
+    I = np.zeros((number))
+    t_indexes = range(1, t.shape[0], 1)
+    ts = np.zeros((number))
+    for i in range(number):
+        ti[i] = ran.choice(t_indexes)
+        I[i] = ran.random()*(Imax-Imin) + Imin
+        ts[i] = ran.random()*(ts2-ts1) + ts1
+    add_light = np.zeros((d.data.shape))
+    for k in range(number):
+        add_light = add_light + I[k]*np.exp(-(1/2)*((t-t[int(ti[k])])/(ts[k]*timeres))**2)
+        
+    # adding events and a mean signal
+    mean_signal = 1.4997363040171798 # W7-X 20181018.026 ABES-11
+    d.data = d.data + add_light + mean_signal
+    
+    # plotting test signal without noise
+    plt.figure()
+    plt.plot(t,d.data)
+    plt.xlabel("Time [s]")
+    plt.ylabel("Test signal without noise [V]")
+    plt.title("Gaussian events")
+    
+    #adding noise
+    a = 0.04378451
+    b = 0.00524973
+    mean_error = a * np.sqrt(mean_signal) + b # valid error for W7-X 20181018.026 ABES-11
+    d.data += np.random.normal(0,mean_error,d.data.shape[0])
+    
+    # plotting test signal with noise
+    plt.figure()
+    plt.plot(t,d.data)
+    plt.xlabel("Time [s]")
+    plt.ylabel("Test signal [V]")
+    plt.title("Gaussian events")
+    
+    # filtering the signal to, then showing its APSD before and after
+    intfilter_tau = 16e-6
+    difffilter_tau = 50e-6
+    d_f = d.filter_data(options={'Type':'Int','Tau':intfilter_tau})
+    d_f = d_f.filter_data(options={'Type':'Diff','Tau':difffilter_tau})
+    
+    plt.figure()
+    p1 = d.apsd(options={'Interval':1, 'Range':[1,1E6],'Res':100})
+    p2 = d_f.apsd(options={'Interval':1, 'Range':[1,1E6],'Res':100})
+    p1.plot(axes="Frequency",options={'Log x': True,
+            'Log y':True, 'Error':False, 'X range':[100,2e5]}, plot_options={'label':'before filter'})
+    p2.plot(axes="Frequency",options={'Log x': True,
+            'Log y':True, 'Error':False, 'X range':[100,2e5]}, plot_options={'label':'after filter'})
+    plt.ylabel("APSD",fontsize=15)
+    plt.xlabel("Frequency [Hz]",fontsize = 15)
+    plt.legend(fontsize = 12)
+    plt.title("Gaussian events")
+    
+    print("**** Selecting intervals.")
+    # parameters of the selection:
+    Lp = ts1*20*timeres
+    trh = 3
+    N = 5
+    sigmastep = (ts1 + ts2)/N
+    minsigma = ts1
+    sigm = np.arange(minsigma,N*sigmastep+minsigma,sigmastep) * timeres
+    
+    # interval selection, and average event:
+    d_int = flap.select_intervals(d,coordinate='Time',
+                                options={'Select':None,
+                                        'Length':Lp,
+                                        'Event':{'Type':'Correlation',
+                                                  'Threshold':trh,
+                                                  'Thr-type':'sigma',
+                                                  'Gaussian sigma':sigm,
+                                                  'Int tau':intfilter_tau,
+                                                  'Diff tau':difffilter_tau}})
+    mean_event = d.slice_data(slicing={'Time':d_int},
+                              summing ={'Start Time in int(Time)':"Mean"},
+                              options={"Regenerate coordinates":False})
+    
+    # showing the time coordinates of the events:
+    inde = np.zeros((t.shape))
+    for i in range(d_int.data.shape[0]):
+        inde += 1e-10 > abs(d_int.data[i] + Lp/2 - t) 
+    ind=np.nonzero(inde)[0]
+    plt.figure()
+    plt.plot(t, d.data,"+", label="signal")
+    plt.plot(d_int.data + Lp/2,d.data[ind], "ro", label="selected events")
+    plt.vlines([t[int(ti[k])] for k in range(number)], np.min(d.data), np.max(d.data), colors='g', linestyles='dashed', label="true event times")
+    plt.xlabel("Time [s]", fontsize = 15)
+    plt.ylabel("Test signal [V]")
+    plt.legend(loc = "upper right")
+    plt.title("Gaussian events")
+    
+    # showing the mean event:
+    plt.figure()
+    mean_event.plot(axes = "Rel. Time in int(Time)")
+    plt.xlabel("Time [s]")
+    plt.ylabel("Mean event [V]")
+    plt.title("Gaussian events")
+
+    ## test with ELM-like events
+    
+    # creating a new, noisy signal
+    d2 = flap.get_data('TESTDATA',name='TEST-1-1',object_name='TEST-1-1',options={'Length':0.150})
+    d2.data = d2.data/2 # its intensity was too high, this way the test is more realistic
+    t = d2.coordinate("Time")[0][:]
+    a = 0.04378451
+    b = 0.00524973
+    mean_error = a * np.sqrt(mean_signal) + b #valid error for W7-X 20181018.026 ABES-11
+    d2.data = d2.data + np.random.normal(mean_signal,mean_error,d2.data.shape[0])
+    
+    tau=0.0001
+    E = 0.00005
+    y= (2*E/(3*np.sqrt(np.pi)))*(1+(tau/(t))**2)*(tau/(t)**2)*np.exp(-(tau/(t))**2)
+    plt.figure()
+    plt.plot(t,y)
+    plt.xlim(-0.0001,0.002)
+    plt.xlabel("Time [s]")
+    plt.ylabel("Signal [V]")
+    plt.title("Theoretical function for type I ELMs in the Free Streaming Model")
+    
+    print("**** Generating random ELMs.")
+    # parameters of the perturbations:
+    taumin = tau/2
+    taumax = tau*2
+    Emax = E*2
+    Emin = E/2
+    number = 50
+    
+    # adding perturbations:
+    ti = np.zeros((number))
+    Es = np.zeros((number))
+    t_indexes = range(1, t.shape[0], 1)
+    taus = np.zeros((number))
+    for i in range(number):
+        ti[i] = ran.choice(t_indexes)
+        Es[i] = ran.random()*(Emax-Emin) + Emin
+        taus[i] = ran.random()*(taumax-taumin) + taumin
+    add_light = np.zeros((d2.data.shape))
+    for k in range(number):
+        y = (2*Es[k]/(3*np.sqrt(np.pi)))*(1+(taus[k]/(t-t[int(ti[k])]))**2)*(taus[k]/(t-t[int(ti[k])])**2)*np.exp(-(taus[k]/(t-t[int(ti[k])]))**2)
+        for i in range(y.shape[0]):
+            if(y.shape[0] > i + int(ti[k])):
+                if(i > ti[k]):
+                    y[i] = y[i]
+                else:
+                    y[i] = 0
+            elif(i + int(ti[k]) >= y.shape[0]):
+                if(i > ti[k]):
+                    y[i] = y[i]
+                else:
+                    y[i] = 0
+        add_light = add_light + y
+    d2.data = d2.data + add_light
+    
+    # showing the raw test signal
+    plt.figure()
+    plt.plot(t,d2.data)
+    plt.xlabel("Time [ms]")
+    plt.ylabel("Signal [V]")
+    plt.title("ELM-like events")
+    
+    # filtering the signal to, then showing its APSD before and after
+    intfilter_tau = 16e-6
+    difffilter_tau = 50e-6
+    d_f = d2.filter_data(options={'Type':'Int','Tau':intfilter_tau})
+    d_f = d_f.filter_data(options={'Type':'Diff','Tau':difffilter_tau})
+    plt.figure()
+    p1 = d2.apsd(options={'Interval':1, 'Range':[1,1E6],'Res':100})
+    p2 = d_f.apsd(options={'Interval':1, 'Range':[1,1E6],'Res':100})
+    p1.plot(axes="Frequency",options={'Log x': True,
+            'Log y':True, 'Error':False, 'X range':[100,2e5]}, plot_options={'label':'before filter'})
+    p2.plot(axes="Frequency",options={'Log x': True,
+            'Log y':True, 'Error':False, 'X range':[100,2e5]}, plot_options={'label':'after filter'})
+    plt.ylabel("APSD",fontsize=15)
+    plt.xlabel("Frequency [Hz]",fontsize = 15)
+    plt.legend(fontsize = 12)
+    plt.title("ELM-like events")
+    
+    # showing the effect of filter on the events:
+    plt.figure()
+    plt.plot(t,d_f.data)
+    plt.xlabel("Time [ms]")
+    plt.ylabel("Signal after filter [V]")
+    plt.title("ELM-like events")
+    
+    print("**** Selecting intervals.")
+    # parameters of the selection:
+    Lp = ts1*20*timeres
+    trh = 3
+    N = 5
+    sigmastep = (ts1 + ts2)/N
+    minsigma = ts1
+    sigm = np.arange(minsigma,N*sigmastep+minsigma,sigmastep) * timeres
+    
+    # interval selection, and average event:
+    d2_int = flap.select_intervals(d2,coordinate='Time',
+                                options={'Select':None,
+                                        'Length':Lp,
+                                        'Event':{'Type':'Correlation',
+                                                  'Threshold':trh,
+                                                  'Thr-type':'sigma',
+                                                  'Gaussian sigma':sigm,
+                                                  'Int tau':intfilter_tau,
+                                                  'Diff tau':difffilter_tau}})
+    mean_event = d2.slice_data(slicing={'Time':d2_int},
+                              summing ={'Start Time in int(Time)':"Mean"},
+                              options={"Regenerate coordinates":False})
+    
+    # showing the time coordinates of the events:
+    inde = np.zeros((t.shape))
+    for i in range(d2_int.data.shape[0]):
+        inde += 1e-10 > abs(d2_int.data[i] + Lp/2 - t) 
+    ind=np.nonzero(inde)[0]
+    plt.figure()
+    plt.plot(t, d2.data, "+", label="signal")
+    plt.plot(d2_int.data + Lp/2, d2.data[ind], "ro", label="selected events")
+    plt.vlines([t[int(ti[k])] for k in range(number)], np.min(d2.data), np.max(d2.data), colors='g', linestyle='dashed', label="true event times")
+    plt.xlabel("Time [s]",fontsize = 15)
+    plt.ylabel("Test signal [V]")
+    plt.legend(loc = "upper right")
+    plt.title("ELM-like events")
+    
+    # showing the mean event:
+    plt.figure()
+    mean_event.plot(axes = "Rel. Time in int(Time)")
+    plt.xlabel("Time [s]")
+    plt.ylabel("Mean event [V]")
+    plt.title("ELM-like events")
 
 def test_binning():
     print()
@@ -880,6 +1129,10 @@ if (False or test_all):
     test_select_multislice()
     show_plot()
     wait_for_key()
+if (False or test_all):
+    test_select_corr()
+    show_plot()
+    wait_for_key()    
 if (False or test_all):
     test_binning()
     show_plot()

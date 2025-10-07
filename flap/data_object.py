@@ -2299,6 +2299,8 @@ class DataObject:
                             # doing slice processing
                             if (n_in_int < 2):
                                     raise ValueError("Number of samples in interval is too small.")
+                            # If there are more samples in an interval than the number of intervals it is faster to loop
+                            # through the intervals than using a slice
                             if (n_in_int > n_int):
                                 slice_type_processing = False
                             else:
@@ -2309,14 +2311,12 @@ class DataObject:
                                 slice_description = slice(slice_start, slice_stop, slice_step)
                                 if (slice_start < 0):
                                     raise RuntimeError("Slice start below 0.")
-                        # We test again if slice type is possible as it might have been changed above
+
                         if (not slice_type_processing):
                             if ((slicing_coords[i_sc].mode.equidistant)  \
                                   and (len(slicing_coords[i_sc].dimension_list) == 1)):
-                                # In this case it is possible to determine index ranges
-                                # try:
-                                #     d_range
-                                # except NameError:
+                                # In this case it is possible to determine index ranges for each interval, these will be contained
+                                # in a dictionary
                                 d_range, d_range_ext = slicing_coords[i_sc].data_range(data_shape=d_slice.shape)
                                 interval_starts, interval_stops  \
                                        = intervals[0].interval_limits(limits=d_range,  \
@@ -2337,25 +2337,43 @@ class DataObject:
                                     stops = np.round((interval_starts - slicing_coords[i_sc].start)
                                                      /slicing_coords[i_sc].step[0]
                                                      ).astype('int32')
-
-                                slice_description = {'Starts':starts, 'Stops':stops}
+                                # Some internal checks
                                 n_int = starts.size
-                                n_in_int = np.amax(stops - starts + 1)
+                                n_in_int = np.max(stops - starts + 1)
                                 if (n_in_int < 2):
                                     raise ValueError("Number of samples in interval is too small.")
                                 if (np.nonzero(starts < 0)[0].size != 0):
                                     raise RuntimeError("Internal error: negative slicing indices.")
                                 if (np.nonzero(stops > d_slice.data.shape[joint_dimension_list[0]])[0].size != 0):
                                     raise RuntimeError("Internal error: Slicing indices over end of data.")
-                                if (np.nonzero(stops <= starts )[0].size != 0):
-                                    raise RuntimeError("Internal error: Interval slice starts after stop.")
+                                ind = np.nonzero(stops <= starts )[0]
+                                if (len(ind) > 0):
+                                    if (len(ind) <= 2):
+                                        # This might be some end effect, removing the bad intervals
+                                        ind_good = np.nonzero(stops > starts )[0]
+                                        starts = starts[ind]
+                                        stops = stops[ind]
+                                    else:
+                                       raise RuntimeError("Internal error: Interval slice starts after stop.")
+                                slice_description = {'Starts':starts, 'Stops':stops}
                             else:
-                                # Determining indices for each interval
+                                # If sample ranges cannot be detemined so simply,then
+                                # determining indices for each interval
+                                # The indivces for each interval will be stored in a list (slice_description))
                                 c_data, c_low, c_high = slicing_coords[i_sc].data(data_shape=d_slice.shape, index=index)
                                 d_range = [np.amin(c_data), np.amax(c_data)]
                                 interval_starts, interval_stops  \
                                        = intervals[i].interval_limits(limits=d_range,  \
                                                                    partial_intervals=partial_intervals)
+                                ind_good = np.nonzero((interval_stops - interval_starts) >= slicing_coords[i_sc].step[0])[0]
+                                if (len(ind_good) != len(interval_stops)):
+                                    # There are some bad intervals
+                                    if (len(ind_good) < len(interval_stops) - 2):
+                                        # This is not an end effect
+                                        raise ValueError("Internal error. Too many bad intervals in slicing.") 
+                                    else:
+                                        interval_starts = interval_starts[ind_good]
+                                        interval_stops = interval_stops[ind_good]
                                 c_data = np.squeeze(c_data).flatten()
                                 slice_description = []
                                 n_max = 0
@@ -2364,8 +2382,13 @@ class DataObject:
                                                      c_data <= interval_stops[i_int]))[0]
                                     if (len(ind) == 0):
                                         raise ValueError("No data in interval.")
+                                    # Some internal checks
+                                    if (np.min(ind) < 0):
+                                        raise RuntimeError("Internal error: negative slicing indices.")
+                                    if (np.max(ind) >= d_slice.data.shape[joint_dimension_list[0]]):
+                                        raise RuntimeError("Internal error: Slicing indices over end of data.")
                                     slice_description.append(ind)
-                                    n = np.amax(ind) - np.amin(ind) + 1
+                                    n = np.max(ind) - np.min(ind) + 1
                                     if (n > n_max):
                                         n_max = n
                                 n_int = interval_starts.size
