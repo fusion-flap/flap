@@ -6008,6 +6008,10 @@ def apsd(object_name,
     frequency or wavenumber. The power spectrum is calculated in multiple
     intervals (described by slicing), and the mean and variance will be
     returned.
+    
+    The power of the signal (mean of the square) can be calculated from the power spectrum as 
+    np.sum(p.data[1:] * np.diff(p.coordinate('Frequency')[0])) * dt * 2),
+    where p is the result of apsd and dt is the time step of the signal. 
 
     Parameters
     ----------
