@@ -3558,7 +3558,7 @@ class DataObject:
 
               - str:
 
-                - 'mean': Subtract mean.
+                - 'Mean': Subtract mean.
 
               - None: Don't remove trend.
 
