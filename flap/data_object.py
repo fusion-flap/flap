@@ -2814,6 +2814,8 @@ class DataObject:
                     del_list.append(rel_coord_obj.unit.name)
                     del_list.append('Interval('+slice_coord+')')
                     del_list.append('Interval('+slice_coord+') sample index')
+            if (len(del_list) == 0):
+                break
             for coord in del_list:
                 try:
                     self.del_coordinate(coord)
