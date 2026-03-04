@@ -9,7 +9,7 @@
         <title>flap.data_object - FLAP documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
     <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
     <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
     <link rel="stylesheet" type="text/css" href="_static/myst_sphinx_gallery.css?v=92de7a9e" />
@@ -935,7 +935,7 @@ and subtract.</p></li>
 </li>
 <li><p>str:</p>
 <ul>
-<li><p>‘mean’: Subtract mean.</p></li>
+<li><p>‘Mean’: Subtract mean.</p></li>
 </ul>
 </li>
 <li><p>None: Don’t remove trend.</p></li>
@@ -2105,6 +2105,9 @@ be overwritten.</p>
 frequency or wavenumber. The power spectrum is calculated in multiple
 intervals (described by slicing), and the mean and variance will be
 returned.</p>
+<p>The power of the signal (mean of the square) can be calculated from the power spectrum as 
+np.sum(p.data[1:] * np.diff(p.coordinate(‘Frequency’)[0])) * dt * 2),
+where p is the result of apsd and dt is the time step of the signal.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>

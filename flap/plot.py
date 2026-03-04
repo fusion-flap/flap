@@ -4,6 +4,8 @@ Created on Sat May 18 18:37:06 2019
 
 @author: Zoletnik
 @coauthor: Lampert
+
+**Note:** For details on how to use the plotting capabilities of FLAP for visualizing a :class:`.DataObject`, see :func:`~flap.data_object.DataObject.plot()` instead.
 """
 """ Notes on how to use subplots.
     plt.gca() returns the current subplot
