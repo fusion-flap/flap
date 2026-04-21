@@ -1552,7 +1552,11 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                                                                  )
         corr_dim_start = len(d.data.shape) - len(correlation_dimensions)
         cps_corr_dims = np.arange(len(correlation_dimensions),dtype=int) + corr_dim_start
-        res = np.fft.ifftn(res,axes=cps_corr_dims)
+        res = np.fft.ifftn(res,axes=cps_corr_dims) 
+        normfac = 1
+        for dim in cps_corr_dims:
+            normfac *= res.shape[dim]
+        res /= normfac    
         if (out_dtype is float):
             res = np.real(res)
         corr = np.empty(res.shape,dtype=res.dtype)
@@ -1561,6 +1565,10 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         corr_sliced = corr[tuple(ind_slice)]
         corr_binned = np.zeros(tuple(out_shape),dtype=res.dtype)
         np.add.at(corr_binned,tuple(ind_bin),corr_sliced)
+        bin_norm = 1
+        for s in corr_res_sample:
+            bin_norm *= s
+        corr_binned /= bin_norm
         if (norm):
             zero_ind_out = [0] * len(correlation_dimensions)
             for i in range(len(correlation_dimensions)):
@@ -1631,7 +1639,7 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
                 extend_shape = [1] * (len(out_corr.shape) - len(corr_binned_acf_ref.shape))
                 corr_binned /= np.sqrt(np.reshape(corr_binned_acf_ref,tuple(extend_shape + list(corr_binned_acf_ref.shape))))
         else:
-            corr_binned /= all_points
+            pass
         out_corr += corr_binned
         if (error_calc):
             out_corr_square += corr_binned ** 2
