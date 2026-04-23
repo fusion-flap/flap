@@ -1555,8 +1555,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         res = np.fft.ifftn(res,axes=cps_corr_dims) 
         normfac = 1
         for dim in cps_corr_dims:
-            normfac *= res.shape[dim]
-        res /= normfac    
+            normfac *= res.shape[dim] - 2 * pad_length[dim]
+        res /= normfac
         if (out_dtype is float):
             res = np.real(res)
         corr = np.empty(res.shape,dtype=res.dtype)
