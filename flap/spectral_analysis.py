@@ -1554,8 +1554,8 @@ def _ccf(d, ref=None, coordinate=None, intervals=None, options=None):
         cps_corr_dims = np.arange(len(correlation_dimensions),dtype=int) + corr_dim_start
         res = np.fft.ifftn(res,axes=cps_corr_dims) 
         normfac = 1
-        for dim in cps_corr_dims:
-            normfac *= res.shape[dim] - 2 * pad_length[dim]
+        for i, dim in enumerate(cps_corr_dims):
+            normfac *= res.shape[dim] - 2 * pad_length[i]
         res /= normfac
         if (out_dtype is float):
             res = np.real(res)
